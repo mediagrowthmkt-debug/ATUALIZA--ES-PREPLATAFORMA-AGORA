@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório do mês</title>
+  <style>
+    :root{ --bg:#0b1020; --panel:#111936; --text:#e2e8f0; --muted:#94a3b8; --accent:#60a5fa; --ok:#22c55e; --warn:#f59e0b; --alert:#ef4444; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .title{font-size:1.25rem;font-weight:800;margin:0}
+    .muted{color:var(--muted)}
+    .panel{background:var(--panel);border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    .btn{background:#1f2937;color:#e5e7eb;border:1px solid rgba(148,163,184,.35);border-radius:10px;padding:8px 12px;cursor:pointer}
+    .btn:hover{background:#2b3a55}
+    .section{margin:18px 0}
+    .section h2{margin:0 0 8px;font-size:1.05rem}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);font-size:.88rem}
+    .ok{color:var(--ok);}
+    .warn{color:var(--warn);}
+    .alert{color:var(--alert);}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .item{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(148,163,184,.25);border-radius:12px;background:rgba(15,23,42,.45)}
+    .item .title{font-size:1rem}
+    .kv{display:grid;grid-template-columns:160px 1fr;gap:6px;font-size:.92rem}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .empty{color:var(--muted);font-size:.92rem}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .print-hint{font-size:.85rem;color:var(--muted)}
+    @media print{ .btn,.print-hint{display:none !important} body{background:#fff;color:#000} .panel{background:#fff;border-color:#ddd} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 class="title">Relatório mensal <span id="reportMonth" class="muted"></span></h1>
+      <div class="header-actions">
+        <button id="printBtn" class="btn" type="button">Imprimir / Salvar PDF</button>
+        <span class="print-hint">Dica: compartilhe este link com o cliente (requer login autorizado)</span>
+      </div>
+    </header>
+
+    <div id="authGate" class="panel" style="display:none">
+      <div class="section">
+        <h2>Autenticação necessária</h2>
+        <p class="muted">Você precisa fazer login para visualizar os dados deste relatório.</p>
+        <button id="loginBtn" class="btn" type="button">Entrar com Google</button>
+      </div>
+    </div>
+
+    <div id="content" style="display:none">
+      <div class="panel section">
+        <div class="grid">
+          <div class="pill"><strong id="pillPosts">0</strong> publicações</div>
+          <div class="pill"><strong id="pillNotes">0</strong> notas de calendário</div>
+          <div class="pill"><strong id="pillMetas">0</strong> metas ativas</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🎯 Metas do mês</h2>
+        <div id="metasContainer" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h2>📅 Calendário (postagens)</h2>
+        <div id="postsContainer" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h2>🗒️ Notas de calendário</h2>
+        <div id="notesContainer" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h2>🔗 Redes conectadas</h2>
+        <div id="socialContainer" class="list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase SDK (modular)
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+    import { getFirestore, doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+
+    // ===== Config igual ao index.html =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    // Parse params
+    const qs = new URLSearchParams(location.search);
+    const mesISO = (qs.get('mes') || '').slice(0,7);
+    const TENANT = qs.get('tenant') || document.body.getAttribute('data-client-id') || '';
+    const monthLabel = (()=>{ try{ const [a,m]=mesISO.split('-'); const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return `${nomes[(+m||1)-1]} ${a}` }catch{ return mesISO } })();
+    document.getElementById('reportMonth').textContent = monthLabel ? `• ${monthLabel}` : '';
+
+    // App/Auth/DB
+    const app = getApps()[0] || initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Helpers metas (copiados do index de forma mínima)
+    const META_MONTHS = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12'];
+    function normalizeMetaNumber(value){
+      if(value===null||value===undefined) return 0; const n=Number(String(value).replace(/[^0-9.,-]/g,'').replace(',','.')); return Number.isFinite(n)?n:0;
+    }
+    function evaluateMetaGoal(planned, realized, direction){
+      const p = Math.max(0, normalizeMetaNumber(planned));
+      const r = normalizeMetaNumber(realized);
+      if(p<=0 && r<=0) return 'missing';
+      if(direction === 'down'){
+        if(r<=p) return 'achieved';
+        return 'progress';
+      }
+      if(r>=p && p>0) return 'achieved';
+      if(r>0 || p>0) return 'progress';
+      return 'missing';
+    }
+
+    function escapeHtml(v){ return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // UI refs
+    const els = {
+      authGate: document.getElementById('authGate'),
+      loginBtn: document.getElementById('loginBtn'),
+      content: document.getElementById('content'),
+      pillPosts: document.getElementById('pillPosts'),
+      pillNotes: document.getElementById('pillNotes'),
+      pillMetas: document.getElementById('pillMetas'),
+      metas: document.getElementById('metasContainer'),
+      posts: document.getElementById('postsContainer'),
+      notes: document.getElementById('notesContainer'),
+      social: document.getElementById('socialContainer'),
+      printBtn: document.getElementById('printBtn')
+    };
+
+    els.printBtn.addEventListener('click', ()=> window.print());
+
+    els.loginBtn?.addEventListener('click', async ()=>{
+      try{
+        await setPersistence(auth, browserLocalPersistence);
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      }catch(err){ alert('Falha no login. Veja o console.'); console.error(err); }
+    });
+
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){
+        els.authGate.style.display = 'block';
+        els.content.style.display = 'none';
+        return;
+      }
+      els.authGate.style.display = 'none';
+      els.content.style.display = 'block';
+      try{
+        await loadAndRender(user.uid);
+      }catch(err){
+        console.error('Erro ao carregar relatório', err);
+        alert('Não foi possível carregar o relatório.');
+      }
+    });
+
+    async function loadAndRender(uid){
+      // 1) USER_DATA básico (metas, social links)
+      const userSnap = await getDoc(doc(db,'usuarios', uid));
+      const USER_DATA = userSnap.exists() ? (userSnap.data()||{}) : {};
+      const METAS = Array.isArray(USER_DATA.metas) ? USER_DATA.metas : [];
+      const SOCIAL_LINKS = USER_DATA.socialLinks && typeof USER_DATA.socialLinks==='object' ? USER_DATA.socialLinks : {};
+
+      // 2) Posts (filtrar por mês e tenant)
+      const postsSnap = await getDocs(collection(db,'usuarios', uid, 'posts'));
+      const allPosts = postsSnap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+      const posts = allPosts.filter(p => {
+        const iso = String(p.dateISO||'');
+        const okMes = mesISO ? iso.startsWith(mesISO) : true;
+        const tenant = p.tenant||''; const safeTenant = TENANT||'';
+        const okTenant = !tenant || !safeTenant ? true : (tenant===safeTenant);
+        return okMes && okTenant;
+      }).sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+
+      // 3) Calendar notes por cliente
+      let notes = [];
+      if(TENANT){
+        const notesSnap = await getDocs(collection(db,'usuarios', uid, 'clients', TENANT, 'calendarNotes'));
+        notes = notesSnap.docs
+          .map(d=>({ id:d.id, ...(d.data()||{}) }))
+          .filter(n=> String(n.id||'').startsWith(mesISO))
+          .sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+      }
+
+      // Render pílulas
+      els.pillPosts.textContent = String(posts.length);
+      els.pillNotes.textContent = String(notes.length);
+      els.pillMetas.textContent = String(METAS.filter(m=>m && m.ativo!==false).length);
+
+      // Render metas do mês
+      renderMetas(METAS);
+      // Render posts
+      renderPosts(posts);
+      // Render notas
+      renderNotes(notes);
+      // Render redes
+      renderSocial(SOCIAL_LINKS);
+    }
+
+    function renderMetas(metasList){
+      const container = els.metas;
+      container.innerHTML = '';
+      const active = Array.isArray(metasList) ? metasList.filter(m=>m && m.ativo!==false) : [];
+      if(!active.length){ container.innerHTML = '<div class="empty">Sem metas ativas.</div>'; return; }
+      const [y,m] = mesISO.split('-');
+      const key = `${y}-${m}`;
+      const groups = { achieved:[], progress:[], missing:[] };
+      active.forEach(meta=>{
+        const cur = (meta.meses && meta.meses[key]) || {p:'',r:''};
+        const status = evaluateMetaGoal(cur.p, cur.r, meta.direcao);
+        groups[status]?.push({meta, cur});
+      });
+      const all = [...groups.achieved, ...groups.progress, ...groups.missing];
+      container.innerHTML = all.map(({meta, cur})=>{
+        const planned = normalizeMetaNumber(cur.p);
+        const realized = normalizeMetaNumber(cur.r);
+        const status = evaluateMetaGoal(planned, realized, meta.direcao);
+        const badge = status==='achieved'?'ok':(status==='progress'?'warn':'alert');
+        return `<div class="item"><div class="title">${escapeHtml(meta.descricao||'(Meta)')}</div><div class="kv"><div>Planejado</div><div><strong>${planned}</strong> ${escapeHtml(meta.unidade||'')}</div><div>Realizado</div><div><strong>${realized}</strong> ${escapeHtml(meta.unidade||'')}</div><div>Status</div><div class="${badge}">${escapeHtml(status)}</div></div></div>`
+      }).join('');
+    }
+
+    function renderPosts(posts){
+      const container = els.posts; container.innerHTML = '';
+      if(!posts.length){ container.innerHTML = '<div class="empty">Sem postagens neste mês.</div>'; return; }
+      container.innerHTML = posts.map(p=>{
+        const date = escapeHtml(String(p.dateISO||'').slice(0,10));
+        const desc = escapeHtml(p.desc||'');
+        const type = escapeHtml(p.type||'');
+        return `<div class="item"><div class="title">${date} • ${type||'Post'}</div><div>${desc||'<span class="muted">(sem descrição)</span>'}</div></div>`
+      }).join('');
+    }
+
+    function renderNotes(notes){
+      const container = els.notes; container.innerHTML = '';
+      if(!notes.length){ container.innerHTML = '<div class="empty">Sem notas para este mês.</div>'; return; }
+      container.innerHTML = notes.map(n=>{
+        const date = escapeHtml(n.id||'');
+        const text = escapeHtml(n.text||n.note||n.value||'');
+        return `<div class="item"><div class="title">${date}</div><div>${text||'<span class=muted>(vazia)</span>'}</div></div>`
+      }).join('');
+    }
+
+    function renderSocial(social){
+      const container = els.social; container.innerHTML = '';
+      const entries = Object.entries(social||{}).filter(([,url])=> !!url);
+      if(!entries.length){ container.innerHTML = '<div class="empty">Nenhuma rede conectada.</div>'; return; }
+      container.innerHTML = entries.map(([name,url])=>{
+        const label = escapeHtml(name);
+        const safe = escapeHtml(url);
+        return `<div class="item"><div class="title">${label}</div><div><a href="${safe}" target="_blank" rel="noopener">${safe}</a></div></div>`
+      }).join('');
+    }
+  </script>
+</body>
+</html>

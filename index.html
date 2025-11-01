@@ -3214,6 +3214,330 @@ function renderReviewNotes(post){
       font-weight: 700;
     }
   }
+
+  /* Aba Relatório */
+  .relatorio-wrap{
+    margin-left:var(--margin-left);
+    margin-right:var(--margin-right);
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .relatorio-container{
+    background:var(--panel);
+    border:1px solid var(--shell-border);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 10px 28px rgba(0,0,0,.35);
+  }
+  .relatorio-header{
+    margin-bottom:24px;
+  }
+  .relatorio-header h2{
+    margin:0 0 8px;
+    font-size:1.8rem;
+    font-weight:900;
+    background:linear-gradient(135deg,#ff6633,#ff944d);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .relatorio-subtitle{
+    margin:0;
+    color:#94a3b8;
+    font-size:.95rem;
+  }
+  .relatorio-desc{
+    margin:14px auto 0;
+    color:#e5ecff;
+    font-size:1.06rem;
+    line-height:1.6;
+    text-align:center;
+    font-weight:700;
+    letter-spacing:.01em;
+    max-width:980px;
+  }
+  .relatorio-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    align-items:flex-end;
+    padding:20px;
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;
+    margin-bottom:24px;
+  }
+  .relatorio-filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:180px;
+  }
+  .relatorio-filter-group label{
+    font-size:.85rem;
+    font-weight:700;
+    color:#cbd5f5;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  .relatorio-preview{
+    min-height:400px;
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;
+    padding:32px;
+  }
+  .relatorio-preview.has-meta{
+    min-height:auto;
+    padding:12px;
+  }
+  .relatorio-preview-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#cbd5f5;
+    font-size:.95rem;
+    background:rgba(255,255,255,.02);
+    border:1px dashed rgba(255,255,255,.12);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .relatorio-preview-meta .meta-item.ok{ color:#86efac; font-weight:800; }
+  .relatorio-preview-meta .meta-sep{ opacity:.6 }
+  @media (max-width:820px){
+    .relatorio-preview-meta{ flex-wrap:wrap; justify-content:center; text-align:center; }
+    .relatorio-preview-meta .meta-sep{ display:none }
+  }
+  .relatorio-empty{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:300px;
+    text-align:center;
+  }
+  .relatorio-empty p{
+    font-size:1.1rem;
+    color:#94a3b8;
+    margin:0;
+  }
+  .relatorio-content{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+  }
+  .relatorio-section{
+    background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:20px;
+  }
+  .relatorio-section h3{
+    margin:0 0 16px;
+    font-size:1.3rem;
+    font-weight:800;
+    color:#ff6633;
+    border-bottom:2px solid #ff6633;
+    padding-bottom:8px;
+  }
+  .relatorio-metric{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .relatorio-metric:last-child{
+    border-bottom:none;
+  }
+  .relatorio-metric-label{
+    font-weight:700;
+    color:#cbd5f5;
+  }
+  .relatorio-metric-value{
+    font-size:1.2rem;
+    font-weight:800;
+    color:#ff6633;
+  }
+  @media (max-width:768px){
+    .relatorio-filters{
+      flex-direction:column;
+      align-items:stretch;
+    }
+    .relatorio-filter-group{
+      width:100%;
+    }
+    .relatorio-filters .btn{
+      width:100%;
+    }
+  }
+  
+  /* Carrossel de Stories do Relatório */
+  .relatorio-stories-carousel{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .relatorio-stories-grid{
+    flex:1;
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    scroll-behavior:smooth;
+    padding:12px 4px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .relatorio-stories-grid::-webkit-scrollbar{
+    height:8px;
+  }
+  .relatorio-stories-grid::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.05);
+    border-radius:4px;
+  }
+  .relatorio-stories-grid::-webkit-scrollbar-thumb{
+    background:#ff6633;
+    border-radius:4px;
+  }
+  .relatorio-stories-grid::-webkit-scrollbar-thumb:hover{
+    background:#ff7744;
+  }
+  .relatorio-story-item{
+    min-width:120px;
+    width:120px;
+    height:200px;
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    cursor:pointer;
+    background:rgba(0,0,0,.4);
+    border:2px solid rgba(255,255,255,.1);
+    transition:all .3s ease;
+    flex-shrink:0;
+  }
+  .relatorio-story-item:hover{
+    transform:translateY(-4px);
+    border-color:#ff6633;
+    box-shadow:0 8px 24px rgba(255,102,51,.3);
+  }
+  .relatorio-story-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .relatorio-story-item.video::before{
+    content:"▶";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:2rem;
+    color:#fff;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);
+    z-index:2;
+  }
+  .relatorio-story-date{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+    color:#fff;
+    font-size:.75rem;
+    font-weight:700;
+    padding:8px 6px 6px;
+    text-align:center;
+  }
+  .relatorio-story-status{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    border:2px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.5);
+  }
+  .relatorio-story-item.aprovado .relatorio-story-status{
+    background:#4ade80;
+  }
+  .relatorio-story-item.aprovado-interno .relatorio-story-status{
+    background:#60a5fa;
+  }
+  .relatorio-story-item.revisar .relatorio-story-status{
+    background:#fbbf24;
+  }
+  .relatorio-story-item.pendente .relatorio-story-status{
+    background:#94a3b8;
+  }
+  .relatorio-stories-empty{
+    width:100%;
+    text-align:center;
+    padding:40px 20px;
+    color:#94a3b8;
+  }
+  .carousel-nav{
+    background:rgba(255,102,51,.2);
+    border:2px solid #ff6633;
+    color:#ff6633;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.5rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .3s ease;
+    flex-shrink:0;
+  }
+  .carousel-nav:hover{
+    background:#ff6633;
+    color:#fff;
+    transform:scale(1.1);
+  }
+  .carousel-nav:active{
+    transform:scale(.95);
+  }
+  @media (max-width:768px){
+    .carousel-nav{
+      width:32px;
+      height:32px;
+      font-size:1.2rem;
+    }
+    .relatorio-story-item{
+      min-width:100px;
+      width:100px;
+      height:170px;
+    }
+  }
+  
+  /* Objetivos do mês (Planejamento) */
+  .relatorio-goals-summary{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:10px 0 18px;
+  }
+  .goal-pill{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); color:#e2e8f0; padding:8px 12px; border-radius:999px; font-size:.9rem; }
+  .goal-pill strong{ color:#fff; margin-left:4px; }
+  .goal-done{ border-color:#14532d; background:rgba(20,83,45,.25); }
+  .goal-progress{ border-color:#b45309; background:rgba(180,83,9,.22); }
+  .goal-todo{ border-color:#1e3a8a; background:rgba(30,58,138,.22); }
+  .goals-columns{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+  .goals-col{ border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px; }
+  .goals-col[data-status="concluido"]{ background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.35); }
+  .goals-col[data-status="em-andamento"]{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.35); }
+  .goals-col[data-status="nao-iniciado"]{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.35); }
+  .goals-col h3{ margin:0 0 10px; font-size:1rem; font-weight:800; color:#e2e8f0; border-bottom:2px solid rgba(255,255,255,.2); padding-bottom:8px; }
+  .goals-list{ display:flex; flex-direction:column; gap:10px; }
+  .goal-card{ border:1px solid rgba(255,255,255,.12); border-left:4px solid #64748b; background:rgba(255,255,255,.03); border-radius:10px; padding:10px 12px; cursor:pointer; transition:.2s ease; }
+  .goal-card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.25); }
+  .goal-title{ font-weight:800; color:#fff; margin:0 0 4px; font-size:.98rem; }
+  .goal-meta{ font-size:.85rem; color:#cbd5f5; opacity:.9; display:flex; gap:8px; flex-wrap:wrap; }
+  .goal-card.done{ border-left-color:#16a34a; }
+  .goal-card.progress{ border-left-color:#f59e0b; }
+  .goal-card.todo{ border-left-color:#3b82f6; }
+  .goal-tag{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:.75rem; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); }
+  @media(max-width:900px){ .goals-columns{ grid-template-columns:1fr; } }
 </style>
 </meta></head>
 <body>
@@ -4297,6 +4621,142 @@ function renderReviewNotes(post){
 <div class="frame-shell" id="briefFrameShell" style="height:600px">
 <iframe class="widget-iframe" id="briefIframe" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" title="Briefing Iframe"></iframe>
 </div>
+</div>
+<!-- RELATÓRIO -->
+<div aria-hidden="true" class="relatorio-wrap" id="relatorioWrap" style="display:none">
+  <div class="relatorio-container">
+    <div class="relatorio-header">
+      <h2>Relatório Consolidado</h2>
+      <p class="relatorio-subtitle">Visualize e exporte relatórios completos do desempenho do cliente</p>
+    </div>
+    
+    <div class="relatorio-filters">
+      <div class="relatorio-filter-group">
+        <label for="relatorioMes">📅 Selecione o Mês:</label>
+        <input type="month" id="relatorioMes" class="input" />
+      </div>
+      <button type="button" id="relatorioGerar" class="btn">📊 Gerar Relatório</button>
+      <button type="button" id="relatorioExportar" class="btn secondary">⬇ Exportar PDF</button>
+    </div>
+    
+    <div class="relatorio-preview" id="relatorioPreview">
+      <div class="relatorio-empty">
+        <p>📋 Selecione um mês e clique em "Gerar Relatório" para visualizar os dados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carrossel de Stories -->
+  <div class="relatorio-container" id="relatorioStoriesSection" style="display:none">
+    <div class="relatorio-header">
+      <h2>📱 Stories Produzidos</h2>
+      <p class="relatorio-subtitle" id="relatorioStoriesSubtitle">Stories criados pelo time de marketing</p>
+    </div>
+    
+    <div class="relatorio-stories-carousel">
+      <button type="button" class="carousel-nav carousel-prev" id="relatorioStoriesPrev">‹</button>
+      <div class="relatorio-stories-grid" id="relatorioStoriesGrid">
+        <div class="relatorio-stories-empty">
+          <p>Nenhum story encontrado para este período</p>
+        </div>
+      </div>
+      <button type="button" class="carousel-nav carousel-next" id="relatorioStoriesNext">›</button>
+    </div>
+    <p class="relatorio-desc" id="relatorioStoriesDesc" style="display:none"></p>
+  </div>
+
+  <!-- Carrossel de Posts (Feed) -->
+  <div class="relatorio-container" id="relatorioPostsSection" style="display:none">
+    <div class="relatorio-header">
+      <h2>📰 Posts Produzidos</h2>
+      <p class="relatorio-subtitle" id="relatorioPostsSubtitle">Posts de feed criados pelo time de marketing</p>
+    </div>
+
+    <div class="relatorio-stories-carousel">
+      <button type="button" class="carousel-nav carousel-prev" id="relatorioPostsPrev">‹</button>
+      <div class="relatorio-stories-grid" id="relatorioPostsGrid">
+        <div class="relatorio-stories-empty">
+          <p>Nenhum post de feed encontrado para este período</p>
+        </div>
+      </div>
+      <button type="button" class="carousel-nav carousel-next" id="relatorioPostsNext">›</button>
+    </div>
+    <p class="relatorio-desc" id="relatorioPostsDesc" style="display:none"></p>
+  </div>
+
+  <!-- Objetivos do mês (Planejamento) -->
+  <div class="relatorio-container" id="relatorioGoalsSection" style="display:none">
+    <div class="relatorio-header">
+      <h2>🎯 Objetivos do mês</h2>
+      <p class="relatorio-subtitle" id="relatorioGoalsSubtitle">Status das demandas do Planejamento no mês selecionado</p>
+    </div>
+    
+    <div class="relatorio-goals-summary">
+      <div class="goal-pill goal-done" id="relatorioGoalsDonePill">Concluídos: <strong>-</strong></div>
+      <div class="goal-pill goal-progress" id="relatorioGoalsProgressPill">Em andamento: <strong>-</strong></div>
+      <div class="goal-pill goal-todo" id="relatorioGoalsTodoPill">Não iniciados: <strong>-</strong></div>
+      <button type="button" class="btn small secondary" id="relatorioGoalsClearFilter">Limpar filtro</button>
+    </div>
+
+    <div class="goals-columns" id="relatorioGoalsColumns">
+      <div class="goals-col" data-status="concluido">
+        <h3>Concluídos</h3>
+        <div class="goals-list" id="relatorioGoalsDone"></div>
+      </div>
+      <div class="goals-col" data-status="em-andamento">
+        <h3>Em andamento</h3>
+        <div class="goals-list" id="relatorioGoalsProgress"></div>
+      </div>
+      <div class="goals-col" data-status="nao-iniciado">
+        <h3>Não iniciados</h3>
+        <div class="goals-list" id="relatorioGoalsTodo"></div>
+      </div>
+    </div>
+    <p class="relatorio-desc" id="relatorioGoalsDesc"></p>
+    
+  </div>
+
+  <!-- Relatório de Metas do mês -->
+  <div class="relatorio-container" id="relatorioMetasSection" style="display:none">
+    <div class="relatorio-header">
+      <h2>📈 Metas do mês</h2>
+      <p class="relatorio-subtitle" id="relatorioMetasSubtitle">Metas ativas (aba Metas) no mês selecionado</p>
+    </div>
+
+    <div class="relatorio-goals-summary">
+      <div class="goal-pill goal-done" id="relatorioMetasAchievedPill">Atingidas: <strong>-</strong></div>
+      <div class="goal-pill goal-progress" id="relatorioMetasProgressPill">Em andamento: <strong>-</strong></div>
+      <div class="goal-pill goal-todo" id="relatorioMetasMissingPill">Precisa colocar: <strong>-</strong></div>
+      <button type="button" class="btn small secondary" id="relatorioMetasClearFilter">Limpar filtro</button>
+    </div>
+
+    <div class="goals-columns" id="relatorioMetasColumns">
+      <div class="goals-col" data-status="concluido">
+        <h3>Atingidas</h3>
+        <div class="goals-list" id="relatorioMetasAchieved"></div>
+      </div>
+      <div class="goals-col" data-status="em-andamento">
+        <h3>Em andamento</h3>
+        <div class="goals-list" id="relatorioMetasProgress"></div>
+      </div>
+      <div class="goals-col" data-status="nao-iniciado">
+        <h3>Precisa colocar</h3>
+        <div class="goals-list" id="relatorioMetasMissing"></div>
+      </div>
+    </div>
+    <p class="relatorio-desc" id="relatorioMetasDesc"></p>
+    
+  </div>
+  
+  <!-- Relatório de redes trabalhadas (apenas redes com link configurado) -->
+  <div class="relatorio-container" id="relatorioRedesSection" style="display:none">
+    <div class="relatorio-header">
+      <h2>🔗 Redes trabalhadas no mês</h2>
+      <p class="relatorio-subtitle" id="relatorioRedesSubtitle">Listagem das redes com link configurado (aba Macro)</p>
+    </div>
+    <div class="macro-social-grid" id="relatorioRedesGrid"></div>
+    <p class="relatorio-desc" id="relatorioRedesDesc"></p>
+  </div>
 </div>
 <!-- Firebase + App -->
 <script type="module">
@@ -5537,7 +5997,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = true;
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
-    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
+    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), relatorioWrap = $("relatorioWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
     const newNoteBtn = $("newNoteBtn"), filterSector = $("filterSector"), filterFrom = $("filterFrom"), filterTo = $("filterTo");
     const applyFilter = $("applyFilter"), clearFilter = $("clearFilter"), scrollHint = $("scrollHint");
@@ -9904,7 +10364,8 @@ async function sendIAQuestion(){
       { id:"notes",     name:"Anotações" },
       { id:"access",    name:"Acessos" },
       { id:"arquivos",  name:"Arquivos" },
-      { id:"concorrentes", name:"Concorrentes" }
+      { id:"concorrentes", name:"Concorrentes" },
+      { id:"relatorio", name:"Relatório" }
     ];
     let currentSection = localStorage.getItem("mg_currentSection") || "macro";
     if(currentSection==="other") currentSection="demandas";
@@ -10010,7 +10471,7 @@ async function sendIAQuestion(){
       whatsapp: { src: "https://www.google.com/s2/favicons?sz=64&domain=whatsapp.com", title: "WhatsApp" },
       googleBusiness: { src: "https://www.google.com/s2/favicons?sz=64&domain=business.google.com" },
       pinterest: { src: "https://www.google.com/s2/favicons?sz=64&domain=pinterest.com" },
-      chart: { emoji: "📈", title: "Gráfico" }
+      chart: { emoji: "📈", title: "CRM" }
     };
     let SOCIAL_LINKS = {};
 
@@ -10307,7 +10768,7 @@ async function sendIAQuestion(){
       uploadClientLogo(file);
     });
 
-    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false}){
+    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, relatorio=false}){
       widgetsGrid.style.display = widgets? "flex":"none";
       iframeDica.style.display  = widgets? "block":"none";
       metasWrap.style.display = metas? "block":"none"; metasWrap.setAttribute("aria-hidden", metas? "false":"true");
@@ -10321,6 +10782,7 @@ async function sendIAQuestion(){
       competitorsWrap.style.display = concorrentes? "block":"none"; competitorsWrap.setAttribute("aria-hidden", concorrentes? "false":"true");
       refSocialWrap.style.display = refSocial? "block":"none"; refSocialWrap.setAttribute("aria-hidden", refSocial? "false":"true");
       cacWrap.style.display = cac? "block":"none"; cacWrap.setAttribute("aria-hidden", cac? "false":"true");
+      relatorioWrap.style.display = relatorio? "block":"none"; relatorioWrap.setAttribute("aria-hidden", relatorio? "false":"true");
       if(trafegoWrap){
         trafegoWrap.style.display = trafego? "flex":"none";
         trafegoWrap.setAttribute("aria-hidden", trafego? "false":"true");
@@ -12603,6 +13065,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="concorrentes"){
         setSectionVisibility({concorrentes:true});
         renderCompetitors();
+      } else if(currentSection==="relatorio"){
+        setSectionVisibility({relatorio:true});
+        initRelatorio();
       } else {
         setSectionVisibility({widgets:true});
         if(widgetsRenderedSection !== currentSection){
@@ -12613,6 +13078,646 @@ async function sendIAQuestion(){
       }
       updateScrollHint();
     }
+
+    /* ========= Relatório ========= */
+  let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
+  let relatorioStoriesSection, relatorioStoriesGrid, relatorioStoriesPrev, relatorioStoriesNext, relatorioStoriesSubtitle;
+  let relatorioPostsSection, relatorioPostsGrid, relatorioPostsPrev, relatorioPostsNext, relatorioPostsSubtitle;
+  let relatorioGoalsSection, relatorioGoalsSubtitle, relatorioGoalsDonePill, relatorioGoalsProgressPill, relatorioGoalsTodoPill, relatorioGoalsClearFilter;
+  let relatorioGoalsDone, relatorioGoalsProgress, relatorioGoalsTodo;
+  let relatorioMetasSection, relatorioMetasSubtitle, relatorioMetasAchievedPill, relatorioMetasProgressPill, relatorioMetasMissingPill, relatorioMetasClearFilter;
+  let relatorioMetasAchieved, relatorioMetasProgress, relatorioMetasMissing;
+  let relatorioGoalsNotesSimple, relatorioGoalsNotesSimpleStatus;
+  // Redes trabalhadas
+  let relatorioRedesSection, relatorioRedesGrid, relatorioRedesDesc, relatorioRedesSubtitle;
+  let relatorioStoriesDesc, relatorioPostsDesc, relatorioGoalsDesc, relatorioMetasDesc;
+  
+    
+    function initRelatorio(){
+      if(!relatorioMesInput){
+        relatorioMesInput = $("relatorioMes");
+        relatorioGerarBtn = $("relatorioGerar");
+        relatorioExportarBtn = $("relatorioExportar");
+        relatorioPreview = $("relatorioPreview");
+        relatorioStoriesSection = $("relatorioStoriesSection");
+        relatorioStoriesGrid = $("relatorioStoriesGrid");
+        relatorioStoriesPrev = $("relatorioStoriesPrev");
+        relatorioStoriesNext = $("relatorioStoriesNext");
+        relatorioStoriesSubtitle = $("relatorioStoriesSubtitle");
+    relatorioStoriesDesc = $("relatorioStoriesDesc");
+  relatorioPostsSection = $("relatorioPostsSection");
+  relatorioPostsGrid = $("relatorioPostsGrid");
+  relatorioPostsPrev = $("relatorioPostsPrev");
+  relatorioPostsNext = $("relatorioPostsNext");
+  relatorioPostsSubtitle = $("relatorioPostsSubtitle");
+  relatorioPostsDesc = $("relatorioPostsDesc");
+  relatorioGoalsSection = $("relatorioGoalsSection");
+  relatorioGoalsSubtitle = $("relatorioGoalsSubtitle");
+  relatorioGoalsDonePill = $("relatorioGoalsDonePill");
+  relatorioGoalsProgressPill = $("relatorioGoalsProgressPill");
+  relatorioGoalsTodoPill = $("relatorioGoalsTodoPill");
+  relatorioGoalsClearFilter = $("relatorioGoalsClearFilter");
+  relatorioGoalsDone = $("relatorioGoalsDone");
+  relatorioGoalsProgress = $("relatorioGoalsProgress");
+  relatorioGoalsTodo = $("relatorioGoalsTodo");
+  relatorioGoalsDesc = $("relatorioGoalsDesc");
+  relatorioMetasSection = $("relatorioMetasSection");
+  relatorioMetasSubtitle = $("relatorioMetasSubtitle");
+  relatorioMetasAchievedPill = $("relatorioMetasAchievedPill");
+  relatorioMetasProgressPill = $("relatorioMetasProgressPill");
+  relatorioMetasMissingPill = $("relatorioMetasMissingPill");
+  relatorioMetasClearFilter = $("relatorioMetasClearFilter");
+  relatorioMetasAchieved = $("relatorioMetasAchieved");
+  relatorioMetasProgress = $("relatorioMetasProgress");
+  relatorioMetasMissing = $("relatorioMetasMissing");
+  relatorioMetasDesc = $("relatorioMetasDesc");
+  relatorioGoalsNotesSimple = $("relatorioGoalsNotesSimple");
+  relatorioGoalsNotesSimpleStatus = $("relatorioGoalsNotesSimpleStatus");
+  
+        
+        if(relatorioGerarBtn){
+          relatorioGerarBtn.addEventListener('click', gerarRelatorio);
+        }
+        if(relatorioExportarBtn){
+          relatorioExportarBtn.addEventListener('click', exportarRelatorioPDF);
+        }
+        if(relatorioMesInput){
+          relatorioMesInput.addEventListener('change', onRelatorioMesChange);
+        }
+        if(relatorioStoriesPrev && relatorioStoriesGrid){
+          relatorioStoriesPrev.addEventListener('click', ()=> relatorioStoriesGrid.scrollBy({left:-200, behavior:'smooth'}));
+        }
+        if(relatorioStoriesNext && relatorioStoriesGrid){
+          relatorioStoriesNext.addEventListener('click', ()=> relatorioStoriesGrid.scrollBy({left:200, behavior:'smooth'}));
+        }
+        if(relatorioPostsPrev && relatorioPostsGrid){
+          relatorioPostsPrev.addEventListener('click', ()=> relatorioPostsGrid.scrollBy({left:-200, behavior:'smooth'}));
+        }
+        if(relatorioPostsNext && relatorioPostsGrid){
+          relatorioPostsNext.addEventListener('click', ()=> relatorioPostsGrid.scrollBy({left:200, behavior:'smooth'}));
+        }
+        if(relatorioGoalsDonePill){ relatorioGoalsDonePill.addEventListener('click', ()=> filterGoals('concluido')); }
+        if(relatorioGoalsProgressPill){ relatorioGoalsProgressPill.addEventListener('click', ()=> filterGoals('em-andamento')); }
+        if(relatorioGoalsTodoPill){ relatorioGoalsTodoPill.addEventListener('click', ()=> filterGoals('nao-iniciado')); }
+        if(relatorioGoalsClearFilter){ relatorioGoalsClearFilter.addEventListener('click', ()=> filterGoals('')); }
+        if(relatorioMetasAchievedPill){ relatorioMetasAchievedPill.addEventListener('click', ()=> filterMetas('concluido')); }
+        if(relatorioMetasProgressPill){ relatorioMetasProgressPill.addEventListener('click', ()=> filterMetas('em-andamento')); }
+        if(relatorioMetasMissingPill){ relatorioMetasMissingPill.addEventListener('click', ()=> filterMetas('nao-iniciado')); }
+        if(relatorioMetasClearFilter){ relatorioMetasClearFilter.addEventListener('click', ()=> filterMetas('')); }
+        if(relatorioGoalsNotesSimple){ relatorioGoalsNotesSimple.addEventListener('input', saveRelatorioGoalsNoteLocal); }
+        // Captura dos elementos de Redes trabalhadas
+        relatorioRedesSection = $("relatorioRedesSection");
+        relatorioRedesGrid = $("relatorioRedesGrid");
+        relatorioRedesDesc = $("relatorioRedesDesc");
+        relatorioRedesSubtitle = $("relatorioRedesSubtitle");
+        
+      }
+    }
+    
+    function onRelatorioMesChange(){
+      if(!relatorioMesInput || !relatorioMesInput.value) return;
+      renderRelatorioStories(relatorioMesInput.value);
+      renderRelatorioPosts(relatorioMesInput.value);
+      renderRelatorioGoals(relatorioMesInput.value);
+  renderRelatorioMetas(relatorioMesInput.value);
+  loadRelatorioGoalsNoteLocal(relatorioMesInput.value);
+  // Atualiza também o bloco de redes trabalhadas (independente do mês, mas mantém consistência visual)
+  renderRelatorioRedes(relatorioMesInput.value);
+    }
+    
+    function renderRelatorioStories(mesISO){
+      if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesISO) return;
+      
+      const [ano, mes] = mesISO.split('-');
+      const stories = POSTS.filter(p => {
+        if((p.target || 'feed') !== 'stories') return false;
+        if(!p.dateISO) return false;
+        const [pAno, pMes] = p.dateISO.split('-');
+        return pAno === ano && pMes === mes;
+      });
+      
+      if(stories.length === 0){
+        relatorioStoriesSection.style.display = 'none';
+        return;
+      }
+      
+      relatorioStoriesSection.style.display = 'block';
+      
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const mesNome = meses[parseInt(mes)-1] || mes;
+      if(relatorioStoriesSubtitle){
+        relatorioStoriesSubtitle.textContent = `${stories.length} ${stories.length===1?'story':'stories'} produzido${stories.length===1?'':'s'} em ${mesNome} de ${ano}`;
+      }
+
+      // Descrição resumida abaixo do bloco
+      if(relatorioStoriesDesc){
+        const total = stories.length;
+        const aprovados = stories.filter(p=> (p.status||'')==='aprovado').length;
+        const revisar = stories.filter(p=> (p.status||'')==='revisar').length;
+        const pendentes = Math.max(0, total - aprovados - revisar);
+        const rate = total>0 ? Math.round((aprovados/total)*100) : 0;
+        const diasMes = Math.max(1, new Date(parseInt(ano,10), parseInt(mes,10), 0).getDate());
+        const mediaDia = (total/diasMes).toFixed(1);
+        relatorioStoriesDesc.style.display = 'block';
+        relatorioStoriesDesc.textContent = `✨ ${mesNome} de ${ano}: ${total} ${total===1?'story':'stories'} produzid${total===1?'o':'os'} • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Excelente consistência de publicações para reforçar a presença da marca.`;
+      }
+      
+      stories.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
+      
+      relatorioStoriesGrid.innerHTML = stories.map(p=>{
+        const first = p.thumbUrl || p.mediaUrls?.[0] || "";
+        const ext = first.split("?")[0].split(".").pop().toLowerCase();
+        const isVideo = ["mp4","mov","webm","m4v","avi"].includes(ext);
+        
+        let cls = "relatorio-story-item";
+        if(p.status === "aprovado"){
+          cls += p.approvedBy === 'interno' ? " aprovado-interno" : " aprovado";
+        }else if(p.status === "revisar"){
+          cls += " revisar";
+        }else{
+          cls += " pendente";
+        }
+        if(isVideo) cls += " video";
+        
+        const [y,m,d] = (p.dateISO||'').split('-');
+        const dateLabel = d && m ? `${d}/${m}` : '';
+        
+        if(first){
+          return `
+            <div class="${cls}" data-id="${p.id}">
+              <img src="${first}" alt="Story ${dateLabel}">
+              <div class="relatorio-story-status"></div>
+              <div class="relatorio-story-date">${dateLabel}</div>
+            </div>
+          `;
+        }else{
+          return `
+            <div class="${cls}" data-id="${p.id}">
+              <div class="relatorio-story-status"></div>
+              <div class="relatorio-story-date">${dateLabel}</div>
+            </div>
+          `;
+        }
+      }).join("");
+      
+      relatorioStoriesGrid.querySelectorAll('.relatorio-story-item').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          const id = el.getAttribute('data-id');
+          const post = POSTS.find(p=>p.id===id);
+          if(post && typeof openPostModal === 'function') openPostModal(post);
+        });
+      });
+    }
+
+    function renderRelatorioPosts(mesISO){
+      if(!relatorioPostsGrid || !relatorioPostsSection || !mesISO) return;
+
+      const [ano, mes] = mesISO.split('-');
+      const posts = POSTS.filter(p => {
+        if((p.target || 'feed') !== 'feed') return false;
+        if(!p.dateISO) return false;
+        const [pAno, pMes] = p.dateISO.split('-');
+        return pAno === ano && pMes === mes;
+      });
+
+      if(posts.length === 0){
+        relatorioPostsSection.style.display = 'none';
+        return;
+      }
+
+      relatorioPostsSection.style.display = 'block';
+
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const mesNome = meses[parseInt(mes)-1] || mes;
+      if(relatorioPostsSubtitle){
+        relatorioPostsSubtitle.textContent = `${posts.length} ${posts.length===1?'post':'posts'} produzido${posts.length===1?'':'s'} em ${mesNome} de ${ano}`;
+      }
+
+      // Descrição resumida abaixo do bloco
+      if(relatorioPostsDesc){
+        const total = posts.length;
+        const aprovados = posts.filter(p=> (p.status||'')==='aprovado').length;
+        const revisar = posts.filter(p=> (p.status||'')==='revisar').length;
+        const pendentes = Math.max(0, total - aprovados - revisar);
+        const rate = total>0 ? Math.round((aprovados/total)*100) : 0;
+        const diasMes = Math.max(1, new Date(parseInt(ano,10), parseInt(mes,10), 0).getDate());
+        const mediaDia = (total/diasMes).toFixed(1);
+        relatorioPostsDesc.style.display = 'block';
+        relatorioPostsDesc.textContent = `✨ ${mesNome} de ${ano}: ${total} ${total===1?'post':'posts'} no feed • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Conteúdo consistente para ampliar alcance e engajamento.`;
+      }
+
+      posts.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
+
+      relatorioPostsGrid.innerHTML = posts.map(p=>{
+        const first = p.thumbUrl || p.mediaUrls?.[0] || "";
+        const ext = first.split("?")[0].split(".").pop().toLowerCase();
+        const isVideo = ["mp4","mov","webm","m4v","avi"].includes(ext);
+
+        let cls = "relatorio-story-item"; // reaproveita estilos
+        if(p.status === "aprovado"){
+          cls += p.approvedBy === 'interno' ? " aprovado-interno" : " aprovado";
+        }else if(p.status === "revisar"){
+          cls += " revisar";
+        }else{
+          cls += " pendente";
+        }
+        if(isVideo) cls += " video";
+
+        const [y,m,d] = (p.dateISO||'').split('-');
+        const dateLabel = d && m ? `${d}/${m}` : '';
+
+        if(first){
+          return `
+            <div class="${cls}" data-id="${p.id}">
+              <img src="${first}" alt="Post ${dateLabel}">
+              <div class="relatorio-story-status"></div>
+              <div class="relatorio-story-date">${dateLabel}</div>
+            </div>
+          `;
+        }else{
+          return `
+            <div class="${cls}" data-id="${p.id}">
+              <div class="relatorio-story-status"></div>
+              <div class="relatorio-story-date">${dateLabel}</div>
+            </div>
+          `;
+        }
+      }).join("");
+
+      relatorioPostsGrid.querySelectorAll('.relatorio-story-item').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          const id = el.getAttribute('data-id');
+          const post = POSTS.find(p=>p.id===id);
+          if(post && typeof openPostModal === 'function') openPostModal(post);
+        });
+      });
+    }
+
+    function mapDemandaToStatusKey(status){
+      const s = (status||'').toLowerCase();
+      if(s === 'concluido' || s === 'concluido-grupo') return 'concluido';
+      if(s === 'em-andamento' || s === 'bloqueado' || s === 'prioridade' || s==='prioridade-grupo') return 'em-andamento';
+      return 'nao-iniciado';
+    }
+
+    let currentGoalsFilter = '';
+    function filterGoals(key){
+      currentGoalsFilter = (key||'');
+      const cols = document.querySelectorAll('#relatorioGoalsColumns .goals-col');
+      cols.forEach(col=>{
+        const st = col.getAttribute('data-status');
+        col.style.display = (!currentGoalsFilter || currentGoalsFilter===st) ? 'block':'none';
+      });
+    }
+
+    function renderRelatorioGoals(mesISO){
+      if(!relatorioGoalsSection) return;
+      const [ano, mes] = (mesISO||'').split('-');
+      const monthKey = `${ano}-${mes}`;
+      const list = Array.isArray(DEMANDAS) ? DEMANDAS : [];
+      const inMonth = list.filter(d=> {
+        try{ return Array.isArray(getDemandMonthKeys(d)) && getDemandMonthKeys(d).includes(monthKey); }catch(_){ return false; }
+      });
+      // Sempre mostrar a seção para exibir o bloco de notas, mesmo sem objetivos
+      relatorioGoalsSection.style.display='block';
+
+      const groups = { 'concluido':[], 'em-andamento':[], 'nao-iniciado':[] };
+      inMonth.forEach(d=>{ groups[mapDemandaToStatusKey(d.status)].push(d); });
+
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const mesNome = meses[(parseInt(mes)||1)-1] || mes;
+      if(relatorioGoalsSubtitle){
+        relatorioGoalsSubtitle.textContent = `Resumo de ${inMonth.length} objetivo${inMonth.length===1?'':'s'} em ${mesNome} de ${ano}`;
+      }
+  if(relatorioGoalsDonePill) relatorioGoalsDonePill.querySelector('strong').textContent = groups['concluido'].length;
+  if(relatorioGoalsProgressPill) relatorioGoalsProgressPill.querySelector('strong').textContent = groups['em-andamento'].length;
+  if(relatorioGoalsTodoPill) relatorioGoalsTodoPill.querySelector('strong').textContent = groups['nao-iniciado'].length;
+
+      // Descrição resumida abaixo do bloco
+      if(relatorioGoalsDesc){
+        const total = inMonth.length;
+        const concl = groups['concluido'].length;
+        const prog = groups['em-andamento'].length;
+        const nao = groups['nao-iniciado'].length;
+        const rate = total>0 ? Math.round((concl/total)*100) : 0;
+        relatorioGoalsDesc.textContent = total>0
+          ? `🚀 ${mesNome} de ${ano}: ${total} objetivo${total===1?'':'s'} — Concluídos: ${concl} (${rate}%), Em andamento: ${prog}, Não iniciados: ${nao}. Foco em entregas com impacto direto na percepção da marca.`
+          : `Sem objetivos cadastrados para ${mesNome} de ${ano}. Que tal definirmos 2–3 prioridades estratégicas para o próximo ciclo?`;
+      }
+
+      const renderCard = (d)=>{
+        const title = (d.demanda||'').trim() || '(Sem título)';
+        const resp = (d.responsavel||'').trim();
+        const end = getDemandaEndDate(d);
+        const date = end ? end.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}) : '';
+        const tag = (Array.isArray(d.tags) ? d.tags[0] : (d.tag||'')).toString();
+        const statusKey = mapDemandaToStatusKey(d.status);
+        const statusLabel = (STATUS_OPTIONS.find(o=>o.value===d.status)?.label) || '';
+        return `<div class="goal-card ${statusKey}" data-id="${d.id||''}">
+          <div class="goal-title">${escapeHtml(title)}</div>
+          <div class="goal-meta">
+            ${resp?`<span class="goal-tag">👤 ${escapeHtml(resp)}</span>`:''}
+            ${date?`<span class="goal-tag">📅 ${date}</span>`:''}
+            ${statusLabel?`<span class="goal-tag">${escapeHtml(statusLabel)}</span>`:''}
+            ${tag?`<span class="goal-tag">🏷️ ${escapeHtml(tag)}</span>`:''}
+          </div>
+        </div>`;
+      };
+
+      if(relatorioGoalsDone) relatorioGoalsDone.innerHTML = groups['concluido'].sort((a,b)=> (getDemandaEndDate(a)?.getTime()||0)-(getDemandaEndDate(b)?.getTime()||0)).map(renderCard).join('');
+      if(relatorioGoalsProgress) relatorioGoalsProgress.innerHTML = groups['em-andamento'].sort((a,b)=> (getDemandaEndDate(a)?.getTime()||0)-(getDemandaEndDate(b)?.getTime()||0)).map(renderCard).join('');
+      if(relatorioGoalsTodo) relatorioGoalsTodo.innerHTML = groups['nao-iniciado'].sort((a,b)=> (getDemandaEndDate(a)?.getTime()||0)-(getDemandaEndDate(b)?.getTime()||0)).map(renderCard).join('');
+
+      // Se não houver objetivos no mês, mostrar mensagem de vazio, mantendo o bloco de notas visível
+      if(inMonth.length === 0){
+        if(relatorioGoalsSubtitle){
+          relatorioGoalsSubtitle.textContent = `Sem objetivos encontrados para ${mesNome} de ${ano}`;
+        }
+      }
+
+      const bindClicks = (root)=>{
+        if(!root) return; 
+        root.querySelectorAll('.goal-card').forEach(el=>{
+          if(el.dataset.bound==='1') return; el.dataset.bound='1';
+          el.addEventListener('click', ()=>{ try{ setActiveTab('demandas'); }catch(_err){} });
+        });
+      };
+      bindClicks(relatorioGoalsDone);
+      bindClicks(relatorioGoalsProgress);
+      bindClicks(relatorioGoalsTodo);
+
+      filterGoals(currentGoalsFilter);
+    }
+    
+    function gerarRelatorio(){
+      if(!relatorioMesInput || !relatorioMesInput.value){
+        alert('Por favor, selecione um mês');
+        return;
+      }
+      
+      const mesISO = relatorioMesInput.value;
+  renderRelatorioStories(mesISO);
+  renderRelatorioPosts(mesISO);
+  renderRelatorioGoals(mesISO);
+  renderRelatorioMetas(mesISO);
+  loadRelatorioGoalsNoteLocal(mesISO);
+  renderRelatorioRedes(mesISO);
+  
+      
+      if(relatorioPreview){
+        const [ano, mes] = mesISO.split('-');
+        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        relatorioPreview.classList.add('has-meta');
+        relatorioPreview.innerHTML = `
+          <div class="relatorio-preview-meta">
+            <span class="meta-item">📅 ${mesNome} ${ano}</span>
+            <span class="meta-sep">•</span>
+            <span class="meta-item ok">✅ Relatório gerado</span>
+            <span class="meta-sep">•</span>
+            <button id="copyRelatorioLinkBtn" type="button" class="btn ghost small" title="Copiar link do relatório para compartilhar">🔗 Copiar link</button>
+          </div>
+        `;
+
+        // botão: copiar link do relatório
+        const btn = relatorioPreview.querySelector('#copyRelatorioLinkBtn');
+        btn?.addEventListener('click', ()=>{
+          try{
+            const url = buildRelatorioShareUrl(mesISO);
+            const clip = navigator.clipboard;
+            if(clip?.writeText){
+              clip.writeText(url).then(()=>{
+                alert('Link do relatório copiado!');
+              }).catch(()=>{
+                throw new Error('Clipboard API falhou');
+              });
+            } else {
+              throw new Error('Clipboard API indisponível');
+            }
+          }catch(_err){
+            // fallback
+            const url = buildRelatorioShareUrl(mesISO);
+            try{
+              const ta = document.createElement('textarea');
+              ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+              alert('Link do relatório copiado!');
+            }catch(_){
+              prompt('Copie o link do relatório:', url);
+            }
+          }
+        });
+      }
+    }
+
+    let currentMetasFilter = '';
+    function filterMetas(key){
+      currentMetasFilter = (key||'');
+      const cols = document.querySelectorAll('#relatorioMetasColumns .goals-col');
+      cols.forEach(col=>{
+        const st = col.getAttribute('data-status');
+        col.style.display = (!currentMetasFilter || currentMetasFilter===st) ? 'block':'none';
+      });
+    }
+
+    function getMetaMonthKeyFromISO(mesISO){
+      if(!mesISO) return META_MONTHS[new Date().getMonth()];
+      const parts = mesISO.split('-');
+      if(parts.length<2) return META_MONTHS[new Date().getMonth()];
+      const idx = Math.min(Math.max(parseInt(parts[1],10)-1,0),11);
+      return META_MONTHS[idx];
+    }
+
+    // Gera a URL compartilhável do relatório para o mês selecionado
+    function buildRelatorioShareUrl(mesISO){
+      try{
+        const pageUrl = new URL('relatorio.html', location.href);
+        const mes = (mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7));
+        const tenant = getClientKey();
+        if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
+        pageUrl.searchParams.set('mes', mes);
+        return pageUrl.toString();
+      }catch(_){
+        // Fallback simples
+        const base = location.origin + location.pathname.replace(/index\.html?$/i,'');
+        const mes = encodeURIComponent((mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7)));
+        const tenant = encodeURIComponent(getClientKey()||'');
+        return `${base}relatorio.html?tenant=${tenant}&mes=${mes}`;
+      }
+    }
+
+    // Notas simples locais (Objetivos do mês)
+    function getClientKeyLocal(){
+      return (typeof window.TENANT === 'string' && window.TENANT) || document.body.getAttribute('data-client-id') || 'default';
+    }
+    function goalsNoteKey(mesISO){
+      const id = (mesISO && mesISO.length>=7) ? mesISO : (new Date().toISOString().slice(0,7));
+      return `relatorio_goals_note_${getClientKeyLocal()}_${id}`;
+    }
+    function loadRelatorioGoalsNoteLocal(mesISO){
+      try{
+        if(!relatorioGoalsNotesSimple) return;
+        const key = goalsNoteKey(mesISO);
+        const saved = localStorage.getItem(key) || '';
+        relatorioGoalsNotesSimple.value = saved;
+        if(relatorioGoalsNotesSimpleStatus){
+          relatorioGoalsNotesSimpleStatus.textContent = saved ? 'Auto-salvo neste navegador.' : '';
+        }
+      }catch(_err){}
+    }
+    function saveRelatorioGoalsNoteLocal(){
+      try{
+        if(!relatorioMesInput || !relatorioMesInput.value || !relatorioGoalsNotesSimple) return;
+        const key = goalsNoteKey(relatorioMesInput.value);
+        localStorage.setItem(key, relatorioGoalsNotesSimple.value || '');
+        if(relatorioGoalsNotesSimpleStatus){
+          const now = new Date();
+          const hora = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+          relatorioGoalsNotesSimpleStatus.textContent = `Auto-salvo às ${hora}`;
+        }
+      }catch(_err){}
+    }
+
+    function renderRelatorioMetas(mesISO){
+      if(!relatorioMetasSection) return;
+      const monthKey = getMetaMonthKeyFromISO(mesISO);
+      const activeMetas = Array.isArray(METAS) ? METAS.filter(meta => meta && meta.ativo !== false) : [];
+      const groups = { achieved:[], progress:[], missing:[] };
+      activeMetas.forEach(meta=>{
+        const current = (meta.meses && meta.meses[monthKey]) || {p:'',r:''};
+        const planned = normalizeMetaNumber(current.p ?? current.P);
+        const realized = normalizeMetaNumber(current.r ?? current.R);
+        const status = evaluateMetaGoal(planned, realized, meta.direcao);
+        if(status === 'achieved') groups.achieved.push({meta, planned, realized});
+        else if(status === 'missing') groups.missing.push({meta, planned, realized});
+        else groups.progress.push({meta, planned, realized});
+      });
+
+      const total = activeMetas.length;
+      if(total === 0){ relatorioMetasSection.style.display='none'; return; }
+      relatorioMetasSection.style.display='block';
+
+      const labelMonth = META_MONTH_LABELS[monthKey] || monthKey.toUpperCase();
+      if(relatorioMetasSubtitle){ relatorioMetasSubtitle.textContent = `Metas ativas: ${total} • ${labelMonth}`; }
+      if(relatorioMetasAchievedPill) relatorioMetasAchievedPill.querySelector('strong').textContent = groups.achieved.length;
+      if(relatorioMetasProgressPill) relatorioMetasProgressPill.querySelector('strong').textContent = groups.progress.length;
+      if(relatorioMetasMissingPill) relatorioMetasMissingPill.querySelector('strong').textContent = groups.missing.length;
+
+      // Descrição resumida abaixo do bloco
+      if(relatorioMetasDesc){
+        const a = groups.achieved.length, p = groups.progress.length, m = groups.missing.length;
+        const rate = total>0 ? Math.round((a/total)*100) : 0;
+        relatorioMetasDesc.textContent = `🎯 ${labelMonth}: ${total} meta${total===1?'':'s'} ativa${total===1?'':'s'} — Atingidas: ${a} (${rate}%), Em andamento: ${p}, Precisa colocar: ${m}. Excelente sinal de alinhamento entre planejamento e execução.`;
+      }
+
+      const renderMetaCard = (item)=>{
+        const m = item.meta;
+        const title = (m.descricao||'').trim() || '(Meta sem título)';
+        const unidade = m.unidade || '';
+        const plannedLabel = formatMetaDisplay(item.planned, unidade);
+        const realizedLabel = formatMetaDisplay(item.realized, unidade);
+        return `<div class="goal-card" data-id="${m.id}">
+          <div class="goal-title">${escapeHtml(title)}</div>
+          <div class="goal-meta">
+            <span class="goal-tag">🎯 Meta: ${escapeHtml(plannedLabel)}</span>
+            <span class="goal-tag">📈 Realizado: ${escapeHtml(realizedLabel)}</span>
+            ${m.setor?`<span class="goal-tag">🏢 ${escapeHtml(m.setor)}</span>`:''}
+          </div>
+        </div>`;
+      };
+
+      if(relatorioMetasAchieved) relatorioMetasAchieved.innerHTML = groups.achieved.map(renderMetaCard).join('');
+      if(relatorioMetasProgress) relatorioMetasProgress.innerHTML = groups.progress.map(renderMetaCard).join('');
+      if(relatorioMetasMissing) relatorioMetasMissing.innerHTML = groups.missing.map(renderMetaCard).join('');
+
+      const bindClicks = (root)=>{
+        if(!root) return; 
+        root.querySelectorAll('.goal-card').forEach(el=>{
+          if(el.dataset.bound==='1') return; el.dataset.bound='1';
+          el.addEventListener('click', ()=>{ try{ setActiveTab('metas'); }catch(_err){} });
+        });
+      };
+      bindClicks(relatorioMetasAchieved);
+      bindClicks(relatorioMetasProgress);
+      bindClicks(relatorioMetasMissing);
+
+      filterMetas(currentMetasFilter);
+    }
+    
+    // Relatório: Redes trabalhadas (lista apenas redes com link configurado)
+    function renderRelatorioRedes(mesISO){
+      // mesISO não altera os links, mas mantém consistência com as demais seções
+      if(!relatorioRedesSection || !relatorioRedesGrid) return;
+      const items = collectHeaderSocialItems();
+      const connected = items.filter(i=> i && i.hasLink && i.href);
+      if(connected.length === 0){
+        relatorioRedesSection.style.display = 'none';
+        return;
+      }
+      relatorioRedesSection.style.display = 'block';
+      // Subtítulo e descrição
+      if(relatorioRedesSubtitle){
+        relatorioRedesSubtitle.textContent = 'Redes conectadas no cliente (clique para acessar)';
+      }
+      if(relatorioRedesDesc){
+        relatorioRedesDesc.textContent = `📌 ${connected.length} rede${connected.length===1?'':'s'} com link configurado${mesISO?` — relatório de ${mesISO}`:''}. Mostrando apenas o que está ativo e pronto para uso.`;
+      }
+      // Monta os cards (reaproveitando os estilos de macro-social-item)
+      const frag = document.createDocumentFragment();
+      connected.forEach(item=>{
+        const card = document.createElement('div');
+        card.className = 'macro-social-item';
+
+        const icon = document.createElement('div');
+        icon.className = 'macro-social-icon';
+        if(item.iconInfo?.type === 'img' && item.iconInfo.src){
+          const img = document.createElement('img');
+          img.src = item.iconInfo.src;
+          img.alt = item.iconInfo.alt || item.label || '';
+          icon.appendChild(img);
+        }else if(item.iconInfo?.type === 'text' && item.iconInfo.text){
+          icon.textContent = item.iconInfo.text;
+          if(item.iconInfo.fontSize){ icon.style.fontSize = item.iconInfo.fontSize; }
+        }
+
+        const info = document.createElement('div');
+        info.className = 'macro-social-info';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'macro-social-label';
+        labelEl.textContent = item.label || 'Rede social';
+        const detailEl = document.createElement('span');
+        detailEl.className = 'macro-social-detail';
+        detailEl.textContent = 'Link conectado';
+        info.append(labelEl, detailEl);
+
+        const actions = document.createElement('div');
+        actions.className = 'macro-social-actions';
+        const openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'macro-social-open';
+        openBtn.textContent = 'Abrir';
+        openBtn.addEventListener('click', ()=>{
+          try{
+            const win = window.open(item.href, '_blank');
+            if(win){ win.opener = null; } else { window.location.href = item.href; }
+          }catch(_){ window.location.href = item.href; }
+        });
+        actions.appendChild(openBtn);
+
+        card.append(icon, info, actions);
+        frag.appendChild(card);
+      });
+      relatorioRedesGrid.replaceChildren(frag);
+    }
+    
+    function exportarRelatorioPDF(){
+      if(!relatorioMesInput || !relatorioMesInput.value){
+        alert('Por favor, gere um relatório primeiro');
+        return;
+      }
+      alert('Funcionalidade de exportação em PDF será implementada em breve!');
+    }
+
+    
 
     /* ========= arquivos ========= */
     const normalizeParent = (value)=> (value===undefined || value===null || value==='') ? null : value;
@@ -23015,6 +24120,15 @@ function renderReviewNotes(post){
 <button class="btn small" id="reviewSend">Enviar observação</button>
 </div>
 </div>
+    <!-- Bloco de notas simples (Objetivos do mês) -->
+    <div class="notes-block" id="relatorioGoalsSimpleNotesWrap">
+      <div class="relatorio-header" style="margin-top:10px">
+        <h3>📝 Anotações do objetivo do mês</h3>
+      </div>
+      <textarea id="relatorioGoalsNotesSimple" rows="4" placeholder="Escreva suas anotações do objetivo do mês..."
+        style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:8px;padding:10px;resize:vertical;text-align:center;"></textarea>
+      <div id="relatorioGoalsNotesSimpleStatus" style="margin-top:6px;font-size:.8rem;color:#9ca3af;text-align:right;"></div>
+    </div>
 </div>
 <script>
   (function(){
