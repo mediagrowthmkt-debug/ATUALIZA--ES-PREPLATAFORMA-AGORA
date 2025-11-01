@@ -290,5 +290,23 @@ service cloud.firestore {
         );
       allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
     }
+
+    /* ✅ Links públicos do RELATÓRIO (novo) */
+    match /reportShares/{token} {
+      // Qualquer pessoa com o link pode visualizar
+      allow get: if true;
+      allow list: if false;
+      // Somente o dono autenticado pode criar/atualizar
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token
+                    && request.resource.data.monthKey is string;
+      allow update: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token
+                    && resource.data.uid == request.auth.uid;
+      // Dono pode apagar
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
   }
 }

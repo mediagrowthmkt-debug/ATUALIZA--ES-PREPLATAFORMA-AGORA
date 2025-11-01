@@ -5,80 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Relatório do mês</title>
   <style>
-    :root{ --bg:#0b1020; --panel:#111936; --text:#e2e8f0; --muted:#94a3b8; --accent:#60a5fa; --ok:#22c55e; --warn:#f59e0b; --alert:#ef4444; }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .title{font-size:1.25rem;font-weight:800;margin:0}
-    .muted{color:var(--muted)}
-    .panel{background:var(--panel);border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:16px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    :root{ --panel:#111936; --shell-border:rgba(255,255,255,.12); }
+    html,body{margin:0;padding:0;background:#0b1020;color:#e2e8f0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";}
     .btn{background:#1f2937;color:#e5e7eb;border:1px solid rgba(148,163,184,.35);border-radius:10px;padding:8px 12px;cursor:pointer}
-    .btn:hover{background:#2b3a55}
-    .section{margin:18px 0}
-    .section h2{margin:0 0 8px;font-size:1.05rem}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);font-size:.88rem}
-    .ok{color:var(--ok);}
-    .warn{color:var(--warn);}
-    .alert{color:var(--alert);}
-    .list{display:flex;flex-direction:column;gap:10px}
-    .item{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(148,163,184,.25);border-radius:12px;background:rgba(15,23,42,.45)}
-    .item .title{font-size:1rem}
-    .kv{display:grid;grid-template-columns:160px 1fr;gap:6px;font-size:.92rem}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .empty{color:var(--muted);font-size:.92rem}
-    .header-actions{display:flex;gap:8px;align-items:center}
-    .print-hint{font-size:.85rem;color:var(--muted)}
-    @media print{ .btn,.print-hint{display:none !important} body{background:#fff;color:#000} .panel{background:#fff;border-color:#ddd} }
+    .btn.small{padding:6px 10px;font-size:.9rem}
+    .btn.secondary{background:rgba(255,255,255,.05)}
+    .relatorio-wrap{max-width:1200px;margin:24px auto;padding:0 16px;display:flex;flex-direction:column;gap:20px}
+    .relatorio-container{background:var(--panel);border:1px solid var(--shell-border);border-radius:16px;padding:24px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .relatorio-header{margin-bottom:16px}
+    .relatorio-header h2{margin:0 0 8px;font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#ff6633,#ff944d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .relatorio-subtitle{margin:0;color:#94a3b8;font-size:.95rem}
+    .relatorio-desc{margin:14px auto 0;color:#e5ecff;font-size:1.06rem;line-height:1.6;text-align:center;font-weight:700;letter-spacing:.01em;max-width:980px}
+    .relatorio-preview{min-height:auto;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+    .relatorio-preview-meta{display:flex;align-items:center;gap:10px;color:#cbd5f5;font-size:.95rem;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px 12px}
+    .relatorio-preview-meta .meta-item.ok{color:#86efac;font-weight:800}
+    .relatorio-preview-meta .meta-sep{opacity:.6}
+    .relatorio-goals-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .goal-pill{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e2e8f0;padding:8px 12px;border-radius:999px;font-size:.9rem}
+    .goal-pill strong{color:#fff;margin-left:4px}
+    .goals-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .goals-col h3{margin:0 0 10px}
+    .goals-list{display:flex;flex-direction:column;gap:10px}
+    .goal-card{border:1px solid rgba(255,255,255,.12);border-left:4px solid #64748b;background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px}
+    .goal-title{font-weight:800;color:#fff;margin:0 0 4px;font-size:.98rem}
+    .goal-meta{font-size:.9rem;color:#cbd5f5}
+    .macro-social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .macro-social-item{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;background:rgba(15,23,42,.52);border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px 16px;text-align:center;box-shadow:0 10px 22px rgba(0,0,0,.26);min-height:220px}
+    .macro-social-icon{width:56px;height:56px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.8);border:1px solid rgba(148,163,184,.38);color:#e2e8f0;flex:0 0 auto;padding:16px;font-size:24px;line-height:1}
+    .macro-social-icon img{width:24px;height:24px;object-fit:contain;display:block}
+    .macro-social-info{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;flex:1;min-width:0}
+    .macro-social-label{font-weight:800;color:#e2e8f0}
+    .macro-social-detail{font-size:.9rem;color:#94a3b8}
+    .macro-social-actions{display:flex;justify-content:center;align-items:center;width:100%;margin-top:auto}
+    @media(max-width:900px){ .goals-columns{grid-template-columns:1fr} }
+    @media print{ .btn{display:none !important} .relatorio-container{box-shadow:none} }
+    /* Stories & Posts carrossel */
+    .relatorio-stories-carousel{position:relative;display:flex;align-items:center;gap:12px}
+    .relatorio-stories-grid{flex:1;display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;padding:12px 4px;-webkit-overflow-scrolling:touch}
+    .relatorio-stories-grid::-webkit-scrollbar{height:8px}
+    .relatorio-stories-grid::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:4px}
+    .relatorio-stories-grid::-webkit-scrollbar-thumb{background:#ff6633;border-radius:4px}
+    .relatorio-stories-grid::-webkit-scrollbar-thumb:hover{background:#ff7744}
+    .relatorio-story-item{min-width:120px;width:120px;height:200px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);transition:all .3s ease;flex-shrink:0}
+    .relatorio-story-item:hover{transform:translateY(-4px);border-color:#ff6633;box-shadow:0 8px 24px rgba(255,102,51,.3)}
+    .relatorio-story-item img{width:100%;height:100%;object-fit:cover}
+    .relatorio-story-item.video::before{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);z-index:2}
+    .relatorio-story-date{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);color:#fff;font-size:.75rem;font-weight:700;padding:8px 6px 6px;text-align:center}
+    .relatorio-story-status{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+    .relatorio-story-item.aprovado .relatorio-story-status{background:#4ade80}
+    .relatorio-story-item.aprovado-interno .relatorio-story-status{background:#60a5fa}
+    .relatorio-story-item.revisar .relatorio-story-status{background:#fbbf24}
+    .relatorio-story-item.pendente .relatorio-story-status{background:#94a3b8}
+    .relatorio-stories-empty{width:100%;text-align:center;padding:40px 20px;color:#94a3b8}
+    .carousel-nav{background:rgba(255,102,51,.2);border:2px solid #ff6633;color:#ff6633;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;cursor:pointer;transition:all .3s ease;flex-shrink:0}
+    .carousel-nav:hover{background:#ff6633;color:#fff;transform:scale(1.1)}
+    .carousel-nav:active{transform:scale(.95)}
+    @media(max-width:768px){ .carousel-nav{width:32px;height:32px;font-size:1.2rem} .relatorio-story-item{min-width:100px;width:100px;height:170px} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1 class="title">Relatório mensal <span id="reportMonth" class="muted"></span></h1>
-      <div class="header-actions">
-        <button id="printBtn" class="btn" type="button">Imprimir / Salvar PDF</button>
-        <span class="print-hint">Dica: compartilhe este link com o cliente (requer login autorizado)</span>
-      </div>
-    </header>
-
-    <div id="authGate" class="panel" style="display:none">
-      <div class="section">
+  <div class="relatorio-wrap">
+    <div class="relatorio-container" id="authGate" style="display:none">
+      <div class="relatorio-header">
         <h2>Autenticação necessária</h2>
-        <p class="muted">Você precisa fazer login para visualizar os dados deste relatório.</p>
-        <button id="loginBtn" class="btn" type="button">Entrar com Google</button>
+        <p class="relatorio-subtitle">Você precisa fazer login para visualizar este relatório.</p>
+      </div>
+      <button id="loginBtn" class="btn" type="button">Entrar com Google</button>
+    </div>
+
+    <div class="relatorio-container" id="content" style="display:none">
+      <div class="relatorio-header">
+        <h2>Relatório do mês</h2>
+        <p class="relatorio-subtitle" id="relatorioHeaderSubtitle"></p>
+      </div>
+      <div class="relatorio-preview">
+        <div class="relatorio-preview-meta" id="relatorioPreviewMeta">
+          <span class="meta-item">📅 <span id="reportMonth"></span></span>
+          <span class="meta-sep">•</span>
+          <span class="meta-item ok">✅ Relatório gerado</span>
+          <span class="meta-sep">•</span>
+          <button id="printBtn" class="btn small" type="button">Imprimir / Salvar PDF</button>
+        </div>
       </div>
     </div>
 
-    <div id="content" style="display:none">
-      <div class="panel section">
-        <div class="grid">
-          <div class="pill"><strong id="pillPosts">0</strong> publicações</div>
-          <div class="pill"><strong id="pillNotes">0</strong> notas de calendário</div>
-          <div class="pill"><strong id="pillMetas">0</strong> metas ativas</div>
+    <!-- Stories -->
+    <div class="relatorio-container" id="relatorioStoriesSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>📱 Stories Produzidos</h2>
+        <p class="relatorio-subtitle" id="relatorioStoriesSubtitle"></p>
+      </div>
+      <div class="relatorio-stories-carousel">
+        <button type="button" class="carousel-nav" id="relatorioStoriesPrev">‹</button>
+        <div class="relatorio-stories-grid" id="relatorioStoriesGrid">
+          <div class="relatorio-stories-empty">Nenhum story encontrado para este período</div>
+        </div>
+        <button type="button" class="carousel-nav" id="relatorioStoriesNext">›</button>
+      </div>
+      <p class="relatorio-desc" id="relatorioStoriesDesc" style="display:none"></p>
+    </div>
+
+    <!-- Posts (Feed) -->
+    <div class="relatorio-container" id="relatorioPostsSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>📰 Posts Produzidos</h2>
+        <p class="relatorio-subtitle" id="relatorioPostsSubtitle"></p>
+      </div>
+      <div class="relatorio-stories-carousel">
+        <button type="button" class="carousel-nav" id="relatorioPostsPrev">‹</button>
+        <div class="relatorio-stories-grid" id="relatorioPostsGrid">
+          <div class="relatorio-stories-empty">Nenhum post de feed encontrado para este período</div>
+        </div>
+        <button type="button" class="carousel-nav" id="relatorioPostsNext">›</button>
+      </div>
+      <p class="relatorio-desc" id="relatorioPostsDesc" style="display:none"></p>
+    </div>
+
+    <!-- Metas -->
+    <div class="relatorio-container" id="relatorioMetasSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>📈 Metas do mês</h2>
+        <p class="relatorio-subtitle" id="relatorioMetasSubtitle"></p>
+      </div>
+      <div class="relatorio-goals-summary">
+        <div class="goal-pill" id="relatorioMetasAchievedPill">Atingidas: <strong>-</strong></div>
+        <div class="goal-pill" id="relatorioMetasProgressPill">Em andamento: <strong>-</strong></div>
+        <div class="goal-pill" id="relatorioMetasMissingPill">Precisa colocar: <strong>-</strong></div>
+      </div>
+      <div class="goals-columns" id="relatorioMetasColumns">
+        <div class="goals-col" data-status="concluido">
+          <h3>Atingidas</h3>
+          <div class="goals-list" id="relatorioMetasAchieved"></div>
+        </div>
+        <div class="goals-col" data-status="em-andamento">
+          <h3>Em andamento</h3>
+          <div class="goals-list" id="relatorioMetasProgress"></div>
+        </div>
+        <div class="goals-col" data-status="nao-iniciado">
+          <h3>Precisa colocar</h3>
+          <div class="goals-list" id="relatorioMetasMissing"></div>
         </div>
       </div>
+      <p class="relatorio-desc" id="relatorioMetasDesc"></p>
+    </div>
 
-      <div class="section">
-        <h2>🎯 Metas do mês</h2>
-        <div id="metasContainer" class="list"></div>
+    <!-- Redes conectadas -->
+    <div class="relatorio-container" id="relatorioRedesSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>🔗 Redes trabalhadas no mês</h2>
+        <p class="relatorio-subtitle" id="relatorioRedesSubtitle"></p>
       </div>
-
-      <div class="section">
-        <h2>📅 Calendário (postagens)</h2>
-        <div id="postsContainer" class="list"></div>
-      </div>
-
-      <div class="section">
-        <h2>🗒️ Notas de calendário</h2>
-        <div id="notesContainer" class="list"></div>
-      </div>
-
-      <div class="section">
-        <h2>🔗 Redes conectadas</h2>
-        <div id="socialContainer" class="list"></div>
-      </div>
+      <div class="macro-social-grid" id="relatorioRedesGrid"></div>
+      <p class="relatorio-desc" id="relatorioRedesDesc"></p>
     </div>
   </div>
 
@@ -99,13 +177,15 @@
     };
 
     // Parse params
-    const qs = new URLSearchParams(location.search);
-    const mesISO = (qs.get('mes') || '').slice(0,7);
-    const TENANT = qs.get('tenant') || document.body.getAttribute('data-client-id') || '';
-    const monthLabel = (()=>{ try{ const [a,m]=mesISO.split('-'); const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return `${nomes[(+m||1)-1]} ${a}` }catch{ return mesISO } })();
-    document.getElementById('reportMonth').textContent = monthLabel ? `• ${monthLabel}` : '';
+  const qs = new URLSearchParams(location.search);
+  const shareToken = qs.get('share') || '';
+  const mesISO = (qs.get('mes') || '').slice(0,7);
+  const TENANT = qs.get('tenant') || document.body.getAttribute('data-client-id') || '';
+  const monthLabel = (()=>{ try{ const [a,m]=mesISO.split('-'); const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return `${nomes[(+m||1)-1]} ${a}` }catch{ return mesISO } })();
+  document.getElementById('reportMonth').textContent = monthLabel || '';
+  document.getElementById('relatorioHeaderSubtitle').textContent = monthLabel ? `Resumo do mês ${monthLabel}` : '';
 
-    // App/Auth/DB
+  // App/Auth/DB
     const app = getApps()[0] || initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -135,14 +215,23 @@
       authGate: document.getElementById('authGate'),
       loginBtn: document.getElementById('loginBtn'),
       content: document.getElementById('content'),
-      pillPosts: document.getElementById('pillPosts'),
-      pillNotes: document.getElementById('pillNotes'),
-      pillMetas: document.getElementById('pillMetas'),
-      metas: document.getElementById('metasContainer'),
-      posts: document.getElementById('postsContainer'),
-      notes: document.getElementById('notesContainer'),
-      social: document.getElementById('socialContainer'),
-      printBtn: document.getElementById('printBtn')
+      printBtn: document.getElementById('printBtn'),
+      stories: {
+        section: document.getElementById('relatorioStoriesSection'),
+        grid: document.getElementById('relatorioStoriesGrid'),
+        prev: document.getElementById('relatorioStoriesPrev'),
+        next: document.getElementById('relatorioStoriesNext'),
+        subtitle: document.getElementById('relatorioStoriesSubtitle'),
+        desc: document.getElementById('relatorioStoriesDesc')
+      },
+      posts: {
+        section: document.getElementById('relatorioPostsSection'),
+        grid: document.getElementById('relatorioPostsGrid'),
+        prev: document.getElementById('relatorioPostsPrev'),
+        next: document.getElementById('relatorioPostsNext'),
+        subtitle: document.getElementById('relatorioPostsSubtitle'),
+        desc: document.getElementById('relatorioPostsDesc')
+      }
     };
 
     els.printBtn.addEventListener('click', ()=> window.print());
@@ -155,21 +244,40 @@
       }catch(err){ alert('Falha no login. Veja o console.'); console.error(err); }
     });
 
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){
-        els.authGate.style.display = 'block';
-        els.content.style.display = 'none';
-        return;
-      }
+    if(shareToken){
+      // Modo público via token: não exige login
       els.authGate.style.display = 'none';
       els.content.style.display = 'block';
       try{
-        await loadAndRender(user.uid);
+        const snap = await getDoc(doc(db,'reportShares', shareToken));
+        if(!snap.exists()){
+          throw new Error('Link inválido ou expirado');
+        }
+        const data = snap.data() || {};
+        const payload = data.payload || {};
+        renderFromPayload(payload);
       }catch(err){
-        console.error('Erro ao carregar relatório', err);
-        alert('Não foi possível carregar o relatório.');
+        console.error('Erro ao carregar link público', err);
+        els.content.innerHTML = '<div class="relatorio-desc">Link inválido ou expirado.</div>';
       }
-    });
+    } else {
+      // Modo autenticado (retrocompat)
+      onAuthStateChanged(auth, async (user)=>{
+        if(!user){
+          els.authGate.style.display = 'block';
+          els.content.style.display = 'none';
+          return;
+        }
+        els.authGate.style.display = 'none';
+        els.content.style.display = 'block';
+        try{
+          await loadAndRender(user.uid);
+        }catch(err){
+          console.error('Erro ao carregar relatório', err);
+          alert('Não foi possível carregar o relatório.');
+        }
+      });
+    }
 
     async function loadAndRender(uid){
       // 1) USER_DATA básico (metas, social links)
@@ -199,74 +307,188 @@
           .sort((a,b)=> String(a.id).localeCompare(String(b.id)));
       }
 
-      // Render pílulas
-      els.pillPosts.textContent = String(posts.length);
-      els.pillNotes.textContent = String(notes.length);
-      els.pillMetas.textContent = String(METAS.filter(m=>m && m.ativo!==false).length);
-
-      // Render metas do mês
-      renderMetas(METAS);
-      // Render posts
-      renderPosts(posts);
-      // Render notas
-      renderNotes(notes);
-      // Render redes
-      renderSocial(SOCIAL_LINKS);
-    }
-
-    function renderMetas(metasList){
-      const container = els.metas;
-      container.innerHTML = '';
-      const active = Array.isArray(metasList) ? metasList.filter(m=>m && m.ativo!==false) : [];
-      if(!active.length){ container.innerHTML = '<div class="empty">Sem metas ativas.</div>'; return; }
-      const [y,m] = mesISO.split('-');
-      const key = `${y}-${m}`;
-      const groups = { achieved:[], progress:[], missing:[] };
-      active.forEach(meta=>{
-        const cur = (meta.meses && meta.meses[key]) || {p:'',r:''};
-        const status = evaluateMetaGoal(cur.p, cur.r, meta.direcao);
-        groups[status]?.push({meta, cur});
+      renderReportSections({
+        labelMonth: monthLabel,
+        metas: (METAS||[]).filter(m=>m && m.ativo!==false).map(m=>{ const cur=(m.meses&&m.meses[mesISO])||{p:'',r:''}; return { descricao:m.descricao||'', unidade:m.unidade||'', direcao:m.direcao||'up', planned: normalizeMetaNumber(cur.p), realized: normalizeMetaNumber(cur.r) }; }),
+        posts: posts.map(p=>({
+          id: p.id||'',
+          dateISO: p.dateISO||'',
+          target: (p.target||'feed'),
+          status: p.status||'',
+          approvedBy: p.approvedBy||'',
+          thumbUrl: p.thumbUrl||'',
+          mediaUrls: Array.isArray(p.mediaUrls)?p.mediaUrls.slice(0,4):[]
+        })),
+        notes,
+        socialLinks: SOCIAL_LINKS||{}
       });
-      const all = [...groups.achieved, ...groups.progress, ...groups.missing];
-      container.innerHTML = all.map(({meta, cur})=>{
-        const planned = normalizeMetaNumber(cur.p);
-        const realized = normalizeMetaNumber(cur.r);
-        const status = evaluateMetaGoal(planned, realized, meta.direcao);
-        const badge = status==='achieved'?'ok':(status==='progress'?'warn':'alert');
-        return `<div class="item"><div class="title">${escapeHtml(meta.descricao||'(Meta)')}</div><div class="kv"><div>Planejado</div><div><strong>${planned}</strong> ${escapeHtml(meta.unidade||'')}</div><div>Realizado</div><div><strong>${realized}</strong> ${escapeHtml(meta.unidade||'')}</div><div>Status</div><div class="${badge}">${escapeHtml(status)}</div></div></div>`
-      }).join('');
+    }
+    function renderReportSections(payload){
+      // Stories + Posts (feed)
+      try{ renderStoriesAndPosts(Array.isArray(payload.posts)?payload.posts:[], payload.labelMonth||''); }catch(e){ console.warn('renderStoriesAndPosts', e); }
+
+      // Metas
+      const metas = Array.isArray(payload.metas)?payload.metas:[];
+      const metasSection = document.getElementById('relatorioMetasSection');
+      const sub = document.getElementById('relatorioMetasSubtitle');
+      const desc = document.getElementById('relatorioMetasDesc');
+      const colA = document.getElementById('relatorioMetasAchieved');
+      const colP = document.getElementById('relatorioMetasProgress');
+      const colM = document.getElementById('relatorioMetasMissing');
+      const pillA = document.getElementById('relatorioMetasAchievedPill');
+      const pillP = document.getElementById('relatorioMetasProgressPill');
+      const pillM = document.getElementById('relatorioMetasMissingPill');
+      if(metas.length){
+        metasSection.style.display='block';
+        if(sub) sub.textContent = `Metas ativas no mês ${payload.labelMonth||''}`;
+        const groups = { achieved:[], progress:[], missing:[] };
+        metas.forEach(m=>{ const st=evaluateMetaGoal(m.planned,m.realized,m.direcao); (groups[st]||(groups.progress)).push(m); });
+        pillA.querySelector('strong').textContent = groups.achieved.length;
+        pillP.querySelector('strong').textContent = groups.progress.length;
+        pillM.querySelector('strong').textContent = groups.missing.length;
+        const total = metas.length; const rate = total? Math.round((groups.achieved.length/total)*100):0;
+        if(desc) desc.textContent = `🎯 ${payload.labelMonth||''}: ${total} metas ativas — Atingidas: ${groups.achieved.length} (${rate}%), Em andamento: ${groups.progress.length}, Precisa colocar: ${groups.missing.length}.`;
+        const card = (m)=>{
+          const planned = Number.isFinite(m.planned)?m.planned:0;
+          const realized = Number.isFinite(m.realized)?m.realized:0;
+          return `<div class="goal-card"><div class="goal-title">${escapeHtml(m.descricao||'(Meta)')}</div><div class="goal-meta">Planejado: <strong>${planned}</strong> ${escapeHtml(m.unidade||'')} • Realizado: <strong>${realized}</strong> ${escapeHtml(m.unidade||'')}</div></div>`;
+        };
+        colA.innerHTML = groups.achieved.map(card).join('');
+        colP.innerHTML = groups.progress.map(card).join('');
+        colM.innerHTML = groups.missing.map(card).join('');
+      } else {
+        metasSection.style.display='none';
+      }
+
+      // Redes
+      const redesSection = document.getElementById('relatorioRedesSection');
+      const redesGrid = document.getElementById('relatorioRedesGrid');
+      const redesSub = document.getElementById('relatorioRedesSubtitle');
+      const redesDesc = document.getElementById('relatorioRedesDesc');
+      const socialArray = Array.isArray(payload.social) ? payload.social.filter(i=> i && i.href) : [];
+      const entries = socialArray.length ? socialArray : Object.entries(payload.socialLinks||{}).filter(([,url])=> !!url).map(([label, href])=> ({ label, href }));
+      if(entries.length){
+        redesSection.style.display='block';
+        redesSub.textContent = 'Redes conectadas no cliente (clique para acessar)';
+        redesDesc.textContent = `📌 ${entries.length} rede${entries.length===1?'':'s'} com link configurado — ${payload.labelMonth||''}`;
+        const frag = document.createDocumentFragment();
+        entries.forEach(item=>{
+          const label = item.label || (Array.isArray(item) ? item[0] : 'Rede');
+          const href = item.href || (Array.isArray(item) ? item[1] : '');
+          const card = document.createElement('div'); card.className='macro-social-item';
+          const icon = document.createElement('div'); icon.className='macro-social-icon';
+          const info = document.createElement('div'); info.className='macro-social-info';
+          const l = document.createElement('span'); l.className='macro-social-label'; l.textContent = label||'Rede';
+          const d = document.createElement('span'); d.className='macro-social-detail'; d.textContent='Link conectado';
+          info.append(l,d);
+          const actions = document.createElement('div'); actions.className='macro-social-actions';
+          const open = document.createElement('button'); open.className='btn small'; open.type='button'; open.textContent='Abrir';
+          open.addEventListener('click', ()=>{ try{ const w=window.open(href,'_blank','noopener'); if(w) w.opener=null; else location.href=href; }catch{ location.href=href; } });
+          actions.appendChild(open);
+          // ícone com base no snapshot do header (se disponível)
+          if(item.iconInfo && item.iconInfo.type==='img' && item.iconInfo.src){
+            const img = document.createElement('img'); img.src = item.iconInfo.src; img.alt = item.iconInfo.alt || label; icon.appendChild(img);
+          } else if(item.iconInfo && item.iconInfo.type==='text' && item.iconInfo.text){
+            icon.textContent = item.iconInfo.text; if(item.iconInfo.fontSize){ icon.style.fontSize = item.iconInfo.fontSize; }
+          } else {
+            // fallback: primeira letra
+            icon.textContent = (label||'?').slice(0,1).toUpperCase();
+          }
+          card.append(icon, info, actions); frag.appendChild(card);
+        });
+        redesGrid.replaceChildren(frag);
+      } else {
+        redesSection.style.display='none';
+      }
     }
 
-    function renderPosts(posts){
-      const container = els.posts; container.innerHTML = '';
-      if(!posts.length){ container.innerHTML = '<div class="empty">Sem postagens neste mês.</div>'; return; }
-      container.innerHTML = posts.map(p=>{
-        const date = escapeHtml(String(p.dateISO||'').slice(0,10));
-        const desc = escapeHtml(p.desc||'');
-        const type = escapeHtml(p.type||'');
-        return `<div class="item"><div class="title">${date} • ${type||'Post'}</div><div>${desc||'<span class="muted">(sem descrição)</span>'}</div></div>`
-      }).join('');
+    // Preenche página pública a partir do snapshot do token
+    function renderFromPayload(payload){
+      if(payload && payload.labelMonth){
+        document.getElementById('reportMonth').textContent = payload.labelMonth;
+        document.getElementById('relatorioHeaderSubtitle').textContent = `Resumo do mês ${payload.labelMonth}`;
+      }
+      renderReportSections(payload||{});
     }
 
-    function renderNotes(notes){
-      const container = els.notes; container.innerHTML = '';
-      if(!notes.length){ container.innerHTML = '<div class="empty">Sem notas para este mês.</div>'; return; }
-      container.innerHTML = notes.map(n=>{
-        const date = escapeHtml(n.id||'');
-        const text = escapeHtml(n.text||n.note||n.value||'');
-        return `<div class="item"><div class="title">${date}</div><div>${text||'<span class=muted>(vazia)</span>'}</div></div>`
-      }).join('');
-    }
+    function renderStoriesAndPosts(posts, labelMonth){
+      const monthLabel = labelMonth || document.getElementById('reportMonth').textContent || '';
+      const parts = monthLabel.split(' ');
+      const ano = parts.length>1 ? parts[1] : '';
+      // Split
+      const stories = posts.filter(p=> (p.target||'feed')==='stories');
+      const feed = posts.filter(p=> (p.target||'feed')==='feed');
 
-    function renderSocial(social){
-      const container = els.social; container.innerHTML = '';
-      const entries = Object.entries(social||{}).filter(([,url])=> !!url);
-      if(!entries.length){ container.innerHTML = '<div class="empty">Nenhuma rede conectada.</div>'; return; }
-      container.innerHTML = entries.map(([name,url])=>{
-        const label = escapeHtml(name);
-        const safe = escapeHtml(url);
-        return `<div class="item"><div class="title">${label}</div><div><a href="${safe}" target="_blank" rel="noopener">${safe}</a></div></div>`
-      }).join('');
+      // Helpers
+      const buildCard = (p)=>{
+        const first = p.thumbUrl || (Array.isArray(p.mediaUrls)&&p.mediaUrls[0]) || '';
+        const ext = String(first).split('?')[0].split('.').pop().toLowerCase();
+        const isVideo = ['mp4','mov','webm','m4v','avi'].includes(ext);
+        let cls = 'relatorio-story-item';
+        if((p.status||'')==='aprovado'){
+          cls += (p.approvedBy==='interno')? ' aprovado-interno':' aprovado';
+        } else if((p.status||'')==='revisar'){
+          cls += ' revisar';
+        } else {
+          cls += ' pendente';
+        }
+        if(isVideo) cls += ' video';
+        const [y,m,d] = String(p.dateISO||'').split('-');
+        const dateLabel = (d&&m)? `${d}/${m}` : '';
+        const img = first ? `<img src="${first}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}">` : '';
+        return `<div class="${cls}" data-id="${p.id||''}">${img}<div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
+      };
+
+      // Stories section
+      const s = els.stories; if(s && s.section){
+        if(stories.length){
+          s.section.style.display='block';
+          if(s.subtitle){
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            let mesNome = '';
+            try{ const match = monthLabel.match(/^(\p{L}+)/u); mesNome = match?match[1]:monthLabel; }catch(_){ mesNome = monthLabel; }
+            s.subtitle.textContent = `${stories.length} ${stories.length===1?'story':'stories'} produzid${stories.length===1?'o':'os'} em ${monthLabel}`;
+          }
+          if(s.desc){
+            const total = stories.length;
+            const aprov = stories.filter(p=> (p.status||'')==='aprovado').length;
+            const revisar = stories.filter(p=> (p.status||'')==='revisar').length;
+            const pend = Math.max(0, total - aprov - revisar);
+            const rate = total>0 ? Math.round((aprov/total)*100) : 0;
+            s.desc.style.display='block';
+            s.desc.textContent = `✨ ${monthLabel}: ${total} ${total===1?'story':'stories'} — ${aprov} aprovados (${rate}%), ${revisar} para revisar, ${pend} pendentes.`;
+          }
+          s.grid.innerHTML = stories.sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||''))).map(buildCard).join('');
+          s.prev?.addEventListener('click', ()=> s.grid.scrollBy({left:-200, behavior:'smooth'}));
+          s.next?.addEventListener('click', ()=> s.grid.scrollBy({left: 200, behavior:'smooth'}));
+        } else {
+          s.section.style.display='none';
+        }
+      }
+
+      // Posts section
+      const psec = els.posts; if(psec && psec.section){
+        if(feed.length){
+          psec.section.style.display='block';
+          if(psec.subtitle){
+            psec.subtitle.textContent = `${feed.length} ${feed.length===1?'post':'posts'} produzid${feed.length===1?'o':'os'} em ${monthLabel}`;
+          }
+          if(psec.desc){
+            const total = feed.length;
+            const aprov = feed.filter(p=> (p.status||'')==='aprovado').length;
+            const revisar = feed.filter(p=> (p.status||'')==='revisar').length;
+            const pend = Math.max(0, total - aprov - revisar);
+            const rate = total>0 ? Math.round((aprov/total)*100) : 0;
+            psec.desc.style.display='block';
+            psec.desc.textContent = `✨ ${monthLabel}: ${total} ${total===1?'post':'posts'} no feed — ${aprov} aprovados (${rate}%), ${revisar} para revisar, ${pend} pendentes.`;
+          }
+          psec.grid.innerHTML = feed.sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||''))).map(buildCard).join('');
+          psec.prev?.addEventListener('click', ()=> psec.grid.scrollBy({left:-200, behavior:'smooth'}));
+          psec.next?.addEventListener('click', ()=> psec.grid.scrollBy({left: 200, behavior:'smooth'}));
+        } else {
+          psec.section.style.display='none';
+        }
+      }
     }
   </script>
 </body>

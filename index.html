@@ -13479,28 +13479,27 @@ async function sendIAQuestion(){
           </div>
         `;
 
-        // botão: copiar link do relatório
+        // botão: copiar link do relatório (gera link público por token)
         const btn = relatorioPreview.querySelector('#copyRelatorioLinkBtn');
-        btn?.addEventListener('click', ()=>{
+        btn?.addEventListener('click', async ()=>{
+          let url = '';
           try{
-            const url = buildRelatorioShareUrl(mesISO);
+            const token = await createOrUpdateReportShare(mesISO);
+            url = buildRelatorioShareUrl(mesISO, token);
             const clip = navigator.clipboard;
             if(clip?.writeText){
-              clip.writeText(url).then(()=>{
-                alert('Link do relatório copiado!');
-              }).catch(()=>{
-                throw new Error('Clipboard API falhou');
-              });
-            } else {
-              throw new Error('Clipboard API indisponível');
+              await clip.writeText(url);
+              alert('Link do relatório copiado! (acesso público)');
+              return;
             }
+            throw new Error('Clipboard API indisponível');
           }catch(_err){
-            // fallback
-            const url = buildRelatorioShareUrl(mesISO);
+            // fallback manual
+            url = url || buildRelatorioShareUrl(mesISO);
             try{
               const ta = document.createElement('textarea');
               ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-              alert('Link do relatório copiado!');
+              alert('Link do relatório copiado! (acesso público)');
             }catch(_){
               prompt('Copie o link do relatório:', url);
             }
@@ -13528,21 +13527,116 @@ async function sendIAQuestion(){
     }
 
     // Gera a URL compartilhável do relatório para o mês selecionado
-    function buildRelatorioShareUrl(mesISO){
+    // Se token for informado, gera link público (?share=token)
+    function buildRelatorioShareUrl(mesISO, token){
       try{
         const pageUrl = new URL('relatorio.html', location.href);
         const mes = (mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7));
         const tenant = getClientKey();
-        if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
-        pageUrl.searchParams.set('mes', mes);
+        if(token){
+          pageUrl.searchParams.set('share', token);
+          // extras amigáveis (não usados para auth, só rótulo)
+          if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
+          pageUrl.searchParams.set('mes', mes);
+        } else {
+          if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
+          pageUrl.searchParams.set('mes', mes);
+        }
         return pageUrl.toString();
       }catch(_){
         // Fallback simples
         const base = location.origin + location.pathname.replace(/index\.html?$/i,'');
         const mes = encodeURIComponent((mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7)));
         const tenant = encodeURIComponent(getClientKey()||'');
-        return `${base}relatorio.html?tenant=${tenant}&mes=${mes}`;
+        return token
+          ? `${base}relatorio.html?share=${encodeURIComponent(token)}&tenant=${tenant}&mes=${mes}`
+          : `${base}relatorio.html?tenant=${tenant}&mes=${mes}`;
       }
+    }
+
+    // Monta snapshot dos dados do relatório do mês (para link público)
+    function buildMonthlyReportData(mesISO){
+      const clientKey = getClientKey();
+      const [ano, mm] = (mesISO||'').split('-');
+      const labelMonth = (()=>{
+        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const idx = Math.max(0, Math.min(11, (parseInt(mm,10)||1)-1));
+        return `${meses[idx]} ${ano||''}`.trim();
+      })();
+      // metas
+      const monthKey = getMetaMonthKeyFromISO(mesISO);
+      const metasActive = Array.isArray(METAS) ? METAS.filter(m=>m && m.ativo!==false) : [];
+      const metas = metasActive.map(m=>{
+        const cur = (m.meses && m.meses[monthKey]) || {p:'',r:''};
+        const planned = normalizeMetaNumber(cur.p ?? cur.P);
+        const realized = normalizeMetaNumber(cur.r ?? cur.R);
+        const status = evaluateMetaGoal(planned, realized, m.direcao);
+        return {
+          descricao: (m.descricao||'').toString(),
+          unidade: m.unidade||'',
+          direcao: m.direcao||'up',
+          planned, realized, status
+        };
+      });
+      // posts
+      const tenant = clientKey;
+      const relevantPosts = filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant)
+        .filter(p=> String(p.dateISO||'').startsWith(mesISO))
+        .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+      const posts = relevantPosts.map(p=>({
+        id: p.id||'',
+        dateISO: p.dateISO||'',
+        type: p.type||'',
+        target: (p.target||'feed'),
+        desc: p.desc||'',
+        status: p.status||'',
+        approvedBy: p.approvedBy||'',
+        thumbUrl: p.thumbUrl||'',
+        mediaUrls: Array.isArray(p.mediaUrls) ? p.mediaUrls.slice(0, 4) : []
+      }));
+      // notes
+      const notes = [];
+      try{
+        const map = CAL_NOTES && typeof CAL_NOTES==='object' ? CAL_NOTES : {};
+        Object.keys(map).forEach(k=>{ if(String(k).startsWith(mesISO)){ const txt = map[k]; if(txt){ notes.push({ id:k, text: String(txt) }); } }});
+        notes.sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+      }catch(_){ }
+      // social links + snapshot dos ícones exibidos no header
+      const linksObj = (typeof SOCIAL_LINKS==='object' && SOCIAL_LINKS) ? SOCIAL_LINKS : {};
+      const socialLinks = Object.fromEntries(Object.entries(linksObj).filter(([,v])=> !!v));
+      let social = [];
+      try{
+        if(typeof collectHeaderSocialItems === 'function'){
+          const items = collectHeaderSocialItems();
+          social = (Array.isArray(items)?items:[])
+            .filter(i=> i && i.hasLink && i.href)
+            .map(i=> ({ label: i.label||'', href: i.href||'', iconInfo: i.iconInfo||null }));
+        }
+      }catch(_err){ /* fallback para socialLinks */ }
+      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social };
+    }
+
+    // Cria/atualiza um documento de compartilhamento público e retorna o token
+    async function createOrUpdateReportShare(mesISO){
+      await requireAuthUser();
+      const uid = getUserKey();
+      if(!uid) throw new Error('Usuário não autenticado');
+      const data = buildMonthlyReportData(mesISO);
+      // token aleatório (curto) base36
+      const token = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0,20);
+      const payload = {
+        token,
+        uid,
+        monthKey: data.monthKey,
+        tenant: data.tenant || null,
+        createdAt: Date.now(),
+        payload: data
+      };
+      try{
+        const ref = doc(db, 'reportShares', token);
+        await setDoc(ref, payload);
+      }catch(err){ console.warn('createOrUpdateReportShare', err); throw err; }
+      return token;
     }
 
     // Notas simples locais (Objetivos do mês)
