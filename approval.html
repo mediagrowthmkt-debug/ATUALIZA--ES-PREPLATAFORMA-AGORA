@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Aprovação de Post • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(59,130,246,0.14), transparent 55%), #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+    }
+    main.container {
+      width: min(960px, 94vw);
+      padding: 48px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .hidden { display: none !important; }
+    body.modal-open { overflow: hidden; }
+    .loading, .error {
+      margin-top: 120px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #cbd5f5;
+    }
+    .error h2 { margin-bottom: 12px; font-size: 1.6rem; }
+    header.page-header { display: flex; flex-direction: column; gap: 14px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(37,99,235,0.2);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: #bfdbfe;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      color: #e0f2fe;
+      line-height: 1.2;
+    }
+    .client-info {
+      font-size: 1rem;
+      color: #cbd5f5;
+      margin: 0;
+    }
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 800;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(148,163,184,0.18);
+      color: #e2e8f0;
+    }
+    .status-badge.status-aprovado {
+      background: rgba(22,163,74,0.25);
+      border-color: rgba(74,222,128,0.35);
+      color: #bbf7d0;
+    }
+    .status-badge.status-revisar {
+      background: rgba(234,179,8,0.25);
+      border-color: rgba(253,224,71,0.35);
+      color: #facc15;
+    }
+    .status-badge.status-pendente {
+      background: rgba(148,163,184,0.2);
+      border-color: rgba(148,163,184,0.35);
+      color: #e2e8f0;
+    }
+    .status-message {
+      font-size: .95rem;
+      color: #93c5fd;
+      min-height: 1.2rem;
+    }
+    .status-message.error { color: #fca5a5; }
+    .media-viewer {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 28px 60px rgba(15,23,42,0.45);
+    }
+    .media-stage {
+      position: relative;
+      width: 100%;
+      padding-top: min(75%, 460px);
+      background: rgba(9,17,35,0.85);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .media-stage img,
+    .media-stage video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+    .media-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .media-nav {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.35);
+      background: rgba(15,23,42,0.65);
+      color: #f8fafc;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .media-nav:disabled {
+      opacity: .4;
+      cursor: default;
+    }
+    .media-nav:not(:disabled):hover { background: rgba(59,130,246,0.35); }
+    .media-indicator {
+      font-size: .95rem;
+      color: #cbd5f5;
+    }
+    section.details {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    section.details h2,
+    section.actions h2,
+    section.notes h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #e2e8f0;
+    }
+    dl.meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin: 0;
+    }
+    dl.meta div { display: flex; flex-direction: column; gap: 4px; }
+    dl.meta dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; font-weight: 700; }
+    dl.meta dd { margin: 0; font-size: .95rem; color: #cbd5f5; }
+    .description {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+    section.actions {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn {
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: .95rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform .15s ease, filter .2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 160px;
+    }
+    .btn:disabled {
+      opacity: .5;
+      cursor: default;
+      transform: none;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, #10b981, #22d3ee);
+      color: #05333b;
+    }
+    .btn.secondary {
+      background: rgba(15,23,42,0.65);
+      border-color: rgba(148,163,184,0.35);
+      color: #e2e8f0;
+    }
+    .btn.ghost {
+      background: rgba(59,130,246,0.16);
+      border-color: rgba(148,163,184,0.25);
+      color: #bfdbfe;
+      width: fit-content;
+      align-self: flex-end;
+    }
+    .btn:not(:disabled):hover { filter: brightness(1.08); }
+    .review-alert {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(248, 113, 113, 0.18);
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      color: #fecaca;
+      font-weight: 600;
+      font-size: .92rem;
+    }
+    .review-alert.visible { display: block; }
+    .review-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(9,17,35,0.65);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .review-box.highlight {
+      animation: review-pulse 1s ease-in-out 0s 2;
+      border-color: rgba(248,113,113,0.65);
+      box-shadow: 0 0 0 2px rgba(248,113,113,0.25);
+    }
+    @keyframes review-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(248,113,113,0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(248,113,113,0); }
+      100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+    }
+    .review-box label { font-size: .85rem; color: #cbd5f5; font-weight: 600; }
+    .review-box input,
+    .review-box textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.35);
+      background: rgba(15,23,42,0.75);
+      color: #f8fafc;
+      padding: 10px 12px;
+      font-size: .95rem;
+      resize: vertical;
+    }
+    .review-box textarea { min-height: 120px; }
+    section.notes {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .note-item {
+      background: rgba(9,17,35,0.7);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+    .modal-root.hidden { display: none !important; }
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(1.5px);
+    }
+    .modal-content {
+      position: relative;
+      max-width: min(90vw, 360px);
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(148,163,184,0.35);
+      border-radius: 18px;
+      padding: 28px 26px 24px;
+      box-shadow: 0 28px 60px rgba(15,23,42,0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+    .modal-content h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #e0f2fe;
+    }
+    .modal-content p {
+      margin: 0;
+      font-size: .98rem;
+      color: #cbd5f5;
+      line-height: 1.5;
+    }
+    .modal-close-btn {
+      margin-top: 10px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.45);
+      background: rgba(59,130,246,0.18);
+      color: #e2e8f0;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter .2s ease;
+    }
+    .modal-close-btn:hover { filter: brightness(1.08); }
+    .note-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: .82rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .note-body {
+      font-size: .95rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 640px) {
+      main.container { padding: 36px 0 60px; gap: 26px; }
+      .action-buttons { flex-direction: column; }
+      .btn { width: 100%; }
+      .review-box textarea { min-height: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div id="loading" class="loading">Carregando dados do post...</div>
+    <section id="content" class="hidden">
+      <header class="page-header">
+        <span class="badge">Aprovação do cliente</span>
+        <h1 id="postTitle">Post</h1>
+        <p id="clientInfo" class="client-info"></p>
+        <div class="status-row">
+          <div id="statusBadge" class="status-badge status-pendente">Pendente</div>
+          <span id="statusMessage" class="status-message"></span>
+        </div>
+      </header>
+      <section class="media-viewer" id="mediaSection">
+        <div class="media-stage" id="mediaStage"></div>
+        <div class="media-controls" id="mediaControls">
+          <button id="prevMedia" class="media-nav" type="button" aria-label="Anterior">&#8249;</button>
+          <div id="mediaIndicator" class="media-indicator"></div>
+          <button id="nextMedia" class="media-nav" type="button" aria-label="Próximo">&#8250;</button>
+        </div>
+      </section>
+      <section class="details">
+        <h2>Detalhes</h2>
+        <dl class="meta">
+          <div>
+            <dt>Data</dt>
+            <dd id="postDate">—</dd>
+          </div>
+          <div>
+            <dt>Destino</dt>
+            <dd id="postTarget">—</dd>
+          </div>
+        </dl>
+        <div>
+          <h3 style="margin:12px 0 8px; font-size:1rem; color:#cbd5f5;">Descrição</h3>
+          <p id="postDescription" class="description">Sem descrição.</p>
+        </div>
+      </section>
+      <section class="actions">
+        <h2>Ações rápidas</h2>
+        <div class="action-buttons">
+          <button id="approveButton" class="btn primary" type="button">Aprovar</button>
+          <button id="rejectButton" class="btn secondary" type="button">Reprovar</button>
+        </div>
+        <div id="reviewAlert" class="review-alert">Por favor, descreva o que deseja ajustar neste post antes de reprovar.</div>
+        <div id="reviewBox" class="review-box">
+          <label for="reviewText">Pedir revisão</label>
+          <input id="reviewName" type="text" placeholder="Seu nome (opcional)"/>
+          <textarea id="reviewText" placeholder="Descreva o que precisa ser ajustado"></textarea>
+          <button id="reviewButton" class="btn ghost" type="button">Enviar revisão</button>
+        </div>
+      </section>
+      <section class="notes" id="notesSection">
+        <h2>Observações já enviadas</h2>
+        <div id="notesList" class="notes-list"></div>
+      </section>
+    </section>
+    <section id="error" class="error hidden">
+      <h2>Link indisponível</h2>
+      <p id="errorMessage">Não foi possível carregar este link de aprovação.</p>
+    </section>
+  </main>
+
+  <div id="successModal" class="modal-root hidden" aria-hidden="true">
+    <div class="modal-overlay" data-modal-overlay></div>
+    <div class="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="successModalTitle" aria-describedby="successModalMessage">
+      <h3 id="successModalTitle">Tudo certo!</h3>
+      <p id="successModalMessage">✅ Sua resposta foi enviada! Nosso time já recebeu e dará sequência.</p>
+      <button id="successModalClose" type="button" class="modal-close-btn">Fechar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const token = qs.get('token');
+
+    const loadingEl = document.getElementById('loading');
+    const contentEl = document.getElementById('content');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const postTitleEl = document.getElementById('postTitle');
+    const clientInfoEl = document.getElementById('clientInfo');
+    const statusBadgeEl = document.getElementById('statusBadge');
+    const statusMessageEl = document.getElementById('statusMessage');
+    const mediaStageEl = document.getElementById('mediaStage');
+    const mediaIndicatorEl = document.getElementById('mediaIndicator');
+    const prevMediaBtn = document.getElementById('prevMedia');
+    const nextMediaBtn = document.getElementById('nextMedia');
+    const postDateEl = document.getElementById('postDate');
+    const postTargetEl = document.getElementById('postTarget');
+    const postDescriptionEl = document.getElementById('postDescription');
+    const notesListEl = document.getElementById('notesList');
+    const approveBtn = document.getElementById('approveButton');
+    const rejectBtn = document.getElementById('rejectButton');
+    const reviewBtn = document.getElementById('reviewButton');
+    const reviewTextEl = document.getElementById('reviewText');
+    const reviewNameEl = document.getElementById('reviewName');
+    const reviewBoxEl = document.getElementById('reviewBox');
+    const reviewAlertEl = document.getElementById('reviewAlert');
+    const successModalEl = document.getElementById('successModal');
+    const successModalCloseBtn = document.getElementById('successModalClose');
+    const successModalOverlay = successModalEl?.querySelector('[data-modal-overlay]');
+
+    if(!token){
+      showError('O link informado é inválido ou expirou. Solicite um novo link ao time da MediaGrowth.');
+      throw new Error('Token ausente');
+    }
+
+    const app = getApps().find(a => a.name === 'post-approval') || initializeApp(firebaseConfig, 'post-approval');
+    const db = getFirestore(app);
+    const approvalRef = doc(db, 'postApprovals', token);
+
+    const successMessage = '✅ Sua resposta foi enviada! Nosso time já recebeu e dará sequência.';
+
+    const state = {
+      approvalData: null,
+      postRef: null,
+      postUnsub: null,
+      postData: null,
+      mediaIndex: 0,
+      busy: false,
+      locked: false
+    };
+
+    let successModalTimer = null;
+
+    const clientSync = {
+      token,
+      active: false,
+      ready: false,
+      promise: null,
+      error: null,
+      config: null,
+      appName: null,
+      db: null,
+      approvalRef: null,
+      postRef: null,
+      approvalDocData: null
+    };
+
+    const fetchedJsonCache = new Map();
+
+    async function fetchJson(url){
+      if(!url || typeof url !== 'string') return null;
+      if(fetchedJsonCache.has(url)){
+        return fetchedJsonCache.get(url);
+      }
+      try{
+        const response = await fetch(url, { mode: 'cors' });
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
+        fetchedJsonCache.set(url, json);
+        return json;
+      }catch(err){
+        console.warn('fetchJson', url, err);
+        fetchedJsonCache.set(url, null);
+        return null;
+      }
+    }
+
+    function parsePathSegments(value){
+      if(!value) return null;
+      if(typeof value === 'string'){
+        return value.split('/').map(part => part.trim()).filter(Boolean);
+      }
+      if(Array.isArray(value)){
+        const flattened = [];
+        for(const part of value){
+          if(typeof part === 'string' && part.trim()){
+            flattened.push(part.trim());
+          }else if(part && typeof part === 'object'){
+            if(typeof part.path === 'string'){
+              flattened.push(...parsePathSegments(part.path) || []);
+            }else if(Array.isArray(part.path)){
+              flattened.push(...parsePathSegments(part.path) || []);
+            }
+          }
+        }
+        return flattened.length ? flattened : null;
+      }
+      if(value && typeof value === 'object'){
+        if(typeof value.path === 'string'){
+          return parsePathSegments(value.path);
+        }
+        if(Array.isArray(value.path)){
+          return parsePathSegments(value.path);
+        }
+        if(Array.isArray(value.segments)){
+          return parsePathSegments(value.segments);
+        }
+        if(value._key?.path?.segments){
+          return parsePathSegments(value._key.path.segments.slice(5));
+        }
+      }
+      return null;
+    }
+
+    function normalizeFirebaseConfig(config){
+      if(!config || typeof config !== 'object') return null;
+      const cfg = { ...config };
+      if(!cfg.projectId && typeof cfg.project_id === 'string') cfg.projectId = cfg.project_id;
+      if(!cfg.appId && typeof cfg.app_id === 'string') cfg.appId = cfg.app_id;
+      if(!cfg.apiKey && typeof cfg.api_key === 'string') cfg.apiKey = cfg.api_key;
+      if(!cfg.authDomain && cfg.projectId){
+        cfg.authDomain = `${cfg.projectId}.firebaseapp.com`;
+      }
+      if(!cfg.storageBucket && cfg.projectId){
+        cfg.storageBucket = `${cfg.projectId}.appspot.com`;
+      }
+      const required = ['apiKey', 'projectId', 'appId'];
+      for(const key of required){
+        if(typeof cfg[key] !== 'string' || !cfg[key]){
+          return null;
+        }
+      }
+      return cfg;
+    }
+
+    async function resolveClientFirebaseConfig(data){
+      if(!data || typeof data !== 'object') return null;
+      const directKeys = [
+        'clientFirebase',
+        'clientFirebaseConfig',
+        'clientFirestoreConfig',
+        'clientFirebasePublic',
+        'clientFirebaseCredentials'
+      ];
+      for(const key of directKeys){
+        const cfg = normalizeFirebaseConfig(data[key]);
+        if(cfg) return cfg;
+      }
+      if(Array.isArray(data.clientFirebaseConfigs)){
+        for(const entry of data.clientFirebaseConfigs){
+          const cfg = normalizeFirebaseConfig(entry);
+          if(cfg) return cfg;
+        }
+      }
+      const urlCandidates = [];
+      if(typeof data.clientFirebaseConfigUrl === 'string'){
+        urlCandidates.push(data.clientFirebaseConfigUrl);
+      }
+      if(Array.isArray(data.clientFirebaseConfigUrls)){
+        for(const url of data.clientFirebaseConfigUrls){
+          if(typeof url === 'string') urlCandidates.push(url);
+        }
+      }
+      if(typeof data.clientFirebaseConfigStoragePath === 'string'){
+        const path = data.clientFirebaseConfigStoragePath.trim();
+        if(/^https?:\/\//i.test(path)){
+          urlCandidates.push(path);
+        }else if(path){
+          const clean = path.replace(/^\/+/, '');
+          const encoded = encodeURIComponent(clean);
+          urlCandidates.push(`https://firebasestorage.googleapis.com/v0/b/mediagrowth-a5349.appspot.com/o/${encoded}?alt=media`);
+        }
+      }
+      const clientParam = qs.get('client');
+      if(clientParam){
+        const encoded = encodeURIComponent(clientParam);
+        urlCandidates.push(`https://firebasestorage.googleapis.com/v0/b/mediagrowth-a5349.appspot.com/o/clientConfigs%2F${encoded}%2Ffirebase.json?alt=media`);
+        urlCandidates.push(`https://firebasestorage.googleapis.com/v0/b/mediagrowth-a5349.appspot.com/o/clientConfigs%2F${encoded}.json?alt=media`);
+      }
+      for(const url of urlCandidates){
+        const json = await fetchJson(url);
+        const cfg = normalizeFirebaseConfig(json);
+        if(cfg) return cfg;
+      }
+      return null;
+    }
+
+    async function prepareClientSync(data){
+      if(clientSync.promise){
+        return clientSync.promise;
+      }
+      clientSync.promise = (async () => {
+        clientSync.active = false;
+        clientSync.ready = false;
+        clientSync.error = null;
+        clientSync.config = null;
+        clientSync.db = null;
+        clientSync.approvalRef = null;
+        clientSync.postRef = null;
+        clientSync.approvalDocData = null;
+
+        const cfg = await resolveClientFirebaseConfig(data);
+        if(!cfg){
+          return false;
+        }
+        clientSync.active = true;
+        clientSync.config = cfg;
+        const appName = cfg.name || `post-approval-client-${cfg.projectId || cfg.appId || token}`;
+        clientSync.appName = appName;
+        let clientApp = getApps().find(app => app.name === appName);
+        if(!clientApp){
+          clientApp = initializeApp(cfg, appName);
+        }
+        const clientDb = getFirestore(clientApp);
+        clientSync.db = clientDb;
+
+        const approvalPath = parsePathSegments(data?.clientApprovalDocPath) ||
+          parsePathSegments(data?.clientApprovalPath) ||
+          ['postApprovals', token];
+        if(!approvalPath || approvalPath.length < 2 || approvalPath.length % 2 !== 0){
+          clientSync.error = new Error('Caminho de aprovação do cliente inválido.');
+          return false;
+        }
+        const approvalRef = doc(clientDb, ...approvalPath);
+        clientSync.approvalRef = approvalRef;
+        try{
+          const snap = await getDoc(approvalRef);
+          if(snap.exists()){
+            clientSync.approvalDocData = snap.data();
+          }
+        }catch(err){
+          console.warn('client approval getDoc', err);
+        }
+
+        const candidates = [];
+        candidates.push(data?.clientPostDocPath);
+        candidates.push(data?.clientPostPath);
+        if(clientSync.approvalDocData){
+          candidates.push(clientSync.approvalDocData.postDocPath);
+          candidates.push(clientSync.approvalDocData.postDocPathSegments);
+          candidates.push(clientSync.approvalDocData.postDoc);
+          candidates.push(clientSync.approvalDocData.postPath);
+          if(clientSync.approvalDocData.postCollection && clientSync.approvalDocData.postId){
+            candidates.push([clientSync.approvalDocData.postCollection, clientSync.approvalDocData.postId]);
+          }
+          if(Array.isArray(clientSync.approvalDocData.postCollectionPath) && clientSync.approvalDocData.postId){
+            candidates.push([...clientSync.approvalDocData.postCollectionPath, clientSync.approvalDocData.postId]);
+          }
+        }
+        if(Array.isArray(data?.clientPostCollectionPath) && data?.postId){
+          candidates.push([...data.clientPostCollectionPath, data.postId]);
+        }
+        if(data?.clientPostCollection && data?.postId){
+          candidates.push([data.clientPostCollection, data.postId]);
+        }
+        if(data?.postDocPath){
+          candidates.push(data.postDocPath);
+        }
+        if(data?.uid && data?.postId){
+          candidates.push(['usuarios', data.uid, 'posts', data.postId]);
+        }
+        if(data?.clientKeyNormalized && data?.postId){
+          candidates.push(['clientes', data.clientKeyNormalized, 'posts', data.postId]);
+        }
+        if(data?.clientKey && data?.postId){
+          candidates.push(['clientes', data.clientKey, 'posts', data.postId]);
+        }
+        if(data?.postTenant && data?.postId){
+          candidates.push(['clientes', data.postTenant, 'posts', data.postId]);
+        }
+
+        let postPath = null;
+        for(const candidate of candidates){
+          const parsed = parsePathSegments(candidate);
+          if(parsed && parsed.length >= 2 && parsed.length % 2 === 0){
+            postPath = parsed;
+            break;
+          }
+        }
+
+        if(!postPath){
+          clientSync.error = new Error('Não foi possível localizar o post do cliente.');
+          return false;
+        }
+
+        clientSync.postRef = doc(clientDb, ...postPath);
+        clientSync.ready = true;
+        return true;
+      })();
+
+      try{
+        return await clientSync.promise;
+      }catch(err){
+        clientSync.error = err;
+        clientSync.ready = false;
+        throw err;
+      }finally{
+        clientSync.promise = null;
+      }
+    }
+
+    async function ensureClientReady(){
+      if(clientSync.ready) return true;
+      if(clientSync.promise){
+        try{
+          const result = await clientSync.promise;
+          return !!result && clientSync.ready;
+        }catch(err){
+          throw err;
+        }
+      }
+      if(!state.approvalData){
+        return false;
+      }
+      try{
+        await prepareClientSync(state.approvalData);
+        return clientSync.ready;
+      }catch(err){
+        throw err;
+      }
+    }
+
+    async function syncClientAction(action, payload = {}){
+      let ready;
+      try{
+        ready = await ensureClientReady();
+      }catch(err){
+        throw err;
+      }
+      if(!ready){
+        if(clientSync.error){
+          throw clientSync.error;
+        }
+        return false;
+      }
+
+      const operations = [];
+      const approvalRef = clientSync.approvalRef;
+      const postRef = clientSync.postRef;
+
+      if(action === 'approve'){
+        const approvedSlides = Array.isArray(payload.approvedSlides) ? payload.approvedSlides : [];
+        if(postRef){
+          operations.push(updateDoc(postRef, {
+            status: 'aprovado',
+            approvedBy: 'cliente',
+            approvedSlides,
+            updatedAt: serverTimestamp(),
+            approvalToken: clientSync.token || token
+          }));
+        }
+        if(approvalRef){
+          operations.push(setDoc(approvalRef, {
+            lastAction: 'approved',
+            lastActionAt: serverTimestamp(),
+            postStatus: 'aprovado',
+            postApprovedBy: 'cliente',
+            approvedSlides,
+            updatedAt: serverTimestamp()
+          }, { merge: true }));
+        }
+      }else if(action === 'reject'){
+        const note = payload?.note;
+        const noteText = (payload?.text || note?.text || '').toString();
+        if(postRef){
+          const updates = {
+            status: 'pendente',
+            approvedBy: '',
+            approvedSlides: [],
+            updatedAt: serverTimestamp(),
+            approvalToken: clientSync.token || token
+          };
+          if(note && note.text){
+            const clientNote = { ...note, at: serverTimestamp(), viaLink: true, origin: 'cliente' };
+            updates.reviewNotes = arrayUnion(clientNote);
+            updates.lastReviewAt = serverTimestamp();
+          }
+          operations.push(updateDoc(postRef, updates));
+        }
+        if(approvalRef){
+          const approvalUpdates = {
+            lastAction: 'rejected',
+            lastActionAt: serverTimestamp(),
+            postStatus: 'pendente',
+            postApprovedBy: '',
+            updatedAt: serverTimestamp()
+          };
+          if(noteText){
+            approvalUpdates.lastActionNote = noteText;
+          }
+          operations.push(setDoc(approvalRef, approvalUpdates, { merge: true }));
+        }
+      }else if(action === 'review'){
+        const note = payload.note || {};
+        const noteText = (payload.text || note.text || '').toString();
+        if(postRef){
+          const clientNote = { ...note, at: serverTimestamp(), viaLink: true, origin: 'cliente' };
+          operations.push(updateDoc(postRef, {
+            status: 'revisar',
+            reviewNotes: arrayUnion(clientNote),
+            updatedAt: serverTimestamp(),
+            lastReviewAt: serverTimestamp(),
+            approvalToken: clientSync.token || token
+          }));
+        }
+        if(approvalRef){
+          operations.push(setDoc(approvalRef, {
+            lastAction: 'review',
+            lastActionAt: serverTimestamp(),
+            lastActionNote: noteText,
+            postStatus: 'revisar',
+            updatedAt: serverTimestamp()
+          }, { merge: true }));
+        }
+      }
+
+      if(!operations.length) return false;
+
+      const results = await Promise.allSettled(operations);
+      const failure = results.find(r => r.status === 'rejected');
+      if(failure){
+        throw failure.reason || new Error('Falha ao atualizar o Firebase do cliente.');
+      }
+      return true;
+    }
+
+    function showError(message){
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = message || 'Não foi possível carregar este link de aprovação.';
+    }
+
+    function showContent(){
+      loadingEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+    }
+
+    function setStatusMessage(message, isError=false){
+      statusMessageEl.textContent = message || '';
+      statusMessageEl.classList.toggle('error', !!isError);
+    }
+
+    function handleSuccessModalKeydown(event){
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        closeSuccessModal();
+      }
+    }
+
+    function openSuccessModal(){
+      if(!successModalEl) return;
+      if(successModalEl.dataset.open === 'true') return;
+      successModalEl.dataset.open = 'true';
+      successModalEl.classList.remove('hidden');
+      successModalEl.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      if(successModalTimer){
+        clearTimeout(successModalTimer);
+      }
+      successModalTimer = window.setTimeout(() => closeSuccessModal(), 3000);
+      requestAnimationFrame(() => {
+        if(successModalCloseBtn){
+          try {
+            successModalCloseBtn.focus({ preventScroll: true });
+          } catch(_){
+            successModalCloseBtn.focus();
+          }
+        }
+      });
+      document.addEventListener('keydown', handleSuccessModalKeydown);
+    }
+
+    function closeSuccessModal(){
+      if(!successModalEl) return;
+      if(successModalEl.dataset.open !== 'true') return;
+      successModalEl.dataset.open = 'false';
+      successModalEl.classList.add('hidden');
+      successModalEl.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      if(successModalTimer){
+        clearTimeout(successModalTimer);
+        successModalTimer = null;
+      }
+      document.removeEventListener('keydown', handleSuccessModalKeydown);
+    }
+
+    successModalCloseBtn?.addEventListener('click', () => closeSuccessModal());
+    successModalOverlay?.addEventListener('click', () => closeSuccessModal());
+
+    function formatDateLabel(iso){
+      if(!iso) return '—';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+        const [y,m,d] = iso.split('-');
+        return `${d}/${m}/${y}`;
+      }
+      try {
+        const dt = new Date(iso);
+        return dt.toLocaleDateString('pt-BR');
+      } catch(_){ return iso; }
+    }
+
+    function formatStatusLabel(status, approvedBy){
+      const map = { aprovado:'Aprovado', revisar:'Revisar', pendente:'Pendente', publicado:'Publicado' };
+      let label = map[status] || status || 'Pendente';
+      if(status === 'aprovado' && approvedBy){
+        label += approvedBy === 'interno' ? ' • time interno' : ' • cliente';
+      }
+      return label;
+    }
+
+    function updateStatusBadge(status, approvedBy){
+      const normalized = status || 'pendente';
+      statusBadgeEl.classList.remove('status-aprovado','status-revisar','status-pendente');
+      const cls = normalized === 'aprovado' ? 'status-aprovado' : (normalized === 'revisar' ? 'status-revisar' : 'status-pendente');
+      statusBadgeEl.classList.add(cls);
+      statusBadgeEl.textContent = formatStatusLabel(normalized, approvedBy);
+    }
+
+    function getMediaList(){
+      const fromPost = Array.isArray(state.postData?.mediaUrls) && state.postData.mediaUrls.length ? state.postData.mediaUrls : null;
+      const fallback = Array.isArray(state.approvalData?.mediaUrls) && state.approvalData.mediaUrls.length ? state.approvalData.mediaUrls : null;
+      const list = fromPost || fallback || (state.approvalData?.thumbUrl ? [state.approvalData.thumbUrl] : []);
+      return list.filter(Boolean);
+    }
+
+    function renderMedia(){
+      const mediaList = getMediaList();
+      if(state.mediaIndex >= mediaList.length){
+        state.mediaIndex = mediaList.length ? mediaList.length - 1 : 0;
+      }
+      mediaStageEl.innerHTML = '';
+      if(!mediaList.length){
+        mediaStageEl.style.paddingTop = '56.25%';
+        const placeholder = document.createElement('div');
+        placeholder.style.position = 'absolute';
+        placeholder.style.inset = '0';
+        placeholder.style.display = 'flex';
+        placeholder.style.alignItems = 'center';
+        placeholder.style.justifyContent = 'center';
+        placeholder.style.color = '#94a3b8';
+        placeholder.style.fontWeight = '600';
+        placeholder.textContent = 'Nenhuma mídia disponível';
+        mediaStageEl.appendChild(placeholder);
+        mediaIndicatorEl.textContent = '';
+        prevMediaBtn.disabled = true;
+        nextMediaBtn.disabled = true;
+        return;
+      }
+      const current = mediaList[state.mediaIndex];
+      const ext = (current.split('?')[0].split('.').pop() || '').toLowerCase();
+      const isVideo = ['mp4','mov','webm','m4v','avi'].includes(ext);
+      const el = document.createElement(isVideo ? 'video' : 'img');
+      el.src = current;
+      if(isVideo){
+        el.controls = true;
+        el.playsInline = true;
+      } else {
+        el.alt = 'Pré-visualização do post';
+        el.loading = 'lazy';
+      }
+      mediaStageEl.appendChild(el);
+      mediaIndicatorEl.textContent = mediaList.length > 1 ? `${state.mediaIndex + 1} / ${mediaList.length}` : '';
+      prevMediaBtn.disabled = mediaList.length <= 1;
+      nextMediaBtn.disabled = mediaList.length <= 1;
+    }
+
+    function toggleReviewAlert(visible){
+      if(!reviewAlertEl) return;
+      reviewAlertEl.classList.toggle('visible', !!visible);
+    }
+
+    function highlightReviewBox(){
+      if(!reviewBoxEl) return;
+      reviewBoxEl.classList.add('highlight');
+      setTimeout(() => reviewBoxEl.classList.remove('highlight'), 2000);
+    }
+
+    reviewTextEl?.addEventListener('input', () => {
+      if((reviewTextEl.value || '').trim()){
+        toggleReviewAlert(false);
+      }
+    });
+
+    function disableActions(disabled){
+      state.busy = disabled;
+      const shouldDisable = disabled || state.locked;
+      [approveBtn, rejectBtn, reviewBtn, reviewTextEl, reviewNameEl].forEach(el => {
+        if(!el) return;
+        el.disabled = shouldDisable;
+      });
+    }
+
+    function lockAfterSubmit(){
+      state.locked = true;
+      disableActions(true);
+      toggleReviewAlert(false);
+    }
+
+    function renderNotes(){
+      const notes = Array.isArray(state.postData?.reviewNotes) ? state.postData.reviewNotes : [];
+      if(!notes.length){
+        notesListEl.innerHTML = '<div style="color:#94a3b8; font-size:.95rem;">Nenhuma observação registrada ainda.</div>';
+        return;
+      }
+      const items = notes
+        .map(note => {
+          const when = note.at?.toMillis ? new Date(note.at.toMillis()) : (typeof note.at === 'number' ? new Date(note.at) : (note.at ? new Date(note.at) : new Date()));
+          const pad = n => String(n).padStart(2,'0');
+          const dateStr = `${when.getFullYear()}-${pad(when.getMonth()+1)}-${pad(when.getDate())} ${pad(when.getHours())}:${pad(when.getMinutes())}`;
+          const who = note.by || (note.origin === 'interno' ? 'Time interno' : 'Cliente');
+          const text = (note.text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          return `<article class="note-item"><div class="note-head"><span>${who}</span><span>•</span><span>${dateStr}</span></div><div class="note-body">${text || '—'}</div></article>`;
+        })
+        .join('');
+      notesListEl.innerHTML = items;
+    }
+
+    function updatePostView(post){
+      state.postData = post;
+      updateStatusBadge(post?.status || 'pendente', post?.approvedBy || state.approvalData?.postApprovedBy);
+      postDescriptionEl.textContent = post?.desc || state.approvalData?.postDesc || 'Sem descrição.';
+      const target = (post?.target || state.approvalData?.postTarget || '').toLowerCase();
+      postTargetEl.textContent = target === 'stories' ? 'Stories' : 'Feed';
+      postDateEl.textContent = formatDateLabel(post?.dateISO || state.approvalData?.postDateISO);
+      renderMedia();
+      renderNotes();
+    }
+
+    function applyApprovalData(data){
+      state.approvalData = data;
+      postTitleEl.textContent = data.postDesc ? data.postDesc.slice(0, 80) : 'Post';
+      const dateLabel = formatDateLabel(data.postDateISO);
+      const clientLabel = data.clientLabel || data.clientKey || '';
+      clientInfoEl.textContent = clientLabel ? `${clientLabel}${dateLabel !== '—' ? ' • ' + dateLabel : ''}` : dateLabel;
+      postDescriptionEl.textContent = data.postDesc || 'Sem descrição.';
+      postTargetEl.textContent = (data.postTarget || '').toLowerCase() === 'stories' ? 'Stories' : 'Feed';
+      postDateEl.textContent = dateLabel;
+      updateStatusBadge(data.postStatus || 'pendente', data.postApprovedBy || '');
+      renderMedia();
+    }
+
+    function subscribeToPost(data){
+      if(!Array.isArray(data.postDocPath) || data.postDocPath.length < 4){
+        setStatusMessage('Não foi possível localizar o post original. Avise o time da MediaGrowth.', true);
+        return;
+      }
+      try { state.postUnsub && state.postUnsub(); } catch(_){ }
+      const ref = doc(db, ...data.postDocPath);
+      state.postRef = ref;
+      state.postUnsub = onSnapshot(ref, snap => {
+        if(!snap.exists()){
+          setStatusMessage('Este post foi removido. Solicite um novo link ao time da MediaGrowth.', true);
+          return;
+        }
+        const postData = { id: snap.id, ...snap.data() };
+        updatePostView(postData);
+      }, err => {
+        console.error('post snapshot', err);
+        setStatusMessage('', true);
+      });
+    }
+
+    prevMediaBtn?.addEventListener('click', () => {
+      if(state.busy) return;
+      const mediaList = getMediaList();
+      if(mediaList.length <= 1) return;
+      state.mediaIndex = (state.mediaIndex - 1 + mediaList.length) % mediaList.length;
+      renderMedia();
+    });
+    nextMediaBtn?.addEventListener('click', () => {
+      if(state.busy) return;
+      const mediaList = getMediaList();
+      if(mediaList.length <= 1) return;
+      state.mediaIndex = (state.mediaIndex + 1) % mediaList.length;
+      renderMedia();
+    });
+    approveBtn?.addEventListener('click', async () => {
+      if(state.busy) return;
+      if(!state.postRef){
+        setStatusMessage('Post não encontrado. Avise o time da MediaGrowth.', true);
+        return;
+      }
+      disableActions(true);
+      setStatusMessage('');
+      try{
+        const mediaList = getMediaList();
+        const approvedSlides = mediaList.map((_, idx) => idx);
+        await updateDoc(state.postRef, {
+          status: 'aprovado',
+          approvedBy: 'cliente',
+          approvedSlides,
+          updatedAt: serverTimestamp(),
+          approvalToken: token
+        });
+        setStatusMessage(successMessage);
+        lockAfterSubmit();
+        openSuccessModal();
+        setDoc(approvalRef, {
+          lastAction: 'approved',
+          lastActionAt: serverTimestamp(),
+          postStatus: 'aprovado',
+          postApprovedBy: 'cliente',
+          approvedSlides,
+          updatedAt: serverTimestamp()
+        }, { merge: true }).catch(console.warn);
+        syncClientAction('approve', { approvedSlides }).catch(console.warn);
+      }catch(err){
+        console.error('approve', err);
+        setStatusMessage('Não foi possível registrar agora. Tente novamente.', true);
+      }finally{
+        disableActions(false);
+        state.busy = false;
+      }
+    });
+
+    rejectBtn?.addEventListener('click', async () => {
+      if(state.busy) return;
+      if(!state.postRef){
+        setStatusMessage('Post não encontrado. Avise o time da MediaGrowth.', true);
+        return;
+      }
+      const text = (reviewTextEl.value || '').trim();
+      if(!text){
+        toggleReviewAlert(true);
+        highlightReviewBox();
+        reviewTextEl?.focus();
+        reviewBoxEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      const name = (reviewNameEl.value || '').trim();
+      const note = {
+        text,
+        by: name || `${state.approvalData?.clientLabel || 'Cliente'} (via link)`,
+        uid: null,
+        at: Date.now(),
+        slide: state.mediaIndex,
+        origin: 'cliente',
+        viaLink: true
+      };
+      disableActions(true);
+      setStatusMessage('Registrando reprovação...');
+      try{
+        toggleReviewAlert(false);
+        await updateDoc(state.postRef, {
+          status: 'pendente',
+          approvedBy: '',
+          approvedSlides: [],
+          reviewNotes: arrayUnion(note),
+          updatedAt: serverTimestamp(),
+          approvalToken: token
+        });
+        setStatusMessage(successMessage);
+        lockAfterSubmit();
+        setDoc(approvalRef, {
+          lastAction: 'rejected',
+          lastActionAt: serverTimestamp(),
+          postStatus: 'pendente',
+          postApprovedBy: '',
+          lastActionNote: text,
+          updatedAt: serverTimestamp()
+        }, { merge: true }).catch(console.warn);
+        syncClientAction('reject', { note, text }).catch(console.warn);
+        if(reviewTextEl){
+          reviewTextEl.value = '';
+        }
+      }catch(err){
+        console.error('reject', err);
+        setStatusMessage('Não foi possível registrar agora. Tente novamente.', true);
+      }finally{
+        disableActions(false);
+        state.busy = false;
+      }
+    });
+
+    reviewBtn?.addEventListener('click', async () => {
+      if(state.busy) return;
+      if(!state.postRef){
+        setStatusMessage('Post não encontrado. Avise o time da MediaGrowth.', true);
+        return;
+      }
+      const text = (reviewTextEl.value || '').trim();
+      if(!text){
+        setStatusMessage('Descreva o que precisa ser ajustado antes de enviar a revisão.', true);
+        reviewTextEl.focus();
+        return;
+      }
+      disableActions(true);
+      setStatusMessage('');
+      const name = (reviewNameEl.value || '').trim();
+      const note = {
+        text,
+        by: name || `${state.approvalData?.clientLabel || 'Cliente'} (via link)`,
+        uid: null,
+        at: Date.now(),
+        slide: state.mediaIndex,
+        origin: 'cliente',
+        viaLink: true
+      };
+      try{
+        await updateDoc(state.postRef, {
+          status: 'revisar',
+          reviewNotes: arrayUnion(note),
+          updatedAt: serverTimestamp(),
+          lastReviewAt: serverTimestamp(),
+          approvalToken: token
+        });
+        setStatusMessage(successMessage);
+        lockAfterSubmit();
+        openSuccessModal();
+        setDoc(approvalRef, {
+          lastAction: 'review',
+          lastActionNote: text,
+          lastActionAt: serverTimestamp(),
+          postStatus: 'revisar',
+          updatedAt: serverTimestamp()
+        }, { merge: true }).catch(console.warn);
+        syncClientAction('review', { note, text }).catch(console.warn);
+        if(reviewTextEl){
+          reviewTextEl.value = '';
+        }
+        if(reviewNameEl){
+          reviewNameEl.value = '';
+        }
+      }catch(err){
+        console.error('review', err);
+        setStatusMessage('Não foi possível registrar agora. Tente novamente.', true);
+      }finally{
+        disableActions(false);
+        state.busy = false;
+      }
+    });
+
+    async function init(){
+      try{
+        const snap = await getDoc(approvalRef);
+        if(!snap.exists()){
+          showError('Este link não está mais ativo. Solicite um novo link ao time da MediaGrowth.');
+          return;
+        }
+        const data = snap.data();
+        applyApprovalData(data || {});
+        prepareClientSync(data || {}).catch(err => console.warn('prepare client sync', err));
+        showContent();
+        subscribeToPost(data || {});
+      }catch(err){
+        console.error('init approval link', err);
+        showError('Não foi possível carregar os dados deste link. Tente novamente mais tarde.');
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

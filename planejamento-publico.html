@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Planejamento Compartilhado • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --bg: radial-gradient(circle at top, rgba(59,130,246,0.12), transparent 55%), #0f172a;
+      --surface: rgba(15,23,42,0.55);
+      --border: rgba(148,163,184,0.28);
+      --border-strong: rgba(148,163,184,0.4);
+      --text: #f8fafc;
+      --muted: #cbd5f5;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warning: #f97316;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 36px 0 72px;
+    }
+    main.container {
+      width: min(1100px, 94vw);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .hidden { display: none !important; }
+    .state-block {
+      text-align: center;
+      padding: 64px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 1rem;
+      color: var(--muted);
+      box-shadow: 0 24px 40px rgba(15,23,42,0.35);
+    }
+    .state-block h2 {
+      margin: 0 0 12px;
+      font-size: 1.6rem;
+      color: #e0f2fe;
+    }
+    header.page-header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 28px 44px rgba(15,23,42,0.32);
+    }
+    .badge {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.18);
+      border: 1px solid rgba(59,130,246,0.32);
+      color: #bae6fd;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 2.7rem);
+      line-height: 1.2;
+      color: #e0f2fe;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    .summary {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #dbeafe;
+    }
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .highlight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 20px 36px rgba(15,23,42,0.3);
+    }
+    .highlight-card h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #e0f2fe;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin: 0;
+    }
+    .metrics div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(15,23,42,0.45);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .metrics dt {
+      margin: 0;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(203,213,225,0.9);
+    }
+    .metrics dd {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .metric-label {
+      margin: 0;
+      font-size: .8rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(203,213,225,0.85);
+    }
+    .metric-value {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .metric-hint {
+      margin: 4px 0 0;
+      font-size: .8rem;
+      color: rgba(203,213,225,0.7);
+    }
+    .plan-sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 36px rgba(15,23,42,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .plan-card h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #e0f2fe;
+    }
+    .plan-content p {
+      margin: 0 0 10px;
+      font-size: .95rem;
+      line-height: 1.6;
+      color: #f1f5f9;
+    }
+    .plan-content p:last-child { margin-bottom: 0; }
+    .muted { color: var(--muted); }
+    .section-head {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #e0f2fe;
+    }
+    .section-subtitle {
+      margin: 0;
+      font-size: .95rem;
+      color: rgba(203,213,225,0.85);
+    }
+    .objective-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .objective-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 18px 32px rgba(15,23,42,0.28);
+    }
+    .objective-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .objective-head h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #f8fafc;
+    }
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--status-color, #64748b);
+      box-shadow: 0 0 0 2px rgba(148,163,184,0.25);
+    }
+    .objective-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: .9rem;
+      color: rgba(203,213,225,0.92);
+    }
+    .objective-meta span { white-space: nowrap; }
+    .objective-plan-details {
+      margin: 0;
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: .9rem;
+      color: #e2e8f0;
+    }
+    .objective-plan-details span {
+      font-weight: 600;
+      color: rgba(186,230,253,0.9);
+    }
+    .objective-note {
+      margin: 0;
+      font-size: .9rem;
+      color: rgba(224,242,254,0.85);
+      background: rgba(37,99,235,0.15);
+      border: 1px solid rgba(37,99,235,0.28);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .timeline-section ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.24);
+      border-radius: 16px;
+    }
+    .timeline-date {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #bae6fd;
+      display: flex;
+      align-items: center;
+    }
+    .timeline-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .timeline-body strong {
+      font-size: 1rem;
+      color: #f8fafc;
+    }
+    .timeline-meta {
+      font-size: .85rem;
+      color: rgba(203,213,225,0.85);
+    }
+    .timeline-detail {
+      font-size: .85rem;
+      color: rgba(226,232,240,0.8);
+    }
+    .impediments-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .impediment-card {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(248,250,252,0.08);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 18px 32px rgba(15,23,42,0.28);
+    }
+    .impediment-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border: 1px solid rgba(148,163,184,0.32);
+      background: rgba(148,163,184,0.18);
+      color: #e2e8f0;
+      width: fit-content;
+    }
+    .impediment-status.pending { background: rgba(250,204,21,0.18); border-color: rgba(250,204,21,0.32); color: #facc15; }
+    .impediment-status.resolved { background: rgba(34,197,94,0.18); border-color: rgba(34,197,94,0.32); color: #bbf7d0; }
+    .impediment-text {
+      margin: 0;
+      font-size: .95rem;
+      line-height: 1.5;
+      color: #f8fafc;
+    }
+    .impediment-action {
+      margin: 0;
+      font-size: .88rem;
+      color: rgba(224,242,254,0.85);
+    }
+    .ads-card {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.24);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 18px 32px rgba(15,23,42,0.28);
+    }
+    .ads-card h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: #e0f2fe;
+    }
+    #adsSchedule {
+      margin: 0;
+      font-size: .95rem;
+      color: rgba(226,232,240,0.85);
+    }
+    .kpi-list {
+      margin: 0;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: .9rem;
+      color: #f1f5f9;
+    }
+    .kpi-list li {
+      list-style: disc;
+    }
+    .kpi-list span {
+      display: block;
+      font-size: .82rem;
+      color: rgba(203,213,225,0.8);
+      margin-top: 4px;
+    }
+    .empty {
+      font-size: .92rem;
+      color: rgba(203,213,225,0.8);
+      background: rgba(15,23,42,0.45);
+      border: 1px dashed rgba(148,163,184,0.28);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    @media (max-width: 720px) {
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+      .timeline-date {
+        font-size: .9rem;
+      }
+      .objective-meta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section id="loading" class="state-block">Carregando planejamento mensal…</section>
+    <section id="error" class="state-block hidden">
+      <h2>Não encontramos o planejamento</h2>
+      <p id="errorMessage">Este link pode ter expirado. Solicite um novo ao time da MediaGrowth.</p>
+    </section>
+    <div id="content" class="hidden">
+      <header class="page-header">
+        <span class="badge">Planejamento mensal</span>
+        <h1 id="pageTitle">Planejamento</h1>
+        <p id="pageSubtitle" class="subtitle"></p>
+        <p id="monthSummary" class="summary"></p>
+      </header>
+      <section class="highlights">
+        <article class="highlight-card">
+          <h2>Visão geral</h2>
+          <dl class="metrics">
+            <div><dt>Objetivos planejados</dt><dd id="metricTotal">0</dd></div>
+            <div><dt>Concluídos</dt><dd id="metricCompleted">0</dd></div>
+            <div><dt>Em andamento</dt><dd id="metricInProgress">0</dd></div>
+            <div><dt>Prioridades</dt><dd id="metricPriority">0</dd></div>
+            <div><dt>Bloqueados</dt><dd id="metricBlocked">0</dd></div>
+          </dl>
+        </article>
+        <article class="highlight-card">
+          <h2>Verba de mídia</h2>
+          <p class="metric-label">Objetivo</p>
+          <p class="metric-value" id="adsObjective">—</p>
+          <p class="metric-label">Investimento planejado</p>
+          <p class="metric-value" id="adsBudgetPlanned">—</p>
+          <p class="metric-label">Investimento registrado</p>
+          <p class="metric-value" id="adsBudgetActual">—</p>
+          <p class="metric-hint" id="adsBudgetSource"></p>
+        </article>
+      </section>
+      <section class="plan-sections">
+        <article class="plan-card">
+          <h2>Plano estratégico</h2>
+          <div id="planStrategico" class="plan-content muted">Sem registro para este mês.</div>
+        </article>
+        <article class="plan-card">
+          <h2>Plano tático</h2>
+          <div id="planTatico" class="plan-content muted">Sem registro para este mês.</div>
+        </article>
+        <article class="plan-card">
+          <h2>Plano operacional</h2>
+          <div id="planOperacional" class="plan-content muted">Sem registro para este mês.</div>
+        </article>
+      </section>
+      <section class="objectives-section">
+        <div class="section-head">
+          <h2>Objetivos do mês</h2>
+          <p class="section-subtitle">Acompanhe responsáveis, prazos e status de cada entrega.</p>
+        </div>
+        <div id="objectivesList" class="objective-list"></div>
+      </section>
+      <section class="timeline-section">
+        <div class="section-head">
+          <h2>Linha do tempo</h2>
+          <p class="section-subtitle">Principais marcos planejados para o mês.</p>
+        </div>
+        <ul id="timelineList" class="timeline-list"></ul>
+      </section>
+      <section class="impediments-section">
+        <div class="section-head">
+          <h2>Impedimentos e riscos</h2>
+          <p class="section-subtitle">Alertas críticos com ações sugeridas.</p>
+        </div>
+        <div id="impedimentsList" class="impediments-list"></div>
+      </section>
+      <section class="ads-section">
+        <div class="section-head">
+          <h2>Planejamento Google Ads</h2>
+          <p class="section-subtitle">Indicadores monitorados para mídia paga.</p>
+        </div>
+        <div class="ads-card">
+          <div>
+            <h3>Cronograma</h3>
+            <p id="adsSchedule" class="muted">Sem cronograma definido.</p>
+          </div>
+          <div>
+            <h3>KPIs prioritários</h3>
+            <ul id="adsKpis" class="kpi-list"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInAnonymously,
+      signInWithCustomToken,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const token = (qs.get('token') || '').trim();
+
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const contentEl = document.getElementById('content');
+    const pageTitleEl = document.getElementById('pageTitle');
+    const pageSubtitleEl = document.getElementById('pageSubtitle');
+    const summaryEl = document.getElementById('monthSummary');
+    const metricTotalEl = document.getElementById('metricTotal');
+    const metricCompletedEl = document.getElementById('metricCompleted');
+    const metricInProgressEl = document.getElementById('metricInProgress');
+    const metricPriorityEl = document.getElementById('metricPriority');
+    const metricBlockedEl = document.getElementById('metricBlocked');
+    const planStrategicoEl = document.getElementById('planStrategico');
+    const planTaticoEl = document.getElementById('planTatico');
+    const planOperacionalEl = document.getElementById('planOperacional');
+    const objectivesListEl = document.getElementById('objectivesList');
+    const timelineListEl = document.getElementById('timelineList');
+    const impedimentsListEl = document.getElementById('impedimentsList');
+    const adsObjectiveEl = document.getElementById('adsObjective');
+    const adsBudgetPlannedEl = document.getElementById('adsBudgetPlanned');
+    const adsBudgetActualEl = document.getElementById('adsBudgetActual');
+    const adsBudgetSourceEl = document.getElementById('adsBudgetSource');
+    const adsScheduleEl = document.getElementById('adsSchedule');
+    const adsKpisEl = document.getElementById('adsKpis');
+
+    const app = getApps().find(a => a.name === 'public-planning') || initializeApp(firebaseConfig, 'public-planning');
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const state = {
+      share: null
+    };
+
+    const authState = {
+      ready: false,
+      error: null,
+      promise: null
+    };
+
+    onAuthStateChanged(auth, user => {
+      if(user){
+        authState.ready = true;
+        authState.error = null;
+      }else{
+        authState.ready = false;
+      }
+    });
+
+    const shareRef = token ? doc(db, 'planningShares', token) : null;
+
+    if(!token){
+      showError('O link informado é inválido ou expirou. Solicite um novo link ao time da MediaGrowth.');
+    }else{
+      initialize();
+    }
+
+    function showError(message){
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = message || 'Não foi possível carregar este planejamento.';
+    }
+
+    function showContent(){
+      loadingEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+    }
+
+    function escapeHtml(str){
+      return String(str || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch] || ch));
+    }
+
+    function textToHtml(text){
+      const lines = String(text || '').split(/\n+/).map(line => line.trim()).filter(Boolean);
+      if(!lines.length) return '';
+      return lines.map(line => `<p>${escapeHtml(line)}</p>`).join('');
+    }
+
+    function getNestedValue(obj, path){
+      if(!obj || typeof obj !== 'object') return undefined;
+      const segments = Array.isArray(path) ? path : String(path).split('.');
+      let current = obj;
+      for(const segment of segments){
+        if(!current || typeof current !== 'object') return undefined;
+        if(!(segment in current)) return undefined;
+        current = current[segment];
+      }
+      return current;
+    }
+
+    function pickShareString(share, candidates, predicate){
+      if(!share || typeof share !== 'object') return '';
+      for(const candidate of candidates){
+        const value = getNestedValue(share, candidate);
+        if(typeof value === 'string'){
+          const trimmed = value.trim();
+          if(trimmed && (!predicate || predicate(trimmed))){
+            return trimmed;
+          }
+        }
+      }
+      return '';
+    }
+
+    function pickShareBoolean(share, candidates){
+      if(!share || typeof share !== 'object') return null;
+      for(const candidate of candidates){
+        const value = getNestedValue(share, candidate);
+        if(typeof value === 'boolean'){
+          return value;
+        }
+      }
+      return null;
+    }
+
+    function resolveShareAuthConfig(share){
+      const tokenCandidates = [
+        'authCustomToken',
+        'customAuthToken',
+        'firebaseAuthCustomToken',
+        'firebaseCustomToken',
+        'auth.customToken',
+        'auth.token',
+        'firebaseAuth.customToken',
+        'credentials.customToken',
+        'authTokens.custom',
+        'authTokens.calendar',
+        'authTokens.planning'
+      ];
+      const emailCandidates = [
+        'authEmail',
+        'firebaseAuthEmail',
+        'auth.email',
+        'credentials.email',
+        'authCredentials.email'
+      ];
+      const passwordCandidates = [
+        'authPassword',
+        'firebaseAuthPassword',
+        'auth.password',
+        'credentials.password',
+        'authCredentials.password'
+      ];
+      const allowAnonCandidates = [
+        'allowAnonymousAuth',
+        'allowAnonymousAccess',
+        'allowAnonymous',
+        'auth.allowAnonymous',
+        'permissions.allowAnonymous'
+      ];
+      const disableAnonCandidates = [
+        'disableAnonymousAuth',
+        'auth.disableAnonymous',
+        'permissions.disableAnonymous'
+      ];
+      const customToken = pickShareString(share, tokenCandidates, value => value.length > 20 && value.includes('.'));
+      const email = pickShareString(share, emailCandidates, value => value.includes('@'));
+      const password = pickShareString(share, passwordCandidates, value => value.length > 0);
+      const allowAnonFlag = pickShareBoolean(share, allowAnonCandidates);
+      const disableAnonFlag = pickShareBoolean(share, disableAnonCandidates);
+      const allowAnonymous = disableAnonFlag === true ? false : (allowAnonFlag === false ? false : true);
+      return {
+        customToken,
+        email,
+        password,
+        allowAnonymous
+      };
+    }
+
+    async function ensureAuth(){
+      if(!auth){
+        authState.ready = true;
+        return true;
+      }
+      if(auth.currentUser && authState.ready){
+        return true;
+      }
+      if(authState.promise){
+        try {
+          return await authState.promise;
+        }catch(err){
+          return false;
+        }
+      }
+      authState.promise = (async () => {
+        if(auth.currentUser){
+          authState.ready = true;
+          authState.error = null;
+          return true;
+        }
+        const share = state.share || {};
+        const authConfig = resolveShareAuthConfig(share);
+        const attempts = [];
+        if(authConfig.customToken){
+          attempts.push(async () => {
+            await signInWithCustomToken(auth, authConfig.customToken);
+          });
+        }
+        if(authConfig.email && authConfig.password){
+          attempts.push(async () => {
+            await signInWithEmailAndPassword(auth, authConfig.email, authConfig.password);
+          });
+        }
+        if(authConfig.allowAnonymous !== false){
+          attempts.push(async () => {
+            await signInAnonymously(auth);
+          });
+        }
+        if(attempts.length === 0){
+          authState.ready = true;
+          authState.error = null;
+          return true;
+        }
+        let lastError = null;
+        for(const attempt of attempts){
+          try {
+            await attempt();
+            authState.ready = true;
+            authState.error = null;
+            return true;
+          }catch(err){
+            lastError = err;
+            console.warn('[planning] auth attempt failed', err);
+            if(err?.code === 'auth/operation-not-allowed'){
+              continue;
+            }
+          }
+        }
+        authState.error = lastError || new Error('Não foi possível autenticar este link.');
+        return false;
+      })();
+      try {
+        return await authState.promise;
+      }finally{
+        authState.promise = null;
+      }
+    }
+
+    function toDate(value){
+      if(!value) return null;
+      if(typeof value.toDate === 'function') return value.toDate();
+      if(typeof value === 'number') return new Date(value);
+      if(value && typeof value === 'object' && typeof value.seconds === 'number'){
+        return new Date(value.seconds * 1000 + (value.nanoseconds || 0) / 1e6);
+      }
+      const parsed = Date.parse(value);
+      return Number.isNaN(parsed) ? null : new Date(parsed);
+    }
+
+    function formatDateTime(date){
+      if(!date) return '';
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function formatDateLabel(iso){
+      if(!iso) return '';
+      const dt = new Date(`${iso}T00:00:00`);
+      if(Number.isNaN(dt.getTime())) return '';
+      return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+
+    function formatCurrency(value, currency){
+      const num = Number(value);
+      if(!Number.isFinite(num)) return '';
+      const code = (currency || 'BRL').toUpperCase();
+      const locale = code === 'USD' ? 'en-US' : 'pt-BR';
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: code,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(num);
+    }
+
+    async function initialize(){
+      try {
+        const snap = await getDoc(shareRef);
+        if(!snap.exists()){
+          showError('Este link de planejamento não está mais disponível.');
+          return;
+        }
+        const data = snap.data() || {};
+        state.share = { id: token, token, ...data };
+        try {
+          await ensureAuth();
+        }catch(authErr){
+          console.warn('planning auth initialization', authErr);
+        }
+        renderShare(state.share);
+        showContent();
+      }catch(err){
+        console.error('load planning share', err);
+        showError('Não foi possível carregar este planejamento.');
+      }
+    }
+
+    function renderShare(share){
+      const clientLabel = share.clientLabel || share.clientKey || 'Cliente';
+      const monthLabel = share.monthLabel || '';
+      pageTitleEl.textContent = monthLabel ? `${clientLabel} • ${monthLabel}` : clientLabel;
+      const updatedAt = toDate(share.updatedAt) || toDate(share.lastActionAt) || toDate(share.createdAt);
+      pageSubtitleEl.textContent = updatedAt ? `Atualizado em ${formatDateTime(updatedAt)}` : '';
+      summaryEl.textContent = share.summary || 'Sem resumo disponível para este mês.';
+      renderHighlights(share);
+      renderPlanSections(share.planSections || {});
+      renderObjectives(Array.isArray(share.objectives) ? share.objectives : []);
+      renderTimeline(Array.isArray(share.timeline) ? share.timeline : []);
+      renderImpediments(Array.isArray(share.impediments) ? share.impediments : []);
+      renderAdsPlan(share.googleAdsPlan || {});
+    }
+
+    function renderHighlights(share){
+      const counts = share.objectivesSummary || {};
+      const total = Number(counts.total ?? (Array.isArray(share.objectives) ? share.objectives.length : 0));
+      metricTotalEl.textContent = total.toString();
+      metricCompletedEl.textContent = Number(counts.completed || 0).toString();
+      metricInProgressEl.textContent = Number(counts.inProgress || 0).toString();
+      metricPriorityEl.textContent = Number(counts.priority || 0).toString();
+      metricBlockedEl.textContent = Number(counts.blocked || 0).toString();
+      const adsPlan = share.googleAdsPlan || {};
+      const budget = adsPlan.budget || {};
+      adsObjectiveEl.textContent = adsPlan.objective || '—';
+      const planned = budget.plannedDisplay || formatCurrency(budget.plannedValue, budget.currency);
+      const actual = budget.actualDisplay || formatCurrency(budget.actualValue, budget.currency);
+      adsBudgetPlannedEl.textContent = planned || '—';
+      adsBudgetActualEl.textContent = actual || '—';
+      let sourceText = '';
+      if(budget.source === 'cac'){
+        sourceText = 'Fonte: dados de CAC (Verba de Tráfego).';
+      }else if(budget.source === 'meta'){
+        sourceText = 'Fonte: metas cadastradas na plataforma.';
+      }
+      adsBudgetSourceEl.textContent = sourceText;
+      adsBudgetSourceEl.classList.toggle('muted', !sourceText);
+    }
+
+    function setPlanContent(element, text){
+      if(!element) return;
+      const html = textToHtml(text);
+      if(html){
+        element.classList.remove('muted');
+        element.innerHTML = html;
+      }else{
+        element.classList.add('muted');
+        element.textContent = 'Sem registro para este mês.';
+      }
+    }
+
+    function renderPlanSections(sections){
+      setPlanContent(planStrategicoEl, sections.estrategico?.text);
+      setPlanContent(planTaticoEl, sections.tatico?.text);
+      setPlanContent(planOperacionalEl, sections.operacional?.text);
+    }
+
+    function renderObjectives(objectives){
+      objectivesListEl.innerHTML = '';
+      if(!objectives.length){
+        objectivesListEl.innerHTML = '<div class="empty">Nenhum objetivo cadastrado para este mês.</div>';
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      objectives.forEach(obj => {
+        const card = document.createElement('article');
+        card.className = 'objective-card';
+        const head = document.createElement('div');
+        head.className = 'objective-head';
+        const dot = document.createElement('span');
+        dot.className = 'status-dot';
+        if(obj.statusColor){
+          dot.style.setProperty('--status-color', obj.statusColor);
+        }
+        const title = document.createElement('h3');
+        title.textContent = obj.title || 'Objetivo';
+        head.appendChild(dot);
+        head.appendChild(title);
+        card.appendChild(head);
+        const meta = document.createElement('div');
+        meta.className = 'objective-meta';
+        const parts = [
+          `<span><strong>Status:</strong> ${escapeHtml(obj.statusLabel || 'Sem status')}</span>`,
+          `<span><strong>Responsável:</strong> ${escapeHtml(obj.responsavel || 'Não definido')}</span>`,
+          `<span><strong>Período:</strong> ${escapeHtml(obj.periodo?.texto || 'Não informado')}</span>`
+        ];
+        if(obj.tag){
+          parts.push(`<span><strong>Tag:</strong> ${escapeHtml(obj.tag)}</span>`);
+        }
+        meta.innerHTML = parts.join('');
+        card.appendChild(meta);
+        if(Array.isArray(obj.planDetails) && obj.planDetails.length){
+          const list = document.createElement('ul');
+          list.className = 'objective-plan-details';
+          obj.planDetails.forEach(detail => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${escapeHtml(detail.label || '')}:</span> ${escapeHtml(detail.text || '')}`;
+            list.appendChild(li);
+          });
+          card.appendChild(list);
+        }
+        if(obj.note){
+          const note = document.createElement('p');
+          note.className = 'objective-note';
+          note.textContent = obj.note;
+          card.appendChild(note);
+        }
+        frag.appendChild(card);
+      });
+      objectivesListEl.appendChild(frag);
+    }
+
+    function renderTimeline(timeline){
+      timelineListEl.innerHTML = '';
+      if(!timeline.length){
+        timelineListEl.innerHTML = '<li class="empty">Cronograma ainda não definido para este mês.</li>';
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      timeline.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'timeline-item';
+        const dateEl = document.createElement('div');
+        dateEl.className = 'timeline-date';
+        dateEl.textContent = formatDateLabel(item.dateISO) || '—';
+        const body = document.createElement('div');
+        body.className = 'timeline-body';
+        const title = document.createElement('strong');
+        title.textContent = item.objectiveTitle || 'Entrega';
+        const metaParts = [];
+        if(item.label){ metaParts.push(item.label); }
+        if(item.responsavel){ metaParts.push(item.responsavel); }
+        if(item.statusLabel){ metaParts.push(item.statusLabel); }
+        const meta = document.createElement('div');
+        meta.className = 'timeline-meta';
+        meta.textContent = metaParts.join(' • ');
+        body.appendChild(title);
+        if(meta.textContent){ body.appendChild(meta); }
+        if(item.periodo){
+          const detail = document.createElement('div');
+          detail.className = 'timeline-detail';
+          detail.textContent = item.periodo;
+          body.appendChild(detail);
+        }
+        li.appendChild(dateEl);
+        li.appendChild(body);
+        frag.appendChild(li);
+      });
+      timelineListEl.appendChild(frag);
+    }
+
+    function renderImpediments(list){
+      impedimentsListEl.innerHTML = '';
+      if(!list.length){
+        impedimentsListEl.innerHTML = '<div class="empty">Nenhum impedimento registrado no momento.</div>';
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      list.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'impediment-card';
+        const status = document.createElement('span');
+        status.className = `impediment-status ${escapeHtml(item.status || '')}`.trim();
+        status.textContent = item.statusLabel || 'Status';
+        const desc = document.createElement('p');
+        desc.className = 'impediment-text';
+        desc.textContent = item.descricao || 'Sem descrição detalhada.';
+        const action = document.createElement('p');
+        action.className = 'impediment-action';
+        action.innerHTML = `<strong>Ação sugerida:</strong> ${escapeHtml(item.suggestedAction || 'Acompanhar com a equipe responsável.')}`;
+        card.appendChild(status);
+        card.appendChild(desc);
+        card.appendChild(action);
+        frag.appendChild(card);
+      });
+      impedimentsListEl.appendChild(frag);
+    }
+
+    function renderAdsPlan(adsPlan){
+      adsObjectiveEl.textContent = adsPlan.objective || '—';
+      const budget = adsPlan.budget || {};
+      const planned = budget.plannedDisplay || formatCurrency(budget.plannedValue, budget.currency);
+      const actual = budget.actualDisplay || formatCurrency(budget.actualValue, budget.currency);
+      adsBudgetPlannedEl.textContent = planned || '—';
+      adsBudgetActualEl.textContent = actual || '—';
+      let sourceText = '';
+      if(budget.source === 'cac'){
+        sourceText = 'Fonte: dados de CAC (Verba de Tráfego).';
+      }else if(budget.source === 'meta'){
+        sourceText = 'Fonte: metas cadastradas na plataforma.';
+      }
+      adsBudgetSourceEl.textContent = sourceText;
+      adsBudgetSourceEl.classList.toggle('muted', !sourceText);
+      adsScheduleEl.textContent = adsPlan.schedule || 'Sem cronograma definido.';
+      adsScheduleEl.classList.toggle('muted', !adsPlan.schedule);
+      adsKpisEl.innerHTML = '';
+      if(Array.isArray(adsPlan.kpis) && adsPlan.kpis.length){
+        adsPlan.kpis.forEach(kpi => {
+          const li = document.createElement('li');
+          const label = escapeHtml(kpi.label || 'Indicador');
+          const unit = (kpi.unit || '').toLowerCase();
+          const formatKpiValue = (display, value) => {
+            if(display) return display;
+            if(Number.isFinite(value)){
+              if(unit === '%'){
+                return `${value.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
+              }
+              return value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+            }
+            return '';
+          };
+          const target = formatKpiValue(kpi.targetDisplay, kpi.targetValue);
+          const current = formatKpiValue(kpi.currentDisplay, kpi.currentValue);
+          const parts = [];
+          if(target){ parts.push(`Meta: ${escapeHtml(target)}`); }
+          if(current){ parts.push(`Atual: ${escapeHtml(current)}`); }
+          li.innerHTML = `<strong>${label}</strong>${parts.length ? `<span>${parts.join(' • ')}</span>` : ''}`;
+          adsKpisEl.appendChild(li);
+        });
+      }else{
+        adsKpisEl.innerHTML = '<li class="empty">Sem indicadores cadastrados.</li>';
+      }
+    }
+  </script>
+</body>
+</html>

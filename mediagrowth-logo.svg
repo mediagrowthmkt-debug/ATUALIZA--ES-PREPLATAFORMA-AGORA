@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">MediaGrowth</title>
+  <desc id="logoDesc">MediaGrowth logotype with an orange play symbol and compass mark</desc>
+  <g fill="none" fill-rule="evenodd">
+    <polygon fill="#FF6A13" points="60 108 60 52 116 80"/>
+    <text fill="#FFFFFF" font-family="'Poppins', 'Montserrat', 'Segoe UI', sans-serif" font-size="120" font-weight="700" letter-spacing="-3">
+      <tspan x="140" y="150">mediagr</tspan>
+      <tspan x="505" y="150">wth</tspan>
+    </text>
+    <circle cx="454" cy="120" r="44" fill="none" stroke="#FF6A13" stroke-width="14"/>
+    <polygon fill="#FF6A13" points="454 84 490 120 454 156"/>
+    <circle cx="454" cy="120" r="14" fill="#FFFFFF"/>
+  </g>
+</svg>

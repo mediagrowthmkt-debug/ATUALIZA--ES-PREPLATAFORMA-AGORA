@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Atualização de Metas • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, rgba(56,189,248,0.12), transparent 55%), #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: min(960px, 94vw);
+      padding: 40px 0 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59,130,246,0.16);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: #bae6fd;
+      font-weight: 700;
+      letter-spacing: .06em;
+      font-size: .75rem;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 6px 14px;
+      width: fit-content;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      color: #e0f2fe;
+    }
+    p {
+      margin: 0;
+      font-size: 1rem;
+      color: #cbd5f5;
+      line-height: 1.6;
+    }
+    .status {
+      min-height: 1.25rem;
+      font-size: .9rem;
+      color: #38bdf8;
+    }
+    .status.error {
+      color: #f87171;
+    }
+    .metas-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .meta-card {
+      background: rgba(15,23,42,0.78);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 18px 38px rgba(15,23,42,0.45);
+    }
+    .meta-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: baseline;
+    }
+    .meta-title {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #f8fafc;
+      flex: 1 1 auto;
+    }
+    .meta-unit {
+      font-size: .75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #bae6fd;
+      background: rgba(56,189,248,0.2);
+      border: 1px solid rgba(56,189,248,0.35);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    .fields {
+      display: grid;
+      gap: 16px;
+    }
+    label.field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: .88rem;
+      color: #cbd5f5;
+    }
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .field-label strong {
+      font-size: .8rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: .05em;
+    }
+    input[type="number"] {
+      width: 100%;
+      background: rgba(10,17,35,0.85);
+      border: 1px solid rgba(148,163,184,0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: #f8fafc;
+      font-size: 1rem;
+    }
+    input[type="number"]:focus {
+      outline: 2px solid rgba(56,189,248,0.75);
+      border-color: rgba(56,189,248,0.5);
+      box-shadow: 0 0 0 4px rgba(56,189,248,0.15);
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+    .hint {
+      font-size: .75rem;
+      color: #94a3b8;
+    }
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(15,23,42,0.65);
+      border: 1px dashed rgba(148,163,184,0.3);
+      border-radius: 16px;
+      color: #cbd5f5;
+      font-size: 1rem;
+    }
+    .loading, .error-section {
+      text-align: center;
+      padding: 80px 20px;
+      color: #e0f2fe;
+      font-size: 1.1rem;
+    }
+    .error-section h2 {
+      margin: 0 0 10px;
+      font-size: 1.6rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    @media (max-width: 640px) {
+      .container {
+        padding: 28px 0 48px;
+        gap: 22px;
+      }
+      .meta-card {
+        padding: 18px;
+      }
+      .month-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div id="loading" class="loading">Carregando dados das metas...</div>
+    <section id="content" class="hidden">
+      <header>
+        <span class="badge">Atualização de metas</span>
+        <h1 id="pageTitle">Metas do cliente</h1>
+        <p id="instructions">Preencha os resultados do mês atual e a projeção até o fim do ano. As respostas são salvas automaticamente.</p>
+      </header>
+      <div id="statusMessage" class="status"></div>
+      <div id="metasList" class="metas-list"></div>
+    </section>
+    <section id="error" class="error-section hidden">
+      <h2>Link indisponível</h2>
+      <p id="errorMessage">Não foi possível carregar este formulário.</p>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const MONTH_LABELS = { jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' };
+
+    const qs = new URLSearchParams(location.search);
+    const token = qs.get('token') || qs.get('metasForm');
+    const loadingEl = document.getElementById('loading');
+    const contentEl = document.getElementById('content');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const statusEl = document.getElementById('statusMessage');
+    const metasListEl = document.getElementById('metasList');
+    const titleEl = document.getElementById('pageTitle');
+    const instructionsEl = document.getElementById('instructions');
+
+    if(!token){
+      showError('O link informado é inválido. Solicite um novo link ao time da MediaGrowth.');
+      throw new Error('Token ausente');
+    }
+
+    const app = getApps().find(a => a.name === 'metas-form') || initializeApp(firebaseConfig, 'metas-form');
+    const db = getFirestore(app);
+    const formRef = doc(db, 'metasForms', token);
+
+    const state = {
+      initialized: false,
+      version: 0,
+      responses: {},
+      docData: null,
+      saveTimer: null,
+      saving: false
+    };
+
+    function showError(message){
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = message;
+    }
+
+    function showContent(){
+      loadingEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+    }
+
+    function setStatus(message, isError=false){
+      statusEl.textContent = message || '';
+      statusEl.classList.toggle('error', !!isError);
+    }
+
+    function getUnitSymbol(unit){
+      if(unit === 'BRL') return 'R$';
+      if(unit === 'USD') return 'US$';
+      if(unit === '%') return '%';
+      return '';
+    }
+
+    function getInputStep(unit){
+      if(unit === 'numero') return '1';
+      if(unit === '%') return '0.1';
+      return '0.01';
+    }
+
+    function formatNumberDisplay(value, unit){
+      if(value === null || value === undefined || value === '') return '—';
+      const num = Number(value);
+      if(!Number.isFinite(num)) return '—';
+      if(unit === 'BRL') return num.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+      if(unit === 'USD') return num.toLocaleString('pt-BR', { style:'currency', currency:'USD' });
+      if(unit === '%') return num.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:2 }) + '%';
+      return num.toLocaleString('pt-BR', { minimumFractionDigits:0, maximumFractionDigits:2 });
+    }
+
+    function cloneResponses(source){
+      const out = {};
+      if(!source || typeof source !== 'object') return out;
+      Object.entries(source).forEach(([metaId, payload]) => {
+        if(!payload || typeof payload !== 'object') return;
+        const entry = {};
+        if(Object.prototype.hasOwnProperty.call(payload, 'current')){
+          entry.current = payload.current;
+        }
+        if(payload.projections && typeof payload.projections === 'object'){
+          entry.projections = { ...payload.projections };
+        }
+        out[metaId] = entry;
+      });
+      return out;
+    }
+
+    function sanitizeNumber(value){
+      if(value === '' || value === null || value === undefined) return null;
+      if(typeof value === 'number') return Number.isFinite(value) ? value : null;
+      const num = Number(value);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function ensureMetaState(metaId){
+      if(!state.responses[metaId]){
+        state.responses[metaId] = {};
+      }
+      if(!state.responses[metaId].projections){
+        state.responses[metaId].projections = {};
+      }
+      return state.responses[metaId];
+    }
+
+    function cleanupMetaState(metaId){
+      const entry = state.responses[metaId];
+      if(!entry) return;
+      if(entry.projections){
+        Object.keys(entry.projections).forEach(month => {
+          const val = entry.projections[month];
+          if(val === '' || val === undefined){
+            delete entry.projections[month];
+          }
+        });
+        if(!Object.keys(entry.projections).length){
+          delete entry.projections;
+        }
+      }
+      if(entry.current === undefined){
+        delete entry.current;
+      }
+      if(!Object.prototype.hasOwnProperty.call(entry, 'current') && !entry.projections){
+        delete state.responses[metaId];
+      }
+    }
+
+    function buildPayload(){
+      const out = {};
+      Object.entries(state.responses).forEach(([metaId, entry]) => {
+        if(!entry || typeof entry !== 'object') return;
+        const payload = {};
+        if(Object.prototype.hasOwnProperty.call(entry, 'current')){
+          if(entry.current === null){
+            payload.current = null;
+          } else {
+            const num = sanitizeNumber(entry.current);
+            if(num !== null){
+              payload.current = num;
+            }
+          }
+        }
+        if(entry.projections && typeof entry.projections === 'object'){
+          const proj = {};
+          Object.entries(entry.projections).forEach(([month, val]) => {
+            if(val === null){
+              proj[month] = null;
+            } else {
+              const num = sanitizeNumber(val);
+              if(num !== null){
+                proj[month] = num;
+              }
+            }
+          });
+          if(Object.keys(proj).length){
+            payload.projections = proj;
+          }
+        }
+        if(Object.keys(payload).length){
+          out[metaId] = payload;
+        }
+      });
+      return out;
+    }
+
+    function scheduleSave(){
+      if(!state.initialized) return;
+      setStatus('Salvando automaticamente...');
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(runSave, 600);
+    }
+
+    async function runSave(){
+      if(state.saving){
+        scheduleSave();
+        return;
+      }
+      clearTimeout(state.saveTimer);
+      state.saveTimer = null;
+      const payload = buildPayload();
+      const version = Date.now();
+      state.saving = true;
+      try{
+        await setDoc(formRef, {
+          responses: payload,
+          updatedAt: serverTimestamp(),
+          version
+        }, { merge: true });
+        state.version = version;
+        state.responses = cloneResponses(payload);
+        setStatus('Respostas salvas. Você pode fechar esta página quando quiser.');
+      }catch(err){
+        console.error('Erro ao salvar respostas', err);
+        setStatus('Não conseguimos salvar agora. Tentaremos novamente em instantes.', true);
+        state.saveTimer = setTimeout(runSave, 3000);
+      }finally{
+        state.saving = false;
+      }
+    }
+
+    function handleInput(metaId, kind, monthKey, rawValue){
+      const entry = ensureMetaState(metaId);
+      if(kind === 'current'){
+        if(rawValue === ''){
+          entry.current = null;
+        }else{
+          const num = Number(rawValue);
+          if(Number.isFinite(num)){
+            entry.current = num;
+          }
+        }
+      } else if(kind === 'projection'){
+        if(rawValue === ''){
+          entry.projections[monthKey] = null;
+        }else{
+          const num = Number(rawValue);
+          if(Number.isFinite(num)){
+            entry.projections[monthKey] = num;
+          }
+        }
+      }
+      cleanupMetaState(metaId);
+      scheduleSave();
+    }
+
+    function renderMetaCard(meta, docData){
+      const card = document.createElement('article');
+      card.className = 'meta-card';
+      const header = document.createElement('div');
+      header.className = 'meta-header';
+      const title = document.createElement('h2');
+      title.className = 'meta-title';
+      const prefix = meta.pos ? meta.pos + ' • ' : '';
+      title.textContent = prefix + (meta.descricao || 'Meta');
+      header.appendChild(title);
+      const unitSymbol = getUnitSymbol(meta.unidade);
+      if(unitSymbol){
+        const unit = document.createElement('span');
+        unit.className = 'meta-unit';
+        unit.textContent = unitSymbol;
+        header.appendChild(unit);
+      }
+      card.appendChild(header);
+
+      const fields = document.createElement('div');
+      fields.className = 'fields';
+      const currentLabel = document.createElement('label');
+      currentLabel.className = 'field';
+      const currentTitle = document.createElement('span');
+      currentTitle.className = 'field-label';
+      currentTitle.textContent = `Resultado de ${docData.monthLabel || MONTH_LABELS[docData.monthKey] || 'Mês atual'}`;
+      if(unitSymbol){
+        const unitTag = document.createElement('strong');
+        unitTag.textContent = unitSymbol;
+        currentTitle.appendChild(unitTag);
+      }
+      currentLabel.appendChild(currentTitle);
+      const currentInput = document.createElement('input');
+      currentInput.type = 'number';
+      currentInput.step = getInputStep(meta.unidade);
+      currentInput.inputMode = meta.unidade === 'numero' ? 'numeric' : 'decimal';
+      const entry = state.responses[meta.id] || {};
+      const currentValue = Object.prototype.hasOwnProperty.call(entry, 'current') ? entry.current : meta.currentValue;
+      currentInput.value = currentValue === null || currentValue === undefined ? '' : currentValue;
+      currentInput.addEventListener('input', () => handleInput(meta.id, 'current', docData.monthKey, currentInput.value));
+      currentLabel.appendChild(currentInput);
+      if(meta.currentValue !== null && meta.currentValue !== undefined && meta.currentValue !== ''){
+        const hint = document.createElement('span');
+        hint.className = 'hint';
+        hint.textContent = `Último valor registrado: ${formatNumberDisplay(meta.currentValue, meta.unidade)}`;
+        currentLabel.appendChild(hint);
+      }
+      fields.appendChild(currentLabel);
+
+      const monthsWrap = document.createElement('div');
+      monthsWrap.className = 'month-grid';
+      const months = Array.isArray(docData.projectionMonths) && docData.projectionMonths.length
+        ? docData.projectionMonths
+        : Object.keys(MONTH_LABELS);
+      const projections = entry.projections || {};
+      months.forEach(monthKey => {
+        const label = document.createElement('label');
+        label.className = 'field';
+        const span = document.createElement('span');
+        span.className = 'field-label';
+        span.textContent = `Projeção • ${MONTH_LABELS[monthKey] || monthKey.toUpperCase()}`;
+        if(unitSymbol){
+          const unitTag = document.createElement('strong');
+          unitTag.textContent = unitSymbol;
+          span.appendChild(unitTag);
+        }
+        label.appendChild(span);
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = getInputStep(meta.unidade);
+        input.inputMode = meta.unidade === 'numero' ? 'numeric' : 'decimal';
+        const projValue = Object.prototype.hasOwnProperty.call(projections, monthKey)
+          ? projections[monthKey]
+          : (meta.projections ? meta.projections[monthKey] : null);
+        input.value = projValue === null || projValue === undefined ? '' : projValue;
+        input.addEventListener('input', () => handleInput(meta.id, 'projection', monthKey, input.value));
+        label.appendChild(input);
+        if(meta.projections && meta.projections[monthKey] !== null && meta.projections[monthKey] !== undefined && meta.projections[monthKey] !== ''){
+          const hint = document.createElement('span');
+          hint.className = 'hint';
+          hint.textContent = `Referência atual: ${formatNumberDisplay(meta.projections[monthKey], meta.unidade)}`;
+          label.appendChild(hint);
+        }
+        monthsWrap.appendChild(label);
+      });
+      fields.appendChild(monthsWrap);
+      card.appendChild(fields);
+      return card;
+    }
+
+    function renderMetas(docData){
+      metasListEl.innerHTML = '';
+      if(!Array.isArray(docData.metas) || !docData.metas.length){
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'Nenhuma meta ativa foi compartilhada neste link. Solicite uma atualização ao time da MediaGrowth.';
+        metasListEl.appendChild(empty);
+        return;
+      }
+      docData.metas.forEach(meta => {
+        metasListEl.appendChild(renderMetaCard(meta, docData));
+      });
+    }
+
+    async function init(){
+      try{
+        const snap = await getDoc(formRef);
+        if(!snap.exists()){
+          showError('Este link expirou ou foi revogado. Solicite um novo link ao seu consultor.');
+          return;
+        }
+        const data = snap.data();
+        state.docData = data;
+        state.version = data.version || 0;
+        state.responses = cloneResponses(data.responses || {});
+        const clientLabel = data.clientLabel || data.clientKey || 'Cliente';
+        const monthLabel = data.monthLabel || MONTH_LABELS[data.monthKey] || 'mês atual';
+        titleEl.textContent = `Metas • ${clientLabel}`;
+        instructionsEl.innerHTML = `Informe o resultado de <strong>${monthLabel}</strong> e atualize a projeção até o fim do ano.`;
+        renderMetas(data);
+        showContent();
+        setStatus('As respostas são salvas automaticamente.');
+        state.initialized = true;
+      }catch(err){
+        console.error('Erro ao carregar formulário de metas', err);
+        showError('Não foi possível carregar este formulário. Verifique o link ou tente novamente mais tarde.');
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

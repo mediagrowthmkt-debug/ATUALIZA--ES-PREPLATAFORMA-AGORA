@@ -1,0 +1,294 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ===== Helpers existentes ===== */
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdmin() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    /* ===== Novos helpers multi-tenant ===== */
+    function isAgency() {
+      return isSignedIn() && request.auth.token.role == 'agency' && request.auth.token.agencyId is string;
+    }
+    function isClient() {
+      return isSignedIn() && request.auth.token.role == 'client' && request.auth.token.agencyId is string && request.auth.token.clientId is string;
+    }
+    function sameAgencyData(doc) {
+      return doc.agencyId is string && request.auth.token.agencyId == doc.agencyId;
+    }
+    function sameAgencyReq(doc) {
+      return doc.agencyId is string && request.auth.token.agencyId == doc.agencyId;
+    }
+    function sameClientData(doc) {
+      return doc.clientId is string && request.auth.token.clientId == doc.clientId && sameAgencyData(doc);
+    }
+    function sameClientReq(doc) {
+      return doc.clientId is string && request.auth.token.clientId == doc.clientId && sameAgencyReq(doc);
+    }
+
+    /* ===== Isolamento por usuário (compat) + abertura para agência ===== */
+    match /usuarios/{userId} {
+
+      // O dono (usuário legado) segue com acesso total e agência/cliente têm acesso dentro do próprio contexto
+    allow read: if isOwner(userId)
+           || (isSignedIn() && exists(resource) && resource.data.agencyId == request.auth.uid)
+           || (isClient() && exists(resource) && sameClientData(resource.data));
+    allow create, update, delete: if isOwner(userId)
+           || (isSignedIn()
+             && request.resource.data.agencyId is string
+             && request.resource.data.agencyId == request.auth.uid)
+           || (isClient()
+             && request.resource.data.agencyId == request.auth.token.agencyId
+             && request.resource.data.clientId == request.auth.token.clientId);
+
+      /* posts (mantido) */
+      match /posts/{postId} {
+        allow read, write: if isOwner(userId);
+        allow read, update, create, delete: if isAgency() && (
+          (exists(resource) && sameAgencyData(resource.data)) ||
+          sameAgencyReq(request.resource.data)
+        );
+
+        /* 🔰 Atualização pública via link (mantido) */
+        allow update: if
+          request.auth == null
+          &&
+          resource.data.diff(request.resource.data).changedKeys().hasOnly([
+            'status','approvedBy','approvedSlides','reviewNotes',
+            'updatedAt','lastReviewAt','approvalToken'
+          ])
+          &&
+          request.resource.data.approvalToken is string
+          &&
+          (
+            ( exists(/databases/$(database)/documents/postApprovals/$(request.resource.data.approvalToken))
+              && get(/databases/$(database)/documents/postApprovals/$(request.resource.data.approvalToken)).data.uid == userId
+              && get(/databases/$(database)/documents/postApprovals/$(request.resource.data.approvalToken)).data.postId == postId
+            )
+            ||
+            (
+              exists(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken))
+              && get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.uid == userId
+              &&
+              (
+                !('postsCollectionPath' in get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data)
+                ||
+                (
+                  get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.postsCollectionPath is list
+                  && get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.postsCollectionPath.size() >= 2
+                  && get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.postsCollectionPath[0] == 'usuarios'
+                  && get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.postsCollectionPath[1] == userId
+                )
+              )
+              &&
+              (
+                !('postIds' in get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data)
+                ||
+                get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.postIds.hasAny([postId])
+              )
+              &&
+              (
+                !('monthKey' in get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data)
+                || !('dateISO' in resource.data)
+                || (resource.data.dateISO is string
+                    && resource.data.dateISO.size() >= 7
+                    && resource.data.dateISO.slice(0,7) == get(/databases/$(database)/documents/calendarShares/$(request.resource.data.approvalToken)).data.monthKey)
+              )
+            )
+          );
+      }
+
+      /* ✅ TIME (global): /usuarios/{userId}/team/{memberId} */
+      match /team/{memberId} {
+        allow read: if isOwner(userId)
+                    || (isAgency() && (
+                         (exists(resource) && sameAgencyData(resource.data)) ||
+                         sameAgencyReq(request.resource.data)
+                       ));
+        allow create, update, delete: if isOwner(userId)
+                    || (isAgency() && (
+                         (exists(resource) && sameAgencyData(resource.data)) ||
+                         sameAgencyReq(request.resource.data)
+                       ));
+      }
+
+      /* ✅ TIME em settings: /usuarios/{userId}/settings/{docId}/team/{memberId} */
+      match /settings/{docId}/team/{memberId} {
+        allow read: if isOwner(userId)
+                    || (isAgency() && (
+                         (exists(resource) && sameAgencyData(resource.data)) ||
+                         sameAgencyReq(request.resource.data)
+                       ));
+        allow create, update, delete: if isOwner(userId)
+                    || (isAgency() && (
+                         (exists(resource) && sameAgencyData(resource.data)) ||
+                         sameAgencyReq(request.resource.data)
+                       ));
+      }
+
+      /* documentos de cada cliente (legado) */
+      match /clients/{clientId} {
+        // Dono segue com acesso
+        allow read, write: if isOwner(userId);
+
+        // Agência pode ler/escrever tudo do cliente, desde que agencyId/clientId batam
+        allow read, update, create, delete: if isAgency() && (
+          (exists(resource) && sameAgencyData(resource.data) && resource.data.clientId == request.auth.token.clientId ? true : sameAgencyData(resource.data))
+          ||
+          sameAgencyReq(request.resource.data)
+        );
+
+        // Cliente logado (role=client) só no próprio clientId
+        allow read, update, create, delete: if isClient() && (
+          (exists(resource) && sameClientData(resource.data)) ||
+          sameClientReq(request.resource.data)
+        );
+
+        /* ✅ TIME por cliente: /usuarios/{userId}/clients/{clientId}/team/{memberId} */
+        match /team/{memberId} {
+          allow read: if isOwner(userId)
+                      || (isAgency() && (
+                           (exists(resource) && sameAgencyData(resource.data)) ||
+                           sameAgencyReq(request.resource.data)
+                         ))
+                      || (isClient() && (
+                           (exists(resource) && sameClientData(resource.data)) ||
+                           sameClientReq(request.resource.data)
+                         ));
+          allow create, update, delete: if isOwner(userId)
+                      || (isAgency() && (
+                           (exists(resource) && sameAgencyData(resource.data)) ||
+                           sameAgencyReq(request.resource.data)
+                         ))
+                      || (isClient() && (
+                           (exists(resource) && sameClientData(resource.data)) ||
+                           sameClientReq(request.resource.data)
+                         ));
+        }
+
+        match /refSocial/{docId} {
+          allow read, write: if isOwner(userId)
+                             || (isAgency() && ((exists(resource) && sameAgencyData(resource.data)) || sameAgencyReq(request.resource.data)))
+                             || (isClient() && ((exists(resource) && sameClientData(resource.data)) || sameClientReq(request.resource.data)));
+        }
+
+        match /{subcol}/{docId} {
+          allow read, write: if isOwner(userId)
+                             || (isAgency() && ((exists(resource) && sameAgencyData(resource.data)) || sameAgencyReq(request.resource.data)))
+                             || (isClient() && ((exists(resource) && sameClientData(resource.data)) || sameClientReq(request.resource.data)));
+        }
+
+        match /{path=**} {
+          allow read, write: if isOwner(userId)
+                             || (isAgency() && ((exists(resource) && sameAgencyData(resource.data)) || sameAgencyReq(request.resource.data)))
+                             || (isClient() && ((exists(resource) && sameClientData(resource.data)) || sameClientReq(request.resource.data)));
+        }
+      }
+    }
+
+    /* Leitura global apenas para admins */
+    match /{path=**}/notas/{docId}        { allow read: if isAdmin(); }
+    match /{path=**}/metricas/{docId}     { allow read: if isAdmin(); }
+    match /{path=**}/atualizacoes/{docId} { allow read: if isAdmin(); }
+    match /{path=**}/iframes/{docId}      { allow read: if isAdmin(); }
+
+    /* Índice de clientes */
+    match /clientes_index/{clienteId} { allow read: if isAdmin(); allow write: if false; }
+
+    /* Lista de admins */
+    match /admins/{uid} { allow read: if isOwner(uid); allow write: if false; }
+
+    /* 🔰 Formulário público de Metas (mantido) */
+    match /metasForms/{token} {
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token;
+      allow get: if true;
+      allow list: if false;
+      allow update: if
+        (isSignedIn() && request.auth.uid == resource.data.uid)
+        ||
+        (
+          request.auth == null
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.clientKeyNormalized == resource.data.clientKeyNormalized
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly(['responses','updatedAt','version'])
+        );
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+
+    /* ✅ Links públicos de aprovação (legado) */
+    match /postApprovals/{token} {
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token;
+      allow get: if true;
+      allow list: if false;
+      allow update: if
+        (isSignedIn() && request.auth.uid == resource.data.uid)
+        ||
+        (
+          request.auth == null
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.clientKeyNormalized == resource.data.clientKeyNormalized
+          && request.resource.data.postId == resource.data.postId
+          && request.resource.data.postDocPath == resource.data.postDocPath
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly([
+            'decision','decisionBy','decisionEmail','decisionAt',
+            'note','notes','reviewNote','approvedSlides','internalApprovedSlides',
+            'status','approvedBy','reviewNotes','updatedAt','lastAction','lastActionAt','lastReviewAt'
+          ])
+        );
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+
+    /* ✅ Links públicos do calendário (mantido) */
+    match /calendarShares/{token} {
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token;
+      allow get: if true;
+      allow list: if false;
+      allow update: if
+        (isSignedIn() && request.auth.uid == resource.data.uid)
+        ||
+        (
+          request.auth == null
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.uid   == resource.data.uid
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly([
+            'lastAction','lastActionAt','updatedAt','lastApprovedPostId','lastReviewPostId','lastReviewNote'
+          ])
+        );
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+
+    /* ✅ Links públicos do PLANEJAMENTO (mantido) */
+    match /planningShares/{token} {
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.token == token
+                    && request.resource.data.clientKeyNormalized is string;
+      allow get: if true;
+      allow list: if false;
+      allow update: if
+        (isSignedIn() && request.auth.uid == resource.data.uid)
+        ||
+        (
+          request.auth == null
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.uid   == resource.data.uid
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly([
+              'updatedAt','lastAction','lastActionAt','lastViewedAt','lastInteraction'
+          ])
+        );
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+  }
+}

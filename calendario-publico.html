@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Calendário Público • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --bg-gradient: radial-gradient(circle at top, rgba(59,130,246,0.12), transparent 55%), #0f172a;
+      --surface: rgba(15,23,42,0.55);
+      --border: rgba(148,163,184,0.28);
+      --border-strong: rgba(148,163,184,0.35);
+      --text: #f8fafc;
+      --muted: #cbd5f5;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 32px 0 64px;
+    }
+    main.container {
+      width: min(1100px, 94vw);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .hidden { display: none !important; }
+    .state-block {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    .state-block h2 {
+      margin: 0 0 12px;
+      font-size: 1.5rem;
+      color: #e0f2fe;
+    }
+    header.page-header {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 24px 40px rgba(15,23,42,0.35);
+    }
+    .badge {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.18);
+      border: 1px solid rgba(59,130,246,0.28);
+      color: #bae6fd;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 2.6rem);
+      line-height: 1.2;
+      color: #e0f2fe;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    .instructions {
+      margin: 0;
+      font-size: .95rem;
+      color: rgba(203,213,225,0.9);
+      line-height: 1.5;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.14);
+      border: 1px solid rgba(148,163,184,0.28);
+    }
+    .legend .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+    .dot-pendente { background: #64748b; }
+    .dot-aprovado { background: #2e7d32; }
+    .dot-aprovado-interno { background: #7c4dff; }
+    .dot-revisar { background: #c8a600; }
+    .calendar-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 24px 40px rgba(15,23,42,0.32);
+    }
+    .calendar {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(15,23,42,0.4);
+    }
+    .cal-head {
+      display: grid;
+      grid-template-columns: 60px 1fr 60px;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(148,163,184,0.12);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-weight: 700;
+    }
+    .cal-head .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(226,232,240,0.4);
+      font-size: 1.4rem;
+    }
+    .cal-head .nav.disabled { opacity: .35; }
+    .cal-title {
+      text-align: center;
+      font-size: 1.15rem;
+      color: #f8fafc;
+      letter-spacing: .04em;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    .cal-weekday {
+      padding: 10px 12px;
+      text-align: center;
+      font-size: .85rem;
+      font-weight: 800;
+      color: rgba(226,232,240,0.82);
+      background: rgba(148,163,184,0.16);
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .cal-weekday:last-child { border-right: 0; }
+    .cal-weekday.weekend { background: rgba(148,163,184,0.22); }
+    .cal-cell {
+      min-height: 120px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      padding: 8px;
+      position: relative;
+    }
+    .cal-cell:nth-child(7n) { border-right: 0; }
+    .cal-cell.weekend:not(.out) { background: rgba(30,41,59,0.32); }
+    .cal-cell.out { background: rgba(15,23,42,0.28); }
+    .cal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+    .daynum {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: .8rem;
+      color: rgba(226,232,240,0.72);
+      font-weight: 700;
+    }
+    .cal-items {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .cal-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid rgba(148,163,184,0.45);
+      background: rgba(15,23,42,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+    .cal-thumb img,
+    .cal-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .cal-thumb span {
+      color: rgba(226,232,240,0.85);
+      font-weight: 800;
+      font-size: .78rem;
+      text-transform: uppercase;
+    }
+    .cal-thumb:hover { transform: scale(1.04); border-color: var(--accent); }
+    .cal-thumb.aprovado { border-color: #2e7d32; }
+    .cal-thumb.aprovado-interno { border-color: #7c4dff; }
+    .cal-thumb.revisar { border-color: #c8a600; }
+    .cal-thumb.pendente { border-color: rgba(148,163,184,0.45); }
+    .mobile-posts {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mobile-card {
+      background: rgba(15,23,42,0.65);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .mobile-card-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(15,23,42,0.8);
+      border: 2px solid rgba(148,163,184,0.35);
+      flex-shrink: 0;
+    }
+    .mobile-card-thumb img,
+    .mobile-card-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .mobile-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1 1 auto;
+    }
+    .mobile-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #e0f2fe;
+      cursor: pointer;
+    }
+    .mobile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: .82rem;
+      color: rgba(226,232,240,0.7);
+    }
+    .mobile-desc {
+      margin: 0;
+      font-size: .9rem;
+      color: rgba(226,232,240,0.88);
+      line-height: 1.45;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .status-pendente { background: rgba(148,163,184,0.18); border-color: rgba(148,163,184,0.35); color: #e2e8f0; }
+    .status-aprovado { background: rgba(34,197,94,0.18); border-color: rgba(34,197,94,0.4); color: #bbf7d0; }
+    .status-aprovado-interno { background: rgba(124,77,255,0.2); border-color: rgba(124,77,255,0.45); color: #e9d5ff; }
+    .status-revisar { background: rgba(202,138,4,0.18); border-color: rgba(202,138,4,0.4); color: #facc15; }
+    .empty-message {
+      padding: 22px;
+      text-align: center;
+      border: 1px dashed rgba(148,163,184,0.32);
+      border-radius: 14px;
+      color: rgba(226,232,240,0.76);
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: min(900px, 96vw);
+      max-height: 94vh;
+      background: rgba(15,23,42,0.95);
+      border-radius: 22px;
+      border: 1px solid rgba(148,163,184,0.28);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(8,15,40,0.55);
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(148,163,184,0.14);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .modal-head strong {
+      font-size: 1.1rem;
+      color: #e0f2fe;
+    }
+    .modal-head button {
+      background: rgba(59,130,246,0.18);
+      color: #bfdbfe;
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .modal-body {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 18px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal-preview {
+      background: rgba(15,23,42,0.6);
+      border: 1px solid rgba(148,163,184,0.28);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-media-stage {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      background: rgba(8,15,35,0.85);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .modal-media-stage img,
+    .modal-media-stage video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .modal-carousel {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .modal-carousel button {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: 2px solid rgba(148,163,184,0.35);
+      background: rgba(15,23,42,0.85);
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .modal-carousel button.active { border-color: var(--accent); }
+    .modal-carousel img,
+    .modal-carousel video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .modal-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    dl.meta {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    dl.meta div { display: flex; flex-direction: column; gap: 4px; }
+    dl.meta dt {
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(203,213,225,0.75);
+      font-weight: 700;
+    }
+    dl.meta dd {
+      margin: 0;
+      font-size: .95rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .modal-desc {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: .95rem;
+      line-height: 1.6;
+      color: rgba(226,232,240,0.92);
+      white-space: pre-wrap;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .modal-actions label {
+      font-size: .85rem;
+      color: rgba(203,213,225,0.86);
+      font-weight: 600;
+    }
+    .modal-actions input,
+    .modal-actions textarea {
+      width: 100%;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 10px;
+      color: #f8fafc;
+      padding: 8px 10px;
+      font-size: .95rem;
+      resize: vertical;
+    }
+    .modal-actions textarea { min-height: 100px; }
+    .modal-action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .modal-action-buttons button {
+      flex: 1 1 160px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 0;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .95rem;
+    }
+    #modalApprove {
+      background: linear-gradient(135deg, rgba(34,197,94,0.92), rgba(16,185,129,0.85));
+      color: #ecfdf5;
+    }
+    #modalReview {
+      background: linear-gradient(135deg, rgba(234,179,8,0.92), rgba(202,138,4,0.88));
+      color: #fff7cc;
+    }
+    #modalApprove:disabled,
+    #modalReview:disabled {
+      opacity: .5;
+      cursor: default;
+    }
+    .modal-feedback {
+      font-size: .9rem;
+      color: rgba(224,231,255,0.86);
+      min-height: 1.2rem;
+    }
+    .modal-feedback.error { color: #fca5a5; }
+    .notes-box {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.28);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .note-item {
+      background: rgba(8,15,35,0.75);
+      border: 1px solid rgba(148,163,184,0.22);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .note-head {
+      font-size: .78rem;
+      color: rgba(203,213,225,0.76);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .note-body {
+      font-size: .92rem;
+      color: rgba(226,232,240,0.92);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 980px) {
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+      .modal-preview { order: 1; }
+      .modal-info { order: 2; }
+    }
+    @media (max-width: 780px) {
+      body { padding: 20px 0 40px; }
+      header.page-header { padding: 20px; }
+      .calendar-shell { padding: 16px; }
+      .cal-head { grid-template-columns: 48px 1fr 48px; }
+      .cal-weekday { font-size: .78rem; padding: 8px; }
+      .cal-cell { min-height: 110px; padding: 6px; }
+      .cal-items { gap: 4px; }
+      .cal-thumb { width: 38px; height: 38px; border-radius: 8px; }
+      .mobile-posts { display: flex; }
+      .calendar { order: -1; }
+    }
+    @media (max-width: 580px) {
+      .modal { padding: 0; }
+      .modal-card {
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+      }
+      .modal-head { padding: 16px; }
+      .modal-body {
+        padding: 16px;
+        overflow-y: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section id="loading" class="state-block">Carregando calendário...</section>
+    <section id="error" class="state-block hidden">
+      <h2>Link indisponível</h2>
+      <p id="errorMessage">Não foi possível carregar este calendário.</p>
+    </section>
+    <section id="content" class="hidden" aria-live="polite">
+      <header class="page-header">
+        <span class="badge">Calendário público</span>
+        <h1 id="calendarTitle">Calendário de publicações</h1>
+        <p id="calendarSubtitle" class="subtitle"></p>
+        <p class="instructions">Visualize e aprove os posts planejados deste mês. Os botões abaixo atualizam o status no painel da MediaGrowth em tempo real, sem necessidade de login.</p>
+        <div class="legend">
+          <span><span class="dot dot-pendente"></span>Pendente</span>
+          <span><span class="dot dot-aprovado"></span>Aprovado</span>
+          <span><span class="dot dot-aprovado-interno"></span>Aprovado (time interno)</span>
+          <span><span class="dot dot-revisar"></span>Pedir ajustes</span>
+        </div>
+      </header>
+      <section class="calendar-shell">
+        <div class="calendar">
+          <div class="cal-head">
+            <div class="nav disabled" aria-hidden="true">‹</div>
+            <div class="cal-title" id="calTitle">Mês</div>
+            <div class="nav disabled" aria-hidden="true">›</div>
+          </div>
+          <div class="cal-grid" id="calWeekdays"></div>
+          <div class="cal-grid" id="calDays"></div>
+        </div>
+        <div class="mobile-posts" id="mobilePostList"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal" id="postModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <strong id="modalTitle">Post</strong>
+        <button id="modalClose" type="button">Fechar</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-preview">
+          <div class="modal-media-stage" id="modalMedia"></div>
+          <div class="modal-carousel" id="modalCarousel"></div>
+        </div>
+        <div class="modal-info">
+          <dl class="meta">
+            <div>
+              <dt>Status</dt>
+              <dd><span id="modalStatus" class="status-pill status-pendente">pendente</span></dd>
+            </div>
+            <div>
+              <dt>Data</dt>
+              <dd id="modalDate">--</dd>
+            </div>
+            <div>
+              <dt>Destino</dt>
+              <dd id="modalTarget">--</dd>
+            </div>
+          </dl>
+          <div class="modal-desc" id="modalDesc">Sem descrição.</div>
+          <div class="modal-actions">
+            <label for="reviewText">Precisa de ajustes? Conte pra gente:</label>
+            <input id="reviewName" type="text" placeholder="Seu nome (opcional)" autocomplete="name"/>
+            <textarea id="reviewText" placeholder="Descreva o que devemos ajustar"></textarea>
+            <div class="modal-action-buttons">
+              <button id="modalApprove" type="button">Aprovar</button>
+              <button id="modalReview" type="button">Pedir ajustes</button>
+            </div>
+            <div id="modalFeedback" class="modal-feedback"></div>
+          </div>
+          <div>
+            <h3 style="margin:0 0 8px; font-size:1rem; color:#e0f2fe;">Observações já enviadas</h3>
+            <div id="modalNotes" class="notes-box"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInAnonymously,
+      signInWithCustomToken,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const token = (qs.get('token') || '').trim();
+    const monthOverride = qs.get('month');
+
+    const loadingEl = document.getElementById('loading');
+    const contentEl = document.getElementById('content');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const calendarTitleEl = document.getElementById('calendarTitle');
+    const calendarSubtitleEl = document.getElementById('calendarSubtitle');
+    const calTitleEl = document.getElementById('calTitle');
+    const calWeekdaysEl = document.getElementById('calWeekdays');
+    const calDaysEl = document.getElementById('calDays');
+    const mobilePostListEl = document.getElementById('mobilePostList');
+    const modalEl = document.getElementById('postModal');
+    const modalCloseBtn = document.getElementById('modalClose');
+    const modalTitleEl = document.getElementById('modalTitle');
+    const modalStatusEl = document.getElementById('modalStatus');
+    const modalDateEl = document.getElementById('modalDate');
+    const modalTargetEl = document.getElementById('modalTarget');
+    const modalDescEl = document.getElementById('modalDesc');
+    const modalMediaEl = document.getElementById('modalMedia');
+    const modalCarouselEl = document.getElementById('modalCarousel');
+    const reviewNameEl = document.getElementById('reviewName');
+    const reviewTextEl = document.getElementById('reviewText');
+    const approveBtn = document.getElementById('modalApprove');
+    const reviewBtn = document.getElementById('modalReview');
+    const modalFeedbackEl = document.getElementById('modalFeedback');
+    const modalNotesEl = document.getElementById('modalNotes');
+
+    const app = getApps().find(a => a.name === 'public-calendar') || initializeApp(firebaseConfig, 'public-calendar');
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const state = {
+      share: null,
+      summariesMap: new Map(),
+      posts: [],
+      postMap: new Map(),
+      selectedPost: null,
+      modalMedia: { urls: [], index: 0 },
+      busy: false
+    };
+
+    const authState = {
+      ready: false,
+      error: null,
+      promise: null
+    };
+
+    onAuthStateChanged(auth, user => {
+      if(user){
+        authState.ready = true;
+        authState.error = null;
+      }else{
+        authState.ready = false;
+      }
+    });
+
+    const shareRef = token ? doc(db, 'calendarShares', token) : null;
+
+    if(!token){
+      showError('O link informado é inválido ou expirou. Solicite um novo link ao time da MediaGrowth.');
+    }else{
+      initialize();
+    }
+
+    function showError(message){
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = message || 'Não foi possível carregar este calendário.';
+    }
+
+    function showContent(){
+      loadingEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+    }
+
+    function getNestedValue(obj, path){
+      if(!obj || typeof obj !== 'object') return undefined;
+      const segments = Array.isArray(path) ? path : String(path).split('.');
+      let current = obj;
+      for(const segment of segments){
+        if(!current || typeof current !== 'object') return undefined;
+        if(!(segment in current)) return undefined;
+        current = current[segment];
+      }
+      return current;
+    }
+
+    function pickShareString(share, candidates, predicate){
+      if(!share || typeof share !== 'object') return '';
+      for(const candidate of candidates){
+        const value = getNestedValue(share, candidate);
+        if(typeof value === 'string'){
+          const trimmed = value.trim();
+          if(trimmed && (!predicate || predicate(trimmed))){
+            return trimmed;
+          }
+        }
+      }
+      return '';
+    }
+
+    function pickShareBoolean(share, candidates){
+      if(!share || typeof share !== 'object') return null;
+      for(const candidate of candidates){
+        const value = getNestedValue(share, candidate);
+        if(typeof value === 'boolean'){
+          return value;
+        }
+      }
+      return null;
+    }
+
+    function resolveShareAuthConfig(share){
+      const tokenCandidates = [
+        'authCustomToken',
+        'customAuthToken',
+        'firebaseAuthCustomToken',
+        'firebaseCustomToken',
+        'auth.customToken',
+        'auth.token',
+        'firebaseAuth.customToken',
+        'credentials.customToken',
+        'authTokens.custom',
+        'authTokens.calendar'
+      ];
+      const emailCandidates = [
+        'authEmail',
+        'firebaseAuthEmail',
+        'auth.email',
+        'credentials.email',
+        'authCredentials.email'
+      ];
+      const passwordCandidates = [
+        'authPassword',
+        'firebaseAuthPassword',
+        'auth.password',
+        'credentials.password',
+        'authCredentials.password'
+      ];
+      const allowAnonCandidates = [
+        'allowAnonymousAuth',
+        'allowAnonymousAccess',
+        'allowAnonymous',
+        'auth.allowAnonymous',
+        'permissions.allowAnonymous'
+      ];
+      const disableAnonCandidates = [
+        'disableAnonymousAuth',
+        'auth.disableAnonymous',
+        'permissions.disableAnonymous'
+      ];
+      const customToken = pickShareString(share, tokenCandidates, value => value.length > 20 && value.includes('.'));
+      const email = pickShareString(share, emailCandidates, value => value.includes('@'));
+      const password = pickShareString(share, passwordCandidates, value => value.length > 0);
+      const allowAnonFlag = pickShareBoolean(share, allowAnonCandidates);
+      const disableAnonFlag = pickShareBoolean(share, disableAnonCandidates);
+      const allowAnonymous = disableAnonFlag === true ? false : (allowAnonFlag === false ? false : true);
+      return {
+        customToken,
+        email,
+        password,
+        allowAnonymous
+      };
+    }
+
+    async function ensureAuth(){
+      if(!auth){
+        authState.ready = true;
+        return true;
+      }
+      if(auth.currentUser && authState.ready){
+        return true;
+      }
+      if(authState.promise){
+        try {
+          return await authState.promise;
+        }catch(err){
+          return false;
+        }
+      }
+      authState.promise = (async () => {
+        if(auth.currentUser){
+          authState.ready = true;
+          authState.error = null;
+          return true;
+        }
+        const share = state.share || {};
+        const authConfig = resolveShareAuthConfig(share);
+        const attempts = [];
+        if(authConfig.customToken){
+          attempts.push(async () => {
+            await signInWithCustomToken(auth, authConfig.customToken);
+          });
+        }
+        if(authConfig.email && authConfig.password){
+          attempts.push(async () => {
+            await signInWithEmailAndPassword(auth, authConfig.email, authConfig.password);
+          });
+        }
+        if(authConfig.allowAnonymous !== false){
+          attempts.push(async () => {
+            await signInAnonymously(auth);
+          });
+        }
+        if(attempts.length === 0){
+          authState.ready = true;
+          authState.error = null;
+          return true;
+        }
+        let lastError = null;
+        for(const attempt of attempts){
+          try {
+            await attempt();
+            authState.ready = true;
+            authState.error = null;
+            return true;
+          }catch(err){
+            lastError = err;
+            console.warn('[calendar] auth attempt failed', err);
+            if(err?.code === 'auth/operation-not-allowed'){
+              continue;
+            }
+          }
+        }
+        authState.error = lastError || new Error('Não foi possível autenticar este link.');
+        return false;
+      })();
+      try {
+        return await authState.promise;
+      }finally{
+        authState.promise = null;
+      }
+    }
+
+    async function initialize(){
+      try {
+        const snap = await getDoc(shareRef);
+        if(!snap.exists()){
+          showError('Este link de calendário não está mais disponível.');
+          return;
+        }
+        const data = snap.data() || {};
+        state.share = { id: token, token, ...data };
+        try {
+          await ensureAuth();
+        }catch(authErr){
+          console.warn('calendar auth initialization', authErr);
+        }
+        if(Array.isArray(data.postSummaries)){
+          state.summariesMap = new Map(data.postSummaries.map(item => [item.id, item]));
+        }
+        const effectiveMonth = resolveMonthKey(data.monthKey || '', monthOverride);
+        state.share.effectiveMonthKey = effectiveMonth || data.monthKey || '';
+        renderHeader();
+        renderCalendarSkeleton();
+        applyPostDataFromSummaries();
+        showContent();
+      }catch(err){
+        console.error('load share', err);
+        showError('Não foi possível carregar este calendário.');
+      }
+    }
+
+    function resolveMonthKey(baseKey, override){
+      if(override && /^\d{4}-\d{2}$/.test(override)){ return override; }
+      return baseKey;
+    }
+
+    function sanitizeDocPath(path){
+      if(!Array.isArray(path) || path.length < 2) return null;
+      const cleaned = [];
+      for(const segment of path){
+        if(segment === undefined || segment === null) return null;
+        const str = String(segment).trim();
+        if(!str) return null;
+        cleaned.push(str);
+      }
+      return cleaned;
+    }
+
+    function sanitizeDocPathString(path){
+      if(typeof path !== 'string') return '';
+      const segments = path.split('/').map(segment => segment.trim()).filter(Boolean);
+      if(segments.length < 2) return '';
+      return segments.join('/');
+    }
+
+    function normalizeDocPathString(value){
+      if(!value) return '';
+      if(typeof value === 'string'){ return sanitizeDocPathString(value); }
+      if(Array.isArray(value)){
+        const segments = sanitizeDocPath(value);
+        return segments ? segments.join('/') : '';
+      }
+      return '';
+    }
+
+    function resolveSharePostPath(postId){
+      const uid = typeof state.share?.uid === 'string' ? state.share.uid.trim() : '';
+      if(!uid) return null;
+      if(postId === undefined || postId === null) return null;
+      const id = String(postId).trim();
+      if(!id) return null;
+      return sanitizeDocPathString(`usuarios/${uid}/posts/${id}`);
+    }
+
+    function resolvePostDocPath(post){
+      if(!post) return { ok: false, message: 'Post inválido.' };
+      const explicit = normalizeDocPathString(post.postDocPath);
+      let postPath = explicit;
+      if(!postPath){
+        const fallback = resolveSharePostPath(post.id);
+        postPath = fallback || '';
+      }
+      if(typeof postPath !== 'string' || !postPath){
+        return { ok: false, message: 'Não foi possível localizar este post no Firebase.' };
+      }
+      const cleanedPath = sanitizeDocPathString(postPath);
+      if(!cleanedPath){
+        return { ok: false, message: 'Não foi possível localizar este post no Firebase.' };
+      }
+      const segments = cleanedPath.split('/');
+      if(segments.length < 2){
+        return { ok: false, message: 'Não foi possível localizar este post no Firebase.' };
+      }
+      return { ok: true, path: segments, pathString: cleanedPath };
+    }
+
+    function validatePostAction(post){
+      if(!post) return { ok: false, message: 'Post inválido.' };
+      const allowed = Array.isArray(state.share?.postIds)
+        ? new Set(state.share.postIds.map(item => String(item)))
+        : null;
+      if(allowed){
+        const postId = post.id === undefined || post.id === null ? '' : String(post.id);
+        if(!postId || !allowed.has(postId)){
+          return { ok: false, message: 'Este post não está disponível para este link.', alert: true };
+        }
+      }
+      const monthKey = typeof state.share?.effectiveMonthKey === 'string' && state.share.effectiveMonthKey
+        ? state.share.effectiveMonthKey
+        : (typeof state.share?.monthKey === 'string' ? state.share.monthKey : '');
+      if(monthKey && typeof post.dateISO === 'string' && post.dateISO){
+        const postMonth = post.dateISO.slice(0, 7);
+        if(postMonth && postMonth !== monthKey){
+          return { ok: false, message: 'Este post não pertence ao mês liberado neste link.', alert: true };
+        }
+      }
+      return { ok: true };
+    }
+
+    function buildPostFromData(id, data, summary){
+      const media = Array.isArray(data.mediaUrls) && data.mediaUrls.length ? data.mediaUrls.filter(Boolean) : (Array.isArray(summary.mediaUrls) ? summary.mediaUrls.filter(Boolean) : []);
+      const reviewNotes = Array.isArray(data.reviewNotes) ? data.reviewNotes : (Array.isArray(summary.reviewNotes) ? summary.reviewNotes : []);
+      const docPath = normalizeDocPathString(data?.postDocPath) || normalizeDocPathString(summary?.postDocPath) || resolveSharePostPath(id);
+      return {
+        id,
+        dateISO: data.dateISO || summary.dateISO || '',
+        desc: data.desc ?? summary.desc ?? '',
+        target: data.target || summary.target || 'feed',
+        status: data.status || summary.status || 'pendente',
+        approvedBy: data.approvedBy || summary.approvedBy || '',
+        type: data.type || summary.type || '',
+        thumbUrl: data.thumbUrl || summary.thumbUrl || (media[0] || ''),
+        mediaUrls: media,
+        reviewNotes,
+        approvedSlides: Array.isArray(data.approvedSlides) ? data.approvedSlides : (Array.isArray(summary.approvedSlides) ? summary.approvedSlides : []),
+        tenant: data.tenant || summary.tenant || '',
+        postDocPath: docPath,
+        updatedAt: extractMillis(data.updatedAt) || extractMillis(summary.updatedAt) || 0
+      };
+    }
+
+    function applyPostData(list){
+      const monthKey = state.share?.effectiveMonthKey || '';
+      const allowedIds = Array.isArray(state.share?.postIds) && state.share.postIds.length
+        ? new Set(state.share.postIds.map(item => String(item)))
+        : null;
+      const posts = [];
+      const usedIds = new Set();
+      list.forEach(post => {
+        if(!post || !post.dateISO){ return; }
+        if(monthKey && post.dateISO.slice(0,7) !== monthKey){ return; }
+        const postId = post.id === undefined || post.id === null ? '' : String(post.id);
+        if(allowedIds && (!postId || !allowedIds.has(postId))){ return; }
+        posts.push(post);
+        if(postId){
+          usedIds.add(postId);
+        }
+      });
+      state.summariesMap.forEach((summary, id) => {
+        const summaryId = id === undefined || id === null ? '' : String(id);
+        if(summaryId && usedIds.has(summaryId)) return;
+        if(monthKey && (summary.dateISO || '').slice(0,7) !== monthKey) return;
+        if(allowedIds && (!summaryId || !allowedIds.has(summaryId))) return;
+        posts.push(buildPostFromData(id, {}, summary));
+      });
+      posts.sort((a,b) => {
+        const diff = (a.dateISO || '').localeCompare(b.dateISO || '');
+        if(diff !== 0) return diff;
+        return (a.desc || '').localeCompare(b.desc || '');
+      });
+      state.posts = posts;
+      state.postMap = new Map(posts.map(p => [p.id, p]));
+      renderCalendar();
+      renderMobileList();
+      if(state.selectedPost){
+        const updated = state.postMap.get(state.selectedPost.id);
+        if(updated && modalEl.dataset.open === 'true'){
+          openPostModal(updated, { preserveMediaIndex: true, silent: true });
+        }
+      }
+    }
+
+    function applyPostDataFromSummaries(){
+      const list = [];
+      state.summariesMap.forEach((summary, id) => {
+        list.push(buildPostFromData(id, {}, summary));
+      });
+      applyPostData(list);
+    }
+
+    function renderHeader(){
+      const share = state.share || {};
+      const clientLabel = share.clientLabel || share.clientKey || 'Cliente';
+      const monthKey = share.effectiveMonthKey || share.monthKey || '';
+      const label = monthKey ? formatMonthLabel(monthKey) : (share.monthLabel || 'Mês atual');
+      calendarTitleEl.textContent = `Calendário de ${clientLabel}`;
+      calendarSubtitleEl.textContent = label ? `${label} • visualize e aprove` : 'Visualize e aprove os posts planejados';
+    }
+
+    function renderCalendarSkeleton(){
+      if(!calWeekdaysEl) return;
+      const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      calWeekdaysEl.innerHTML = weekdays.map((day, idx) => `<div class="cal-weekday${(idx===0||idx===6)?' weekend':''}">${day}</div>`).join('');
+    }
+
+    function renderCalendar(){
+      if(!calDaysEl) return;
+      const monthKey = state.share?.effectiveMonthKey || '';
+      if(!monthKey){
+        calTitleEl.textContent = 'Calendário';
+        calDaysEl.innerHTML = '';
+        return;
+      }
+      const [yearStr, monthStr] = monthKey.split('-');
+      const year = parseInt(yearStr, 10);
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      if(!Number.isFinite(year) || !Number.isFinite(monthIndex)){
+        calTitleEl.textContent = state.share?.monthLabel || 'Calendário';
+        calDaysEl.innerHTML = '';
+        return;
+      }
+      const monthDate = new Date(year, monthIndex, 1);
+      calTitleEl.textContent = state.share?.monthLabel || formatMonthLabel(monthKey) || monthLabel(monthDate);
+      const firstDay = new Date(year, monthIndex, 1);
+      const startWeekday = (firstDay.getDay() + 7) % 7;
+      const totalDays = daysInMonth(year, monthIndex);
+      const totalCells = Math.ceil((startWeekday + totalDays) / 7) * 7;
+      const todayISO = localDateISO(new Date());
+      const postsByDate = new Map();
+      state.posts.forEach(post => {
+        if(!post.dateISO) return;
+        const list = postsByDate.get(post.dateISO) || [];
+        list.push(post);
+        postsByDate.set(post.dateISO, list);
+      });
+      const cells = [];
+      for(let idx=0; idx<totalCells; idx++){
+        const dayNum = idx - startWeekday + 1;
+        const inMonth = dayNum >= 1 && dayNum <= totalDays;
+        const dateObj = inMonth ? new Date(year, monthIndex, dayNum) : null;
+        const iso = inMonth ? localDateISO(dateObj) : '';
+        const posts = inMonth ? (postsByDate.get(iso) || []) : [];
+        const isWeekend = idx % 7 === 0 || idx % 7 === 6;
+        const classes = ['cal-cell'];
+        if(isWeekend) classes.push('weekend');
+        if(!inMonth) classes.push('out');
+        if(iso === todayISO) classes.push('today');
+        const thumbs = posts.map(post => renderCalendarThumb(post)).join('');
+        cells.push(`
+          <div class="${classes.join(' ')}" data-iso="${iso}">
+            ${inMonth ? `<div class="daynum">${dayNum}</div>` : ''}
+            <div class="cal-items">${thumbs}</div>
+          </div>
+        `);
+      }
+      calDaysEl.innerHTML = cells.join('');
+      calDaysEl.querySelectorAll('.cal-thumb').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.getAttribute('data-id');
+          if(!id) return;
+          const post = state.postMap.get(id);
+          if(post) openPostModal(post);
+        });
+      });
+    }
+
+    function renderCalendarThumb(post){
+      const status = (post.status || '').toLowerCase();
+      let cls = 'cal-thumb';
+      if(status === 'aprovado'){
+        cls += post.approvedBy === 'interno' ? ' aprovado-interno' : ' aprovado';
+      }else if(status === 'revisar'){
+        cls += ' revisar';
+      }else{
+        cls += ' pendente';
+      }
+      const first = post.thumbUrl || (Array.isArray(post.mediaUrls) ? post.mediaUrls[0] : '') || '';
+      const label = resolveMediaLabel(first, post.type);
+      if(first && isVideoUrl(first)){
+        return `<div class="${cls}" data-id="${post.id}" title="${escapeHtml(post.desc||'')}" aria-label="Post em vídeo"><span>${label || 'V'}</span></div>`;
+      }
+      if(first){
+        return `<div class="${cls}" data-id="${post.id}" title="${escapeHtml(post.desc||'')}"><img src="${first}" alt=""></div>`;
+      }
+      return `<div class="${cls}" data-id="${post.id}" title="${escapeHtml(post.desc||'')}"><span>${label || '+'}</span></div>`;
+    }
+
+    function renderMobileList(){
+      if(!mobilePostListEl) return;
+      if(!state.posts.length){
+        mobilePostListEl.innerHTML = '<div class="empty-message">Nenhum post cadastrado para este mês ainda.</div>';
+        return;
+      }
+      mobilePostListEl.innerHTML = state.posts.map(post => {
+        const first = post.thumbUrl || (Array.isArray(post.mediaUrls) ? post.mediaUrls[0] : '') || '';
+        const label = formatStatusLabel(post.status, post.approvedBy);
+        const statusClass = statusClassName(post.status, post.approvedBy);
+        const dateLabel = formatDate(post.dateISO);
+        const targetLabel = post.target === 'stories' ? 'Stories' : 'Feed';
+        const thumb = first ? renderMobileThumb(first) : `<div class="mobile-card-thumb"></div>`;
+        return `
+          <article class="mobile-card" data-id="${post.id}">
+            ${thumb}
+            <div class="mobile-card-body">
+              <h3>${escapeHtml(post.desc || 'Post sem descrição')}</h3>
+              <div class="mobile-meta">
+                <span>${dateLabel}</span>
+                <span>${targetLabel}</span>
+                <span class="status-pill ${statusClass}">${label}</span>
+              </div>
+              <p class="mobile-desc">${escapeHtml(truncateText(post.desc || 'Sem descrição.', 160))}</p>
+            </div>
+          </article>
+        `;
+      }).join('');
+      mobilePostListEl.querySelectorAll('.mobile-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          if(!id) return;
+          const post = state.postMap.get(id);
+          if(post) openPostModal(post);
+        });
+      });
+    }
+
+    function renderMobileThumb(url){
+      const video = isVideoUrl(url);
+      if(video){
+        return `<div class="mobile-card-thumb"><video src="${url}" muted playsinline></video></div>`;
+      }
+      return `<div class="mobile-card-thumb"><img src="${url}" alt=""></div>`;
+    }
+
+    function openPostModal(post, options = {}){
+      state.selectedPost = post;
+      const summary = state.summariesMap.get(post.id) || {};
+      const media = collectMedia(post, summary);
+      state.modalMedia = {
+        urls: media,
+        index: options.preserveMediaIndex ? Math.min(state.modalMedia.index || 0, Math.max(media.length - 1, 0)) : 0
+      };
+      modalTitleEl.textContent = post.desc ? truncateText(post.desc, 80) : 'Post do calendário';
+      modalDateEl.textContent = formatDate(post.dateISO) || '--';
+      modalTargetEl.textContent = post.target === 'stories' ? 'Stories' : 'Feed';
+      updateModalStatus(post.status, post.approvedBy);
+      modalDescEl.textContent = post.desc || 'Sem descrição.';
+      renderModalMedia();
+      renderModalNotes(post);
+      if(!options.silent){
+        modalFeedbackEl.textContent = '';
+        modalFeedbackEl.classList.remove('error');
+        reviewTextEl.value = '';
+      }
+      modalEl.classList.add('show');
+      modalEl.dataset.open = 'true';
+      modalEl.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+    }
+
+    function closePostModal(){
+      modalEl.classList.remove('show');
+      modalEl.dataset.open = 'false';
+      modalEl.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      state.selectedPost = null;
+      state.modalMedia = { urls: [], index: 0 };
+      setModalBusy(false);
+      modalFeedbackEl.textContent = '';
+      modalFeedbackEl.classList.remove('error');
+    }
+
+    function renderModalMedia(){
+      const media = Array.isArray(state.modalMedia?.urls) ? state.modalMedia.urls : [];
+      const index = Math.max(0, Math.min(state.modalMedia?.index || 0, Math.max(media.length - 1, 0)));
+      if(!media.length){
+        modalMediaEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(226,232,240,0.7);font-size:.95rem;">Nenhuma mídia enviada.</div>';
+        modalCarouselEl.innerHTML = '';
+        return;
+      }
+      const current = media[index];
+      modalMediaEl.innerHTML = renderModalStageMedia(current);
+      modalCarouselEl.innerHTML = media.map((url, idx) => renderCarouselButton(url, idx, idx === index)).join('');
+      modalCarouselEl.querySelectorAll('[data-index]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-index')) || 0;
+          state.modalMedia.index = idx;
+          renderModalMedia();
+        });
+      });
+    }
+
+    function renderModalStageMedia(url){
+      if(isVideoUrl(url)){
+        return `<video src="${url}" controls playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000"></video>`;
+      }
+      return `<img src="${url}" alt="Prévia do post" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>`;
+    }
+
+    function renderCarouselButton(url, index, active){
+      const cls = active ? 'active' : '';
+      if(isVideoUrl(url)){
+        return `<button type="button" class="${cls}" data-index="${index}"><video src="${url}" muted playsinline></video></button>`;
+      }
+      return `<button type="button" class="${cls}" data-index="${index}"><img src="${url}" alt="Mídia ${index+1}"></button>`;
+    }
+
+    function renderModalNotes(post){
+      const notes = Array.isArray(post.reviewNotes) ? post.reviewNotes : [];
+      if(!notes.length){
+        modalNotesEl.innerHTML = '<div class="empty-message" style="background:rgba(15,23,42,0.4);border:1px dashed rgba(148,163,184,0.32);">Sem observações enviadas até o momento.</div>';
+        return;
+      }
+      modalNotesEl.innerHTML = notes.map(note => {
+        const who = escapeHtml(note.by || 'Cliente');
+        const whenValue = extractMillis(note.at);
+        const when = whenValue ? formatDateTime(whenValue) : '';
+        const text = escapeHtml(note.text || '');
+        const rendered = text.replace(/\n/g,'<br>');
+        const meta = when ? `${who}<span>•</span>${when}` : who;
+        return `<div class="note-item"><div class="note-head">${meta}</div><div class="note-body">${rendered}</div></div>`;
+      }).join('');
+    }
+
+    function collectMedia(post, summary){
+      const media = [];
+      if(Array.isArray(post.mediaUrls) && post.mediaUrls.length){
+        post.mediaUrls.forEach(url => { if(url) media.push(url); });
+      }
+      if(!media.length && Array.isArray(summary.mediaUrls)){
+        summary.mediaUrls.forEach(url => { if(url) media.push(url); });
+      }
+      if(!media.length && post.thumbUrl){ media.push(post.thumbUrl); }
+      return media;
+    }
+
+    function updateModalStatus(status, approvedBy){
+      const value = (status || 'pendente').toLowerCase();
+      const label = formatStatusLabel(value, approvedBy);
+      const cls = statusClassName(value, approvedBy);
+      modalStatusEl.textContent = label;
+      modalStatusEl.className = `status-pill ${cls}`;
+    }
+
+    function formatStatusLabel(status, approvedBy){
+      const value = (status || 'pendente').toLowerCase();
+      if(value === 'aprovado'){
+        return approvedBy === 'interno' ? 'Aprovado • time interno' : 'Aprovado';
+      }
+      if(value === 'revisar') return 'Pedir ajustes';
+      return 'Pendente';
+    }
+
+    function statusClassName(status, approvedBy){
+      const value = (status || 'pendente').toLowerCase();
+      if(value === 'aprovado'){
+        return approvedBy === 'interno' ? 'status-aprovado-interno' : 'status-aprovado';
+      }
+      if(value === 'revisar') return 'status-revisar';
+      return 'status-pendente';
+    }
+
+    function setModalBusy(busy){
+      state.busy = busy;
+      approveBtn.disabled = busy;
+      reviewBtn.disabled = busy;
+      reviewTextEl.disabled = busy;
+      reviewNameEl.disabled = busy;
+    }
+
+    function setModalFeedback(message, isError){
+      modalFeedbackEl.textContent = message || '';
+      modalFeedbackEl.classList.toggle('error', !!isError);
+    }
+
+    function buildShareTelemetryUpdate(action, post, extras = {}){
+      if(!shareRef || !action || !post) return null;
+      const postId = post?.id === undefined || post?.id === null ? '' : String(post.id);
+      if(!postId) return null;
+      const updates = {
+        lastAction: action,
+        lastActionAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      if(action === 'post-approved'){
+        updates.lastApprovedPostId = postId;
+      }else if(action === 'post-review-requested'){
+        updates.lastReviewPostId = postId;
+        if(typeof extras.notePreview === 'string' && extras.notePreview.trim()){
+          const preview = extras.notePreview.trim();
+          updates.lastReviewNote = truncateText(preview, 180);
+        }
+      }
+      return updates;
+    }
+
+    async function updateShareTelemetry(action, post, extras = {}){
+      if(!shareRef) return;
+      const updates = buildShareTelemetryUpdate(action, post, extras);
+      if(!updates) return;
+      return updateDoc(shareRef, updates);
+    }
+
+    async function handleApprove(){
+      if(state.busy) return;
+      if(!state.selectedPost) return;
+      const post = state.selectedPost;
+      const validation = validatePostAction(post);
+      if(!validation.ok){
+        setModalFeedback(validation.message, true);
+        if(validation.alert){ alert(validation.message); }
+        return;
+      }
+      const pathInfo = resolvePostDocPath(post);
+      if(!pathInfo.ok){
+        setModalFeedback(pathInfo.message, true);
+        return;
+      }
+      const authOk = await ensureAuth();
+      if(!authOk){
+        const errorMessage = authState.error?.message || 'Não foi possível autenticar este link de aprovação. Solicite um novo acesso ao time MediaGrowth.';
+        console.error('[approve] auth failed', authState.error);
+        setModalFeedback(errorMessage, true);
+        if(authState.error?.code === 'auth/operation-not-allowed'){
+          alert('A autenticação anônima não está habilitada para este link. Solicite um novo acesso ao time MediaGrowth.');
+        }
+        return;
+      }
+      setModalBusy(true);
+      setModalFeedback('Enviando aprovação...', false);
+      try {
+        const approvalToken = token;
+        const postPayload = {
+          status: 'aprovado',
+          approvedBy: 'cliente',
+          approvalToken,
+          updatedAt: serverTimestamp()
+        };
+        const operations = [updateDoc(doc(db, ...pathInfo.path), postPayload)];
+        if(shareRef){
+          operations.push(updateShareTelemetry('post-approved', post));
+        }
+        await Promise.all(operations);
+        const now = Date.now();
+        const updatedPost = {
+          ...post,
+          status: 'aprovado',
+          approvedBy: 'cliente',
+          approvalToken,
+          updatedAt: now,
+          postDocPath: pathInfo.pathString
+        };
+        state.selectedPost = updatedPost;
+        const summary = state.summariesMap.get(updatedPost.id) || {};
+        state.summariesMap.set(updatedPost.id, {
+          ...summary,
+          status: 'aprovado',
+          approvedBy: 'cliente',
+          approvalToken,
+          updatedAt: now,
+          postDocPath: pathInfo.pathString
+        });
+        state.postMap.set(updatedPost.id, updatedPost);
+        state.posts = state.posts.map(item => item.id === updatedPost.id ? updatedPost : item);
+        updateModalStatus(updatedPost.status, updatedPost.approvedBy);
+        renderModalNotes(updatedPost);
+        renderCalendar();
+        renderMobileList();
+        setModalFeedback('✅ A aprovação foi registrada com sucesso. Obrigado pela confirmação!', false);
+      }catch(err){
+        console.error('[approve] erro ao atualizar post', err);
+        if(err?.code === 'permission-denied'){
+          const message = 'Este link não tem permissão para realizar esta ação. Solicite um novo acesso ao time MediaGrowth.';
+          alert(message);
+          setModalFeedback(message, true);
+        }else{
+          setModalFeedback('Não foi possível aprovar o post agora. Tente novamente em instantes.', true);
+        }
+      }finally{
+        setModalBusy(false);
+      }
+    }
+
+    async function handleReview(){
+      if(state.busy) return;
+      if(!state.selectedPost) return;
+      const message = (reviewTextEl.value || '').trim();
+      if(!message){
+        setModalFeedback('Descreva o que precisa ser ajustado antes de enviar.', true);
+        reviewTextEl.focus();
+        return;
+      }
+      const post = state.selectedPost;
+      const validation = validatePostAction(post);
+      if(!validation.ok){
+        setModalFeedback(validation.message, true);
+        if(validation.alert){ alert(validation.message); }
+        return;
+      }
+      const pathInfo = resolvePostDocPath(post);
+      if(!pathInfo.ok){
+        setModalFeedback(pathInfo.message, true);
+        return;
+      }
+      const authOk = await ensureAuth();
+      if(!authOk){
+        const errorMessage = authState.error?.message || 'Não foi possível autenticar este link de aprovação. Solicite um novo acesso ao time MediaGrowth.';
+        console.error('[review] auth failed', authState.error);
+        setModalFeedback(errorMessage, true);
+        if(authState.error?.code === 'auth/operation-not-allowed'){
+          alert('A autenticação anônima não está habilitada para este link. Solicite um novo acesso ao time MediaGrowth.');
+        }
+        return;
+      }
+      const name = (reviewNameEl.value || '').trim();
+      setModalBusy(true);
+      setModalFeedback('Enviando ajustes...', false);
+      try {
+        const approvalToken = token;
+        const note = {
+          text: message,
+          by: name || 'Cliente',
+          viaLink: true,
+          origin: 'cliente',
+          shareToken: token || '',
+          createdAt: new Date().toISOString()
+        };
+        const existingNotes = Array.isArray(post.reviewNotes) ? [...post.reviewNotes] : [];
+        const updatedNotes = [...existingNotes, note];
+        const postPayload = {
+          status: 'revisar',
+          approvedBy: '',
+          reviewNotes: updatedNotes,
+          approvalToken,
+          updatedAt: serverTimestamp(),
+          lastReviewAt: serverTimestamp()
+        };
+        const operations = [updateDoc(doc(db, ...pathInfo.path), postPayload)];
+        if(shareRef){
+          operations.push(updateShareTelemetry('post-review-requested', post, {
+            notePreview: message
+          }));
+        }
+        await Promise.all(operations);
+        const now = Date.now();
+        const updatedPost = {
+          ...post,
+          status: 'revisar',
+          approvedBy: '',
+          reviewNotes: updatedNotes,
+          approvalToken,
+          updatedAt: now,
+          lastReviewAt: now,
+          postDocPath: pathInfo.pathString
+        };
+        state.selectedPost = updatedPost;
+        const summary = state.summariesMap.get(updatedPost.id) || {};
+        state.summariesMap.set(updatedPost.id, {
+          ...summary,
+          status: 'revisar',
+          approvedBy: '',
+          reviewNotes: updatedNotes,
+          approvalToken,
+          updatedAt: now,
+          lastReviewAt: now,
+          postDocPath: pathInfo.pathString
+        });
+        state.postMap.set(updatedPost.id, updatedPost);
+        state.posts = state.posts.map(item => item.id === updatedPost.id ? updatedPost : item);
+        updateModalStatus(updatedPost.status, updatedPost.approvedBy);
+        renderModalNotes(updatedPost);
+        renderCalendar();
+        renderMobileList();
+        reviewTextEl.value = '';
+        setModalFeedback('✅ O pedido de ajustes foi registrado. Obrigado pelo feedback!', false);
+      }catch(err){
+        console.error('[review] erro ao atualizar post', err);
+        if(err?.code === 'permission-denied'){
+          const message = 'Este link não tem permissão para realizar esta ação. Solicite um novo acesso ao time MediaGrowth.';
+          alert(message);
+          setModalFeedback(message, true);
+        }else{
+          setModalFeedback('Não foi possível enviar os ajustes agora. Tente novamente em instantes.', true);
+        }
+      }finally{
+        setModalBusy(false);
+      }
+    }
+
+    modalCloseBtn?.addEventListener('click', closePostModal);
+    modalEl?.addEventListener('click', event => {
+      if(event.target === modalEl){ closePostModal(); }
+    });
+    document.addEventListener('keydown', event => {
+      if(event.key === 'Escape' && modalEl?.dataset.open === 'true'){
+        closePostModal();
+      }
+    });
+    approveBtn?.addEventListener('click', handleApprove);
+    reviewBtn?.addEventListener('click', handleReview);
+
+    const notesObserverTarget = modalNotesEl && typeof modalNotesEl === 'object' && typeof modalNotesEl.nodeType === 'number'
+      ? modalNotesEl
+      : null;
+    if(typeof MutationObserver === 'function' && notesObserverTarget){
+      try {
+        const notesObserver = new MutationObserver(() => {
+          notesObserverTarget.scrollTop = notesObserverTarget.scrollHeight;
+        });
+        notesObserver.observe(notesObserverTarget, { childList: true, subtree: true });
+      }catch(observerErr){
+        console.warn('calendar notes observer failed', observerErr);
+      }
+    }
+
+    function extractMillis(value){
+      if(!value) return 0;
+      if(typeof value === 'number') return value;
+      if(typeof value.toMillis === 'function'){
+        try { return value.toMillis(); }catch(_err){ return 0; }
+      }
+      const parsed = Date.parse(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function localDateISO(date){
+      if(!(date instanceof Date)) return '';
+      const tz = date.getTimezoneOffset() * 60000;
+      return new Date(date.getTime() - tz).toISOString().slice(0,10);
+    }
+
+    function daysInMonth(year, monthIndex){
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+
+    function monthLabel(date){
+      const names = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      return `${names[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    function formatMonthLabel(monthKey){
+      if(!monthKey) return '';
+      const [y,m] = monthKey.split('-');
+      const year = parseInt(y,10);
+      const monthIndex = parseInt(m,10) - 1;
+      if(!Number.isFinite(year) || !Number.isFinite(monthIndex)) return '';
+      const names = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      const name = names[monthIndex] || '';
+      return name ? `${name} ${year}` : `${monthKey}`;
+    }
+
+    function formatDate(iso){
+      if(!iso) return '--';
+      const [y,m,d] = iso.split('-');
+      if(!y || !m || !d) return iso;
+      return `${d}/${m}`;
+    }
+
+    function formatDateTime(value){
+      if(!value) return '';
+      const date = new Date(value);
+      if(Number.isNaN(date.getTime())) return '';
+      const pad = (n) => String(n).padStart(2,'0');
+      return `${pad(date.getDate())}/${pad(date.getMonth()+1)}/${date.getFullYear()} ${pad(date.getHours())}h${pad(date.getMinutes())}`;
+    }
+
+    function isVideoUrl(url){
+      if(!url) return false;
+      const ext = url.split('?')[0].split('.').pop().toLowerCase();
+      return ['mp4','mov','webm','m4v','avi'].includes(ext);
+    }
+
+    function resolveMediaLabel(url, type){
+      if(type === 'carousel') return 'C';
+      if(isVideoUrl(url)) return 'V';
+      return '';
+    }
+
+    function truncateText(text, max){
+      if(!text || text.length <= max) return text;
+      return `${text.slice(0, max)}…`;
+    }
+
+    function escapeHtml(value){
+      return (value || '').replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch] || ch));
+    }
+  </script>
+</body>
+</html>
