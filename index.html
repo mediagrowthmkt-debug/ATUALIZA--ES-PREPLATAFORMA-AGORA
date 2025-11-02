@@ -1542,7 +1542,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
 
     // Função para aplicar thumbnails em elementos de vídeo no DOM
     function applyVideoThumbnails() {
-      const videoContainers = document.querySelectorAll('.cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url]');
+      const videoContainers = document.querySelectorAll('.cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url], .relatorio-story-item[data-video-url]');
       
       console.log('[Thumbnails] Encontrados', videoContainers.length, 'vídeos para processar');
       
@@ -13348,7 +13348,7 @@ async function sendIAQuestion(){
   renderRelatorioRedes(relatorioMesInput.value);
     }
     
-    function renderRelatorioStories(mesISO){
+  function renderRelatorioStories(mesISO){
       if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesISO) return;
       
       const [ano, mes] = mesISO.split('-');
@@ -13388,10 +13388,10 @@ async function sendIAQuestion(){
       stories.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
       
       relatorioStoriesGrid.innerHTML = stories.map(p=>{
-        const first = p.thumbUrl || p.mediaUrls?.[0] || "";
-        const ext = first.split("?")[0].split(".").pop().toLowerCase();
+        const firstMedia = p.mediaUrls?.[0] || "";
+        const ext = firstMedia.split("?")[0].split(".").pop().toLowerCase();
         const isVideo = ["mp4","mov","webm","m4v","avi"].includes(ext);
-        
+
         let cls = "relatorio-story-item";
         if(p.status === "aprovado"){
           cls += p.approvedBy === 'interno' ? " aprovado-interno" : " aprovado";
@@ -13401,26 +13401,51 @@ async function sendIAQuestion(){
           cls += " pendente";
         }
         if(isVideo) cls += " video";
-        
+
         const [y,m,d] = (p.dateISO||'').split('-');
         const dateLabel = d && m ? `${d}/${m}` : '';
-        
-        if(first){
+
+        // Se for vídeo e houver capa customizada (imagem), usa a capa
+        const hasCustomCover = p.thumbUrl && !/\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(p.thumbUrl);
+        if(isVideo){
+          if(hasCustomCover){
+            return `
+              <div class="${cls}" data-id="${p.id}">
+                <img src="${p.thumbUrl}" alt="Story ${dateLabel}" crossorigin="anonymous">
+                <div class="relatorio-story-status"></div>
+                <div class="relatorio-story-date">${dateLabel}</div>
+              </div>
+            `;
+          }
+          // Senão, gera automaticamente a thumbnail via canvas
+          if(firstMedia){
+            return `
+              <div class="${cls}" data-id="${p.id}" data-video-url="${firstMedia}">
+                <span>V</span>
+                <div class="relatorio-story-status"></div>
+                <div class="relatorio-story-date">${dateLabel}</div>
+              </div>
+            `;
+          }
+        }
+        // Não é vídeo: usa a primeira mídia disponível (thumbUrl preferencial)
+        const imgSrc = p.thumbUrl || firstMedia;
+        if(imgSrc){
           return `
             <div class="${cls}" data-id="${p.id}">
-              <img src="${first}" alt="Story ${dateLabel}" crossorigin="anonymous">
-              <div class="relatorio-story-status"></div>
-              <div class="relatorio-story-date">${dateLabel}</div>
-            </div>
-          `;
-        }else{
-          return `
-            <div class="${cls}" data-id="${p.id}">
+              <img src="${imgSrc}" alt="Story ${dateLabel}" crossorigin="anonymous">
               <div class="relatorio-story-status"></div>
               <div class="relatorio-story-date">${dateLabel}</div>
             </div>
           `;
         }
+        // Sem mídia
+        return `
+          <div class="${cls}" data-id="${p.id}">
+            <div class="relatorio-story-status"></div>
+            <div class="relatorio-story-date">${dateLabel}</div>
+          </div>
+        `;
       }).join("");
       
       relatorioStoriesGrid.querySelectorAll('.relatorio-story-item').forEach(el=>{
@@ -13430,6 +13455,8 @@ async function sendIAQuestion(){
           if(post && typeof openPostModal === 'function') openPostModal(post);
         });
       });
+      // Agendar geração das thumbnails de vídeo
+      setTimeout(() => { try{ applyVideoThumbnails(); }catch(_e){ try{ window.applyVideoThumbnails && window.applyVideoThumbnails(); }catch(__){} } }, 120);
     }
 
     function renderRelatorioPosts(mesISO){
@@ -13472,8 +13499,8 @@ async function sendIAQuestion(){
       posts.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
 
       relatorioPostsGrid.innerHTML = posts.map(p=>{
-        const first = p.thumbUrl || p.mediaUrls?.[0] || "";
-        const ext = first.split("?")[0].split(".").pop().toLowerCase();
+        const firstMedia = p.mediaUrls?.[0] || "";
+        const ext = firstMedia.split("?")[0].split(".").pop().toLowerCase();
         const isVideo = ["mp4","mov","webm","m4v","avi"].includes(ext);
 
         let cls = "relatorio-story-item"; // reaproveita estilos
@@ -13489,22 +13516,43 @@ async function sendIAQuestion(){
         const [y,m,d] = (p.dateISO||'').split('-');
         const dateLabel = d && m ? `${d}/${m}` : '';
 
-        if(first){
+        const hasCustomCover = p.thumbUrl && !/\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(p.thumbUrl);
+        if(isVideo){
+          if(hasCustomCover){
+            return `
+              <div class="${cls}" data-id="${p.id}">
+                <img src="${p.thumbUrl}" alt="Post ${dateLabel}" crossorigin="anonymous">
+                <div class="relatorio-story-status"></div>
+                <div class="relatorio-story-date">${dateLabel}</div>
+              </div>
+            `;
+          }
+          if(firstMedia){
+            return `
+              <div class="${cls}" data-id="${p.id}" data-video-url="${firstMedia}">
+                <span>V</span>
+                <div class="relatorio-story-status"></div>
+                <div class="relatorio-story-date">${dateLabel}</div>
+              </div>
+            `;
+          }
+        }
+        const imgSrc = p.thumbUrl || firstMedia;
+        if(imgSrc){
           return `
             <div class="${cls}" data-id="${p.id}">
-              <img src="${first}" alt="Post ${dateLabel}" crossorigin="anonymous">
-              <div class="relatorio-story-status"></div>
-              <div class="relatorio-story-date">${dateLabel}</div>
-            </div>
-          `;
-        }else{
-          return `
-            <div class="${cls}" data-id="${p.id}">
+              <img src="${imgSrc}" alt="Post ${dateLabel}" crossorigin="anonymous">
               <div class="relatorio-story-status"></div>
               <div class="relatorio-story-date">${dateLabel}</div>
             </div>
           `;
         }
+        return `
+          <div class="${cls}" data-id="${p.id}">
+            <div class="relatorio-story-status"></div>
+            <div class="relatorio-story-date">${dateLabel}</div>
+          </div>
+        `;
       }).join("");
 
       relatorioPostsGrid.querySelectorAll('.relatorio-story-item').forEach(el=>{
@@ -13514,6 +13562,8 @@ async function sendIAQuestion(){
           if(post && typeof openPostModal === 'function') openPostModal(post);
         });
       });
+      // Agendar geração das thumbnails de vídeo
+      setTimeout(() => { try{ applyVideoThumbnails(); }catch(_e){ try{ window.applyVideoThumbnails && window.applyVideoThumbnails(); }catch(__){} } }, 120);
     }
 
     function mapDemandaToStatusKey(status){
@@ -23077,7 +23127,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
     }
     if(typeof applyVideoThumbnails === "undefined") {
       window.applyVideoThumbnails = function() {
-        const videoContainers = document.querySelectorAll(".cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url]");
+        const videoContainers = document.querySelectorAll(".cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url], .relatorio-story-item[data-video-url]");
         console.log("[Thumbnails] Encontrados", videoContainers.length, "vídeos para processar");
         videoContainers.forEach(async (container) => {
           const videoUrl = container.getAttribute("data-video-url"); const postId = container.getAttribute("data-id");

@@ -46,10 +46,11 @@
     .relatorio-stories-grid::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:4px}
     .relatorio-stories-grid::-webkit-scrollbar-thumb{background:#ff6633;border-radius:4px}
     .relatorio-stories-grid::-webkit-scrollbar-thumb:hover{background:#ff7744}
-    .relatorio-story-item{min-width:120px;width:120px;height:200px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);transition:all .3s ease;flex-shrink:0}
+    .relatorio-story-item{min-width:120px;width:120px;height:200px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);transition:all .3s ease;flex-shrink:0;display:flex;align-items:center;justify-content:center}
     .relatorio-story-item:hover{transform:translateY(-4px);border-color:#ff6633;box-shadow:0 8px 24px rgba(255,102,51,.3)}
-    .relatorio-story-item img{width:100%;height:100%;object-fit:cover}
-    .relatorio-story-item.video::before{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);z-index:2}
+    .relatorio-story-item img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
+    .relatorio-story-item.video::before{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);z-index:2;pointer-events:none}
+    .relatorio-story-item[data-video-url]:not(:has(img))::after{content:"V";font-size:1.2rem;color:#fff;font-weight:700}
     .relatorio-story-date{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);color:#fff;font-size:.75rem;font-weight:700;padding:8px 6px 6px;text-align:center}
     .relatorio-story-status{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5)}
     .relatorio-story-item.aprovado .relatorio-story-status{background:#4ade80}
@@ -444,13 +445,111 @@
       }
     }
 
-    // Preenche página pública a partir do snapshot do token
-    function renderFromPayload(payload){
-      if(payload && payload.labelMonth){
-        document.getElementById('reportMonth').textContent = payload.labelMonth;
-        document.getElementById('relatorioHeaderSubtitle').textContent = `Resumo do mês ${payload.labelMonth}`;
+    // === Sistema de geração automática de thumbnails para vídeos ===
+    const VIDEO_THUMBNAILS_CACHE = new Map();
+
+    async function generateVideoThumbnail(videoUrl, postId) {
+      console.log('[Relatorio] Gerando thumbnail para:', videoUrl);
+      
+      if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) {
+        console.log('[Relatorio] Retornando do cache');
+        return VIDEO_THUMBNAILS_CACHE.get(videoUrl);
       }
-      renderReportSections(payload||{});
+
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.crossOrigin = 'anonymous';
+        video.preload = 'metadata';
+        video.muted = true;
+        video.playsInline = true;
+        
+        const timeout = setTimeout(() => {
+          console.error('[Relatorio] Timeout ao carregar vídeo');
+          video.src = '';
+          reject(new Error('Timeout ao gerar thumbnail'));
+        }, 10000);
+
+        video.onloadedmetadata = () => {
+          console.log('[Relatorio] Metadata carregada, duração:', video.duration);
+          const seekTime = Math.min(0.5, video.duration * 0.1);
+          video.currentTime = seekTime;
+        };
+        
+        video.onseeked = () => {
+          console.log('[Relatorio] Frame encontrado, capturando...');
+          try {
+            clearTimeout(timeout);
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            console.log('[Relatorio] Thumbnail gerada com sucesso');
+            
+            VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
+            video.src = '';
+            
+            resolve(thumbnailDataUrl);
+          } catch (err) {
+            clearTimeout(timeout);
+            console.error('[Relatorio] Erro ao capturar frame:', err);
+            reject(err);
+          }
+        };
+        
+        video.onerror = (err) => {
+          clearTimeout(timeout);
+          console.error('[Relatorio] Erro ao carregar vídeo:', err);
+          video.src = '';
+          reject(err);
+        };
+        
+        video.src = videoUrl;
+      });
+    }
+
+    function applyVideoThumbnails() {
+      const videoContainers = document.querySelectorAll('.relatorio-story-item[data-video-url]');
+      
+      console.log('[Relatorio] Encontrados', videoContainers.length, 'vídeos para processar');
+      
+      videoContainers.forEach(async (container) => {
+        const videoUrl = container.getAttribute('data-video-url');
+        const postId = container.getAttribute('data-id');
+        
+        if (!videoUrl) return;
+        
+        if (container.querySelector('img')) {
+          console.log('[Relatorio] Já tem thumbnail:', videoUrl);
+          return;
+        }
+        
+        console.log('[Relatorio] Gerando thumbnail para:', videoUrl);
+        
+        try {
+          const thumbnailUrl = await generateVideoThumbnail(videoUrl, postId);
+          
+          console.log('[Relatorio] Thumbnail gerada com sucesso');
+          
+          if (container.getAttribute('data-video-url') === videoUrl) {
+            const img = document.createElement('img');
+            img.src = thumbnailUrl;
+            img.alt = 'Video preview';
+            img.crossOrigin = 'anonymous';
+            
+            container.appendChild(img);
+            
+            console.log('[Relatorio] Thumbnail aplicada ao container');
+          }
+        } catch (err) {
+          console.error('[Relatorio] Falha ao gerar thumbnail:', err);
+        }
+      });
     }
 
     function renderStoriesAndPosts(posts, labelMonth){
@@ -477,6 +576,18 @@
         if(isVideo) cls += ' video';
         const [y,m,d] = String(p.dateISO||'').split('-');
         const dateLabel = (d&&m)? `${d}/${m}` : '';
+        
+        // Se é vídeo e tem thumbUrl personalizada (capa), usa ela
+        if(isVideo && p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
+          return `<div class="${cls}" data-id="${p.id||''}"><img src="${p.thumbUrl}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
+        }
+        
+        // Se é vídeo sem capa, adiciona data-video-url para gerar thumbnail
+        if(isVideo && first) {
+          return `<div class="${cls}" data-id="${p.id||''}" data-video-url="${first}"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
+        }
+        
+        // Se é imagem ou não tem mídia
         const img = first ? `<img src="${first}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}">` : '';
         return `<div class="${cls}" data-id="${p.id||''}">${img}<div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
       };
@@ -503,6 +614,12 @@
           s.grid.innerHTML = stories.sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||''))).map(buildCard).join('');
           s.prev?.addEventListener('click', ()=> s.grid.scrollBy({left:-200, behavior:'smooth'}));
           s.next?.addEventListener('click', ()=> s.grid.scrollBy({left: 200, behavior:'smooth'}));
+          
+          // Gera thumbnails para vídeos
+          setTimeout(() => {
+            console.log('[Relatorio] Aplicando thumbnails aos stories');
+            applyVideoThumbnails();
+          }, 100);
         } else {
           s.section.style.display='none';
         }
@@ -527,6 +644,12 @@
           psec.grid.innerHTML = feed.sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||''))).map(buildCard).join('');
           psec.prev?.addEventListener('click', ()=> psec.grid.scrollBy({left:-200, behavior:'smooth'}));
           psec.next?.addEventListener('click', ()=> psec.grid.scrollBy({left: 200, behavior:'smooth'}));
+          
+          // Gera thumbnails para vídeos
+          setTimeout(() => {
+            console.log('[Relatorio] Aplicando thumbnails aos posts');
+            applyVideoThumbnails();
+          }, 150);
         } else {
           psec.section.style.display='none';
         }
@@ -568,6 +691,15 @@
       g.done.innerHTML = groups['concluido'].map(renderCard).join('');
       g.progress.innerHTML = groups['em-andamento'].map(renderCard).join('');
       g.todo.innerHTML = groups['nao-iniciado'].map(renderCard).join('');
+    }
+
+    // Preenche página pública a partir do snapshot do token
+    function renderFromPayload(payload){
+      if(payload && payload.labelMonth){
+        document.getElementById('reportMonth').textContent = payload.labelMonth;
+        document.getElementById('relatorioHeaderSubtitle').textContent = `Resumo do mês ${payload.labelMonth}`;
+      }
+      renderReportSections(payload||{});
     }
   </script>
 </body>
