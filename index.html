@@ -1549,24 +1549,22 @@ html, body{ -webkit-text-size-adjust: 100%; }
       videoContainers.forEach(async (container) => {
         const videoUrl = container.getAttribute('data-video-url');
         const postId = container.getAttribute('data-id');
-        
-        if (!videoUrl) {
-          console.log('[Thumbnails] Container sem videoUrl:', container);
+        if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === '') {
+          console.log('[Thumbnails] Container sem videoUrl válido:', container);
           return;
         }
-        
         if (container.querySelector('img')) {
           console.log('[Thumbnails] Já tem thumbnail:', videoUrl);
           return; // Já tem thumbnail
         }
-        
         console.log('[Thumbnails] Gerando thumbnail para:', videoUrl);
-        
         try {
           const thumbnailUrl = await generateVideoThumbnail(videoUrl, postId);
-          
+          if (!thumbnailUrl) {
+            console.log('[Thumbnails] Thumbnail não gerada para videoUrl inválido:', videoUrl);
+            return;
+          }
           console.log('[Thumbnails] Thumbnail gerada com sucesso:', thumbnailUrl.substring(0, 50) + '...');
-          
           // Verifica se ainda está na página e não foi substituído
           if (container.getAttribute('data-video-url') === videoUrl) {
             const img = document.createElement('img');
@@ -1576,12 +1574,10 @@ html, body{ -webkit-text-size-adjust: 100%; }
             img.style.width = '100%';
             img.style.height = '100%';
             img.style.objectFit = 'cover';
-            
             // Remove o span "V" e adiciona a imagem
             const span = container.querySelector('span');
             if (span) span.remove();
             container.appendChild(img);
-            
             console.log('[Thumbnails] Thumbnail aplicada ao container');
           }
         } catch (err) {
@@ -17386,7 +17382,7 @@ async function sendIAQuestion(){
       const uid = auth?.currentUser?.uid;
       const clientKey = getClientKeySafe();
       if(!uid || !clientKey) return;
-      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+  const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'settings', 'leadWebhook');
       const snap = await getDoc(ref);
       if(!snap.exists() || !(snap.data()||{}).token){
         const token = (Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10)).toLowerCase();
@@ -17398,7 +17394,7 @@ async function sendIAQuestion(){
       const uid = auth?.currentUser?.uid;
       const clientKey = getClientKeySafe();
       if(!uid || !clientKey) throw new Error('Sessão expirada ou cliente ausente');
-      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+  const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'settings', 'leadWebhook');
       const token = (Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10)).toLowerCase();
       await setDoc(ref, { token, updatedAt: serverTimestamp() }, { merge: true });
     }
@@ -17421,7 +17417,7 @@ async function sendIAQuestion(){
         if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Faça login e selecione um cliente.';
         return;
       }
-      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+  const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'settings', 'leadWebhook');
       const snap = await getDoc(ref);
       const data = snap.data() || {};
       const token = data.token || '';
@@ -17437,7 +17433,7 @@ async function sendIAQuestion(){
         if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Faça login e selecione um cliente.';
         return;
       }
-      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+  const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'settings', 'leadWebhook');
       // Garante token pelo menos uma vez
       await ensureLeadWebhookToken();
       leadWebhookUnsub = onSnapshot(ref, async (snap)=>{

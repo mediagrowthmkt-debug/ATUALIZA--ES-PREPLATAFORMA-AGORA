@@ -1233,7 +1233,7 @@
 
     function renderMobileThumb(url){
       const video = isVideoUrl(url);
-      if(video){
+      if(video && url && url.trim() !== ""){
         return `<div class="mobile-card-thumb"><video src="${url}" muted playsinline></video></div>`;
       }
       return `<div class="mobile-card-thumb"><img src="${url}" alt=""></div>`;
@@ -1298,7 +1298,7 @@
     }
 
     function renderModalStageMedia(url){
-      if(isVideoUrl(url)){
+      if(isVideoUrl(url) && url && url.trim() !== ""){
         return `<video src="${url}" controls playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000"></video>`;
       }
       return `<img src="${url}" alt="Prévia do post" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>`;
@@ -1306,7 +1306,7 @@
 
     function renderCarouselButton(url, index, active){
       const cls = active ? 'active' : '';
-      if(isVideoUrl(url)){
+      if(isVideoUrl(url) && url && url.trim() !== ""){
         return `<button type="button" class="${cls}" data-index="${index}"><video src="${url}" muted playsinline></video></button>`;
       }
       return `<button type="button" class="${cls}" data-index="${index}"><img src="${url}" alt="Mídia ${index+1}"></button>`;

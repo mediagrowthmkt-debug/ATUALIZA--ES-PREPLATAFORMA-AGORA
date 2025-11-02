@@ -49,8 +49,8 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
       return res.status(400).json({ ok: false, error: 'Missing uid, client or token' });
     }
 
-    // Valida token consultando doc /usuarios/{uid}/clients/{client}/leadWebhook
-    const tokenRef = admin.firestore().doc(`usuarios/${uid}/clients/${client}/leadWebhook`);
+  // Valida token consultando doc /usuarios/{uid}/clients/{client}/settings/leadWebhook
+  const tokenRef = admin.firestore().doc(`usuarios/${uid}/clients/${client}/settings/leadWebhook`);
     const tokenSnap = await tokenRef.get();
     if (!tokenSnap.exists) {
       return res.status(403).json({ ok: false, error: 'Invalid token (not configured)' });

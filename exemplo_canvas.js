@@ -36,6 +36,10 @@ function captureVideoFrame(videoElement) {
 // ---------------------------------------
 async function generateVideoThumbnail(videoUrl) {
   return new Promise((resolve, reject) => {
+    if (!videoUrl || videoUrl.trim() === "") {
+      reject(new Error("URL do vídeo está vazia!"));
+      return;
+    }
     const video = document.createElement('video');
     video.crossOrigin = 'anonymous'; // IMPORTANTE!
     video.preload = 'metadata';
