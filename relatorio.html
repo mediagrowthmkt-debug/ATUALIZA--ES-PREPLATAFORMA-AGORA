@@ -541,6 +541,17 @@
             img.src = thumbnailUrl;
             img.alt = 'Video preview';
             img.crossOrigin = 'anonymous';
+            // Aplica estilos inline para garantir posicionamento correto
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            img.style.position = 'absolute';
+            img.style.top = '0';
+            img.style.left = '0';
+            
+            // Remove o span "V" se existir
+            const span = container.querySelector('span');
+            if (span) span.remove();
             
             container.appendChild(img);
             
