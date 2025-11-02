@@ -3949,6 +3949,65 @@ function renderReviewNotes(post){
     padding: 20px;
     min-height: 400px;
   }
+  .leads-webhook{
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--shell-border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .leads-webhook label{
+    display: block;
+    font-size: .78rem;
+    color: #cbd5f5;
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  #leadsWebhookUrl{
+    width: 100%;
+    background: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid rgba(148,163,184,.28);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: .9rem;
+  }
+  .leads-webhook .btn{
+    white-space: nowrap;
+  }
+  .leads-hint{ font-size: .8rem; color: #94a3b8; margin: 6px 0 0; }
+  .leads-list{ display:flex; flex-direction:column; gap:8px; }
+  .lead-row{
+    display:grid;
+    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr;
+    gap:10px;
+    align-items:center;
+    background: rgba(15,23,42,.45);
+    border: 1px solid rgba(148,163,184,.24);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.28);
+  }
+  .lead-row .lead-cell{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lead-name{ font-weight: 800; color: #f8fafc; }
+  .lead-email{ color:#cbd5f5; }
+  .lead-phone{ color:#e5e7eb; }
+  .lead-question{ color:#cbd5f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
+  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr; gap:10px; padding: 6px 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; }
+  .leads-empty{ color:#94a3b8; padding: 20px; text-align:center; border:1px dashed rgba(148,163,184,.28); border-radius:12px; }
+  @media (max-width: 900px){
+    .leads-webhook{ grid-template-columns: 1fr; }
+    .leads-header{ display:none; }
+    .lead-row{ grid-template-columns: 1fr; gap:6px; align-items:flex-start; }
+    .lead-when{ text-align:left; }
+  }
 </style>
 <div aria-hidden="true" class="cac-wrap" id="cacWrap" style="display:none">
   <div class="field">
@@ -4028,7 +4087,18 @@ function renderReviewNotes(post){
     <p>Gerencie e acompanhe seus leads de forma organizada</p>
   </div>
   <div class="leads-content">
-    <p style="color: #cbd5f5; text-align: center; padding: 40px;">Seção de Leads em desenvolvimento...</p>
+    <div class="leads-webhook">
+      <div>
+        <label>Webhook do Make.com</label>
+        <input id="leadsWebhookUrl" type="text" readonly value="Gerando..." />
+        <div class="leads-hint">Use este endpoint no Make.com (module Webhook/HTTP) para enviar name, email, phone e question por POST (JSON).</div>
+      </div>
+      <button class="btn small" id="leadsWebhookCopy" type="button">Copiar URL</button>
+      <button class="btn small ghost" id="leadsWebhookRegenerate" type="button" title="Gera um novo token de segurança">Regenerar token</button>
+    </div>
+    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Quando</div></div>
+    <div id="leadsList" class="leads-list"></div>
+    <p id="leadsEmpty" class="leads-empty" style="display:none">Nenhum lead recebido ainda.</p>
   </div>
 </div>
 <!-- METAS -->
@@ -17266,7 +17336,186 @@ async function sendIAQuestion(){
     function renderLeads(){
       if(renderLeads._bound) return;
       console.log('Seção de Leads inicializada');
+      // Cache de elementos
+      leadsWebhookUrlEl = $("leadsWebhookUrl");
+      leadsWebhookCopyBtn = $("leadsWebhookCopy");
+      leadsWebhookRegenerateBtn = $("leadsWebhookRegenerate");
+      leadsListEl = $("leadsList");
+      leadsEmptyEl = $("leadsEmpty");
+
+      // Eventos
+      leadsWebhookCopyBtn?.addEventListener('click', async ()=>{
+        try{
+          const val = leadsWebhookUrlEl?.value || '';
+          if(!val){ return; }
+          await navigator.clipboard.writeText(val);
+          if(typeof mgToast==='function') mgToast('URL copiada!');
+        }catch(err){ alert('Falha ao copiar: ' + (err?.message||err)); }
+      });
+      leadsWebhookRegenerateBtn?.addEventListener('click', async ()=>{
+        if(!confirm('Gerar um novo token? Isso invalida a URL anterior.')) return;
+        try{
+          await regenerateLeadWebhookToken();
+          await syncLeadWebhookUrl();
+          if(typeof mgToast==='function') mgToast('Novo token gerado');
+        }catch(err){ alert('Não foi possível regenerar: ' + (err?.message||err)); }
+      });
+
+      // Inicializa fluxo
+      (async ()=>{
+        try{
+          await subscribeLeadWebhookToken();
+          await subscribeLeads();
+        }catch(err){ console.warn('leads:init', err); }
+      })();
+
       renderLeads._bound = true;
+    }
+
+    // ====== LEADS: estado/refs ======
+    let leadsWebhookUrlEl, leadsWebhookCopyBtn, leadsWebhookRegenerateBtn, leadsListEl, leadsEmptyEl;
+  let LEADS = [];
+  let leadsUnsub = null;
+  let leadWebhookUnsub = null;
+
+    function getClientKeySafe(){
+      return getClientKey() || '';
+    }
+
+    async function ensureLeadWebhookToken(){
+      const uid = auth?.currentUser?.uid;
+      const clientKey = getClientKeySafe();
+      if(!uid || !clientKey) return;
+      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+      const snap = await getDoc(ref);
+      if(!snap.exists() || !(snap.data()||{}).token){
+        const token = (Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10)).toLowerCase();
+        await setDoc(ref, { token, createdAt: serverTimestamp(), agencyId: uid, clientId: clientKey }, { merge: true });
+      }
+    }
+
+    async function regenerateLeadWebhookToken(){
+      const uid = auth?.currentUser?.uid;
+      const clientKey = getClientKeySafe();
+      if(!uid || !clientKey) throw new Error('Sessão expirada ou cliente ausente');
+      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+      const token = (Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10)).toLowerCase();
+      await setDoc(ref, { token, updatedAt: serverTimestamp() }, { merge: true });
+    }
+
+    function buildLeadWebhookUrl(uid, clientKey, token){
+      const region = 'us-central1';
+      const projectId = 'mediagrowth-a5349';
+      const base = `https://${region}-${projectId}.cloudfunctions.net/receiveLead`;
+      const url = new URL(base);
+      url.searchParams.set('uid', uid);
+      url.searchParams.set('client', clientKey);
+      url.searchParams.set('token', token);
+      return url.toString();
+    }
+
+    async function syncLeadWebhookUrl(){
+      const uid = auth?.currentUser?.uid;
+      const clientKey = getClientKeySafe();
+      if(!uid || !clientKey){
+        if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Faça login e selecione um cliente.';
+        return;
+      }
+      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+      const snap = await getDoc(ref);
+      const data = snap.data() || {};
+      const token = data.token || '';
+      const url = token ? buildLeadWebhookUrl(uid, clientKey, token) : '';
+      if(leadsWebhookUrlEl){ leadsWebhookUrlEl.value = url || 'Gerando...'; }
+    }
+
+    async function subscribeLeadWebhookToken(){
+      const uid = auth?.currentUser?.uid;
+      const clientKey = getClientKeySafe();
+      if(leadWebhookUnsub){ try{ leadWebhookUnsub(); }catch(_e){} leadWebhookUnsub = null; }
+      if(!uid || !clientKey){
+        if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Faça login e selecione um cliente.';
+        return;
+      }
+      const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leadWebhook');
+      // Garante token pelo menos uma vez
+      await ensureLeadWebhookToken();
+      leadWebhookUnsub = onSnapshot(ref, async (snap)=>{
+        if(!snap.exists()){
+          // defensivo: cria token se não existir
+          try{ await ensureLeadWebhookToken(); }catch(_e){}
+          if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Gerando...';
+          return;
+        }
+        const data = snap.data()||{};
+        if(!data.token){
+          try{ await ensureLeadWebhookToken(); }catch(_e){}
+          if(leadsWebhookUrlEl) leadsWebhookUrlEl.value = 'Gerando...';
+          return;
+        }
+        const url = buildLeadWebhookUrl(uid, clientKey, data.token);
+        if(leadsWebhookUrlEl){ leadsWebhookUrlEl.value = url; }
+      }, (err)=>{
+        console.warn('leadWebhook:onSnapshot', err);
+      });
+    }
+
+    async function subscribeLeads(){
+      const uid = auth?.currentUser?.uid;
+      const clientKey = getClientKeySafe();
+      if(leadsUnsub){ try{ leadsUnsub(); }catch(_e){} leadsUnsub = null; }
+      if(!uid || !clientKey){
+        LEADS = [];
+        renderLeadsList();
+        return;
+      }
+      const colRef = collection(db, 'usuarios', uid, 'clients', clientKey, 'leads');
+      const qy = query(colRef, orderBy('createdAt', 'desc'));
+      leadsUnsub = onSnapshot(qy, (snap)=>{
+        const list = [];
+        snap.forEach(docSnap=>{
+          const d = docSnap.data() || {};
+          list.push({ id: docSnap.id, ...d });
+        });
+        LEADS = list;
+        renderLeadsList();
+      }, (err)=>{
+        console.warn('leads:onSnapshot', err);
+      });
+    }
+
+    function formatWhen(value){
+      try{
+        if(!value) return '';
+        if(typeof value.toMillis === 'function') return new Date(value.toMillis()).toLocaleString('pt-BR',{hour12:false});
+        if(typeof value === 'number') return new Date(value).toLocaleString('pt-BR',{hour12:false});
+        return '';
+      }catch(_){ return ''; }
+    }
+
+    function renderLeadsList(){
+      if(!leadsListEl || !leadsEmptyEl) return;
+      if(!Array.isArray(LEADS) || LEADS.length === 0){
+        leadsListEl.innerHTML = '';
+        leadsEmptyEl.style.display = 'block';
+        return;
+      }
+      leadsEmptyEl.style.display = 'none';
+      leadsListEl.innerHTML = LEADS.map(l => {
+        const name = (l.name||'').toString();
+        const email = (l.email||'').toString();
+        const phone = (l.phone||'').toString();
+        const question = (l.question||'').toString();
+        const when = formatWhen(l.createdAt || l.updatedAt || null);
+        const esc = (s)=> String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+        return `<div class="lead-row">
+          <div class="lead-cell lead-name" title="${esc(name)}">${esc(name)||'-'}</div>
+          <div class="lead-cell lead-email" title="${esc(email)}">${esc(email)||'-'}</div>
+          <div class="lead-cell lead-phone" title="${esc(phone)}">${esc(phone)||'-'}</div>
+          <div class="lead-cell lead-question" title="${esc(question)}">${esc(question)||'-'}</div>
+          <div class="lead-cell lead-when">${esc(when)}</div>
+        </div>`;
+      }).join('');
     }
 
     /* ========= Referências Redes ========= */
