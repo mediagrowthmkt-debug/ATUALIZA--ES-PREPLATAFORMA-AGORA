@@ -39,6 +39,22 @@
     .macro-social-detail{font-size:.9rem;color:#94a3b8}
     .macro-social-actions{display:flex;justify-content:center;align-items:center;width:100%;margin-top:auto}
     @media(max-width:900px){ .goals-columns{grid-template-columns:1fr} }
+
+  /* Cores por status — Objetivos do mês */
+  #relatorioGoalsColumns .goals-col[data-status="concluido"]{ background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.35); }
+  #relatorioGoalsColumns .goals-col[data-status="em-andamento"]{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.35); }
+  #relatorioGoalsColumns .goals-col[data-status="nao-iniciado"]{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.35); }
+  #relatorioGoalsDonePill{ border-color:#14532d; background:rgba(20,83,45,.25); }
+  #relatorioGoalsProgressPill{ border-color:#b45309; background:rgba(180,83,9,.22); }
+  #relatorioGoalsTodoPill{ border-color:#1e3a8a; background:rgba(30,58,138,.22); }
+
+  /* Cores por status — Metas do mês (map: achieved=verde, progress=amarelo, missing=azul) */
+  #relatorioMetasColumns .goals-col[data-status="concluido"]{ background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.35); }
+  #relatorioMetasColumns .goals-col[data-status="em-andamento"]{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.35); }
+  #relatorioMetasColumns .goals-col[data-status="nao-iniciado"]{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.35); }
+  #relatorioMetasAchievedPill{ border-color:#14532d; background:rgba(20,83,45,.25); }
+  #relatorioMetasProgressPill{ border-color:#b45309; background:rgba(180,83,9,.22); }
+  #relatorioMetasMissingPill{ border-color:#1e3a8a; background:rgba(30,58,138,.22); }
     @media print{ .btn{display:none !important} .relatorio-container{box-shadow:none} }
     /* Stories & Posts carrossel */
     .relatorio-stories-carousel{position:relative;display:flex;align-items:center;gap:12px}
