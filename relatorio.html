@@ -121,6 +121,34 @@
       <p class="relatorio-desc" id="relatorioPostsDesc" style="display:none"></p>
     </div>
 
+    <!-- Objetivos do mês (Planejamento) -->
+    <div class="relatorio-container" id="relatorioGoalsSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>🎯 Objetivos do mês</h2>
+        <p class="relatorio-subtitle" id="relatorioGoalsSubtitle">Status das demandas do Planejamento no mês selecionado</p>
+      </div>
+      <div class="relatorio-goals-summary">
+        <div class="goal-pill" id="relatorioGoalsDonePill">Concluídos: <strong>-</strong></div>
+        <div class="goal-pill" id="relatorioGoalsProgressPill">Em andamento: <strong>-</strong></div>
+        <div class="goal-pill" id="relatorioGoalsTodoPill">Não iniciados: <strong>-</strong></div>
+      </div>
+      <div class="goals-columns" id="relatorioGoalsColumns">
+        <div class="goals-col" data-status="concluido">
+          <h3>Concluídos</h3>
+          <div class="goals-list" id="relatorioGoalsDone"></div>
+        </div>
+        <div class="goals-col" data-status="em-andamento">
+          <h3>Em andamento</h3>
+          <div class="goals-list" id="relatorioGoalsProgress"></div>
+        </div>
+        <div class="goals-col" data-status="nao-iniciado">
+          <h3>Não iniciados</h3>
+          <div class="goals-list" id="relatorioGoalsTodo"></div>
+        </div>
+      </div>
+      <p class="relatorio-desc" id="relatorioGoalsDesc"></p>
+    </div>
+
     <!-- Metas -->
     <div class="relatorio-container" id="relatorioMetasSection" style="display:none">
       <div class="relatorio-header">
@@ -231,6 +259,17 @@
         next: document.getElementById('relatorioPostsNext'),
         subtitle: document.getElementById('relatorioPostsSubtitle'),
         desc: document.getElementById('relatorioPostsDesc')
+      },
+      goals: {
+        section: document.getElementById('relatorioGoalsSection'),
+        subtitle: document.getElementById('relatorioGoalsSubtitle'),
+        desc: document.getElementById('relatorioGoalsDesc'),
+        donePill: document.getElementById('relatorioGoalsDonePill'),
+        progressPill: document.getElementById('relatorioGoalsProgressPill'),
+        todoPill: document.getElementById('relatorioGoalsTodoPill'),
+        done: document.getElementById('relatorioGoalsDone'),
+        progress: document.getElementById('relatorioGoalsProgress'),
+        todo: document.getElementById('relatorioGoalsTodo')
       }
     };
 
@@ -327,7 +366,10 @@
       // Stories + Posts (feed)
       try{ renderStoriesAndPosts(Array.isArray(payload.posts)?payload.posts:[], payload.labelMonth||''); }catch(e){ console.warn('renderStoriesAndPosts', e); }
 
-      // Metas
+  // Objetivos do mês (Planejamento)
+  try{ renderGoals(payload.goals||null, payload.labelMonth||''); }catch(e){ console.warn('renderGoals', e); }
+
+  // Metas
       const metas = Array.isArray(payload.metas)?payload.metas:[];
       const metasSection = document.getElementById('relatorioMetasSection');
       const sub = document.getElementById('relatorioMetasSubtitle');
@@ -489,6 +531,43 @@
           psec.section.style.display='none';
         }
       }
+    }
+
+    function renderGoals(goals, labelMonth){
+      const g = els.goals; if(!g || !g.section) return;
+      if(!goals || !Array.isArray(goals.items) || goals.items.length===0){ g.section.style.display='none'; return; }
+      g.section.style.display='block';
+      const total = Number(goals.summary?.total)||goals.items.length;
+      const done = Number(goals.summary?.done)||0;
+      const progress = Number(goals.summary?.progress)||0;
+      const todo = Number(goals.summary?.todo)||0;
+      if(g.subtitle) g.subtitle.textContent = `Resumo de ${total} objetivo${total===1?'':'s'} em ${labelMonth}`;
+      g.donePill?.querySelector('strong')?.replaceWith(Object.assign(document.createElement('strong'),{textContent:String(done)}));
+      g.progressPill?.querySelector('strong')?.replaceWith(Object.assign(document.createElement('strong'),{textContent:String(progress)}));
+      g.todoPill?.querySelector('strong')?.replaceWith(Object.assign(document.createElement('strong'),{textContent:String(todo)}));
+      if(g.desc){
+        const rate = total>0 ? Math.round((done/total)*100) : 0;
+        g.desc.textContent = `🚀 ${labelMonth}: ${total} objetivo${total===1?'':'s'} — Concluídos: ${done} (${rate}%), Em andamento: ${progress}, Não iniciados: ${todo}.`;
+      }
+      const groups = { 'concluido':[], 'em-andamento':[], 'nao-iniciado':[] };
+      goals.items.forEach(item=>{
+        const st = (item.status||'').toLowerCase();
+        const key = (st==='concluido') ? 'concluido' : ((st==='em-andamento'||st==='bloqueado'||st==='prioridade'||st==='prioridade-grupo') ? 'em-andamento' : 'nao-iniciado');
+        groups[key].push(item);
+      });
+      const renderCard = (d)=>{
+        const title = (d.title||'').trim() || '(Sem título)';
+        const resp = (d.responsavel||'').trim();
+        const date = (d.endDate||'').split('-');
+        const dateLabel = (date.length===3) ? `${date[2]}/${date[1]}` : '';
+        const tag = (d.tag||'').toString();
+        const statusKey = (d.status||'').toLowerCase();
+        const statusLabel = (statusKey==='concluido')? 'Concluído' : (statusKey==='em-andamento'?'Em andamento': (statusKey||''));
+        return `<div class="goal-card"><div class="goal-title">${escapeHtml(title)}</div><div class="goal-meta">${resp?`<span class=\"goal-tag\">👤 ${escapeHtml(resp)}</span>`:''}${dateLabel?`<span class=\"goal-tag\">📅 ${dateLabel}</span>`:''}${statusLabel?`<span class=\"goal-tag\">${escapeHtml(statusLabel)}</span>`:''}${tag?`<span class=\"goal-tag\">🏷️ ${escapeHtml(tag)}</span>`:''}</div></div>`;
+      };
+      g.done.innerHTML = groups['concluido'].map(renderCard).join('');
+      g.progress.innerHTML = groups['em-andamento'].map(renderCard).join('');
+      g.todo.innerHTML = groups['nao-iniciado'].map(renderCard).join('');
     }
   </script>
 </body>

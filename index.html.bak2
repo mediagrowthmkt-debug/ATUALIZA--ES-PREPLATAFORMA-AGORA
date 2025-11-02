@@ -1461,135 +1461,6 @@ html, body{ -webkit-text-size-adjust: 100%; }
       }
     }
     let postsUnsub = null;
-
-    // === Geração automática de thumbnails para vídeos ===
-    const VIDEO_THUMBNAILS_CACHE = new Map(); // Cache de thumbnails geradas
-
-    async function generateVideoThumbnail(videoUrl, postId) {
-      console.log('[GenerateThumbnail] Iniciando para:', videoUrl);
-      
-      // Verifica se já tem no cache
-      if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) {
-        console.log('[GenerateThumbnail] Retornando do cache');
-        return VIDEO_THUMBNAILS_CACHE.get(videoUrl);
-      }
-
-      return new Promise((resolve, reject) => {
-        const video = document.createElement('video');
-        video.crossOrigin = 'anonymous';
-        video.preload = 'metadata';
-        video.muted = true;
-        video.playsInline = true;
-        
-        console.log('[GenerateThumbnail] Video element criado');
-        
-        // Timeout de segurança
-        const timeout = setTimeout(() => {
-          console.error('[GenerateThumbnail] Timeout ao carregar vídeo');
-          video.src = '';
-          reject(new Error('Timeout ao gerar thumbnail'));
-        }, 10000);
-
-        video.onloadedmetadata = () => {
-          console.log('[GenerateThumbnail] Metadata carregada, duração:', video.duration);
-          // Vai para 0.5 segundo ou 10% do vídeo
-          const seekTime = Math.min(0.5, video.duration * 0.1);
-          video.currentTime = seekTime;
-          console.log('[GenerateThumbnail] Buscando frame em:', seekTime, 's');
-        };
-        
-        video.onseeked = () => {
-          console.log('[GenerateThumbnail] Frame encontrado, capturando...');
-          try {
-            clearTimeout(timeout);
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 360;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            
-            console.log('[GenerateThumbnail] Thumbnail gerada com sucesso, tamanho:', thumbnailDataUrl.length, 'bytes');
-            
-            // Adiciona ao cache
-            VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
-            
-            // Limpa o vídeo
-            video.src = '';
-            
-            resolve(thumbnailDataUrl);
-          } catch (err) {
-            clearTimeout(timeout);
-            console.error('[GenerateThumbnail] Erro ao capturar frame:', err);
-            reject(err);
-          }
-        };
-        
-        video.onerror = (err) => {
-          clearTimeout(timeout);
-          console.error('[GenerateThumbnail] Erro ao carregar vídeo:', err, video.error);
-          video.src = '';
-          reject(err);
-        };
-        
-        console.log('[GenerateThumbnail] Carregando URL:', videoUrl);
-        video.src = videoUrl;
-      });
-    }
-
-    // Função para aplicar thumbnails em elementos de vídeo no DOM
-    function applyVideoThumbnails() {
-      const videoContainers = document.querySelectorAll('.cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url]');
-      
-      console.log('[Thumbnails] Encontrados', videoContainers.length, 'vídeos para processar');
-      
-      videoContainers.forEach(async (container) => {
-        const videoUrl = container.getAttribute('data-video-url');
-        const postId = container.getAttribute('data-id');
-        
-        if (!videoUrl) {
-          console.log('[Thumbnails] Container sem videoUrl:', container);
-          return;
-        }
-        
-        if (container.querySelector('img')) {
-          console.log('[Thumbnails] Já tem thumbnail:', videoUrl);
-          return; // Já tem thumbnail
-        }
-        
-        console.log('[Thumbnails] Gerando thumbnail para:', videoUrl);
-        
-        try {
-          const thumbnailUrl = await generateVideoThumbnail(videoUrl, postId);
-          
-          console.log('[Thumbnails] Thumbnail gerada com sucesso:', thumbnailUrl.substring(0, 50) + '...');
-          
-          // Verifica se ainda está na página e não foi substituído
-          if (container.getAttribute('data-video-url') === videoUrl) {
-            const img = document.createElement('img');
-            img.src = thumbnailUrl;
-            img.alt = 'Video preview';
-            img.crossOrigin = 'anonymous';
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = 'cover';
-            
-            // Remove o span "V" e adiciona a imagem
-            const span = container.querySelector('span');
-            if (span) span.remove();
-            container.appendChild(img);
-            
-            console.log('[Thumbnails] Thumbnail aplicada ao container');
-          }
-        } catch (err) {
-          console.error('[Thumbnails] Falha ao gerar thumbnail para:', videoUrl, err);
-          // Mantém o "V" como fallback
-        }
-      });
-    }
     let currentMonth = (()=>{ const d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
     let selectedPost = null;
     const COMMEMORATIVE_DATES_BR = window.COMMEMORATIVE_DATES_BR || {};
@@ -1645,7 +1516,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
     }
 
     function renderCalendarDays(){
-      console.log("[Calendar] renderCalendarDays() chamado");
       if(!calDays) return;
       calTitle.textContent = monthLabel(currentMonth);
       const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
@@ -1721,12 +1591,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           const label = post.type==="carousel" ? "C" : (isVideo ? "V" : "");
           if(first){
             if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(post.thumbUrl && !post.thumbUrl.includes('.mp4') && !post.thumbUrl.includes('.mov') && !post.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><img src="${post.thumbUrl}" alt="" crossorigin="anonymous"></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${post.id}" data-video-url="${first}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><span>${label||"V"}</span></div>`;
+              return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><span>${label||"V"}</span></div>`;
             }else{
               return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><img src="${first}" alt="" crossorigin="anonymous"></div>`;
             }
@@ -1764,13 +1629,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           if(post) openPostModal(post);
         });
       });
-
-      // Gera thumbnails automáticas para vídeos
-      console.log('[Calendar] Agendando applyVideoThumbnails em 100ms');
-      setTimeout(() => {
-        console.log('[Calendar] Executando applyVideoThumbnails agora');
-        applyVideoThumbnails();
-      }, 100);
     }
 
     function renderPlanilha(){
@@ -1797,17 +1655,8 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           }else{
             cls += " pendente";
           }
-          if(first){
-            if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${p.thumbUrl}" alt="" crossorigin="anonymous"></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${p.id}" data-video-url="${first}">${coverBtn}<span>${label||"V"}</span></div>`;
-            }else{
-              return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"></div>`;
-            }
+          if(first && !isVideo){
+            return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"></div>`;
           }else{
             return `<div class="${cls}" data-id="${p.id}">${coverBtn}<span>${label||"+"}</span></div>`;
           }
@@ -1849,17 +1698,8 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           }
           const [y,m,d] = (p.dateISO||'').split('-');
           const dateLabel = d && m ? `${d}/${m}` : '';
-          if(first){
-            if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${p.thumbUrl}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${p.id}" data-video-url="${first}">${coverBtn}<span>${label||"V"}</span><div class="story-date">${dateLabel}</div></div>`;
-            }else{
-              return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
-            }
+          if(first && !isVideo){
+            return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
           }else{
             return `<div class="${cls}" data-id="${p.id}">${coverBtn}<span>${label||"+"}</span><div class="story-date">${dateLabel}</div></div>`;
           }
@@ -1880,9 +1720,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
             if(id) promptCoverUpload(id);
           });
         });
-
-      // Gera thumbnails automáticas para vídeos no feed e stories
-      setTimeout(() => applyVideoThumbnails(), 150);
       }
     }
 
@@ -23057,40 +22894,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
       calFilterStatus.onchange = ()=>{ renderCalendarDays(); renderPlanilha(); };
       calFilterCountry.onchange = ()=>{ renderCalendarDays(); };
       calFilterText.oninput = ()=>{ renderCalendarDays(); };
-    // === Funções de geração de thumbnail de vídeo (seção 2) ===
-    // Funções duplicadas aqui porque o código está em duas seções
-    if(typeof VIDEO_THUMBNAILS_CACHE === "undefined") var VIDEO_THUMBNAILS_CACHE = new Map();
-    if(typeof generateVideoThumbnail === "undefined") {
-      window.generateVideoThumbnail = async function(videoUrl, postId) {
-        console.log("[GenerateThumbnail] Iniciando para:", videoUrl);
-        if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) { console.log("[GenerateThumbnail] Retornando do cache"); return VIDEO_THUMBNAILS_CACHE.get(videoUrl); }
-        return new Promise((resolve, reject) => {
-          const video = document.createElement("video"); video.crossOrigin = "anonymous"; video.preload = "metadata"; video.muted = true; video.playsInline = true;
-          console.log("[GenerateThumbnail] Video element criado");
-          const timeout = setTimeout(() => { console.error("[GenerateThumbnail] Timeout"); video.src = ""; reject(new Error("Timeout")); }, 10000);
-          video.onloadedmetadata = () => { console.log("[GenerateThumbnail] Metadata carregada, duração:", video.duration); const seekTime = Math.min(0.5, video.duration * 0.1); video.currentTime = seekTime; console.log("[GenerateThumbnail] Buscando frame em:", seekTime, "s"); };
-          video.onseeked = () => { console.log("[GenerateThumbnail] Frame encontrado, capturando..."); try { clearTimeout(timeout); const canvas = document.createElement("canvas"); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 360; const ctx = canvas.getContext("2d"); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); const thumbnailDataUrl = canvas.toDataURL("image/jpeg", 0.7); console.log("[GenerateThumbnail] Thumbnail gerada, tamanho:", thumbnailDataUrl.length, "bytes"); VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl); video.src = ""; resolve(thumbnailDataUrl); } catch (err) { clearTimeout(timeout); console.error("[GenerateThumbnail] Erro ao capturar:", err); reject(err); } };
-          video.onerror = (err) => { clearTimeout(timeout); console.error("[GenerateThumbnail] Erro ao carregar:", err, video.error); video.src = ""; reject(err); };
-          console.log("[GenerateThumbnail] Carregando URL:", videoUrl); video.src = videoUrl;
-        });
-      };
-    }
-    if(typeof applyVideoThumbnails === "undefined") {
-      window.applyVideoThumbnails = function() {
-        const videoContainers = document.querySelectorAll(".cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url]");
-        console.log("[Thumbnails] Encontrados", videoContainers.length, "vídeos para processar");
-        videoContainers.forEach(async (container) => {
-          const videoUrl = container.getAttribute("data-video-url"); const postId = container.getAttribute("data-id");
-          if (!videoUrl) { console.log("[Thumbnails] Container sem videoUrl:", container); return; }
-          if (container.querySelector("img")) { console.log("[Thumbnails] Já tem thumbnail:", videoUrl); return; }
-          console.log("[Thumbnails] Gerando thumbnail para:", videoUrl);
-          try { const thumbnailUrl = await window.generateVideoThumbnail(videoUrl, postId); console.log("[Thumbnails] Gerada:", thumbnailUrl.substring(0, 50) + "...");
-            if (container.getAttribute("data-video-url") === videoUrl) { const img = document.createElement("img"); img.src = thumbnailUrl; img.alt = "Video preview"; img.crossOrigin = "anonymous"; img.style.width = "100%"; img.style.height = "100%"; img.style.objectFit = "cover"; const span = container.querySelector("span"); if (span) span.remove(); container.appendChild(img); console.log("[Thumbnails] Thumbnail aplicada"); }
-          } catch (err) { console.error("[Thumbnails] Falha:", videoUrl, err); }
-        });
-      };
-    }
-
     }
 
     function postsByDateMap(){
@@ -23105,7 +22908,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
     }
 
     function renderCalendarDays(){
-      console.log("[Calendar] renderCalendarDays() chamado");
       if(!calDays) return;
       calTitle.textContent = monthLabel(currentMonth);
       const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
@@ -23181,12 +22983,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           const label = post.type==="carousel" ? "C" : (isVideo ? "V" : "");
           if(first){
             if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(post.thumbUrl && !post.thumbUrl.includes('.mp4') && !post.thumbUrl.includes('.mov') && !post.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><img src="${post.thumbUrl}" alt="" crossorigin="anonymous"></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${post.id}" data-video-url="${first}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><span>${label||"V"}</span></div>`;
+              return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><span>${label||"V"}</span></div>`;
             }else{
               return `<div class="${cls}" data-id="${post.id}" title="${(post.desc||'').replace(/"/g,'&quot;')}"><img src="${first}" alt="" crossorigin="anonymous"></div>`;
             }
@@ -23224,13 +23021,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           if(post) openPostModal(post);
         });
       });
-
-      // Gera thumbnails automáticas para vídeos
-      console.log('[Calendar] Agendando applyVideoThumbnails em 100ms');
-      setTimeout(() => {
-        console.log('[Calendar] Executando applyVideoThumbnails agora');
-        applyVideoThumbnails();
-      }, 100);
     }
 
     function renderPlanilha(){
@@ -23257,17 +23047,8 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           }else{
             cls += " pendente";
           }
-          if(first){
-            if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${p.thumbUrl}" alt="" crossorigin="anonymous"></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${p.id}" data-video-url="${first}">${coverBtn}<span>${label||"V"}</span></div>`;
-            }else{
-              return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"></div>`;
-            }
+          if(first && !isVideo){
+            return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"></div>`;
           }else{
             return `<div class="${cls}" data-id="${p.id}">${coverBtn}<span>${label||"+"}</span></div>`;
           }
@@ -23309,17 +23090,8 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
           }
           const [y,m,d] = (p.dateISO||'').split('-');
           const dateLabel = d && m ? `${d}/${m}` : '';
-          if(first){
-            if(isVideo){
-              // Se já tem thumbUrl personalizada (capa), usa ela
-              if(p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-                return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${p.thumbUrl}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
-              }
-              // Senão, renderiza com data-video-url para gerar thumbnail automática
-              return `<div class="${cls}" data-id="${p.id}" data-video-url="${first}">${coverBtn}<span>${label||"V"}</span><div class="story-date">${dateLabel}</div></div>`;
-            }else{
-              return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
-            }
+          if(first && !isVideo){
+            return `<div class="${cls}" data-id="${p.id}">${coverBtn}<img src="${first}" alt="" crossorigin="anonymous"><div class="story-date">${dateLabel}</div></div>`;
           }else{
             return `<div class="${cls}" data-id="${p.id}">${coverBtn}<span>${label||"+"}</span><div class="story-date">${dateLabel}</div></div>`;
           }
@@ -23342,9 +23114,6 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         });
       }
     }
-
-      // Gera thumbnails automáticas para vídeos no feed e stories
-      setTimeout(() => { if(typeof applyVideoThumbnails !== "undefined") applyVideoThumbnails(); else if(typeof window.applyVideoThumbnails !== "undefined") window.applyVideoThumbnails(); }, 150);
 
     async function saveCalNote(el){
       const iso = el.closest('.cal-cell')?.getAttribute('data-iso');
