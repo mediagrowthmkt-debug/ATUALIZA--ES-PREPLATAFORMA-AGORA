@@ -3918,6 +3918,38 @@ function renderReviewNotes(post){
   .cac-table th{background:var(--title-bg)}
   .cac-table input{width:100%;background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:4px;padding:4px}
 </style>
+<style>
+  /* LEADS */
+  .leads-wrap{
+    padding: 20px;
+    margin-left: var(--margin-left);
+    margin-right: var(--margin-right);
+  }
+  .leads-toolbar{
+    background: var(--title-bg, rgba(0, 0, 0, 0.35));
+    border: 1px solid var(--shell-border, rgba(255, 255, 255, 0.14));
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .leads-toolbar h2{
+    margin: 0 0 8px 0;
+    font-size: 1.35rem;
+    color: #fff;
+  }
+  .leads-toolbar p{
+    margin: 0;
+    color: #cbd5f5;
+    font-size: 0.9rem;
+  }
+  .leads-content{
+    background: var(--panel);
+    border: 1px solid var(--shell-border);
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 400px;
+  }
+</style>
 <div aria-hidden="true" class="cac-wrap" id="cacWrap" style="display:none">
   <div class="field">
     <label for="cacMonth">Mês:</label>
@@ -3988,6 +4020,16 @@ function renderReviewNotes(post){
       <p>CAC REAL: <span id="cacReal">-</span></p>
       <p>CAC publicitários: <span id="cacAds">-</span></p>
     </div>
+</div>
+<!-- LEADS -->
+<div aria-hidden="true" class="leads-wrap" id="leadsWrap" style="display:none">
+  <div class="leads-toolbar">
+    <h2>Gestão de Leads</h2>
+    <p>Gerencie e acompanhe seus leads de forma organizada</p>
+  </div>
+  <div class="leads-content">
+    <p style="color: #cbd5f5; text-align: center; padding: 40px;">Seção de Leads em desenvolvimento...</p>
+  </div>
 </div>
 <!-- METAS -->
 <div aria-hidden="true" class="metas-wrap" id="metasWrap" style="display:none">
@@ -6160,7 +6202,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = true;
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
-    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), relatorioWrap = $("relatorioWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
+    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
     const newNoteBtn = $("newNoteBtn"), filterSector = $("filterSector"), filterFrom = $("filterFrom"), filterTo = $("filterTo");
     const applyFilter = $("applyFilter"), clearFilter = $("clearFilter"), scrollHint = $("scrollHint");
@@ -10522,7 +10564,7 @@ async function sendIAQuestion(){
       { id:"trafego",   name:"Tráfego Pago" },
       { id:"metas",     name:"Metas" },
       { id:"cac",       name:"CAC" },
-      { id:"reportei",  name:"Reportei" },
+      { id:"leads",     name:"Leads" },
       { id:"refSocial", name:"Referências" },
       { id:"notes",     name:"Anotações" },
       { id:"access",    name:"Acessos" },
@@ -10931,7 +10973,7 @@ async function sendIAQuestion(){
       uploadClientLogo(file);
     });
 
-    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, relatorio=false}){
+    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false}){
       widgetsGrid.style.display = widgets? "flex":"none";
       iframeDica.style.display  = widgets? "block":"none";
       metasWrap.style.display = metas? "block":"none"; metasWrap.setAttribute("aria-hidden", metas? "false":"true");
@@ -10945,6 +10987,7 @@ async function sendIAQuestion(){
       competitorsWrap.style.display = concorrentes? "block":"none"; competitorsWrap.setAttribute("aria-hidden", concorrentes? "false":"true");
       refSocialWrap.style.display = refSocial? "block":"none"; refSocialWrap.setAttribute("aria-hidden", refSocial? "false":"true");
       cacWrap.style.display = cac? "block":"none"; cacWrap.setAttribute("aria-hidden", cac? "false":"true");
+      leadsWrap.style.display = leads? "block":"none"; leadsWrap.setAttribute("aria-hidden", leads? "false":"true");
       relatorioWrap.style.display = relatorio? "block":"none"; relatorioWrap.setAttribute("aria-hidden", relatorio? "false":"true");
       if(trafegoWrap){
         trafegoWrap.style.display = trafego? "flex":"none";
@@ -13207,6 +13250,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="cac"){
         setSectionVisibility({cac:true});
         renderCAC();
+      } else if(currentSection==="leads"){
+        setSectionVisibility({leads:true});
+        renderLeads();
       } else if(currentSection==="trafego"){
         setSectionVisibility({trafego:true});
         renderTrafego();
@@ -17214,6 +17260,13 @@ async function sendIAQuestion(){
       const mIdx = now.getMonth();
       monthSel.value = META_MONTHS[mIdx];
       loadMonth();
+    }
+
+    /* ========= LEADS ========= */
+    function renderLeads(){
+      if(renderLeads._bound) return;
+      console.log('Seção de Leads inicializada');
+      renderLeads._bound = true;
     }
 
     /* ========= Referências Redes ========= */
