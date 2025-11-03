@@ -13807,18 +13807,24 @@ async function sendIAQuestion(){
         // botão: copiar link do relatório (gera link público por token)
         const btn = relatorioPreview.querySelector('#copyRelatorioLinkBtn');
         btn?.addEventListener('click', async ()=>{
+          console.log('🔗 [Botão Copiar Link] Clicado! mesISO:', mesISO);
           let url = '';
           try{
+            console.log('🔗 [Botão Copiar Link] Chamando createOrUpdateReportShare...');
             const token = await createOrUpdateReportShare(mesISO);
+            console.log('🔗 [Botão Copiar Link] Token gerado:', token);
             url = buildRelatorioShareUrl(mesISO, token);
+            console.log('🔗 [Botão Copiar Link] URL gerada:', url);
             const clip = navigator.clipboard;
             if(clip?.writeText){
               await clip.writeText(url);
               alert('Link do relatório copiado! (acesso público)');
+              console.log('🔗 [Botão Copiar Link] ✅ Link copiado com sucesso!');
               return;
             }
             throw new Error('Clipboard API indisponível');
           }catch(_err){
+            console.error('🔗 [Botão Copiar Link] ❌ Erro:', _err);
             // fallback manual
             url = url || buildRelatorioShareUrl(mesISO);
             try{
