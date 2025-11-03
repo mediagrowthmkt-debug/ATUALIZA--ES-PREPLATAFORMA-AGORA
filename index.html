@@ -8882,9 +8882,14 @@ async function sendIAQuestion(){
     function evaluateMetaGoal(planned, realized, direction){
       const p = Math.max(0, normalizeMetaNumber(planned));
       const r = normalizeMetaNumber(realized);
-      if(p <= 0) return 'missing';
+      
+      // Se não tem meta planejada ou realizado está vazio/zero, retorna 'missing' (precisa colocar)
+      if(p <= 0 || (r === 0 && planned === 0) || (r === 0 && !realized && realized !== 0)) return 'missing';
+      
       const dir = (direction || 'aumentar').toLowerCase();
+      
       if(dir === 'diminuir'){
+        // Para diminuir: se realizado <= planejado = atingida, senão = em andamento
         return r <= p ? 'achieved' : 'in-progress';
       }
       if(dir === 'manter'){
@@ -8892,6 +8897,7 @@ async function sendIAQuestion(){
         const tolerance = Math.max(Math.abs(p) * 0.05, 0.01);
         return Math.abs(r - p) <= tolerance ? 'achieved' : 'in-progress';
       }
+      // Para aumentar: se realizado >= planejado = atingida, senão = em andamento
       return r >= p ? 'achieved' : 'in-progress';
     }
 
