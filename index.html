@@ -14389,12 +14389,17 @@ async function sendIAQuestion(){
     function filterPostsByClient(posts, clientKey){
       if(!Array.isArray(posts)) return [];
       const safeKey = normalizeTenantKey(clientKey);
+      console.log('[filterPostsByClient] clientKey:', clientKey, 'safeKey:', safeKey);
       if(!safeKey) return posts.slice();
-      return posts.filter(post=>{
+      const filtered = posts.filter(post=>{
         const tenant = post?.tenant || '';
         if(!tenant) return true;
-        return tenant === safeKey || tenant === clientKey;
+        const matches = tenant === safeKey || tenant === clientKey;
+        console.log('[filterPostsByClient] Post:', post.id, 'tenant:', tenant, 'matches:', matches);
+        return matches;
       });
+      console.log('[filterPostsByClient] Total posts:', posts.length, 'Filtered:', filtered.length);
+      return filtered;
     }
 
     async function computeCalendarStorageUsage(clientKey){
