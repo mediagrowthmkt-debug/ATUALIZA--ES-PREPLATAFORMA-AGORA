@@ -534,69 +534,83 @@
         return VIDEO_THUMBNAILS_CACHE.get(videoUrl);
       }
 
-      return new Promise((resolve, reject) => {
-        const video = document.createElement('video');
-        // Tenta primeiro SEM crossOrigin para evitar erros CORS
-        video.preload = 'metadata';
-        video.muted = true;
-        video.playsInline = true;
-        
-        const timeout = setTimeout(() => {
-          console.error('[Relatorio] Timeout ao carregar vídeo');
-          video.src = '';
-          reject(new Error('Timeout ao gerar thumbnail'));
-        }, 15000); // Aumentado para 15s
-
-        video.onloadedmetadata = () => {
-          console.log('[Relatorio] Metadata carregada, duração:', video.duration);
-          const seekTime = Math.min(0.5, video.duration * 0.1);
-          video.currentTime = seekTime;
-        };
-        
-        video.onseeked = () => {
-          console.log('[Relatorio] Frame encontrado, capturando...');
-          try {
-            clearTimeout(timeout);
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 360;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            
-            console.log('[Relatorio] Thumbnail gerada com sucesso');
-            
-            VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
+      // Tenta duas vezes: primeiro sem CORS, depois com CORS se falhar
+      const tryGenerate = (useCors = false) => {
+        return new Promise((resolve, reject) => {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          video.muted = true;
+          video.playsInline = true;
+          if (useCors) {
+            video.crossOrigin = 'anonymous';
+            console.log('[Relatorio] Tentando com crossOrigin=anonymous');
+          }
+          
+          const timeout = setTimeout(() => {
+            console.error('[Relatorio] Timeout ao carregar vídeo (useCors:', useCors, ')');
             video.src = '';
-            
-            resolve(thumbnailDataUrl);
-          } catch (err) {
+            reject(new Error('Timeout ao gerar thumbnail'));
+          }, 20000); // 20s timeout
+
+          video.onloadedmetadata = () => {
+            console.log('[Relatorio] Metadata carregada, duração:', video.duration, 'dimensões:', video.videoWidth, 'x', video.videoHeight);
+            const seekTime = Math.min(0.5, video.duration * 0.1);
+            video.currentTime = seekTime;
+          };
+          
+          video.onseeked = () => {
+            console.log('[Relatorio] Frame encontrado, capturando canvas...');
+            try {
+              clearTimeout(timeout);
+              
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth || 640;
+              canvas.height = video.videoHeight || 360;
+              
+              const ctx = canvas.getContext('2d', { willReadFrequently: false });
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              
+              console.log('[Relatorio] ✅ Thumbnail gerada com sucesso! Tamanho:', thumbnailDataUrl.length, 'bytes');
+              
+              VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
+              video.src = '';
+              
+              resolve(thumbnailDataUrl);
+            } catch (err) {
+              clearTimeout(timeout);
+              console.error('[Relatorio] ❌ Erro ao capturar frame do canvas:', err);
+              video.src = '';
+              reject(err);
+            }
+          };
+          
+          video.onerror = (err) => {
             clearTimeout(timeout);
-            console.error('[Relatorio] Erro ao capturar frame:', err);
+            console.error('[Relatorio] ❌ Erro ao carregar vídeo:', err, 'errorCode:', video.error?.code, 'message:', video.error?.message);
             video.src = '';
             reject(err);
+          };
+          
+          // Garante HTTPS
+          let safeUrl = videoUrl;
+          if (videoUrl.includes('firebasestorage.googleapis.com') && videoUrl.startsWith('http://')) {
+            safeUrl = videoUrl.replace('http://', 'https://');
+            console.log('[Relatorio] URL convertida para HTTPS:', safeUrl);
           }
-        };
-        
-        video.onerror = (err) => {
-          clearTimeout(timeout);
-          console.error('[Relatorio] Erro ao carregar vídeo:', err, video.error);
-          video.src = '';
-          reject(err);
-        };
-        
-        // Se for Firebase Storage, garante que está usando HTTPS
-        let safeUrl = videoUrl;
-        if (videoUrl.includes('firebasestorage.googleapis.com') && videoUrl.startsWith('http://')) {
-          safeUrl = videoUrl.replace('http://', 'https://');
-          console.log('[Relatorio] URL convertida para HTTPS:', safeUrl);
-        }
-        
-        video.src = safeUrl;
-      });
+          
+          video.src = safeUrl;
+        });
+      };
+
+      // Tenta sem CORS primeiro, depois com CORS se falhar
+      try {
+        return await tryGenerate(false);
+      } catch (err) {
+        console.warn('[Relatorio] Primeira tentativa falhou, tentando com CORS...');
+        return await tryGenerate(true);
+      }
     }
 
     // Lazy + throttled thumbnail generation para reduzir jank
@@ -625,46 +639,68 @@
         if(!container || container.classList.contains('has-thumb')) return;
         const videoUrl = container.getAttribute('data-video-url');
         const postId = container.getAttribute('data-id');
-        if(!videoUrl) return;
+        console.log('[Relatorio] Processando thumbnail - postId:', postId, 'url:', videoUrl);
+        
+        if(!videoUrl) {
+          console.warn('[Relatorio] Container sem data-video-url, ignorando');
+          return;
+        }
+        
         // Evita duplicado
-        if(container.querySelector('img')){ container.classList.add('has-thumb'); return; }
+        if(container.querySelector('img')){ 
+          console.log('[Relatorio] Container já tem img, marcando como processado');
+          container.classList.add('has-thumb'); 
+          return; 
+        }
+        
         const thumbnailUrl = await generateVideoThumbnail(videoUrl, postId);
-        if (container.getAttribute('data-video-url') !== videoUrl) return; // mudou
+        
+        if (container.getAttribute('data-video-url') !== videoUrl) {
+          console.warn('[Relatorio] URL mudou durante processamento, abortando');
+          return; // mudou
+        }
+        
         const img = document.createElement('img');
         img.src = thumbnailUrl;
         img.alt = 'Video preview';
-        // Remove crossOrigin para evitar erros CORS em produção
         img.decoding = 'async';
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:block';
+        img.loading = 'lazy';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:block;background:#000';
         
         // Trata erro de carregamento da imagem
         img.onerror = () => {
-          console.warn('[Relatorio] Erro ao carregar thumbnail gerada, mantendo indicador de vídeo');
+          console.warn('[Relatorio] ❌ Erro ao exibir thumbnail gerada, usando fallback de ícone');
           img.remove();
-          // Adiciona ícone de vídeo como fallback
-          const playIcon = document.createElement('div');
-          playIcon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;';
-          playIcon.textContent = '▶';
-          container.appendChild(playIcon);
-          container.classList.add('has-thumb');
+          addVideoPlayIcon(container);
         };
         
-        const span = container.querySelector('span'); if(span) span.remove();
+        img.onload = () => {
+          console.log('[Relatorio] ✅ Thumbnail exibida com sucesso para postId:', postId);
+        };
+        
+        const span = container.querySelector('span'); 
+        if(span) span.remove();
         container.appendChild(img);
         container.classList.add('has-thumb');
+        
       }catch(err){
-        console.warn('[Relatorio] Falha ao gerar thumbnail:', err, 'para postId:', container?.getAttribute('data-id'));
+        console.error('[Relatorio] ❌ Falha ao gerar thumbnail:', err.message, 'para postId:', container?.getAttribute('data-id'));
         // Adiciona indicador visual de que é um vídeo mesmo que falhe
         if(container && !container.classList.contains('has-thumb')){
-          const playIcon = document.createElement('div');
-          playIcon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;';
-          playIcon.textContent = '▶';
-          container.appendChild(playIcon);
-          container.classList.add('has-thumb');
+          addVideoPlayIcon(container);
         }
       }finally{
         if(container) delete container.dataset.thumbProcessing;
       }
+    }
+
+    function addVideoPlayIcon(container) {
+      const playIcon = document.createElement('div');
+      playIcon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;z-index:1;';
+      playIcon.textContent = '▶';
+      container.appendChild(playIcon);
+      container.classList.add('has-thumb');
+      console.log('[Relatorio] Ícone de play adicionado como fallback');
     }
 
     function enqueueContainer(c){
