@@ -19072,14 +19072,10 @@ async function sendIAQuestion(){
         changed = true;
       }
       METAS = METAS.map(m => {
-        const d = norm(m.descricao);
-        if(d === 'faturamento total das vendas' || d === 'total de vendas' || d === 'valor dos contratos no mes'){
-          if(m.unidade !== 'BRL'){ m.unidade = 'BRL'; changed = true; }
-          if(!m.fixed){ m.fixed = true; changed = true; }
-        }
-        if(d === 'numero de negocios fechados'){
-          if(m.unidade !== 'numero'){ m.unidade = 'numero'; changed = true; }
-          if(!m.fixed){ m.fixed = true; changed = true; }
+        // Remove qualquer bloqueio automático - todas as metas são editáveis
+        if(m.fixed){ 
+          m.fixed = false; 
+          changed = true; 
         }
         return m;
       });

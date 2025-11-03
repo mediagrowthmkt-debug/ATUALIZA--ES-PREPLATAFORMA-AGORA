@@ -22,7 +22,7 @@
       justify-content: center;
     }
     .container {
-      width: min(960px, 94vw);
+      width: min(720px, 94vw);
       padding: 40px 0 60px;
       display: flex;
       flex-direction: column;
@@ -67,107 +67,242 @@
     .status.error {
       color: #f87171;
     }
-    .metas-list {
+    
+    /* Wizard/Step styles */
+    .wizard-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 32px;
     }
-    .meta-card {
-      background: rgba(15,23,42,0.78);
+    .progress-bar {
+      background: rgba(15,23,42,0.65);
       border: 1px solid rgba(148,163,184,0.25);
-      border-radius: 18px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 16px 20px;
       display: flex;
-      flex-direction: column;
-      gap: 18px;
-      box-shadow: 0 18px 38px rgba(15,23,42,0.45);
-    }
-    .meta-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: baseline;
-    }
-    .meta-title {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #f8fafc;
-      flex: 1 1 auto;
-    }
-    .meta-unit {
-      font-size: .75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: #bae6fd;
-      background: rgba(56,189,248,0.2);
-      border: 1px solid rgba(56,189,248,0.35);
-      border-radius: 999px;
-      padding: 4px 10px;
-    }
-    .fields {
-      display: grid;
+      align-items: center;
+      justify-content: space-between;
       gap: 16px;
     }
-    label.field {
+    .progress-text {
+      font-size: .9rem;
+      color: #cbd5f5;
+      font-weight: 600;
+    }
+    .progress-steps {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(148,163,184,0.3);
+      transition: all 0.3s ease;
+    }
+    .progress-dot.completed {
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74,222,128,0.5);
+    }
+    .progress-dot.current {
+      background: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.6);
+      transform: scale(1.3);
+    }
+    
+    .meta-step {
+      background: rgba(15,23,42,0.85);
+      border: 2px solid rgba(56,189,248,0.4);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 45px rgba(15,23,42,0.55), 0 0 0 1px rgba(56,189,248,0.1);
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      font-size: .88rem;
-      color: #cbd5f5;
+      gap: 28px;
+      animation: slideIn 0.4s ease;
     }
-    .field-label {
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .meta-step-header {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .meta-number {
+      font-size: .85rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: #38bdf8;
+      text-transform: uppercase;
+    }
+    .meta-question {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.4;
+      margin: 0;
+    }
+    .meta-subtitle {
+      font-size: .95rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+    .meta-explanation {
+      background: rgba(56,189,248,0.08);
+      border-left: 3px solid #38bdf8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: .9rem;
+      color: #bae6fd;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+    .meta-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
       align-items: center;
       gap: 12px;
+    }
+    .input-prefix, .input-suffix {
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #e2e8f0;
-    }
-    .field-label strong {
-      font-size: .8rem;
-      font-weight: 800;
       color: #38bdf8;
-      letter-spacing: .05em;
+      white-space: nowrap;
     }
-    input[type="number"] {
-      width: 100%;
-      background: rgba(10,17,35,0.85);
-      border: 1px solid rgba(148,163,184,0.35);
-      border-radius: 12px;
-      padding: 10px 12px;
+    input[type="number"].wizard-input {
+      flex: 1;
+      background: rgba(10,17,35,0.95);
+      border: 2px solid rgba(148,163,184,0.4);
+      border-radius: 14px;
+      padding: 16px 20px;
       color: #f8fafc;
-      font-size: 1rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
     }
-    input[type="number"]:focus {
-      outline: 2px solid rgba(56,189,248,0.75);
-      border-color: rgba(56,189,248,0.5);
-      box-shadow: 0 0 0 4px rgba(56,189,248,0.15);
+    input[type="number"].wizard-input:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 4px rgba(56,189,248,0.2), 0 8px 16px rgba(56,189,248,0.15);
+      transform: scale(1.02);
     }
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
+    input[type="number"].wizard-input::-webkit-outer-spin-button,
+    input[type="number"].wizard-input::-webkit-inner-spin-button {
       appearance: none;
       margin: 0;
     }
-    .hint {
-      font-size: .75rem;
-      color: #94a3b8;
-    }
-    .month-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-    }
-    .empty-state {
+    .current-value-display {
+      background: rgba(56,189,248,0.1);
+      border: 1px solid rgba(56,189,248,0.3);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: .95rem;
+      color: #bae6fd;
       text-align: center;
-      padding: 60px 20px;
-      background: rgba(15,23,42,0.65);
-      border: 1px dashed rgba(148,163,184,0.3);
-      border-radius: 16px;
-      color: #cbd5f5;
-      font-size: 1rem;
     }
-    .loading, .error-section {
+    .wizard-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(56,189,248,0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(56,189,248,0.45);
+    }
+    .btn-secondary {
+      background: rgba(148,163,184,0.15);
+      color: #cbd5f5;
+      border: 1px solid rgba(148,163,184,0.35);
+    }
+    .btn-secondary:hover {
+      background: rgba(148,163,184,0.25);
+    }
+    .btn-approve {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(74,222,128,0.35);
+    }
+    .btn-approve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(74,222,128,0.45);
+    }
+    .btn-edit {
+      background: rgba(251,191,36,0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251,191,36,0.4);
+    }
+    .btn-edit:hover {
+      background: rgba(251,191,36,0.25);
+    }
+    .btn-skip {
+      background: rgba(148,163,184,0.08);
+      color: #94a3b8;
+      border: 1px solid rgba(148,163,184,0.25);
+      font-size: 0.9rem;
+    }
+    .btn-skip:hover {
+      background: rgba(148,163,184,0.15);
+      color: #cbd5e1;
+    }
+    .completion-screen {
+      text-align: center;
+      padding: 60px 32px;
+      background: rgba(15,23,42,0.85);
+      border: 2px solid rgba(74,222,128,0.4);
+      border-radius: 20px;
+      box-shadow: 0 20px 45px rgba(15,23,42,0.55);
+      animation: slideIn 0.5s ease;
+    }
+    .completion-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 0.6s ease;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    .completion-screen h2 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      color: #4ade80;
+    }
+    .completion-screen p {
+      font-size: 1.1rem;
+      color: #cbd5f5;
+      margin: 0 0 8px;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .empty-state, .loading, .error-section {
       text-align: center;
       padding: 80px 20px;
       color: #e0f2fe;
@@ -177,19 +312,37 @@
       margin: 0 0 10px;
       font-size: 1.6rem;
     }
-    .hidden {
-      display: none !important;
-    }
     @media (max-width: 640px) {
       .container {
         padding: 28px 0 48px;
         gap: 22px;
       }
-      .meta-card {
-        padding: 18px;
+      .meta-step {
+        padding: 28px 20px;
       }
-      .month-grid {
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      .meta-question {
+        font-size: 1.3rem;
+      }
+      input[type="number"].wizard-input {
+        font-size: 1.2rem;
+        padding: 14px 16px;
+      }
+      .wizard-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .btn-skip {
+        order: 3; /* Fica por último em mobile */
+      }
+      .btn-secondary {
+        order: 2;
+      }
+      .btn-primary, .btn-approve, .btn-edit {
+        order: 1; /* Ficam no topo em mobile */
       }
     }
   </style>
@@ -201,10 +354,10 @@
       <header>
         <span class="badge">Atualização de metas</span>
         <h1 id="pageTitle">Metas do cliente</h1>
-        <p id="instructions">Preencha os resultados do mês atual e a projeção até o fim do ano. As respostas são salvas automaticamente.</p>
+        <p id="instructions">Responda uma pergunta por vez. Suas respostas são salvas automaticamente.</p>
       </header>
       <div id="statusMessage" class="status"></div>
-      <div id="metasList" class="metas-list"></div>
+      <div id="wizardContainer" class="wizard-container"></div>
     </section>
     <section id="error" class="error-section hidden">
       <h2>Link indisponível</h2>
@@ -225,7 +378,11 @@
       appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
     };
 
-    const MONTH_LABELS = { jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' };
+    const MONTH_LABELS = { 
+      jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', 
+      mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', 
+      set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' 
+    };
 
     const qs = new URLSearchParams(location.search);
     const token = qs.get('token') || qs.get('metasForm');
@@ -234,7 +391,7 @@
     const errorEl = document.getElementById('error');
     const errorMessageEl = document.getElementById('errorMessage');
     const statusEl = document.getElementById('statusMessage');
-    const metasListEl = document.getElementById('metasList');
+    const wizardContainerEl = document.getElementById('wizardContainer');
     const titleEl = document.getElementById('pageTitle');
     const instructionsEl = document.getElementById('instructions');
 
@@ -249,9 +406,12 @@
 
     const state = {
       initialized: false,
-      version: 0,
+      currentStep: 0,
       responses: {},
       docData: null,
+      metas: [],
+      monthKey: '',
+      monthLabel: '',
       saveTimer: null,
       saving: false
     };
@@ -278,6 +438,7 @@
       if(unit === 'BRL') return 'R$';
       if(unit === 'USD') return 'US$';
       if(unit === '%') return '%';
+      if(unit === 'numero') return '';
       return '';
     }
 
@@ -294,98 +455,18 @@
       if(unit === 'BRL') return num.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
       if(unit === 'USD') return num.toLocaleString('pt-BR', { style:'currency', currency:'USD' });
       if(unit === '%') return num.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:2 }) + '%';
+      if(unit === 'numero') return num.toLocaleString('pt-BR', { minimumFractionDigits:0, maximumFractionDigits:0 });
       return num.toLocaleString('pt-BR', { minimumFractionDigits:0, maximumFractionDigits:2 });
-    }
-
-    function cloneResponses(source){
-      const out = {};
-      if(!source || typeof source !== 'object') return out;
-      Object.entries(source).forEach(([metaId, payload]) => {
-        if(!payload || typeof payload !== 'object') return;
-        const entry = {};
-        if(Object.prototype.hasOwnProperty.call(payload, 'current')){
-          entry.current = payload.current;
-        }
-        if(payload.projections && typeof payload.projections === 'object'){
-          entry.projections = { ...payload.projections };
-        }
-        out[metaId] = entry;
-      });
-      return out;
-    }
-
-    function sanitizeNumber(value){
-      if(value === '' || value === null || value === undefined) return null;
-      if(typeof value === 'number') return Number.isFinite(value) ? value : null;
-      const num = Number(value);
-      return Number.isFinite(num) ? num : null;
-    }
-
-    function ensureMetaState(metaId){
-      if(!state.responses[metaId]){
-        state.responses[metaId] = {};
-      }
-      if(!state.responses[metaId].projections){
-        state.responses[metaId].projections = {};
-      }
-      return state.responses[metaId];
-    }
-
-    function cleanupMetaState(metaId){
-      const entry = state.responses[metaId];
-      if(!entry) return;
-      if(entry.projections){
-        Object.keys(entry.projections).forEach(month => {
-          const val = entry.projections[month];
-          if(val === '' || val === undefined){
-            delete entry.projections[month];
-          }
-        });
-        if(!Object.keys(entry.projections).length){
-          delete entry.projections;
-        }
-      }
-      if(entry.current === undefined){
-        delete entry.current;
-      }
-      if(!Object.prototype.hasOwnProperty.call(entry, 'current') && !entry.projections){
-        delete state.responses[metaId];
-      }
     }
 
     function buildPayload(){
       const out = {};
-      Object.entries(state.responses).forEach(([metaId, entry]) => {
-        if(!entry || typeof entry !== 'object') return;
-        const payload = {};
-        if(Object.prototype.hasOwnProperty.call(entry, 'current')){
-          if(entry.current === null){
-            payload.current = null;
-          } else {
-            const num = sanitizeNumber(entry.current);
-            if(num !== null){
-              payload.current = num;
-            }
+      Object.entries(state.responses).forEach(([metaId, value]) => {
+        if(value !== null && value !== undefined && value !== ''){
+          const num = Number(value);
+          if(Number.isFinite(num)){
+            out[metaId] = { current: num };
           }
-        }
-        if(entry.projections && typeof entry.projections === 'object'){
-          const proj = {};
-          Object.entries(entry.projections).forEach(([month, val]) => {
-            if(val === null){
-              proj[month] = null;
-            } else {
-              const num = sanitizeNumber(val);
-              if(num !== null){
-                proj[month] = num;
-              }
-            }
-          });
-          if(Object.keys(proj).length){
-            payload.projections = proj;
-          }
-        }
-        if(Object.keys(payload).length){
-          out[metaId] = payload;
         }
       });
       return out;
@@ -393,9 +474,9 @@
 
     function scheduleSave(){
       if(!state.initialized) return;
-      setStatus('Salvando automaticamente...');
+      setStatus('💾 Salvando...');
       clearTimeout(state.saveTimer);
-      state.saveTimer = setTimeout(runSave, 600);
+      state.saveTimer = setTimeout(runSave, 800);
     }
 
     async function runSave(){
@@ -406,153 +487,483 @@
       clearTimeout(state.saveTimer);
       state.saveTimer = null;
       const payload = buildPayload();
-      const version = Date.now();
       state.saving = true;
       try{
         await setDoc(formRef, {
           responses: payload,
-          updatedAt: serverTimestamp(),
-          version
+          updatedAt: serverTimestamp()
         }, { merge: true });
-        state.version = version;
-        state.responses = cloneResponses(payload);
-        setStatus('Respostas salvas. Você pode fechar esta página quando quiser.');
+        setStatus('✅ Resposta salva automaticamente');
+        setTimeout(() => setStatus(''), 2000);
       }catch(err){
         console.error('Erro ao salvar respostas', err);
-        setStatus('Não conseguimos salvar agora. Tentaremos novamente em instantes.', true);
+        setStatus('⚠️ Não conseguimos salvar. Tentando novamente...', true);
         state.saveTimer = setTimeout(runSave, 3000);
       }finally{
         state.saving = false;
       }
     }
 
-    function handleInput(metaId, kind, monthKey, rawValue){
-      const entry = ensureMetaState(metaId);
-      if(kind === 'current'){
-        if(rawValue === ''){
-          entry.current = null;
-        }else{
-          const num = Number(rawValue);
-          if(Number.isFinite(num)){
-            entry.current = num;
-          }
-        }
-      } else if(kind === 'projection'){
-        if(rawValue === ''){
-          entry.projections[monthKey] = null;
-        }else{
-          const num = Number(rawValue);
-          if(Number.isFinite(num)){
-            entry.projections[monthKey] = num;
-          }
-        }
+    function generateQuestion(meta){
+      const desc = (meta.descricao || '').toLowerCase();
+      const unit = meta.unidade || '';
+      const symbol = getUnitSymbol(unit);
+      
+      // Mapeamento de perguntas personalizadas
+      if(desc.includes('investimento') && desc.includes('tráfego')){
+        return `Quanto você pretende investir em tráfego pago (anúncios online)?`;
       }
-      cleanupMetaState(metaId);
-      scheduleSave();
+      if(desc.includes('faturamento') || desc.includes('receita')){
+        return `Qual é a meta de faturamento para este mês?`;
+      }
+      if(desc.includes('vendas') || desc.includes('negócios fechados')){
+        return `Quantas vendas você espera fechar este mês?`;
+      }
+      if(desc.includes('leads') || desc.includes('contatos')){
+        return `Quantos novos contatos/leads você quer gerar?`;
+      }
+      if(desc.includes('ticket médio')){
+        return `Qual deve ser o valor médio de cada venda?`;
+      }
+      if(desc.includes('taxa de conversão') || desc.includes('conversão')){
+        return `Qual a taxa de conversão esperada?`;
+      }
+      if(desc.includes('roi') || desc.includes('retorno')){
+        return `Qual o retorno sobre investimento (ROI) esperado?`;
+      }
+      if(desc.includes('custo') || desc.includes('despesa')){
+        return `Qual o limite de custos para este mês?`;
+      }
+      
+      // Pergunta genérica
+      if(unit === 'BRL' || unit === 'USD'){
+        return `Qual a meta de "${meta.descricao}" para este mês?`;
+      }
+      if(unit === '%'){
+        return `Qual a porcentagem esperada de "${meta.descricao}"?`;
+      }
+      if(unit === 'numero'){
+        return `Quantos "${meta.descricao}" você espera alcançar?`;
+      }
+      return `Qual a meta de "${meta.descricao}"?`;
     }
 
-    function renderMetaCard(meta, docData){
-      const card = document.createElement('article');
-      card.className = 'meta-card';
+    function generateExplanation(meta){
+      const desc = (meta.descricao || '').toLowerCase();
+      
+      // Explicações personalizadas baseadas no documento do cliente
+      if(desc.includes('investimento') && (desc.includes('tráfego') || desc.includes('publicidade'))){
+        return `💡 Valor aplicado em anúncios pagos. Exemplo: Investir R$ 1.500 em campanhas no Meta Ads.`;
+      }
+      if(desc.includes('faturamento') && desc.includes('tráfego')){
+        return `💡 Vendas geradas pelos anúncios online. Exemplo: R$ 7.000 em vendas vindas de campanhas.`;
+      }
+      if(desc.includes('roas')){
+        return `💡 Lucro por cada real investido. Exemplo: Investiu R$ 1.000, faturou R$ 4.000 → ROAS 4x.`;
+      }
+      if(desc.includes('taxa') && desc.includes('qualificado')){
+        return `💡 Percentual de leads prontos para contato. Exemplo: 30 dos 100 leads demonstraram interesse (30%).`;
+      }
+      if(desc.includes('cpl') || (desc.includes('custo') && desc.includes('lead'))){
+        return `💡 Valor médio pago por cada lead. Exemplo: Gastou R$ 500 e gerou 25 leads → R$ 20 por lead.`;
+      }
+      if(desc.includes('cac') || desc.includes('custo de aquisição')){
+        return `💡 Custo total para conquistar um cliente. Exemplo: Investiu R$ 2.000 e fechou 4 clientes → CAC R$ 500.`;
+      }
+      if(desc.includes('aquecido') || desc.includes('nutrição')){
+        return `💡 Leads engajados e próximos de comprar. Exemplo: 10 leads que responderam follow-up e pediram orçamento.`;
+      }
+      if(desc.includes('seguidores') || desc.includes('tração')){
+        return `💡 Crescimento do público nas redes sociais. Exemplo: Instagram passou de 2.000 para 2.350 seguidores.`;
+      }
+      if(desc.includes('comentários') || desc.includes('gbp') || desc.includes('google business')){
+        return `💡 Avaliações positivas no Google Business Profile. Exemplo: 5 novas avaliações com 5 estrelas no mês.`;
+      }
+      if(desc.includes('valor') && desc.includes('contrato')){
+        return `💡 Soma total de contratos fechados. Exemplo: Fechou dois projetos de R$ 8.000 → total R$ 16.000.`;
+      }
+      if(desc.includes('orçamento') && desc.includes('recorrente')){
+        return `💡 Propostas enviadas a clientes antigos. Exemplo: Reenviou 3 orçamentos para clientes já existentes.`;
+      }
+      if(desc.includes('negócio') && desc.includes('recorrente')){
+        return `💡 Vendas feitas para clientes antigos. Exemplo: Fechou 2 serviços com clientes recorrentes.`;
+      }
+      if(desc.includes('taxa') && desc.includes('conversão') && desc.includes('recorrente')){
+        return `💡 Percentual de retorno de clientes antigos. Exemplo: 5 orçamentos enviados, 2 fechados → 40%.`;
+      }
+      if(desc.includes('total') && desc.includes('lead')){
+        return `💡 Quantidade total de novos contatos recebidos. Exemplo: 60 novos leads captados via anúncios.`;
+      }
+      if(desc.includes('orçamento') && (desc.includes('novo') || desc.includes('leads novos'))){
+        return `💡 Propostas enviadas a novos contatos. Exemplo: 20 orçamentos enviados para leads do site.`;
+      }
+      if(desc.includes('negócio') && (desc.includes('novo') || desc.includes('leads novos'))){
+        return `💡 Vendas concluídas com novos leads. Exemplo: 6 novos clientes vindos de anúncios.`;
+      }
+      if(desc.includes('taxa') && desc.includes('conversão') && (desc.includes('novo') || desc.includes('leads novos'))){
+        return `💡 Percentual de leads que se tornaram clientes. Exemplo: 30 leads gerados, 6 vendas → 20%.`;
+      }
+      if(desc.includes('perdido')){
+        return `💡 Total de propostas não convertidas. Exemplo: Perdeu 3 orçamentos que somavam R$ 5.000.`;
+      }
+      if(desc.includes('faturamento') && desc.includes('total')){
+        return `💡 Soma de todas as vendas do mês. Exemplo: Vendeu R$ 50.000 entre todos os clientes.`;
+      }
+      if(desc.includes('leads') || desc.includes('contatos')){
+        return `💡 Pessoas interessadas no seu produto/serviço. Quantos novos contatos você quer capturar?`;
+      }
+      if(desc.includes('ticket médio')){
+        return `💡 Valor médio de cada venda. Exemplo: Vendeu R$ 1.000 e R$ 2.000 → ticket médio R$ 1.500.`;
+      }
+      if(desc.includes('taxa de conversão') || desc.includes('conversão')){
+        return `💡 Percentual de leads que compraram. Exemplo: 100 leads, 5 compraram = 5% de conversão.`;
+      }
+      
+      // Explicação genérica
+      return `💡 ${meta.descricao} - Defina o valor que você espera alcançar neste mês.`;
+    }
+
+    function renderProgressBar(){
+      const total = state.metas.length;
+      const current = state.currentStep;
+      
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      
+      const text = document.createElement('div');
+      text.className = 'progress-text';
+      text.textContent = `Meta ${Math.min(current + 1, total)} de ${total}`;
+      
+      const dots = document.createElement('div');
+      dots.className = 'progress-steps';
+      
+      for(let i = 0; i < total; i++){
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if(i < current) dot.classList.add('completed');
+        if(i === current) dot.classList.add('current');
+        dots.appendChild(dot);
+      }
+      
+      progressBar.appendChild(text);
+      progressBar.appendChild(dots);
+      
+      return progressBar;
+    }
+
+    function renderMetaStep(meta, index){
+      const container = document.createElement('div');
+      
+      // Progress bar
+      container.appendChild(renderProgressBar());
+      
+      const step = document.createElement('div');
+      step.className = 'meta-step';
+      
+      // Header
       const header = document.createElement('div');
-      header.className = 'meta-header';
-      const title = document.createElement('h2');
-      title.className = 'meta-title';
-      const prefix = meta.pos ? meta.pos + ' • ' : '';
-      title.textContent = prefix + (meta.descricao || 'Meta');
-      header.appendChild(title);
-      const unitSymbol = getUnitSymbol(meta.unidade);
-      if(unitSymbol){
-        const unit = document.createElement('span');
-        unit.className = 'meta-unit';
-        unit.textContent = unitSymbol;
-        header.appendChild(unit);
-      }
-      card.appendChild(header);
-
-      const fields = document.createElement('div');
-      fields.className = 'fields';
-      const currentLabel = document.createElement('label');
-      currentLabel.className = 'field';
-      const currentTitle = document.createElement('span');
-      currentTitle.className = 'field-label';
-      currentTitle.textContent = `Resultado de ${docData.monthLabel || MONTH_LABELS[docData.monthKey] || 'Mês atual'}`;
-      if(unitSymbol){
-        const unitTag = document.createElement('strong');
-        unitTag.textContent = unitSymbol;
-        currentTitle.appendChild(unitTag);
-      }
-      currentLabel.appendChild(currentTitle);
-      const currentInput = document.createElement('input');
-      currentInput.type = 'number';
-      currentInput.step = getInputStep(meta.unidade);
-      currentInput.inputMode = meta.unidade === 'numero' ? 'numeric' : 'decimal';
-      const entry = state.responses[meta.id] || {};
-      const currentValue = Object.prototype.hasOwnProperty.call(entry, 'current') ? entry.current : meta.currentValue;
-      currentInput.value = currentValue === null || currentValue === undefined ? '' : currentValue;
-      currentInput.addEventListener('input', () => handleInput(meta.id, 'current', docData.monthKey, currentInput.value));
-      currentLabel.appendChild(currentInput);
-      if(meta.currentValue !== null && meta.currentValue !== undefined && meta.currentValue !== ''){
-        const hint = document.createElement('span');
-        hint.className = 'hint';
-        hint.textContent = `Último valor registrado: ${formatNumberDisplay(meta.currentValue, meta.unidade)}`;
-        currentLabel.appendChild(hint);
-      }
-      fields.appendChild(currentLabel);
-
-      const monthsWrap = document.createElement('div');
-      monthsWrap.className = 'month-grid';
-      const months = Array.isArray(docData.projectionMonths) && docData.projectionMonths.length
-        ? docData.projectionMonths
-        : Object.keys(MONTH_LABELS);
-      const projections = entry.projections || {};
-      months.forEach(monthKey => {
-        const label = document.createElement('label');
-        label.className = 'field';
-        const span = document.createElement('span');
-        span.className = 'field-label';
-        span.textContent = `Projeção • ${MONTH_LABELS[monthKey] || monthKey.toUpperCase()}`;
-        if(unitSymbol){
-          const unitTag = document.createElement('strong');
-          unitTag.textContent = unitSymbol;
-          span.appendChild(unitTag);
+      header.className = 'meta-step-header';
+      
+      const number = document.createElement('div');
+      number.className = 'meta-number';
+      number.textContent = `Meta ${index + 1} • ${meta.descricao || 'Meta'}`;
+      
+      const question = document.createElement('h2');
+      question.className = 'meta-question';
+      question.textContent = generateQuestion(meta);
+      
+      const subtitle = document.createElement('p');
+      subtitle.className = 'meta-subtitle';
+      subtitle.textContent = `Referente ao mês de ${state.monthLabel}`;
+      
+      const explanation = document.createElement('div');
+      explanation.className = 'meta-explanation';
+      explanation.textContent = generateExplanation(meta);
+      
+      header.appendChild(number);
+      header.appendChild(question);
+      header.appendChild(subtitle);
+      header.appendChild(explanation);
+      step.appendChild(header);
+      
+      // Pega o valor planejado (P) que a agência definiu
+      const plannedValue = meta.plannedValue; // Vem do backend
+      const hasPlannedValue = plannedValue !== null && plannedValue !== undefined && plannedValue !== '';
+      
+      // Verifica se já tem valor salvo pelo cliente
+      const savedValue = state.responses[meta.id];
+      const hasSavedValue = savedValue !== null && savedValue !== undefined && savedValue !== '';
+      
+      const unit = meta.unidade || '';
+      const symbol = getUnitSymbol(unit);
+      
+      // Input group
+      const inputGroup = document.createElement('div');
+      inputGroup.className = 'meta-input-group';
+      
+      if(hasPlannedValue){
+        // MODO APROVAÇÃO: Agência já definiu um valor planejado
+        const display = document.createElement('div');
+        display.className = 'current-value-display';
+        
+        let approvalText = '';
+        if(unit === 'BRL' || unit === 'USD'){
+          approvalText = `A agência sugeriu: ${formatNumberDisplay(plannedValue, unit)}. Você aprova este valor?`;
+        } else if(unit === '%'){
+          approvalText = `A agência sugeriu: ${formatNumberDisplay(plannedValue, unit)}. Você aprova esta meta?`;
+        } else if(unit === 'numero'){
+          approvalText = `A agência sugeriu: ${formatNumberDisplay(plannedValue, unit)}. Você aprova este número?`;
+        } else {
+          approvalText = `Valor sugerido pela agência: ${formatNumberDisplay(plannedValue, unit)}`;
         }
-        label.appendChild(span);
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.step = getInputStep(meta.unidade);
-        input.inputMode = meta.unidade === 'numero' ? 'numeric' : 'decimal';
-        const projValue = Object.prototype.hasOwnProperty.call(projections, monthKey)
-          ? projections[monthKey]
-          : (meta.projections ? meta.projections[monthKey] : null);
-        input.value = projValue === null || projValue === undefined ? '' : projValue;
-        input.addEventListener('input', () => handleInput(meta.id, 'projection', monthKey, input.value));
-        label.appendChild(input);
-        if(meta.projections && meta.projections[monthKey] !== null && meta.projections[monthKey] !== undefined && meta.projections[monthKey] !== ''){
-          const hint = document.createElement('span');
-          hint.className = 'hint';
-          hint.textContent = `Referência atual: ${formatNumberDisplay(meta.projections[monthKey], meta.unidade)}`;
-          label.appendChild(hint);
-        }
-        monthsWrap.appendChild(label);
-      });
-      fields.appendChild(monthsWrap);
-      card.appendChild(fields);
-      return card;
+        
+        display.textContent = approvalText;
+        inputGroup.appendChild(display);
+        
+        // Actions
+        const actions = document.createElement('div');
+        actions.className = 'wizard-actions';
+        
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'btn btn-skip';
+        skipBtn.type = 'button';
+        skipBtn.innerHTML = '⏭️ Não sei, pular';
+        skipBtn.onclick = () => {
+          // Remove resposta se existir
+          delete state.responses[meta.id];
+          // Avança sem salvar
+          nextStep();
+        };
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-edit';
+        editBtn.type = 'button';
+        editBtn.innerHTML = '✏️ Quero ajustar este valor';
+        editBtn.onclick = () => {
+          // Substitui por input com valor pré-preenchido
+          inputGroup.innerHTML = '';
+          inputGroup.appendChild(createInputField(meta, plannedValue));
+        };
+        
+        const approveBtn = document.createElement('button');
+        approveBtn.className = 'btn btn-approve';
+        approveBtn.type = 'button';
+        approveBtn.innerHTML = '✅ Aprovar e continuar';
+        approveBtn.onclick = () => {
+          state.responses[meta.id] = plannedValue;
+          scheduleSave();
+          nextStep();
+        };
+        
+        actions.appendChild(skipBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(approveBtn);
+        inputGroup.appendChild(actions);
+        
+      } else {
+        // MODO INPUT: Não tem valor planejado, cliente precisa preencher
+        const noPlannedMsg = document.createElement('div');
+        noPlannedMsg.className = 'current-value-display';
+        noPlannedMsg.style.background = 'rgba(251,191,36,0.1)';
+        noPlannedMsg.style.borderColor = 'rgba(251,191,36,0.3)';
+        noPlannedMsg.style.color = '#fbbf24';
+        noPlannedMsg.textContent = '⚠️ A agência ainda não definiu esta meta. Você pode sugerir um valor:';
+        inputGroup.appendChild(noPlannedMsg);
+        
+        inputGroup.appendChild(createInputField(meta, hasSavedValue ? savedValue : ''));
+      }
+      
+      step.appendChild(inputGroup);
+      container.appendChild(step);
+      
+      return container;
     }
 
-    function renderMetas(docData){
-      metasListEl.innerHTML = '';
-      if(!Array.isArray(docData.metas) || !docData.metas.length){
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.textContent = 'Nenhuma meta ativa foi compartilhada neste link. Solicite uma atualização ao time da MediaGrowth.';
-        metasListEl.appendChild(empty);
+    function createInputField(meta, initialValue = ''){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'input-wrapper';
+      
+      const unit = meta.unidade || '';
+      const symbol = getUnitSymbol(unit);
+      
+      if(symbol && (unit === 'BRL' || unit === 'USD')){
+        const prefix = document.createElement('span');
+        prefix.className = 'input-prefix';
+        prefix.textContent = symbol;
+        wrapper.appendChild(prefix);
+      }
+      
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'wizard-input';
+      input.step = getInputStep(unit);
+      input.inputMode = unit === 'numero' ? 'numeric' : 'decimal';
+      input.placeholder = '0';
+      input.value = initialValue;
+      input.autofocus = true;
+      
+      // Auto-save on input
+      let inputTimer;
+      input.oninput = () => {
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(() => {
+          const val = input.value.trim();
+          if(val !== ''){
+            const num = Number(val);
+            if(Number.isFinite(num)){
+              state.responses[meta.id] = num;
+              scheduleSave();
+            }
+          }
+        }, 500);
+      };
+      
+      // Enter to continue
+      input.onkeypress = (e) => {
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          const val = input.value.trim();
+          if(val !== ''){
+            const num = Number(val);
+            if(Number.isFinite(num)){
+              state.responses[meta.id] = num;
+              scheduleSave();
+              nextStep();
+            }
+          }
+        }
+      };
+      
+      wrapper.appendChild(input);
+      
+      if(symbol && unit === '%'){
+        const suffix = document.createElement('span');
+        suffix.className = 'input-suffix';
+        suffix.textContent = '%';
+        wrapper.appendChild(suffix);
+      }
+      
+      // Actions
+      const actions = document.createElement('div');
+      actions.className = 'wizard-actions';
+      
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn btn-secondary';
+      backBtn.type = 'button';
+      backBtn.innerHTML = '← Voltar';
+      backBtn.onclick = previousStep;
+      if(state.currentStep === 0) backBtn.style.visibility = 'hidden';
+      
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'btn btn-skip';
+      skipBtn.type = 'button';
+      skipBtn.innerHTML = '⏭️ Não sei, pular';
+      skipBtn.onclick = () => {
+        // Remove resposta se existir
+        delete state.responses[meta.id];
+        // Avança sem salvar
+        nextStep();
+      };
+      
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn btn-primary';
+      nextBtn.type = 'button';
+      nextBtn.innerHTML = 'Próxima →';
+      nextBtn.onclick = () => {
+        const val = input.value.trim();
+        if(val !== ''){
+          const num = Number(val);
+          if(Number.isFinite(num)){
+            state.responses[meta.id] = num;
+            scheduleSave();
+            nextStep();
+          }
+        } else {
+          // Permite pular se não quiser responder
+          nextStep();
+        }
+      };
+      
+      actions.appendChild(backBtn);
+      actions.appendChild(skipBtn);
+      actions.appendChild(nextBtn);
+      
+      const container = document.createElement('div');
+      container.appendChild(wrapper);
+      container.appendChild(actions);
+      
+      return container;
+    }
+
+    function renderCompletionScreen(){
+      const screen = document.createElement('div');
+      screen.className = 'completion-screen';
+      
+      const icon = document.createElement('div');
+      icon.className = 'completion-icon';
+      icon.textContent = '🎉';
+      
+      const title = document.createElement('h2');
+      title.textContent = 'Pronto! Metas atualizadas';
+      
+      const message = document.createElement('p');
+      message.textContent = 'Todas as suas respostas foram salvas com sucesso.';
+      
+      const submessage = document.createElement('p');
+      submessage.style.fontSize = '.9rem';
+      submessage.style.color = '#94a3b8';
+      submessage.textContent = 'Você pode fechar esta página agora.';
+      
+      const restartBtn = document.createElement('button');
+      restartBtn.className = 'btn btn-secondary';
+      restartBtn.type = 'button';
+      restartBtn.innerHTML = '🔄 Revisar respostas';
+      restartBtn.style.marginTop = '24px';
+      restartBtn.onclick = () => {
+        state.currentStep = 0;
+        renderCurrentStep();
+      };
+      
+      screen.appendChild(icon);
+      screen.appendChild(title);
+      screen.appendChild(message);
+      screen.appendChild(submessage);
+      screen.appendChild(restartBtn);
+      
+      return screen;
+    }
+
+    function renderCurrentStep(){
+      wizardContainerEl.innerHTML = '';
+      
+      if(state.currentStep >= state.metas.length){
+        // Completion
+        wizardContainerEl.appendChild(renderCompletionScreen());
         return;
       }
-      docData.metas.forEach(meta => {
-        metasListEl.appendChild(renderMetaCard(meta, docData));
-      });
+      
+      const meta = state.metas[state.currentStep];
+      wizardContainerEl.appendChild(renderMetaStep(meta, state.currentStep));
+      
+      // Auto-focus no input
+      setTimeout(() => {
+        const input = wizardContainerEl.querySelector('.wizard-input');
+        if(input) input.focus();
+      }, 100);
+    }
+
+    function nextStep(){
+      if(state.currentStep < state.metas.length){
+        state.currentStep++;
+        renderCurrentStep();
+      }
+    }
+
+    function previousStep(){
+      if(state.currentStep > 0){
+        state.currentStep--;
+        renderCurrentStep();
+      }
     }
 
     async function init(){
@@ -562,18 +973,48 @@
           showError('Este link expirou ou foi revogado. Solicite um novo link ao seu consultor.');
           return;
         }
+        
         const data = snap.data();
         state.docData = data;
-        state.version = data.version || 0;
-        state.responses = cloneResponses(data.responses || {});
+        state.monthKey = data.monthKey || '';
+        state.monthLabel = data.monthLabel || MONTH_LABELS[state.monthKey] || 'mês atual';
+        
+        // Carrega respostas salvas
+        if(data.responses && typeof data.responses === 'object'){
+          Object.entries(data.responses).forEach(([metaId, payload]) => {
+            if(payload && typeof payload === 'object' && payload.current !== undefined){
+              state.responses[metaId] = payload.current;
+            }
+          });
+        }
+        
+        // Prepara metas (somente do mês atual)
+        if(Array.isArray(data.metas) && data.metas.length > 0){
+          state.metas = data.metas.map((m, idx) => {
+            // Extrai o valor planejado (P) para o mês atual
+            const plannedValue = m.projections && m.projections[state.monthKey] !== undefined 
+              ? m.projections[state.monthKey] 
+              : null;
+            
+            return {
+              ...m,
+              pos: idx + 1,
+              plannedValue // Adiciona o valor planejado ao objeto meta
+            };
+          });
+        } else {
+          showError('Nenhuma meta ativa foi compartilhada neste link. Solicite uma atualização ao time da MediaGrowth.');
+          return;
+        }
+        
         const clientLabel = data.clientLabel || data.clientKey || 'Cliente';
-        const monthLabel = data.monthLabel || MONTH_LABELS[data.monthKey] || 'mês atual';
         titleEl.textContent = `Metas • ${clientLabel}`;
-        instructionsEl.innerHTML = `Informe o resultado de <strong>${monthLabel}</strong> e atualize a projeção até o fim do ano.`;
-        renderMetas(data);
+        instructionsEl.innerHTML = `Responda as perguntas sobre <strong>${state.monthLabel}</strong>. Vá no seu ritmo, suas respostas são salvas automaticamente.`;
+        
         showContent();
-        setStatus('As respostas são salvas automaticamente.');
+        renderCurrentStep();
         state.initialized = true;
+        
       }catch(err){
         console.error('Erro ao carregar formulário de metas', err);
         showError('Não foi possível carregar este formulário. Verifique o link ou tente novamente mais tarde.');
