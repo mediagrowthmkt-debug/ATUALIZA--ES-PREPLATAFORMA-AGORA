@@ -14391,11 +14391,20 @@ async function sendIAQuestion(){
       const safeKey = normalizeTenantKey(clientKey);
       console.log('[filterPostsByClient] clientKey:', clientKey, 'safeKey:', safeKey);
       if(!safeKey) return posts.slice();
+      
+      // Normaliza removendo pontos e hífens para comparação
+      const normalizeForCompare = (str) => {
+        if(!str) return '';
+        return String(str).toLowerCase().replace(/[.-]/g, '');
+      };
+      const normalizedClientKey = normalizeForCompare(clientKey);
+      
       const filtered = posts.filter(post=>{
         const tenant = post?.tenant || '';
         if(!tenant) return true;
-        const matches = tenant === safeKey || tenant === clientKey;
-        console.log('[filterPostsByClient] Post:', post.id, 'tenant:', tenant, 'matches:', matches);
+        const normalizedTenant = normalizeForCompare(tenant);
+        const matches = normalizedTenant === normalizedClientKey;
+        console.log('[filterPostsByClient] Post:', post.id, 'tenant:', tenant, 'normalized:', normalizedTenant, 'matches:', matches);
         return matches;
       });
       console.log('[filterPostsByClient] Total posts:', posts.length, 'Filtered:', filtered.length);
