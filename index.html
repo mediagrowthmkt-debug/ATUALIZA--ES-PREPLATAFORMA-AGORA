@@ -13881,13 +13881,18 @@ async function sendIAQuestion(){
 
     // Monta snapshot dos dados do relatório do mês (para link público)
     function buildMonthlyReportData(mesISO){
+      console.log('[buildMonthlyReportData] Iniciando - mesISO:', mesISO);
       const clientKey = getClientKey();
+      console.log('[buildMonthlyReportData] clientKey:', clientKey);
+      
       const [ano, mm] = (mesISO||'').split('-');
       const labelMonth = (()=>{
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         const idx = Math.max(0, Math.min(11, (parseInt(mm,10)||1)-1));
         return `${meses[idx]} ${ano||''}`.trim();
       })();
+      console.log('[buildMonthlyReportData] labelMonth:', labelMonth);
+      
       // metas
       const monthKey = getMetaMonthKeyFromISO(mesISO);
       const metasActive = Array.isArray(METAS) ? METAS.filter(m=>m && m.ativo!==false) : [];
@@ -13903,11 +13908,30 @@ async function sendIAQuestion(){
           planned, realized, status
         };
       });
+      console.log('[buildMonthlyReportData] Metas preparadas:', metas.length);
+      
       // posts
       const tenant = clientKey;
+      console.log('[buildMonthlyReportData] Total de POSTS:', Array.isArray(POSTS) ? POSTS.length : 0);
+      
       const relevantPosts = filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant)
         .filter(p=> String(p.dateISO||'').startsWith(mesISO))
         .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+      
+      console.log('[buildMonthlyReportData] Posts relevantes (após filtro):', relevantPosts.length);
+      console.log('[buildMonthlyReportData] Stories:', relevantPosts.filter(p => p.target === 'stories').length);
+      console.log('[buildMonthlyReportData] Feed:', relevantPosts.filter(p => (p.target||'feed') === 'feed').length);
+      
+      if(relevantPosts.length > 0){
+        console.log('[buildMonthlyReportData] Primeiro post relevante:', {
+          id: relevantPosts[0].id,
+          dateISO: relevantPosts[0].dateISO,
+          target: relevantPosts[0].target,
+          tenant: relevantPosts[0].tenant,
+          thumbUrl: relevantPosts[0].thumbUrl?.substring(0, 50) + '...'
+        });
+      }
+      
       const posts = relevantPosts.map(p=>({
         id: p.id||'',
         dateISO: p.dateISO||'',
@@ -13919,6 +13943,8 @@ async function sendIAQuestion(){
         thumbUrl: p.thumbUrl||'',
         mediaUrls: Array.isArray(p.mediaUrls) ? p.mediaUrls.slice(0, 4) : []
       }));
+      
+      console.log('[buildMonthlyReportData] Posts mapeados para payload:', posts.length);
       // objetivos do mês (Planejamento)
       let goals = null;
       try{
@@ -13969,10 +13995,22 @@ async function sendIAQuestion(){
 
     // Cria/atualiza um documento de compartilhamento público e retorna o token
     async function createOrUpdateReportShare(mesISO){
+      console.log('[createOrUpdateReportShare] Iniciando - mesISO:', mesISO);
       await requireAuthUser();
       const uid = getUserKey();
       if(!uid) throw new Error('Usuário não autenticado');
+      console.log('[createOrUpdateReportShare] uid:', uid);
+      
       const data = buildMonthlyReportData(mesISO);
+      console.log('[createOrUpdateReportShare] Data gerado:', {
+        monthKey: data.monthKey,
+        tenant: data.tenant,
+        postsCount: Array.isArray(data.posts) ? data.posts.length : 0,
+        storiesCount: Array.isArray(data.posts) ? data.posts.filter(p => p.target === 'stories').length : 0,
+        feedCount: Array.isArray(data.posts) ? data.posts.filter(p => (p.target||'feed') === 'feed').length : 0,
+        metasCount: Array.isArray(data.metas) ? data.metas.length : 0
+      });
+      
       // token aleatório (curto) base36
       const token = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0,20);
       const payload = {
@@ -13983,10 +14021,23 @@ async function sendIAQuestion(){
         createdAt: Date.now(),
         payload: data
       };
+      
+      console.log('[createOrUpdateReportShare] Payload a ser salvo:', {
+        token,
+        monthKey: payload.monthKey,
+        tenant: payload.tenant,
+        payloadPostsCount: Array.isArray(payload.payload?.posts) ? payload.payload.posts.length : 0
+      });
+      
       try{
         const ref = doc(db, 'reportShares', token);
+        console.log('[createOrUpdateReportShare] Salvando no Firestore - collection: reportShares, doc:', token);
         await setDoc(ref, payload);
-      }catch(err){ console.warn('createOrUpdateReportShare', err); throw err; }
+        console.log('[createOrUpdateReportShare] ✅ Salvo com sucesso!');
+      }catch(err){ 
+        console.error('[createOrUpdateReportShare] ❌ Erro ao salvar:', err); 
+        throw err; 
+      }
       return token;
     }
 
