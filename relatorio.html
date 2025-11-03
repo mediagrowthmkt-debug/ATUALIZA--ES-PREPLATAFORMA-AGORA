@@ -66,6 +66,7 @@
   .relatorio-story-item{min-width:120px;width:120px;height:200px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);transition:all .3s ease;flex-shrink:0;transform:translateZ(0);backface-visibility:hidden;contain:layout paint}
     .relatorio-story-item:hover{transform:translateY(-4px) translateZ(0);border-color:#ff6633;box-shadow:0 8px 24px rgba(255,102,51,.3)}
     .relatorio-story-item img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:block}
+  .relatorio-story-item img[data-error="true"]{opacity:0.3;filter:grayscale(1)}
   .relatorio-story-item.video::before{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);z-index:2;pointer-events:none}
   /* Evita :has() por custo de reflow: usamos classe .has-thumb */
   .relatorio-story-item[data-video-url]:not(.has-thumb)::after{content:"V";font-size:1.2rem;color:#fff;font-weight:700;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
@@ -477,7 +478,7 @@
 
       return new Promise((resolve, reject) => {
         const video = document.createElement('video');
-        video.crossOrigin = 'anonymous';
+        // Tenta primeiro SEM crossOrigin para evitar erros CORS
         video.preload = 'metadata';
         video.muted = true;
         video.playsInline = true;
@@ -486,7 +487,7 @@
           console.error('[Relatorio] Timeout ao carregar vídeo');
           video.src = '';
           reject(new Error('Timeout ao gerar thumbnail'));
-        }, 10000);
+        }, 15000); // Aumentado para 15s
 
         video.onloadedmetadata = () => {
           console.log('[Relatorio] Metadata carregada, duração:', video.duration);
@@ -517,18 +518,26 @@
           } catch (err) {
             clearTimeout(timeout);
             console.error('[Relatorio] Erro ao capturar frame:', err);
+            video.src = '';
             reject(err);
           }
         };
         
         video.onerror = (err) => {
           clearTimeout(timeout);
-          console.error('[Relatorio] Erro ao carregar vídeo:', err);
+          console.error('[Relatorio] Erro ao carregar vídeo:', err, video.error);
           video.src = '';
           reject(err);
         };
         
-        video.src = videoUrl;
+        // Se for Firebase Storage, garante que está usando HTTPS
+        let safeUrl = videoUrl;
+        if (videoUrl.includes('firebasestorage.googleapis.com') && videoUrl.startsWith('http://')) {
+          safeUrl = videoUrl.replace('http://', 'https://');
+          console.log('[Relatorio] URL convertida para HTTPS:', safeUrl);
+        }
+        
+        video.src = safeUrl;
       });
     }
 
@@ -566,14 +575,35 @@
         const img = document.createElement('img');
         img.src = thumbnailUrl;
         img.alt = 'Video preview';
-        img.crossOrigin = 'anonymous';
+        // Remove crossOrigin para evitar erros CORS em produção
         img.decoding = 'async';
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:block';
+        
+        // Trata erro de carregamento da imagem
+        img.onerror = () => {
+          console.warn('[Relatorio] Erro ao carregar thumbnail gerada, mantendo indicador de vídeo');
+          img.remove();
+          // Adiciona ícone de vídeo como fallback
+          const playIcon = document.createElement('div');
+          playIcon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;';
+          playIcon.textContent = '▶';
+          container.appendChild(playIcon);
+          container.classList.add('has-thumb');
+        };
+        
         const span = container.querySelector('span'); if(span) span.remove();
         container.appendChild(img);
         container.classList.add('has-thumb');
       }catch(err){
-        console.warn('[Relatorio] Falha ao gerar thumbnail:', err);
+        console.warn('[Relatorio] Falha ao gerar thumbnail:', err, 'para postId:', container?.getAttribute('data-id'));
+        // Adiciona indicador visual de que é um vídeo mesmo que falhe
+        if(container && !container.classList.contains('has-thumb')){
+          const playIcon = document.createElement('div');
+          playIcon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;';
+          playIcon.textContent = '▶';
+          container.appendChild(playIcon);
+          container.classList.add('has-thumb');
+        }
       }finally{
         if(container) delete container.dataset.thumbProcessing;
       }
@@ -614,9 +644,19 @@
       const stories = posts.filter(p=> (p.target||'feed')==='stories');
       const feed = posts.filter(p=> (p.target||'feed')==='feed');
 
+      // Helper para garantir HTTPS nas URLs do Firebase Storage
+      const ensureHttps = (url) => {
+        if (!url) return '';
+        const urlStr = String(url);
+        if ((urlStr.includes('firebasestorage.googleapis.com') || urlStr.includes('firebasestorage.app')) && urlStr.startsWith('http://')) {
+          return urlStr.replace('http://', 'https://');
+        }
+        return urlStr;
+      };
+
       // Helpers
       const buildCard = (p)=>{
-        const first = p.thumbUrl || (Array.isArray(p.mediaUrls)&&p.mediaUrls[0]) || '';
+        const first = ensureHttps(p.thumbUrl || (Array.isArray(p.mediaUrls)&&p.mediaUrls[0]) || '');
         const ext = String(first).split('?')[0].split('.').pop().toLowerCase();
         const isVideo = ['mp4','mov','webm','m4v','avi'].includes(ext);
         let cls = 'relatorio-story-item';
@@ -633,7 +673,8 @@
         
         // Se é vídeo e tem thumbUrl personalizada (capa), usa ela
         if(isVideo && p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-          return `<div class="${cls}" data-id="${p.id||''}"><img src="${p.thumbUrl}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
+          const safeThumbUrl = ensureHttps(p.thumbUrl);
+          return `<div class="${cls}" data-id="${p.id||''}"><img src="${safeThumbUrl}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}" loading="lazy"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
         }
         
         // Se é vídeo sem capa, adiciona data-video-url para gerar thumbnail
@@ -642,7 +683,7 @@
         }
         
         // Se é imagem ou não tem mídia
-        const img = first ? `<img src="${first}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}">` : '';
+        const img = first ? `<img src="${first}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}" loading="lazy">` : '';
         return `<div class="${cls}" data-id="${p.id||''}">${img}<div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
       };
 
@@ -755,6 +796,35 @@
       }
       renderReportSections(payload||{});
     }
+
+    // Global error handler para imagens (debug em produção)
+    document.addEventListener('error', (e) => {
+      if (e.target.tagName === 'IMG') {
+        const img = e.target;
+        const src = img.src;
+        console.error('[Relatorio] Falha ao carregar imagem:', src);
+        console.error('[Relatorio] Elemento pai:', img.parentElement?.className);
+        console.error('[Relatorio] Protocolo:', src.startsWith('https://') ? 'HTTPS ✓' : 'HTTP ✗');
+        
+        // Marca a imagem com erro
+        img.setAttribute('data-error', 'true');
+        
+        // Se for uma imagem de story/post, adiciona fallback visual
+        const container = img.closest('.relatorio-story-item');
+        if (container && !container.querySelector('.error-fallback')) {
+          const fallback = document.createElement('div');
+          fallback.className = 'error-fallback';
+          fallback.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ff6633;font-size:2rem;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;';
+          fallback.textContent = '📷';
+          container.appendChild(fallback);
+        }
+      }
+    }, true); // capture phase para pegar todos os erros
+
+    // Log inicial para debug
+    console.log('[Relatorio] Script carregado. Modo:', shareToken ? 'Público (token)' : 'Autenticado');
+    console.log('[Relatorio] Mês:', mesISO);
+    console.log('[Relatorio] Tenant:', TENANT);
   </script>
 </body>
 </html>

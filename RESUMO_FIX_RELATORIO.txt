@@ -1,0 +1,50 @@
+# RESUMO: Fix Stories/Posts em Produção
+
+## ⚡ Problema
+Stories e posts carregavam no VS Code Live Preview mas NÃO no domínio em produção.
+
+## 🔧 Correções Aplicadas
+
+### relatorio.html
+1. ✅ Removido `crossOrigin='anonymous'` (causava erro CORS)
+2. ✅ Forçar HTTPS em URLs do Firebase Storage
+3. ✅ Timeout aumentado: 10s → 15s
+4. ✅ Lazy loading nas imagens (`loading="lazy"`)
+5. ✅ Error handler global para imagens
+6. ✅ Fallback visual (📷 e ▶) quando mídia falha
+7. ✅ Logs detalhados no console para debug
+
+### netlify.toml (NOVO)
+1. ✅ Headers CORS para imagens/vídeos
+2. ✅ Force HTTPS redirect
+3. ✅ Cache otimizado
+
+## 🚀 Deploy
+
+```bash
+git add .
+git commit -m "fix: stories e posts não apareciam em produção"
+git push origin main
+```
+
+## ✅ Teste no Domínio
+
+1. Acesse: `https://seu-dominio.com/relatorio.html?mes=2025-11&tenant=SEU_TENANT`
+2. Abra DevTools (F12) → Console
+3. Procure por: `[Relatorio] Aplicando thumbnails aos stories/posts`
+4. Stories e posts devem aparecer!
+
+## 🆘 Se Ainda Não Funcionar
+
+**Firebase Storage Rules** - Garanta leitura pública:
+```
+allow read: if true;
+```
+
+**Aplique CORS no bucket**:
+```bash
+gsutil cors set cors.json gs://mediagrowth-a5349.firebasestorage.app
+```
+
+---
+📄 Detalhes completos: `FIX_RELATORIO_PRODUCAO.md`
