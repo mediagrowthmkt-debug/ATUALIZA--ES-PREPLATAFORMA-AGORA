@@ -4052,9 +4052,9 @@ function renderReviewNotes(post){
           <tr><th>Descrição</th><th>Valor</th></tr>
         </thead>
         <tbody>
-          <tr><td>Qtde de Vendas</td><td><input type="number" step="1" id="cacSales" readonly></td></tr>
-          <tr><td>Total Receita</td><td><input type="number" step="0.01" id="cacRevenue" readonly></td></tr>
-          <tr><td>Ticket Médio</td><td><span id="cacTicket">-</span></td></tr>
+          <tr><td>Qtde de Vendas</td><td><input type="number" step="1" id="cacSales"></td></tr>
+          <tr><td>Total Receita</td><td><input type="number" step="0.01" id="cacRevenue"></td></tr>
+          <tr><td>Ticket Médio</td><td><span id="cacTicket">R$ 0,00</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -4066,14 +4066,14 @@ function renderReviewNotes(post){
         <tbody>
           <tr><td>Qtde de Vendas (Tráfego)</td><td><input type="number" step="1" id="cacSalesAds"></td></tr>
           <tr><td>Total Receita (Tráfego)</td><td><input type="number" step="0.01" id="cacRevenueAds"></td></tr>
-          <tr><td>Ticket Médio (Tráfego)</td><td><span id="cacTicketAds">-</span></td></tr>
+          <tr><td>Ticket Médio (Tráfego)</td><td><span id="cacTicketAds">R$ 0,00</span></td></tr>
         </tbody>
       </table>
     </div>
   </div>
     <div class="cac-results">
-      <p>CAC REAL: <span id="cacReal">-</span></p>
-      <p>CAC publicitários: <span id="cacAds">-</span></p>
+      <p>CAC REAL: <span id="cacReal">R$ 0,00</span></p>
+      <p>CAC publicitários: <span id="cacAds">R$ 0,00</span></p>
     </div>
 </div>
 <!-- LEADS -->
@@ -17308,31 +17308,6 @@ async function sendIAQuestion(){
         real.textContent = fmt(salesVal ? totalExpenses / salesVal : 0);
         ads.textContent  = fmt(salesAdsVal ? tBudget / salesAdsVal : 0);
       }
-      function updateFromMetas(){
-        const m = monthSel.value;
-        const norm = s => (s||'')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[̀-ͯ]/g,'')
-          .replace(/\s+/g,' ')
-          .trim();
-        const activeMetas = Array.isArray(METAS) ? METAS.filter(meta => meta && meta.ativo !== false) : [];
-        const totalMeta = activeMetas.find(meta => {
-          const d = norm(meta.descricao);
-          return d === 'faturamento total das vendas' || d === 'total de vendas' || d === 'valor dos contratos no mes';
-        });
-        const dealsMeta = activeMetas.find(meta => norm(meta.descricao) === 'numero de negocios fechados');
-        const revenueVal = totalMeta ? parseToNumber((totalMeta.meses?.[m]?.r ?? totalMeta.meses?.[m]?.p), true) : 0;
-        const salesVal = dealsMeta ? parseToNumber((dealsMeta.meses?.[m]?.r ?? dealsMeta.meses?.[m]?.p), false) : 0;
-        revenue.value = Number.isFinite(revenueVal) ? revenueVal : 0;
-        sales.value = Number.isFinite(salesVal) ? salesVal : 0;
-        CAC_DATA.revenue = CAC_DATA.revenue || {};
-        CAC_DATA.sales = CAC_DATA.sales || {};
-        CAC_DATA.revenue[m] = Number.isFinite(revenueVal) ? revenueVal : 0;
-        CAC_DATA.sales[m] = Number.isFinite(salesVal) ? salesVal : 0;
-        recalc();
-        saveMonth();
-      }
       function loadMonth(){
         currency.value = CAC_DATA.currency || 'BRL';
         const m = monthSel.value;
@@ -17358,7 +17333,8 @@ async function sendIAQuestion(){
         });
         salesAds.value = CAC_DATA.salesAds?.[m] ?? '';
         revenueAds.value = CAC_DATA.revenueAds?.[m] ?? '';
-        updateFromMetas();
+        sales.value = CAC_DATA.sales?.[m] ?? '';
+        revenue.value = CAC_DATA.revenue?.[m] ?? '';
         recalc();
       }
       function saveMonth(){
@@ -17373,15 +17349,19 @@ async function sendIAQuestion(){
         });
         CAC_DATA.salesAds = CAC_DATA.salesAds || {};
         CAC_DATA.revenueAds = CAC_DATA.revenueAds || {};
+        CAC_DATA.sales = CAC_DATA.sales || {};
+        CAC_DATA.revenue = CAC_DATA.revenue || {};
         CAC_DATA.salesAds[m] = parseFloat(salesAds.value) || 0;
         CAC_DATA.revenueAds[m] = parseFloat(revenueAds.value) || 0;
+        CAC_DATA.sales[m] = parseFloat(sales.value) || 0;
+        CAC_DATA.revenue[m] = parseFloat(revenue.value) || 0;
         CAC_DATA.currency = currency.value;
         persistCAC();
         try{ refreshMacroInsights(); }catch(_){ }
       }
       expensesBody.addEventListener('input', recalc);
       expensesBody.addEventListener('change', ()=>{ recalc(); saveMonth(); });
-      [currency, salesAds, revenueAds].forEach(el=>{
+      [currency, salesAds, revenueAds, sales, revenue].forEach(el=>{
         el.addEventListener('input', recalc);
         el.addEventListener('change', ()=>{ recalc(); saveMonth(); });
       });
