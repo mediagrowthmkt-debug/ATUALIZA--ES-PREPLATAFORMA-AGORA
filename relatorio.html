@@ -306,56 +306,90 @@
 
     if(shareToken){
       // Modo público via token: não exige login
+      console.log('[Relatorio] Modo público - carregando via shareToken:', shareToken);
       els.authGate.style.display = 'none';
       els.content.style.display = 'block';
       try{
         const snap = await getDoc(doc(db,'reportShares', shareToken));
         if(!snap.exists()){
+          console.error('[Relatorio] Token não encontrado no Firestore');
           throw new Error('Link inválido ou expirado');
         }
+        console.log('[Relatorio] Token encontrado, carregando payload...');
         const data = snap.data() || {};
         const payload = data.payload || {};
+        console.log('[Relatorio] Payload carregado:', {
+          hasStories: Array.isArray(payload.posts) ? payload.posts.filter(p => p.target === 'stories').length : 0,
+          hasPosts: Array.isArray(payload.posts) ? payload.posts.filter(p => p.target === 'feed').length : 0,
+          totalPosts: Array.isArray(payload.posts) ? payload.posts.length : 0
+        });
         renderFromPayload(payload);
       }catch(err){
-        console.error('Erro ao carregar link público', err);
-        els.content.innerHTML = '<div class="relatorio-desc">Link inválido ou expirado.</div>';
+        console.error('[Relatorio] Erro ao carregar link público:', err);
+        els.content.innerHTML = '<div class="relatorio-desc">Link inválido ou expirado. Erro: ' + (err.message || String(err)) + '</div>';
       }
     } else {
       // Modo autenticado (retrocompat)
+      console.log('[Relatorio] Modo autenticado - aguardando login...');
+      console.warn('[Relatorio] IMPORTANTE: Para acesso público use o botão "Copiar link" no painel principal que gera um link com token ?share=...');
+      console.warn('[Relatorio] Acesso direto sem token requer autenticação Google.');
+      
       onAuthStateChanged(auth, async (user)=>{
         if(!user){
+          console.log('[Relatorio] Usuário não autenticado, mostrando tela de login');
+          console.warn('[Relatorio] Se você está em produção e quer acessar o relatório, use o link gerado com o botão "Copiar link" que inclui o token de compartilhamento.');
           els.authGate.style.display = 'block';
           els.content.style.display = 'none';
+          
+          // Mostra mensagem mais clara
+          const subtitle = els.authGate.querySelector('.relatorio-subtitle');
+          if(subtitle){
+            subtitle.innerHTML = 'Você precisa fazer login para visualizar este relatório.<br><small style="color:#94a3b8;margin-top:8px;display:block;">💡 Dica: Use o botão "Copiar link" no painel principal para gerar um link público que não requer login.</small>';
+          }
           return;
         }
+        console.log('[Relatorio] Usuário autenticado:', user.uid);
         els.authGate.style.display = 'none';
         els.content.style.display = 'block';
         try{
           await loadAndRender(user.uid);
         }catch(err){
-          console.error('Erro ao carregar relatório', err);
+          console.error('[Relatorio] Erro ao carregar relatório:', err);
           alert('Não foi possível carregar o relatório.');
         }
       });
     }
 
     async function loadAndRender(uid){
+      console.log('[Relatorio] loadAndRender iniciado - uid:', uid, 'mesISO:', mesISO, 'TENANT:', TENANT);
+      
       // 1) USER_DATA básico (metas, social links)
       const userSnap = await getDoc(doc(db,'usuarios', uid));
       const USER_DATA = userSnap.exists() ? (userSnap.data()||{}) : {};
       const METAS = Array.isArray(USER_DATA.metas) ? USER_DATA.metas : [];
       const SOCIAL_LINKS = USER_DATA.socialLinks && typeof USER_DATA.socialLinks==='object' ? USER_DATA.socialLinks : {};
+      console.log('[Relatorio] USER_DATA carregado - metas:', METAS.length);
 
       // 2) Posts (filtrar por mês e tenant)
       const postsSnap = await getDocs(collection(db,'usuarios', uid, 'posts'));
       const allPosts = postsSnap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+      console.log('[Relatorio] Total de posts no Firestore:', allPosts.length);
+      
       const posts = allPosts.filter(p => {
         const iso = String(p.dateISO||'');
         const okMes = mesISO ? iso.startsWith(mesISO) : true;
         const tenant = p.tenant||''; const safeTenant = TENANT||'';
         const okTenant = !tenant || !safeTenant ? true : (tenant===safeTenant);
-        return okMes && okTenant;
+        const keep = okMes && okTenant;
+        if(!keep && mesISO && TENANT){
+          console.log('[Relatorio] Post filtrado:', p.id, 'dateISO:', iso, 'tenant:', tenant, 'okMes:', okMes, 'okTenant:', okTenant);
+        }
+        return keep;
       }).sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+      
+      console.log('[Relatorio] Posts após filtro:', posts.length);
+      console.log('[Relatorio] Stories:', posts.filter(p => p.target === 'stories').length);
+      console.log('[Relatorio] Feed posts:', posts.filter(p => (p.target||'feed') === 'feed').length);
 
       // 3) Calendar notes por cliente
       let notes = [];
@@ -365,9 +399,10 @@
           .map(d=>({ id:d.id, ...(d.data()||{}) }))
           .filter(n=> String(n.id||'').startsWith(mesISO))
           .sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+        console.log('[Relatorio] Calendar notes carregadas:', notes.length);
       }
 
-      renderReportSections({
+      const payload = {
         labelMonth: monthLabel,
         metas: (METAS||[]).filter(m=>m && m.ativo!==false).map(m=>{ const cur=(m.meses&&m.meses[mesISO])||{p:'',r:''}; return { descricao:m.descricao||'', unidade:m.unidade||'', direcao:m.direcao||'up', planned: normalizeMetaNumber(cur.p), realized: normalizeMetaNumber(cur.r) }; }),
         posts: posts.map(p=>({
@@ -381,11 +416,34 @@
         })),
         notes,
         socialLinks: SOCIAL_LINKS||{}
+      };
+      
+      console.log('[Relatorio] Payload preparado:', {
+        metas: payload.metas.length,
+        posts: payload.posts.length,
+        stories: payload.posts.filter(p => p.target === 'stories').length,
+        feed: payload.posts.filter(p => (p.target||'feed') === 'feed').length
       });
+      
+      renderReportSections(payload);
     }
     function renderReportSections(payload){
+      console.log('[Relatorio] renderReportSections chamado - payload:', {
+        hasPosts: Array.isArray(payload.posts),
+        postsLength: Array.isArray(payload.posts) ? payload.posts.length : 0,
+        hasMetas: Array.isArray(payload.metas),
+        metasLength: Array.isArray(payload.metas) ? payload.metas.length : 0,
+        hasGoals: payload.goals !== null && payload.goals !== undefined,
+        labelMonth: payload.labelMonth
+      });
+      
       // Stories + Posts (feed)
-      try{ renderStoriesAndPosts(Array.isArray(payload.posts)?payload.posts:[], payload.labelMonth||''); }catch(e){ console.warn('renderStoriesAndPosts', e); }
+      try{ 
+        console.log('[Relatorio] Chamando renderStoriesAndPosts...');
+        renderStoriesAndPosts(Array.isArray(payload.posts)?payload.posts:[], payload.labelMonth||''); 
+      }catch(e){ 
+        console.error('[Relatorio] Erro em renderStoriesAndPosts:', e); 
+      }
 
   // Objetivos do mês (Planejamento)
   try{ renderGoals(payload.goals||null, payload.labelMonth||''); }catch(e){ console.warn('renderGoals', e); }
@@ -637,12 +695,23 @@
     }
 
     function renderStoriesAndPosts(posts, labelMonth){
+      console.log('[Relatorio] renderStoriesAndPosts chamado - total posts:', posts.length);
       const monthLabel = labelMonth || document.getElementById('reportMonth').textContent || '';
       const parts = monthLabel.split(' ');
       const ano = parts.length>1 ? parts[1] : '';
       // Split
       const stories = posts.filter(p=> (p.target||'feed')==='stories');
       const feed = posts.filter(p=> (p.target||'feed')==='feed');
+      
+      console.log('[Relatorio] Stories encontrados:', stories.length);
+      console.log('[Relatorio] Posts de feed encontrados:', feed.length);
+      
+      if(stories.length > 0){
+        console.log('[Relatorio] Primeiro story:', stories[0]);
+      }
+      if(feed.length > 0){
+        console.log('[Relatorio] Primeiro post:', feed[0]);
+      }
 
       // Helper para garantir HTTPS nas URLs do Firebase Storage
       const ensureHttps = (url) => {

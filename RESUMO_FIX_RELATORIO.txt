@@ -1,9 +1,30 @@
-# RESUMO: Fix Stories/Posts em Produção
+# RESUMO: Fix Stories/Posts em Produção + Como Usar Corretamente
 
 ## ⚡ Problema
 Stories e posts carregavam no VS Code Live Preview mas NÃO no domínio em produção.
 
-## 🔧 Correções Aplicadas
+## ❗ IMPORTANTE: VOCÊ ESTÁ USANDO O LINK CORRETO?
+
+### ❌ ERRADO (não funciona em produção):
+```
+https://seu-dominio.com/relatorio.html?mes=2025-10&tenant=CLIENTE
+```
+
+### ✅ CORRETO (funciona em produção):
+```
+https://seu-dominio.com/relatorio.html?share=abc123xyz&tenant=CLIENTE&mes=2025-10
+```
+
+## 🎯 Como Gerar o Link Correto
+
+1. Acesse o painel: `https://seu-dominio.com/?client=SEU_CLIENTE`
+2. Faça login com Google
+3. Vá até a seção "� Relatório do mês"
+4. Selecione o mês desejado
+5. Clique no botão **"🔗 Copiar link"**
+6. Use o link copiado (tem `?share=TOKEN`)
+
+## �🔧 Correções Aplicadas
 
 ### relatorio.html
 1. ✅ Removido `crossOrigin='anonymous'` (causava erro CORS)
@@ -13,6 +34,7 @@ Stories e posts carregavam no VS Code Live Preview mas NÃO no domínio em produ
 5. ✅ Error handler global para imagens
 6. ✅ Fallback visual (📷 e ▶) quando mídia falha
 7. ✅ Logs detalhados no console para debug
+8. ✅ Mensagem clara quando falta token de compartilhamento
 
 ### netlify.toml (NOVO)
 1. ✅ Headers CORS para imagens/vídeos
@@ -23,18 +45,43 @@ Stories e posts carregavam no VS Code Live Preview mas NÃO no domínio em produ
 
 ```bash
 git add .
-git commit -m "fix: stories e posts não apareciam em produção"
+git commit -m "fix: relatorio com logs debug e instruções de uso correto"
 git push origin main
 ```
 
 ## ✅ Teste no Domínio
 
-1. Acesse: `https://seu-dominio.com/relatorio.html?mes=2025-11&tenant=SEU_TENANT`
-2. Abra DevTools (F12) → Console
-3. Procure por: `[Relatorio] Aplicando thumbnails aos stories/posts`
-4. Stories e posts devem aparecer!
+1. Acesse: `https://seu-dominio.com/?client=SEU_CLIENTE`
+2. Faça login
+3. Vá até "Relatório do mês"
+4. Clique em "🔗 Copiar link"
+5. Abra o link em aba anônima (Ctrl+Shift+N)
+6. Abra DevTools (F12) → Console
+7. Procure por: `[Relatorio] Modo público - carregando via shareToken`
+8. Stories e posts devem aparecer!
+
+## 🐛 Debug
+
+Se ainda não funcionar, veja os logs no console:
+
+**Com token (correto)**:
+```
+[Relatorio] Modo público - carregando via shareToken: abc123
+[Relatorio] Payload carregado: {hasStories: 5, hasPosts: 12}
+```
+
+**Sem token (incorreto)**:
+```
+[Relatorio] Modo autenticado - aguardando login...
+[Relatorio] IMPORTANTE: Para acesso público use o botão "Copiar link"...
+```
 
 ## 🆘 Se Ainda Não Funcionar
+
+1. **Verifique se o link TEM o parâmetro `?share=...`**
+2. **Gere um NOVO link** pelo botão "Copiar link"
+3. **Confira os logs** no console (F12)
+4. **Compartilhe os logs** comigo para análise
 
 **Firebase Storage Rules** - Garanta leitura pública:
 ```
@@ -48,3 +95,4 @@ gsutil cors set cors.json gs://mediagrowth-a5349.firebasestorage.app
 
 ---
 📄 Detalhes completos: `FIX_RELATORIO_PRODUCAO.md`
+📖 Guia de uso: `COMO_USAR_RELATORIO.md`
