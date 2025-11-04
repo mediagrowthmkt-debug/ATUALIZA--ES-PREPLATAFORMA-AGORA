@@ -92,6 +92,7 @@ exports.receiveLead = functions.https.onRequest(async (req, res) => {
         const phone = (body.phone || body.telefone || body.whatsapp || '').toString().trim();
         const question = (body.question || body.pergunta || body.qualifying_question || '').toString().trim();
         const source = (body.source || body.origem || 'make').toString().trim();
+        const plataforma = (body.plataforma || body.platform || '').toString().trim();
         const tags = Array.isArray(body.tags) ? body.tags.slice(0, 20).map(String) : [];
         if (!name && !email && !phone) {
             return res.status(400).json({ ok: false, error: 'Missing lead fields (name/email/phone required)' });
@@ -103,6 +104,7 @@ exports.receiveLead = functions.https.onRequest(async (req, res) => {
             phone: phone || null,
             question: question || null,
             source,
+            plataforma: plataforma || null,
             tags,
             status: 'novo',
             createdAt: now,

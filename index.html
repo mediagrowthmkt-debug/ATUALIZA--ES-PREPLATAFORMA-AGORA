@@ -3947,7 +3947,7 @@ function renderReviewNotes(post){
   }
   .leads-webhook{
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1.2fr auto auto;
     gap: 10px;
     align-items: center;
     background: rgba(255,255,255,0.04);
@@ -3981,7 +3981,7 @@ function renderReviewNotes(post){
   .leads-list{ display:flex; flex-direction:column; gap:8px; }
   .lead-row{
     display:grid;
-    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr 50px;
+    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px;
     gap:10px;
     align-items:center;
     background: rgba(15,23,42,.45);
@@ -3995,8 +3995,11 @@ function renderReviewNotes(post){
   .lead-email{ color:#cbd5f5; }
   .lead-phone{ color:#e5e7eb; }
   .lead-question{ color:#cbd5f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lead-plataforma{ color:#fbbf24; font-size:.8rem; font-weight:700; text-transform:uppercase; }
+  .lead-fonte{ color:#94a3b8; font-size:.85rem; }
   .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
-  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr 50px; gap:10px; padding: 6px 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; }
+  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px; gap:10px; padding: 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; align-items:center; }
+  .leads-header > div{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .leads-empty{ color:#94a3b8; padding: 20px; text-align:center; border:1px dashed rgba(148,163,184,.28); border-radius:12px; }
   .lead-delete-btn{ 
     background: rgba(220,38,38,.16); 
@@ -4024,7 +4027,7 @@ function renderReviewNotes(post){
       gap:6px; 
       align-items:flex-start; 
     }
-    .lead-row .lead-cell:nth-child(-n+5) {
+    .lead-row .lead-cell:nth-child(-n+6) {
       grid-column: 1;
     }
     .lead-row .lead-cell:last-child {
@@ -4117,12 +4120,12 @@ function renderReviewNotes(post){
       <div>
         <label>Webhook do Make.com</label>
         <input id="leadsWebhookUrl" type="text" readonly value="Gerando..." />
-        <div class="leads-hint">Use este endpoint no Make.com (module Webhook/HTTP) para enviar name, email, phone e question por POST (JSON).</div>
+        <div class="leads-hint">Use este endpoint no Make.com (module Webhook/HTTP) para enviar name, email, phone, question, plataforma (Google ou Meta) e source por POST (JSON).</div>
       </div>
       <button class="btn small" id="leadsWebhookCopy" type="button">Copiar URL</button>
       <button class="btn small ghost" id="leadsWebhookRegenerate" type="button" title="Gera um novo token de segurança">Regenerar token</button>
     </div>
-    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Quando</div><div></div></div>
+    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Plataforma</div><div>Fonte</div><div>Quando</div><div></div></div>
     <div id="leadsList" class="leads-list"></div>
     <p id="leadsEmpty" class="leads-empty" style="display:none">Nenhum lead recebido ainda.</p>
   </div>
@@ -17609,6 +17612,8 @@ async function sendIAQuestion(){
         const email = (l.email||'').toString();
         const phone = (l.phone||'').toString();
         const question = (l.question||'').toString();
+        const plataforma = (l.plataforma||'').toString();
+        const fonte = (l.source||'').toString();
         const when = formatWhen(l.createdAt || l.updatedAt || null);
         const esc = (s)=> String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
         return `<div class="lead-row" data-lead-id="${l.id || ''}">
@@ -17616,6 +17621,8 @@ async function sendIAQuestion(){
           <div class="lead-cell lead-email" title="${esc(email)}">${esc(email)||'-'}</div>
           <div class="lead-cell lead-phone" title="${esc(phone)}">${esc(phone)||'-'}</div>
           <div class="lead-cell lead-question" title="${esc(question)}">${esc(question)||'-'}</div>
+          <div class="lead-cell lead-plataforma" title="${esc(plataforma)}">${esc(plataforma)||'-'}</div>
+          <div class="lead-cell lead-fonte" title="${esc(fonte)}">${esc(fonte)||'-'}</div>
           <div class="lead-cell lead-when">${esc(when)}</div>
           <div class="lead-cell">
             <button class="lead-delete-btn" data-lead-id="${l.id || ''}" title="Remover lead">×</button>
