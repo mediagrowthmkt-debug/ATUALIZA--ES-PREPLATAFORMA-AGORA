@@ -3995,7 +3995,16 @@ function renderReviewNotes(post){
   .lead-email{ color:#cbd5f5; }
   .lead-phone{ color:#e5e7eb; }
   .lead-question{ color:#cbd5f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .lead-plataforma{ color:#fbbf24; font-size:.8rem; font-weight:700; text-transform:uppercase; }
+  .lead-plataforma{ 
+    color:#fbbf24; 
+    font-size:.9rem; 
+    font-weight:900; 
+    text-transform:uppercase; 
+    background: rgba(251,191,36,.15);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(251,191,36,.3);
+  }
   .lead-fonte{ color:#94a3b8; font-size:.85rem; }
   .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
   .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px; gap:10px; padding: 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; align-items:center; }
@@ -17561,9 +17570,20 @@ async function sendIAQuestion(){
         const list = [];
         snap.forEach(docSnap=>{
           const d = docSnap.data() || {};
+          // DEBUG: Log do documento bruto do Firestore
+          if(d.name && d.name.includes('TEST')){
+            console.log('[FIRESTORE DEBUG] Lead de teste encontrado:', docSnap.id);
+            console.log('[FIRESTORE DEBUG] Dados brutos:', d);
+            console.log('[FIRESTORE DEBUG] Campo plataforma:', d.plataforma);
+          }
           list.push({ id: docSnap.id, ...d });
         });
         LEADS = list;
+        console.log('[LEADS DEBUG] Total de leads carregados do Firestore:', list.length);
+        if(list.length > 0){
+          console.log('[LEADS DEBUG] Primeiro lead (após carregar):', list[0]);
+          console.log('[LEADS DEBUG] Plataforma do primeiro lead:', list[0].plataforma);
+        }
         renderLeadsList();
       }, (err)=>{
         console.warn('leads:onSnapshot', err);
@@ -17607,6 +17627,14 @@ async function sendIAQuestion(){
         return;
       }
       leadsEmptyEl.style.display = 'none';
+      
+      // DEBUG: Log dos leads para verificar campo plataforma
+      console.log('[LEADS DEBUG] Total de leads:', LEADS.length);
+      if(LEADS.length > 0){
+        console.log('[LEADS DEBUG] Primeiro lead completo:', LEADS[0]);
+        console.log('[LEADS DEBUG] Campo plataforma do primeiro lead:', LEADS[0].plataforma);
+      }
+      
       leadsListEl.innerHTML = LEADS.map(l => {
         const name = (l.name||'').toString();
         const email = (l.email||'').toString();
@@ -17614,6 +17642,11 @@ async function sendIAQuestion(){
         const question = (l.question||'').toString();
         const plataforma = (l.plataforma||'').toString();
         const fonte = (l.source||'').toString();
+        
+        // DEBUG: Log individual de cada lead
+        if(l.plataforma){
+          console.log('[LEADS DEBUG] Lead com plataforma:', l.name, '- Plataforma:', l.plataforma);
+        }
         const when = formatWhen(l.createdAt || l.updatedAt || null);
         const esc = (s)=> String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
         return `<div class="lead-row" data-lead-id="${l.id || ''}">
