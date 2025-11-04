@@ -3981,7 +3981,7 @@ function renderReviewNotes(post){
   .leads-list{ display:flex; flex-direction:column; gap:8px; }
   .lead-row{
     display:grid;
-    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr;
+    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr 50px;
     gap:10px;
     align-items:center;
     background: rgba(15,23,42,.45);
@@ -3996,12 +3996,42 @@ function renderReviewNotes(post){
   .lead-phone{ color:#e5e7eb; }
   .lead-question{ color:#cbd5f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
-  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr; gap:10px; padding: 6px 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; }
+  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .8fr 50px; gap:10px; padding: 6px 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; }
   .leads-empty{ color:#94a3b8; padding: 20px; text-align:center; border:1px dashed rgba(148,163,184,.28); border-radius:12px; }
+  .lead-delete-btn{ 
+    background: rgba(220,38,38,.16); 
+    border: 1px solid rgba(220,38,38,.45); 
+    color: #fecaca; 
+    border-radius: 8px; 
+    padding: 6px 10px; 
+    font-size: .85rem; 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: background .2s ease, transform .1s ease;
+  }
+  .lead-delete-btn:hover{ 
+    background: rgba(220,38,38,.28); 
+    transform: scale(1.05); 
+  }
+  .lead-delete-btn:active{ 
+    transform: scale(.98); 
+  }
   @media (max-width: 900px){
     .leads-webhook{ grid-template-columns: 1fr; }
     .leads-header{ display:none; }
-    .lead-row{ grid-template-columns: 1fr; gap:6px; align-items:flex-start; }
+    .lead-row{ 
+      grid-template-columns: 1fr auto; 
+      gap:6px; 
+      align-items:flex-start; 
+    }
+    .lead-row .lead-cell:nth-child(-n+5) {
+      grid-column: 1;
+    }
+    .lead-row .lead-cell:last-child {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      align-self: center;
+    }
     .lead-when{ text-align:left; }
   }
 </style>
@@ -4092,7 +4122,7 @@ function renderReviewNotes(post){
       <button class="btn small" id="leadsWebhookCopy" type="button">Copiar URL</button>
       <button class="btn small ghost" id="leadsWebhookRegenerate" type="button" title="Gera um novo token de segurança">Regenerar token</button>
     </div>
-    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Quando</div></div>
+    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Quando</div><div></div></div>
     <div id="leadsList" class="leads-list"></div>
     <p id="leadsEmpty" class="leads-empty" style="display:none">Nenhum lead recebido ainda.</p>
   </div>
@@ -17537,6 +17567,26 @@ async function sendIAQuestion(){
       });
     }
 
+    async function deleteLead(leadId){
+      if(!leadId) return;
+      try{
+        const uid = auth?.currentUser?.uid;
+        const clientKey = getClientKeySafe();
+        if(!uid || !clientKey){
+          alert('Sessão expirada ou cliente ausente');
+          return;
+        }
+        const docRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'leads', leadId);
+        await deleteDoc(docRef);
+        if(typeof mgToast === 'function'){
+          mgToast('Lead removido com sucesso!');
+        }
+      }catch(err){
+        console.error('deleteLead', err);
+        alert('Erro ao remover lead: ' + (err?.message || String(err)));
+      }
+    }
+
     function formatWhen(value){
       try{
         if(!value) return '';
@@ -17561,14 +17611,28 @@ async function sendIAQuestion(){
         const question = (l.question||'').toString();
         const when = formatWhen(l.createdAt || l.updatedAt || null);
         const esc = (s)=> String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-        return `<div class="lead-row">
+        return `<div class="lead-row" data-lead-id="${l.id || ''}">
           <div class="lead-cell lead-name" title="${esc(name)}">${esc(name)||'-'}</div>
           <div class="lead-cell lead-email" title="${esc(email)}">${esc(email)||'-'}</div>
           <div class="lead-cell lead-phone" title="${esc(phone)}">${esc(phone)||'-'}</div>
           <div class="lead-cell lead-question" title="${esc(question)}">${esc(question)||'-'}</div>
           <div class="lead-cell lead-when">${esc(when)}</div>
+          <div class="lead-cell">
+            <button class="lead-delete-btn" data-lead-id="${l.id || ''}" title="Remover lead">×</button>
+          </div>
         </div>`;
       }).join('');
+      
+      // Bind delete buttons
+      leadsListEl.querySelectorAll('.lead-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const leadId = btn.getAttribute('data-lead-id');
+          if(!leadId) return;
+          if(!confirm('Tem certeza que deseja remover este lead?')) return;
+          await deleteLead(leadId);
+        });
+      });
     }
 
     /* ========= Referências Redes ========= */
