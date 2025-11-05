@@ -6,9 +6,10 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Removido X-Frame-Options para permitir iframes
+    # Se quiser permitir apenas domínios específicos, use Content-Security-Policy frame-ancestors
     
 # Headers específicos para imagens e vídeos
 [[headers]]
