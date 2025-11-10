@@ -3981,7 +3981,8 @@ function renderReviewNotes(post){
   .leads-list{ display:flex; flex-direction:column; gap:8px; }
   .lead-row{
     display:grid;
-    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px;
+    /* Última coluna ampliada para comportar ações de edição */
+    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px;
     gap:10px;
     align-items:center;
     background: rgba(15,23,42,.45);
@@ -4008,6 +4009,7 @@ function renderReviewNotes(post){
   .lead-fonte{ color:#94a3b8; font-size:.85rem; }
   .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
   .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px; gap:10px; padding: 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; align-items:center; }
+  .leads-header{ grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px; }
   .leads-header > div{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .leads-empty{ color:#94a3b8; padding: 20px; text-align:center; border:1px dashed rgba(148,163,184,.28); border-radius:12px; }
   .lead-delete-btn{ 
@@ -4028,6 +4030,35 @@ function renderReviewNotes(post){
   .lead-delete-btn:active{ 
     transform: scale(.98); 
   }
+  /* Botões de edição (inline) */
+  .lead-edit-btn, .lead-save-btn, .lead-cancel-btn{
+    background: rgba(56,189,248,.16);
+    border:1px solid rgba(56,189,248,.45);
+    color:#bae6fd;
+    border-radius:8px;
+    padding:6px 8px;
+    font-size:.75rem;
+    font-weight:700;
+    cursor:pointer;
+    margin-right:4px;
+    transition: background .2s ease, transform .1s ease;
+  }
+  .lead-edit-btn:hover, .lead-save-btn:hover, .lead-cancel-btn:hover{ background: rgba(56,189,248,.28); transform:scale(1.05); }
+  .lead-edit-btn:active, .lead-save-btn:active, .lead-cancel-btn:active{ transform:scale(.95); }
+  .lead-save-btn{ background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.5); color:#bbf7d0; }
+  .lead-save-btn:hover{ background: rgba(34,197,94,.3); }
+  .lead-cancel-btn{ background: rgba(248,113,113,.16); border-color: rgba(248,113,113,.45); color:#fecaca; }
+  .lead-cancel-btn:hover{ background: rgba(248,113,113,.28); }
+  .lead-edit-input{
+    width:100%;
+    background:#0f172a;
+    border:1px solid rgba(148,163,184,.35);
+    color:#f8fafc;
+    border-radius:6px;
+    padding:6px 8px;
+    font-size:.75rem;
+  }
+  .lead-editing .lead-cell{ white-space:normal; }
   @media (max-width: 900px){
     .leads-webhook{ grid-template-columns: 1fr; }
     .leads-header{ display:none; }
@@ -17657,7 +17688,8 @@ async function sendIAQuestion(){
           <div class="lead-cell lead-plataforma" title="${esc(plataforma)}">${esc(plataforma)||'-'}</div>
           <div class="lead-cell lead-fonte" title="${esc(fonte)}">${esc(fonte)||'-'}</div>
           <div class="lead-cell lead-when">${esc(when)}</div>
-          <div class="lead-cell">
+          <div class="lead-cell lead-actions">
+            <button class="lead-edit-btn" data-lead-id="${l.id || ''}" title="Editar">✎</button>
             <button class="lead-delete-btn" data-lead-id="${l.id || ''}" title="Remover lead">×</button>
           </div>
         </div>`;
@@ -17673,6 +17705,95 @@ async function sendIAQuestion(){
           await deleteLead(leadId);
         });
       });
+
+      // Bind edit buttons
+      leadsListEl.querySelectorAll('.lead-edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const row = btn.closest('.lead-row');
+          if(!row) return;
+          enterLeadEditMode(row);
+        });
+      });
+    }
+
+    // Atualiza campos específicos do lead no Firestore (merge)
+    async function updateLead(leadId, patch){
+      if(!leadId || !patch || typeof patch !== 'object') return;
+      try{
+        const uid = auth?.currentUser?.uid;
+        const clientKey = getClientKeySafe();
+        if(!uid || !clientKey) throw new Error('Sessão expirada ou cliente ausente');
+        const ref = doc(db, 'usuarios', uid, 'clients', clientKey, 'leads', leadId);
+        await setDoc(ref, { ...patch, updatedAt: serverTimestamp() }, { merge:true });
+        if(typeof mgToast==='function') mgToast('Lead atualizado');
+      }catch(err){
+        console.error('updateLead', err);
+        alert('Falha ao atualizar lead: ' + (err?.message || String(err)));
+      }
+    }
+
+    function enterLeadEditMode(row){
+      if(!row || row.dataset.editing==='1') return;
+      row.dataset.editing='1';
+      row.classList.add('lead-editing');
+      const leadId = row.getAttribute('data-lead-id');
+      const fieldMap = [
+        { cls:'lead-name', key:'name', type:'text' },
+        { cls:'lead-email', key:'email', type:'email' },
+        { cls:'lead-phone', key:'phone', type:'text' },
+        { cls:'lead-question', key:'question', type:'text' },
+        { cls:'lead-plataforma', key:'plataforma', type:'text' },
+        { cls:'lead-fonte', key:'source', type:'text' }
+      ];
+      fieldMap.forEach(f=>{
+        const cell = row.querySelector('.'+f.cls);
+        if(!cell) return;
+        const original = cell.textContent || '';
+        cell.dataset.originalValue = original;
+        cell.innerHTML = `<input class="lead-edit-input" type="${f.type}" data-field="${f.key}" value="${original.replace(/"/g,'&quot;')}">`;
+      });
+      // Ações
+      const actionsCell = row.querySelector('.lead-actions');
+      if(actionsCell){
+        actionsCell.innerHTML = '';
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'lead-save-btn';
+        saveBtn.textContent = 'Salvar';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'lead-cancel-btn';
+        cancelBtn.textContent = 'Cancelar';
+        actionsCell.appendChild(saveBtn);
+        actionsCell.appendChild(cancelBtn);
+        saveBtn.addEventListener('click', async (e)=>{
+          e.preventDefault();
+          if(!leadId) return;
+          saveBtn.disabled = true; cancelBtn.disabled = true;
+          const inputs = row.querySelectorAll('.lead-edit-input');
+          const patch = {};
+          inputs.forEach(inp=>{ 
+            const k = inp.dataset.field; 
+            if(!k) return; 
+            const val = inp.value.trim();
+            const cell = inp.closest('.lead-cell');
+            const original = cell?.dataset?.originalValue ?? '';
+            if(val !== original){ patch[k] = val; }
+          });
+          if(Object.keys(patch).length === 0){ 
+            // Nada mudou, apenas sair do modo edição
+            renderLeadsList();
+            return; 
+          }
+          await updateLead(leadId, patch);
+          // Re-render (snapshot irá atualizar, mas forçamos fallback)
+          renderLeadsList();
+        });
+        cancelBtn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          // Reverte sem salvar
+          renderLeadsList();
+        });
+      }
     }
 
     /* ========= Referências Redes ========= */
