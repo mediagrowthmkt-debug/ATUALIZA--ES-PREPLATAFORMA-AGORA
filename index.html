@@ -4513,6 +4513,19 @@ function renderReviewNotes(post){
   .trafego-history-remove:hover{color:#f87171}
   @keyframes trafego-progress-stripes{0%{background-position:0 0}100%{background-position:-200% 0}}
   .trafego-optimizations-empty{margin-top:10px}
+  /* Tooltip simples para leitura do nome completo ao passar o mouse na célula */
+  .trafego-optimizations-table td[data-tooltip]{position:relative}
+  .trafego-optimizations-table td[data-tooltip]:hover::after{
+    content: attr(data-tooltip);
+    position:absolute;left:100%;top:50%;
+    transform: translateY(-50%);
+    margin-left:8px;max-width:480px;min-width:120px;
+    background:rgba(15,23,42,.95);color:#e2e8f0;
+    border:1px solid rgba(148,163,184,.28);
+    border-radius:8px;padding:8px 10px;font-size:.8rem;line-height:1.25;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    white-space:normal;z-index:30;pointer-events:none;
+  }
   @media(max-width:1024px){
     .trafego-columns{grid-template-columns:1fr;gap:14px}
   }
@@ -12607,6 +12620,10 @@ async function sendIAQuestion(){
       campaignInput.placeholder = 'Campanha';
       campaignInput.dataset.field = 'campaign';
       campaignInput.value = item.campaign;
+  // Tooltip com o nome completo da campanha
+  campaignInput.title = item.campaign || '';
+  campaignCell.title = item.campaign || '';
+  campaignCell.setAttribute('data-tooltip', item.campaign || '');
       campaignCell.appendChild(campaignInput);
       row.appendChild(campaignCell);
 
@@ -12716,6 +12733,17 @@ async function sendIAQuestion(){
       if(refs.next){
         refs.next.textContent = stats.nextLabel || '—';
       }
+      // Atualiza tooltip do nome da campanha (input e célula)
+      const campaignInput = row.querySelector('input[data-field="campaign"]');
+      if(campaignInput){
+        const full = item?.campaign || '';
+        campaignInput.title = full;
+        const campaignCell = campaignInput.closest('td');
+        if(campaignCell){
+          campaignCell.title = full;
+          campaignCell.setAttribute('data-tooltip', full);
+        }
+      }
       // Marca visualmente como pausada se a observação indicar pausa
       const isPaused = (item?.observation || '').toLowerCase().includes('pausada');
       row.classList.toggle('is-paused', isPaused);
@@ -12742,6 +12770,13 @@ async function sendIAQuestion(){
       const campaignInput = row.querySelector('input[data-field="campaign"]');
       if(campaignInput){
         item.campaign = campaignInput.value || '';
+        const full = item.campaign || '';
+        campaignInput.title = full;
+        const campaignCell = campaignInput.closest('td');
+        if(campaignCell){
+          campaignCell.title = full;
+          campaignCell.setAttribute('data-tooltip', full);
+        }
       }
       const observationArea = row.querySelector('textarea[data-field="observation"]');
       if(observationArea){
@@ -13245,6 +13280,15 @@ async function sendIAQuestion(){
       const item = TRAFEGO_OPTIMIZATIONS.find(entry => entry.id === id);
       if(!item) return;
       item[field] = target.value;
+      if(field === 'campaign'){
+        const full = String(target.value || '');
+        target.title = full;
+        const cell = target.closest('td');
+        if(cell){
+          cell.title = full;
+          cell.setAttribute('data-tooltip', full);
+        }
+      }
       updateTrafficOptimizationLocalSignature();
       scheduleTrafficOptimizationPersist();
       updateTrafficOptimizationRow(row, item);
