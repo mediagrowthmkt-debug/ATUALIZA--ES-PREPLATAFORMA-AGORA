@@ -4476,6 +4476,35 @@ function renderReviewNotes(post){
   .trafego-progress.is-due .trafego-progress-fill{background:linear-gradient(120deg,rgba(248,113,113,.85),rgba(239,68,68,.9))}
   .trafego-progress.is-empty .trafego-progress-fill{animation:none}
   .trafego-optimizations-table .trafego-actions-cell{text-align:center}
+  .trafego-optimizations-table tr.is-paused td{background:#3a3a3a}
+  .trafego-optimizations-table tr.is-paused input,
+  .trafego-optimizations-table tr.is-paused select,
+  .trafego-optimizations-table tr.is-paused textarea{
+    opacity:.6;
+    pointer-events:none;
+    background-color:#3a3a3a;
+    color:#bbb;
+    border-color:#555;
+    cursor:not-allowed;
+  }
+  .trafego-optimizations-table tr.is-paused button{
+    opacity:.5;
+    pointer-events:none;
+    cursor:not-allowed;
+    filter: grayscale(0.3);
+  }
+  /* Cores por plataforma - apenas nos selects da coluna Plataforma */
+  .trafego-optimizations-table select[data-field="platform"]{transition:background-color .2s ease, border-color .2s ease, color .2s ease}
+  .trafego-optimizations-table select[data-field="platform"].platform-meta{background:#1877f2;border-color:#1877f2;color:#fff}
+  .trafego-optimizations-table select[data-field="platform"].platform-google{
+    background:#FBBC05; /* amarelo Google */
+    border-color:#d4a106; /* amarelo um pouco mais escuro na borda */
+    color:#111; /* texto preto */
+    font-weight:700;
+  }
+  .trafego-optimizations-table select[data-field="platform"].platform-tiktok{background:linear-gradient(90deg,#25F4EE 0%, #000 50%, #FE2C55 100%);border-color:#6b7280;color:#fff}
+  .trafego-optimizations-table select[data-field="platform"].platform-linkedin{background:#0a66c2;border-color:#0a66c2;color:#fff}
+  .trafego-optimizations-table select[data-field="platform"].platform-pinterest{background:#e60023;border-color:#e60023;color:#fff}
   .trafego-save-optimization{min-width:92px}
   .trafego-save-optimization[disabled]{opacity:.7;cursor:wait}
   .trafego-history-table .trafego-history-actions{text-align:center}
@@ -4525,6 +4554,14 @@ function renderReviewNotes(post){
               <option value="3-semanas">3 semanas</option>
               <option value="1-mes">1 mês</option>
               <option value="2-meses">2 meses</option>
+            </select>
+          </div>
+          <div class="trafego-control-group">
+            <label for="trafegoOptimizationStatusFilter">Status</label>
+            <select id="trafegoOptimizationStatusFilter">
+              <option value="all">Todas</option>
+              <option value="active">Ativas</option>
+              <option value="paused">Pausadas</option>
             </select>
           </div>
           <div class="trafego-control-group">
@@ -4653,6 +4690,7 @@ function renderReviewNotes(post){
               <option value="all">Todos</option>
               <option value="nao-testada">Ainda não testada</option>
               <option value="ja-testada">Já testada</option>
+              <option value="pausada">Pausada</option>
               <option value="aprovado">Aprovado pelo cliente</option>
               <option value="nao-aprovado">Não aprovado</option>
             </select>
@@ -4676,6 +4714,7 @@ function renderReviewNotes(post){
               <th>Copy</th>
               <th>Objetivo</th>
               <th>Status</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody id="trafegoCampaignsBody"></tbody>
@@ -6463,8 +6502,8 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     if (!TENANT) {
       statusBox.textContent = 'Faça login para continuar.';
     }
-    const dashboard = $("dashboard"), totalScore = $("totalScore"), totalCard = $("totalCard"), macroActions = $("macroActions"), macroBadges = $("macroBadges");
-    const sectionTabs = $("sectionTabs"), widgetsGrid = $("widgetsGrid"), demandasWrap = $("demandasWrap"), notesWrap = $("notesWrap"), metasWrap = $("metasWrap"), iframeDica = $("iframedica"), filesWrap = $("filesWrap"), foldersList = $("foldersList"), filesPane = $("filesPane"), filesList = $("filesList"), fileInput = $("fileInput"), uploadFilesBtn = $("uploadFilesBtn"), newFolderBtn = $("newFolder"), filesBreadcrumb = $("filesBreadcrumb"), subfoldersGrid = $("subfoldersGrid"), filesEmpty = $("filesEmpty"), filesViewToggle = $("filesViewToggle"), viewAllFilesBtn = $("viewAllFilesBtn"), filePreviewModal = $("filePreviewModal"), filePreviewTitle = $("filePreviewTitle"), filePreviewContent = $("filePreviewContent"), filePreviewInfo = $("filePreviewInfo"), filePreviewClose = $("filePreviewClose"), uploadProgress = $("uploadProgress"), uploadProgressText = $("uploadProgressText"), uploadProgressBar = $("uploadProgressBar"), uploadProgressPercent = $("uploadProgressPercent"), storageUsage = $("storageUsage"), storageUsagePercent = $("storageUsagePercent"), storageUsageFill = $("storageUsageFill"), storageUsageSummary = $("storageUsageSummary"), storageUsageHint = $("storageUsageHint"), filesBulkBar = $("filesBulkBar"), filesBulkCount = $("filesBulkCount"), filesBulkStatus = $("filesBulkStatus"), filesBulkUndo = $("filesBulkUndo"), filesSelectAll = $("filesSelectAll"), trafegoWrap = $("trafegoWrap"), trafegoDemandasBody = $("trafegoDemandasBody"), trafegoAddDemanda = $("trafegoAddDemanda"), trafegoMetricsBody = $("trafegoMetricsBody"), trafegoAddMetricRow = $("trafegoAddMetricRow"), trafegoCampaignsBody = $("trafegoCampaignsBody"), trafegoAddCampaign = $("trafegoAddCampaign"), trafegoCampaignStatusFilter = $("trafegoCampaignStatusFilter"), trafegoCampaignSearch = $("trafegoCampaignSearch"), trafegoCampaignsEmpty = $("trafegoCampaignsEmpty"), trafegoOptimizationsBody = $("trafegoOptimizationsBody"), trafegoAddOptimization = $("trafegoAddOptimization"), trafegoOptimizationPlatformFilter = $("trafegoOptimizationPlatformFilter"), trafegoOptimizationRecurrenceFilter = $("trafegoOptimizationRecurrenceFilter"), trafegoOptimizationSearch = $("trafegoOptimizationSearch"), trafegoOptimizationsEmpty = $("trafegoOptimizationsEmpty"), trafegoHistoryBody = $("trafegoHistoryBody"), trafegoHistoryPlatformFilter = $("trafegoHistoryPlatformFilter"), trafegoHistorySearch = $("trafegoHistorySearch"), trafegoHistoryEmpty = $("trafegoHistoryEmpty");
+  const dashboard = $("dashboard"), totalScore = $("totalScore"), totalCard = $("totalCard"), macroActions = $("macroActions"), macroBadges = $("macroBadges");
+  const sectionTabs = $("sectionTabs"), widgetsGrid = $("widgetsGrid"), demandasWrap = $("demandasWrap"), notesWrap = $("notesWrap"), metasWrap = $("metasWrap"), iframeDica = $("iframedica"), filesWrap = $("filesWrap"), foldersList = $("foldersList"), filesPane = $("filesPane"), filesList = $("filesList"), fileInput = $("fileInput"), uploadFilesBtn = $("uploadFilesBtn"), newFolderBtn = $("newFolder"), filesBreadcrumb = $("filesBreadcrumb"), subfoldersGrid = $("subfoldersGrid"), filesEmpty = $("filesEmpty"), filesViewToggle = $("filesViewToggle"), viewAllFilesBtn = $("viewAllFilesBtn"), filePreviewModal = $("filePreviewModal"), filePreviewTitle = $("filePreviewTitle"), filePreviewContent = $("filePreviewContent"), filePreviewInfo = $("filePreviewInfo"), filePreviewClose = $("filePreviewClose"), uploadProgress = $("uploadProgress"), uploadProgressText = $("uploadProgressText"), uploadProgressBar = $("uploadProgressBar"), uploadProgressPercent = $("uploadProgressPercent"), storageUsage = $("storageUsage"), storageUsagePercent = $("storageUsagePercent"), storageUsageFill = $("storageUsageFill"), storageUsageSummary = $("storageUsageSummary"), storageUsageHint = $("storageUsageHint"), filesBulkBar = $("filesBulkBar"), filesBulkCount = $("filesBulkCount"), filesBulkStatus = $("filesBulkStatus"), filesBulkUndo = $("filesBulkUndo"), filesSelectAll = $("filesSelectAll"), trafegoWrap = $("trafegoWrap"), trafegoDemandasBody = $("trafegoDemandasBody"), trafegoAddDemanda = $("trafegoAddDemanda"), trafegoMetricsBody = $("trafegoMetricsBody"), trafegoAddMetricRow = $("trafegoAddMetricRow"), trafegoCampaignsBody = $("trafegoCampaignsBody"), trafegoAddCampaign = $("trafegoAddCampaign"), trafegoCampaignStatusFilter = $("trafegoCampaignStatusFilter"), trafegoCampaignSearch = $("trafegoCampaignSearch"), trafegoCampaignsEmpty = $("trafegoCampaignsEmpty"), trafegoOptimizationsBody = $("trafegoOptimizationsBody"), trafegoAddOptimization = $("trafegoAddOptimization"), trafegoOptimizationPlatformFilter = $("trafegoOptimizationPlatformFilter"), trafegoOptimizationRecurrenceFilter = $("trafegoOptimizationRecurrenceFilter"), trafegoOptimizationStatusFilter = $("trafegoOptimizationStatusFilter"), trafegoOptimizationSearch = $("trafegoOptimizationSearch"), trafegoOptimizationsEmpty = $("trafegoOptimizationsEmpty"), trafegoHistoryBody = $("trafegoHistoryBody"), trafegoHistoryPlatformFilter = $("trafegoHistoryPlatformFilter"), trafegoHistorySearch = $("trafegoHistorySearch"), trafegoHistoryEmpty = $("trafegoHistoryEmpty");
     const trafegoCampaignsEmptyDefault = trafegoCampaignsEmpty ? trafegoCampaignsEmpty.textContent : '';
     const trafegoOptimizationsEmptyDefault = trafegoOptimizationsEmpty ? trafegoOptimizationsEmpty.textContent : '';
     let macroTabBadgeEl = null;
@@ -11267,6 +11306,10 @@ async function sendIAQuestion(){
       if(trafegoWrap){
         trafegoWrap.style.display = trafego? "flex":"none";
         trafegoWrap.setAttribute("aria-hidden", trafego? "false":"true");
+        if(trafego){
+          const statusSel = document.getElementById('trafegoOptimizationStatusFilter');
+          if(statusSel){ statusSel.value = 'active'; }
+        }
       }
     }
 
@@ -11280,6 +11323,7 @@ async function sendIAQuestion(){
     const TRAFEGO_CAMPAIGN_STATUS_OPTIONS = [
       { value: 'nao-testada', label: 'Ainda não testada' },
       { value: 'ja-testada', label: 'Já testada' },
+      { value: 'pausada', label: 'Pausada' },
       { value: 'aprovado', label: 'Aprovado pelo cliente' },
       { value: 'nao-aprovado', label: 'Não aprovado' }
     ];
@@ -11676,6 +11720,16 @@ async function sendIAQuestion(){
         statusCell.appendChild(statusSelect);
         row.appendChild(statusCell);
 
+        // Ações
+        const actionsCell = document.createElement('td');
+        const pauseBtn = document.createElement('button');
+        pauseBtn.type = 'button';
+        pauseBtn.className = 'btn small ghost pause-btn';
+        pauseBtn.title = 'Pausar campanha';
+        pauseBtn.textContent = 'P';
+        actionsCell.appendChild(pauseBtn);
+        row.appendChild(actionsCell);
+
         frag.appendChild(row);
       });
       trafegoCampaignsBody.appendChild(frag);
@@ -11868,6 +11922,60 @@ async function sendIAQuestion(){
         idea[field] = target.value;
         updateTrafficCampaignLocalSignature();
         scheduleTrafficCampaignPersist();
+      }
+    }
+
+    function handleTrafficCampaignClick(event){
+      const btn = event.target?.closest?.('.pause-btn');
+      if(!btn) return;
+      const row = btn.closest('tr');
+      if(!row) return;
+      const id = row.dataset.id;
+      const idea = TRAFEGO_CAMPAIGN_IDEAS.find(item => item.id === id);
+      if(!idea) return;
+
+      // Pergunta a data de pausa (AAAA-MM-DD)
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const defaultDate = `${yyyy}-${mm}-${dd}`;
+      const input = window.prompt('Quando a campanha foi pausada? (AAAA-MM-DD)', defaultDate);
+      if(input === null) return; // cancelado
+      let dateStr = (input || '').trim();
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){
+        dateStr = defaultDate;
+      }
+
+      const noteLine = `Pausada em ${dateStr}`;
+      if(typeof idea.observation === 'string' && idea.observation.trim()){
+        idea.observation = `${idea.observation}\n${noteLine}`.trim();
+      }else{
+        idea.observation = noteLine;
+      }
+      idea.status = 'pausada';
+
+      // Reflete no DOM imediato
+      const statusSelect = row.querySelector('select[data-field="status"]');
+      if(statusSelect){
+        if(!Array.from(statusSelect.options).some(o => o.value === 'pausada')){
+          const opt = document.createElement('option');
+          opt.value = 'pausada';
+          opt.textContent = 'Pausada';
+          statusSelect.appendChild(opt);
+        }
+        statusSelect.value = 'pausada';
+      }
+      const obsArea = row.querySelector('textarea[data-field="observation"]');
+      if(obsArea){ obsArea.value = idea.observation; }
+
+      updateTrafficCampaignLocalSignature();
+      scheduleTrafficCampaignPersist({ immediate: true });
+
+      // Após salvar, rola para o card de histórico
+      const historyCard = document.querySelector('.trafego-card.trafego-history-card');
+      if(historyCard && typeof historyCard.scrollIntoView === 'function'){
+        historyCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 
@@ -12397,16 +12505,35 @@ async function sendIAQuestion(){
     function getOptimizationFilters(){
       const platform = (trafegoOptimizationPlatformFilter?.value || 'all').toLowerCase();
       const recurrence = (trafegoOptimizationRecurrenceFilter?.value || 'all').toLowerCase();
+      const status = (trafegoOptimizationStatusFilter?.value || 'all').toLowerCase();
       const search = (trafegoOptimizationSearch?.value || '').toLowerCase().trim();
-      return { platform, recurrence, search };
+      return { platform, recurrence, status, search };
     }
 
     function optimizationMatchesFilters(item){
-      const { platform, recurrence, search } = getOptimizationFilters();
+      const { platform, recurrence, status, search } = getOptimizationFilters();
       if(platform !== 'all' && item.platform !== platform) return false;
       if(recurrence !== 'all' && item.recurrence !== recurrence) return false;
+      if(status !== 'all'){
+        const isPaused = (item?.observation || '').toLowerCase().includes('pausada');
+        if(status === 'paused' && !isPaused) return false;
+        if(status === 'active' && isPaused) return false;
+      }
       if(search && !(item.campaign || '').toLowerCase().includes(search)) return false;
       return true;
+    }
+
+    // Aplica classes de cor no select de Plataforma conforme o value
+    function applyPlatformThemeToSelect(selectEl, value){
+      if(!selectEl) return;
+      const cls = ['platform-meta','platform-google','platform-tiktok','platform-linkedin','platform-pinterest'];
+      cls.forEach(c => selectEl.classList.remove(c));
+      const v = String(value || '').toLowerCase();
+      if(v === 'meta') selectEl.classList.add('platform-meta');
+      else if(v === 'google') selectEl.classList.add('platform-google');
+      else if(v === 'tiktok') selectEl.classList.add('platform-tiktok');
+      else if(v === 'linkedin') selectEl.classList.add('platform-linkedin');
+      else if(v === 'pinterest') selectEl.classList.add('platform-pinterest');
     }
 
     function computeTrafficOptimizationStats(item){
@@ -12461,6 +12588,7 @@ async function sendIAQuestion(){
       const platformCell = document.createElement('td');
       const platformSelect = document.createElement('select');
       platformSelect.dataset.field = 'platform';
+      platformSelect.classList.add('platform-select');
       TRAFEGO_PLATFORM_OPTIONS.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt.value;
@@ -12468,6 +12596,8 @@ async function sendIAQuestion(){
         if(opt.value === item.platform) option.selected = true;
         platformSelect.appendChild(option);
       });
+      // Aplica a cor conforme a plataforma atual
+      applyPlatformThemeToSelect(platformSelect, item.platform);
       platformCell.appendChild(platformSelect);
       row.appendChild(platformCell);
 
@@ -12543,6 +12673,12 @@ async function sendIAQuestion(){
 
       const actionsCell = document.createElement('td');
       actionsCell.className = 'trafego-actions-cell';
+  const pauseButton = document.createElement('button');
+  pauseButton.type = 'button';
+  pauseButton.className = 'btn small ghost trafego-optimization-pause';
+  pauseButton.title = 'Pausar campanha';
+  pauseButton.textContent = 'P';
+  actionsCell.appendChild(pauseButton);
       const saveButton = document.createElement('button');
       saveButton.type = 'button';
       saveButton.className = 'btn small trafego-save-optimization';
@@ -12580,6 +12716,15 @@ async function sendIAQuestion(){
       if(refs.next){
         refs.next.textContent = stats.nextLabel || '—';
       }
+      // Marca visualmente como pausada se a observação indicar pausa
+      const isPaused = (item?.observation || '').toLowerCase().includes('pausada');
+      row.classList.toggle('is-paused', isPaused);
+      row.setAttribute('aria-disabled', isPaused ? 'true' : 'false');
+      // Atualiza a cor do select de plataforma
+      const platformSelect = row.querySelector('select[data-field="platform"]');
+      if(platformSelect){
+        applyPlatformThemeToSelect(platformSelect, item.platform);
+      }
     }
 
     function syncTrafficOptimizationItemFromRow(row, item){
@@ -12592,6 +12737,7 @@ async function sendIAQuestion(){
         if(platformSelect.value !== platform){
           platformSelect.value = platform;
         }
+        applyPlatformThemeToSelect(platformSelect, item.platform);
       }
       const campaignInput = row.querySelector('input[data-field="campaign"]');
       if(campaignInput){
@@ -12637,13 +12783,7 @@ async function sendIAQuestion(){
     function renderTrafficOptimizations(){
       if(!trafegoOptimizationsBody) return;
       trafegoOptimizationsBody.innerHTML = '';
-      const { platform, recurrence, search } = getOptimizationFilters();
-      const filtered = TRAFEGO_OPTIMIZATIONS.filter(item => {
-        if(platform !== 'all' && item.platform !== platform) return false;
-        if(recurrence !== 'all' && item.recurrence !== recurrence) return false;
-        if(search && !(item.campaign || '').toLowerCase().includes(search)) return false;
-        return true;
-      });
+      const filtered = TRAFEGO_OPTIMIZATIONS.filter(item => optimizationMatchesFilters(item));
       const frag = document.createDocumentFragment();
       filtered.forEach(item => {
         frag.appendChild(createTrafficOptimizationRow(item));
@@ -12957,6 +13097,10 @@ async function sendIAQuestion(){
       trafficOptimizationSavedSignature = trafficOptimizationLocalSignature;
       trafficOptimizationRemoteSignature = trafficOptimizationLocalSignature;
       TRAFEGO_OPTIMIZATIONS_LAST_SAVED = getSanitizedTrafficOptimizations().map(item => ({ ...item }));
+      (function(){
+        const statusSel = document.getElementById('trafegoOptimizationStatusFilter');
+        if(statusSel){ statusSel.value = 'active'; }
+      })();
       renderTrafficOptimizations();
     }
 
@@ -13119,6 +13263,8 @@ async function sendIAQuestion(){
       if(field === 'platform'){
         const value = String(target.value || '').toLowerCase();
         item.platform = TRAFEGO_PLATFORM_OPTIONS.some(opt => opt.value === value) ? value : 'meta';
+        // Atualiza a cor do select conforme a plataforma escolhida
+        applyPlatformThemeToSelect(target, item.platform);
         item.lastOptimization = normalizeOptimizationTopicValue(item.lastOptimization, item.platform);
         if(row._optimizationRefs?.topicsSelect){
           populateOptimizationTopicOptions(row._optimizationRefs.topicsSelect, item.platform, item.lastOptimization);
@@ -13141,8 +13287,8 @@ async function sendIAQuestion(){
       updateTrafficOptimizationLocalSignature();
       scheduleTrafficOptimizationPersist();
       updateTrafficOptimizationRow(row, item);
-      const { platform, recurrence, search } = getOptimizationFilters();
-      const filtersActive = platform !== 'all' || recurrence !== 'all' || !!search;
+      const { platform, recurrence, status, search } = getOptimizationFilters();
+      const filtersActive = platform !== 'all' || recurrence !== 'all' || status !== 'all' || !!search;
       if(filtersActive && !optimizationMatchesFilters(item)){
         renderTrafficOptimizations();
       }
@@ -13161,10 +13307,15 @@ async function sendIAQuestion(){
     }
 
     function handleTrafficOptimizationClick(event){
-      const button = event.target?.closest('.trafego-save-optimization');
-      if(!button) return;
+      const pauseBtn = event.target?.closest('.trafego-optimization-pause');
+      const saveBtn = event.target?.closest('.trafego-save-optimization');
+      if(!pauseBtn && !saveBtn) return;
       event.preventDefault();
-      onTrafficOptimizationSaveButtonClick(button);
+      if(pauseBtn){
+        onTrafficOptimizationPauseClick(pauseBtn);
+      }else if(saveBtn){
+        onTrafficOptimizationSaveButtonClick(saveBtn);
+      }
     }
 
     async function onTrafficOptimizationSaveButtonClick(button){
@@ -13197,6 +13348,72 @@ async function sendIAQuestion(){
       }catch(err){
         console.error('onTrafficOptimizationSaveButtonClick', err);
         alert('Não foi possível salvar a otimização. Tente novamente.');
+      }finally{
+        button.disabled = false;
+      }
+    }
+
+    async function onTrafficOptimizationPauseClick(button){
+      if(!button) return;
+      const row = button.closest('tr');
+      if(!row) return;
+      const id = row.dataset.id;
+      if(!id) return;
+      const item = TRAFEGO_OPTIMIZATIONS.find(entry => entry.id === id);
+      if(!item) return;
+      if(button.disabled) return;
+      if(!auth?.currentUser){
+        alert('Faça login para pausar a campanha.');
+        return;
+      }
+      button.disabled = true;
+      // Pergunta a data de pausa (AAAA-MM-DD), padrão hoje
+      const today = new Date();
+      const defaultDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const input = window.prompt('Quando a campanha foi pausada? (AAAA-MM-DD)', defaultDate);
+      if(input == null) return; // cancelado
+      const pausedDate = sanitizeOptimizationDate(String(input || ''));
+      if(!pausedDate){
+        alert('Data inválida. Use o formato AAAA-MM-DD.');
+        button.disabled = false;
+        return;
+      }
+      // Snapshot anterior para histórico
+      const previousSnapshot = Array.isArray(TRAFEGO_OPTIMIZATIONS_LAST_SAVED)
+        ? TRAFEGO_OPTIMIZATIONS_LAST_SAVED.map(entry => ({ ...entry }))
+        : [];
+      // Atualiza observação com a informação de pausa
+      const observationArea = row.querySelector('textarea[data-field="observation"]');
+      const prefix = item.observation && item.observation.trim() ? item.observation.trim() + '\n' : '';
+      const newObservation = `${prefix}Pausada em ${pausedDate}`;
+      if(observationArea){
+        observationArea.value = newObservation;
+      }
+      item.observation = newObservation;
+      try{
+        // Atualiza visual imediatamente
+        updateTrafficOptimizationRow(row, item);
+        // Se o filtro atual for "Ativas" (ou o item não corresponder mais aos filtros), recarrega a lista para sumir em tempo real
+        const { platform, recurrence, status, search } = getOptimizationFilters();
+        const filtersActive = platform !== 'all' || recurrence !== 'all' || status !== 'all' || !!search;
+        if(status === 'active' || (filtersActive && !optimizationMatchesFilters(item))){
+          renderTrafficOptimizations();
+        }
+        updateTrafficOptimizationLocalSignature();
+        await saveTrafficOptimizationsImmediate();
+        // Registra no histórico para aparecer na aba Histórico
+        recordManualTrafficOptimizationHistory(item, previousSnapshot);
+        if(typeof mgToast === 'function'){
+          mgToast('Campanha pausada e salva');
+        }
+        // Rola até o card de histórico
+        const historyCard = document.querySelector('.trafego-card.trafego-history-card');
+        if(historyCard){
+          historyCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }catch(err){
+        console.error('onTrafficOptimizationPauseClick', err);
+        alert('Não foi possível pausar/salvar. Tente novamente.');
       }finally{
         button.disabled = false;
       }
@@ -13414,6 +13631,7 @@ async function sendIAQuestion(){
           trafegoCampaignsBody.addEventListener('input', handleTrafficCampaignInput);
           trafegoCampaignsBody.addEventListener('change', handleTrafficCampaignChange);
           trafegoCampaignsBody.addEventListener('blur', handleTrafficCampaignBlur, true);
+          trafegoCampaignsBody.addEventListener('click', handleTrafficCampaignClick);
         }
         if(trafegoOptimizationsBody){
           trafegoOptimizationsBody.addEventListener('input', handleTrafficOptimizationInput);
@@ -13432,6 +13650,10 @@ async function sendIAQuestion(){
         }
         if(trafegoOptimizationRecurrenceFilter){
           trafegoOptimizationRecurrenceFilter.addEventListener('change', ()=> renderTrafficOptimizations());
+        }
+        const trafegoOptimizationStatusFilter = document.getElementById('trafegoOptimizationStatusFilter');
+        if(trafegoOptimizationStatusFilter){
+          trafegoOptimizationStatusFilter.addEventListener('change', ()=> renderTrafficOptimizations());
         }
         if(trafegoOptimizationSearch){
           trafegoOptimizationSearch.addEventListener('input', ()=> renderTrafficOptimizations());
@@ -23611,6 +23833,8 @@ async function sendIAQuestion(){
           if(trafegoCampaignSearch) trafegoCampaignSearch.value = '';
           if(trafegoOptimizationPlatformFilter) trafegoOptimizationPlatformFilter.value = 'all';
           if(trafegoOptimizationRecurrenceFilter) trafegoOptimizationRecurrenceFilter.value = 'all';
+          const trafegoOptimizationStatusFilter = document.getElementById('trafegoOptimizationStatusFilter');
+          if(trafegoOptimizationStatusFilter) trafegoOptimizationStatusFilter.value = 'all';
           if(trafegoOptimizationSearch) trafegoOptimizationSearch.value = '';
           if(trafegoHistoryPlatformFilter) trafegoHistoryPlatformFilter.value = 'all';
           if(trafegoHistorySearch) trafegoHistorySearch.value = '';
