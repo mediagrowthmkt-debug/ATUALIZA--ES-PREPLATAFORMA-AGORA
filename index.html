@@ -132,6 +132,81 @@ html, body{ -webkit-text-size-adjust: 100%; }
   }
 }
 
+/* ===== Mobile: reduzir fontes e botões no modal de post ===== */
+@media (max-width: 820px){
+  /* Mantém inputs/textarea >=16px (evitar zoom iOS), mas reduz botões e textos não interativos */
+  #postModal .btn { font-size: 13px !important; padding: 6px 8px !important; }
+  #postModal .btn.small { font-size: 12.5px !important; padding: 5px 8px !important; border-radius: 8px !important; }
+  #postModal .modal-foot .btn { min-height: 36px !important; padding: 6px 8px !important; }
+  #postModal .modal-head .btn { min-height: 32px !important; padding: 4px 8px !important; }
+
+  /* Tipografia interna do modal */
+  #postModal #modalTitle { font-size: 0.95rem !important; }
+  #postModal #modalDate { font-size: 0.85rem !important; }
+  #postModal .info, #postModal .info label, #postModal .info p { font-size: 0.9rem !important; }
+  #postModal #clientNotesList, #postModal #postChecklistBlock { font-size: 0.9rem !important; }
+
+  /* Descrição: menor para leitura; volta a 16px ao focar para evitar zoom no iOS */
+  #postModal #modalDesc { font-size: 13px !important; line-height: 1.35 !important; font-family: inherit !important; }
+  #postModal #modalDesc:focus { font-size: 16px !important; }
+
+  /* Header do modal mais compacto e com título super curto */
+  #postModal .modal-head { padding: 6px 8px !important; gap: 8px; }
+  #postModal #modalTitle { 
+    max-width: 4ch !important; /* mostra visualmente ~4 caracteres */
+    overflow: hidden !important; 
+    white-space: nowrap !important; 
+    text-overflow: clip !important; 
+    display: inline-block !important;
+  }
+
+  /* Botão fechar vira um X para economizar espaço */
+  #postModal #modalClose { 
+    font-size: 0 !important; /* esconde o texto 'Fechar' */
+    width: 36px !important; 
+    min-width: 36px !important; 
+    height: 32px !important; 
+    padding: 0 !important; 
+    display: inline-flex !important; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 8px !important;
+  }
+  #postModal #modalClose::before { 
+    content: "✕"; 
+    font-size: 18px; 
+    font-weight: 800; 
+    line-height: 1; 
+  }
+}
+
+/* ===== Post Checklist: layout e visibilidade ===== */
+#postChecklistBlock{
+  background: #121212;
+  border: 1px solid var(--shell-border, rgba(255,255,255,.14));
+  border-radius: 10px;
+  padding: 10px;
+}
+#postChecklistBlock .post-checklist-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+#postChecklistBlock label{ display:flex; align-items:center; gap:8px; }
+
+/* Desktop: preview em largura total e info+checklist lado a lado */
+@media (min-width: 821px){
+  #postModal .modal-body{ grid-template-columns: 1fr 1fr; }
+  #postModal #modalPreview{ grid-column: 1 / -1; }
+  #postModal .info{ grid-column: 1; align-self: start; }
+  #postModal #postChecklistBlock{ grid-column: 2; align-self: start; }
+}
+
+/* Mobile: esconder checklist (deixar como está) */
+@media (max-width: 820px){
+  #postChecklistBlock{ display:none !important; }
+}
+
 </style>
 <style id="access-css">
   /* ===================== ACESSOS ===================== */
@@ -1468,13 +1543,25 @@ html, body{ -webkit-text-size-adjust: 100%; }
     async function generateVideoThumbnail(videoUrl, postId) {
       console.log('[GenerateThumbnail] Iniciando para:', videoUrl);
       
+      // URL inválida: não tenta carregar para evitar erros de mídia
+      if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === '') {
+        return null;
+      }
+
       // Verifica se já tem no cache
       if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) {
         console.log('[GenerateThumbnail] Retornando do cache');
         return VIDEO_THUMBNAILS_CACHE.get(videoUrl);
       }
 
-      return new Promise((resolve, reject) => {
+      // Função de limpeza segura para evitar 'Empty src attribute'
+      const releaseVideo = (video) => {
+        try { video.onerror = null; video.onseeked = null; video.onloadedmetadata = null; } catch(_) {}
+        try { video.pause?.(); } catch(_) {}
+        try { video.removeAttribute('src'); video.load?.(); } catch(_) {}
+      };
+
+      return new Promise((resolve) => {
         const video = document.createElement('video');
         video.crossOrigin = 'anonymous';
         video.preload = 'metadata';
@@ -1485,58 +1572,59 @@ html, body{ -webkit-text-size-adjust: 100%; }
         
         // Timeout de segurança
         const timeout = setTimeout(() => {
-          console.error('[GenerateThumbnail] Timeout ao carregar vídeo');
-          video.src = '';
-          reject(new Error('Timeout ao gerar thumbnail'));
+          // Evita spam de erro no console; apenas retorna null
+          releaseVideo(video);
+          resolve(null);
         }, 10000);
 
         video.onloadedmetadata = () => {
-          console.log('[GenerateThumbnail] Metadata carregada, duração:', video.duration);
-          // Vai para 0.5 segundo ou 10% do vídeo
-          const seekTime = Math.min(0.5, video.duration * 0.1);
-          video.currentTime = seekTime;
-          console.log('[GenerateThumbnail] Buscando frame em:', seekTime, 's');
-        };
-        
-        video.onseeked = () => {
-          console.log('[GenerateThumbnail] Frame encontrado, capturando...');
           try {
+            // Vai para 0.5 segundo ou 10% do vídeo
+            const seekTime = Math.min(0.5, Math.max(0, Number(video.duration) || 0) * 0.1);
+            video.currentTime = seekTime;
+          } catch(_) {
+            // Falha ao buscar: retorna silenciosamente
             clearTimeout(timeout);
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 360;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            
-            console.log('[GenerateThumbnail] Thumbnail gerada com sucesso, tamanho:', thumbnailDataUrl.length, 'bytes');
-            
-            // Adiciona ao cache
-            VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
-            
-            // Limpa o vídeo
-            video.src = '';
-            
-            resolve(thumbnailDataUrl);
-          } catch (err) {
-            clearTimeout(timeout);
-            console.error('[GenerateThumbnail] Erro ao capturar frame:', err);
-            reject(err);
+            releaseVideo(video);
+            resolve(null);
           }
         };
         
-        video.onerror = (err) => {
-          clearTimeout(timeout);
-          console.error('[GenerateThumbnail] Erro ao carregar vídeo:', err, video.error);
-          video.src = '';
-          reject(err);
+        video.onseeked = () => {
+          try {
+            clearTimeout(timeout);
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            // Adiciona ao cache
+            VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
+            // Limpa o vídeo sem disparar erro de mídia
+            releaseVideo(video);
+            resolve(thumbnailDataUrl);
+          } catch (_) {
+            clearTimeout(timeout);
+            releaseVideo(video);
+            resolve(null);
+          }
         };
         
-        console.log('[GenerateThumbnail] Carregando URL:', videoUrl);
-        video.src = videoUrl;
+        video.onerror = () => {
+          clearTimeout(timeout);
+          // Não loga erro nem rejeita para evitar spam
+          releaseVideo(video);
+          resolve(null);
+        };
+        
+        try {
+          video.src = videoUrl;
+        } catch(_) {
+          clearTimeout(timeout);
+          releaseVideo(video);
+          resolve(null);
+        }
       });
     }
 
@@ -2698,6 +2786,28 @@ function renderReviewNotes(post){
   .demanda-month-button:hover{border-color:var(--accent)}
   .demanda-month-button.active{background:var(--accent);color:#000;border-color:var(--accent)}
   .demanda-month-button.has-data{box-shadow:0 0 0 1px rgba(255,255,255,.12) inset}
+  /* Dropdown alternativo de meses (oculto por padrão no desktop) */
+  .demanda-month-select{display:none}
+  /* Mobile: busca menor e meses por dropdown */
+  @media (max-width: 820px){
+    /* Tornar os campos mais "finos" no mobile */
+    /* Rebate o min-height global de 44px e a aparência nativa do iOS/Safari */
+    .demandas-filters input[type="text"],
+    .demandas-filters select{
+      -webkit-appearance:none!important;
+      appearance:none!important;
+      height:28px!important;
+      min-height:28px!important;
+      padding:3px 8px!important;
+      line-height:22px!important;
+      border-radius:6px!important;
+    }
+    #demandaSearch{font-size:16px!important;padding:3px 8px!important;min-height:28px!important;height:28px!important;line-height:22px!important}
+    #demandaMonthButtons{display:none}
+    .demanda-month-select{display:block;width:100%;font-size:16px!important;padding:3px 28px 3px 8px!important;min-height:28px!important;height:28px!important;line-height:22px!important;-webkit-appearance:none!important;appearance:none!important}
+    /* seta do select com espaçamento à direita */
+    .demanda-month-select{background-image:linear-gradient(45deg,transparent 50%, #bbb 50%),linear-gradient(135deg,#bbb 50%, transparent 50%);background-position:right 12px center,right 8px center;background-size:8px 8px,8px 8px;background-repeat:no-repeat}
+  }
   .prazo-alert{background:#7f1d1d;color:#fff;padding:6px 8px;border-radius:8px}
   .demandas-wrap,
   .demandas-wrap *{
@@ -3161,6 +3271,12 @@ function renderReviewNotes(post){
     cursor: pointer;
     z-index: 1000;
     display: none;
+  }
+  /* Remove completamente o botão de atualizar no mobile (aba/slice superior) */
+  @media (max-width: 820px){
+    #refreshBtn{ display:none !important; visibility:hidden !important; }
+    /* Esconde o card de uso de armazenamento apenas no mobile */
+    .storage-usage{ display:none !important; }
   }
 </style>
 <style>
@@ -4192,6 +4308,7 @@ function renderReviewNotes(post){
         <button class="demanda-year-btn" id="demandaYearNext" type="button" aria-label="Próximo ano">▶</button>
       </div>
       <div class="demanda-month-buttons" id="demandaMonthButtons"></div>
+      <select id="demandaMonthSelect" class="demanda-month-select" aria-label="Selecionar mês"></select>
     </div>
     <button class="btn small" id="addDemanda">Adicionar linha</button>
     <input type="url" id="demandasWebhook" placeholder="Webhook URL">
@@ -4842,6 +4959,19 @@ function renderReviewNotes(post){
 <label class="muted" style="display:block; margin:6px 0">Observações do cliente</label>
 <div class="notes-list" id="notesList"></div>
 </div>
+</div>
+<!-- Checklist de publicação (visível apenas no desktop) -->
+<div id="postChecklistBlock" class="post-checklist">
+  <label class="muted" style="display:block; margin:6px 0">Checklist de publicação</label>
+  <div class="post-checklist-grid">
+    <label><input type="checkbox" data-platform="instagram"> Instagram</label>
+    <label><input type="checkbox" data-platform="facebook"> Facebook</label>
+    <label><input type="checkbox" data-platform="tiktok"> TikTok</label>
+    <label><input type="checkbox" data-platform="linkedin"> LinkedIn</label>
+    <label><input type="checkbox" data-platform="youtube"> YouTube</label>
+    <label><input type="checkbox" data-platform="gmb"> Google Meu Negócio</label>
+  </div>
+  <p class="muted" style="margin-top:8px">Marque as plataformas onde este post será publicado.</p>
 </div>
 </div>
 <div class="modal-foot">
@@ -21272,24 +21402,50 @@ async function sendIAQuestion(){
     }
     function renderDemandaMonthButtons(){
       const container=$('demandaMonthButtons');
+      const monthSelect=$('demandaMonthSelect');
       const yearLabel=$('demandaYearLabel');
       const prevBtn=$('demandaYearPrev');
       const nextBtn=$('demandaYearNext');
       if(yearLabel){ yearLabel.textContent=demandaMonthYear; }
       if(prevBtn){ prevBtn.onclick=()=>changeDemandaYear(-1); }
       if(nextBtn){ nextBtn.onclick=()=>changeDemandaYear(1); }
-      if(!container) return;
+      if(!container && !monthSelect) return;
       const availableKeys=getAllDemandaMonthKeys();
-      container.innerHTML='';
-      DEMANDA_MONTHS.forEach(({month,label})=>{
-        const key=buildMonthKey(demandaMonthYear,month);
-        const btn=document.createElement('button');
-        btn.type='button';
-        btn.className='demanda-month-button'+(selectedDemandaMonth===key?' active':'')+(availableKeys.has(key)?' has-data':'');
-        btn.textContent=label;
-        btn.addEventListener('click',()=>{ setSelectedDemandaMonth(key); });
-        container.appendChild(btn);
-      });
+      if(container){
+        container.innerHTML='';
+        DEMANDA_MONTHS.forEach(({month,label})=>{
+          const key=buildMonthKey(demandaMonthYear,month);
+          const btn=document.createElement('button');
+          btn.type='button';
+          btn.className='demanda-month-button'+(selectedDemandaMonth===key?' active':'')+(availableKeys.has(key)?' has-data':'');
+          btn.textContent=label;
+          btn.addEventListener('click',()=>{ setSelectedDemandaMonth(key); });
+          container.appendChild(btn);
+        });
+      }
+      if(monthSelect){
+        // Gera opções com o mês selecionado primeiro
+        const selMonthPart = (selectedDemandaMonth||'').slice(5);
+        const selMonthNum = parseInt(selMonthPart||'',10) || (demandaToday.getMonth()+1);
+        const idx = Math.max(0, DEMANDA_MONTHS.findIndex(m=>m.month===selMonthNum));
+        const rotated = idx>0 ? [...DEMANDA_MONTHS.slice(idx), ...DEMANDA_MONTHS.slice(0, idx)] : [...DEMANDA_MONTHS];
+        monthSelect.innerHTML='';
+        rotated.forEach(({month,label})=>{
+          const key=buildMonthKey(demandaMonthYear,month);
+          const opt=document.createElement('option');
+          opt.value=key;
+          opt.textContent=label;
+          if(key===selectedDemandaMonth) opt.selected=true;
+          monthSelect.appendChild(opt);
+        });
+        if(!monthSelect._bound){
+          monthSelect.addEventListener('change',()=>{
+            const key = monthSelect.value;
+            setSelectedDemandaMonth(key);
+          });
+          monthSelect._bound = true;
+        }
+      }
     }
     function setSelectedDemandaMonth(monthKey,{persist=true,triggerRender=true}={}){
       if(typeof monthKey!=='string' || !/^\d{4}-\d{2}$/.test(monthKey)) return;
@@ -23688,31 +23844,69 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
     if(typeof VIDEO_THUMBNAILS_CACHE === "undefined") var VIDEO_THUMBNAILS_CACHE = new Map();
     if(typeof generateVideoThumbnail === "undefined") {
       window.generateVideoThumbnail = async function(videoUrl, postId) {
-        console.log("[GenerateThumbnail] Iniciando para:", videoUrl);
-        if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) { console.log("[GenerateThumbnail] Retornando do cache"); return VIDEO_THUMBNAILS_CACHE.get(videoUrl); }
-        return new Promise((resolve, reject) => {
-          const video = document.createElement("video"); video.crossOrigin = "anonymous"; video.preload = "metadata"; video.muted = true; video.playsInline = true;
-          console.log("[GenerateThumbnail] Video element criado");
-          const timeout = setTimeout(() => { console.error("[GenerateThumbnail] Timeout"); video.src = ""; reject(new Error("Timeout")); }, 10000);
-          video.onloadedmetadata = () => { console.log("[GenerateThumbnail] Metadata carregada, duração:", video.duration); const seekTime = Math.min(0.5, video.duration * 0.1); video.currentTime = seekTime; console.log("[GenerateThumbnail] Buscando frame em:", seekTime, "s"); };
-          video.onseeked = () => { console.log("[GenerateThumbnail] Frame encontrado, capturando..."); try { clearTimeout(timeout); const canvas = document.createElement("canvas"); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 360; const ctx = canvas.getContext("2d"); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); const thumbnailDataUrl = canvas.toDataURL("image/jpeg", 0.7); console.log("[GenerateThumbnail] Thumbnail gerada, tamanho:", thumbnailDataUrl.length, "bytes"); VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl); video.src = ""; resolve(thumbnailDataUrl); } catch (err) { clearTimeout(timeout); console.error("[GenerateThumbnail] Erro ao capturar:", err); reject(err); } };
-          video.onerror = (err) => { clearTimeout(timeout); console.error("[GenerateThumbnail] Erro ao carregar:", err, video.error); video.src = ""; reject(err); };
-          console.log("[GenerateThumbnail] Carregando URL:", videoUrl); video.src = videoUrl;
+        // URL inválida? não processa
+        if(!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === ''){
+          return null;
+        }
+        if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) { return VIDEO_THUMBNAILS_CACHE.get(videoUrl); }
+        const releaseVideo = (video) => {
+          try{ video.onerror = null; video.onseeked = null; video.onloadedmetadata = null; }catch(_){}
+          try{ video.pause?.(); }catch(_){ }
+          try{ video.removeAttribute('src'); video.load?.(); }catch(_){ }
+        };
+        return new Promise((resolve) => {
+          const video = document.createElement("video");
+          video.crossOrigin = "anonymous";
+          video.preload = "metadata";
+          video.muted = true;
+          video.playsInline = true;
+          const timeout = setTimeout(() => { releaseVideo(video); resolve(null); }, 10000);
+          video.onloadedmetadata = () => {
+            try{
+              const dur = Number(video.duration) || 0;
+              const seekTime = Math.min(0.5, Math.max(0, dur) * 0.1);
+              video.currentTime = seekTime;
+            }catch(_){ clearTimeout(timeout); releaseVideo(video); resolve(null); }
+          };
+          video.onseeked = () => {
+            try{
+              clearTimeout(timeout);
+              const canvas = document.createElement("canvas");
+              canvas.width = video.videoWidth || 640;
+              canvas.height = video.videoHeight || 360;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const thumbnailDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+              VIDEO_THUMBNAILS_CACHE.set(videoUrl, thumbnailDataUrl);
+              releaseVideo(video);
+              resolve(thumbnailDataUrl);
+            }catch(_){ clearTimeout(timeout); releaseVideo(video); resolve(null); }
+          };
+          video.onerror = () => { clearTimeout(timeout); releaseVideo(video); resolve(null); };
+          try{ video.src = videoUrl; }catch(_){ clearTimeout(timeout); releaseVideo(video); resolve(null); }
         });
       };
     }
     if(typeof applyVideoThumbnails === "undefined") {
       window.applyVideoThumbnails = function() {
         const videoContainers = document.querySelectorAll(".cal-thumb[data-video-url], .feed-item[data-video-url], .story-item[data-video-url], .relatorio-story-item[data-video-url]");
-        console.log("[Thumbnails] Encontrados", videoContainers.length, "vídeos para processar");
         videoContainers.forEach(async (container) => {
           const videoUrl = container.getAttribute("data-video-url"); const postId = container.getAttribute("data-id");
-          if (!videoUrl) { console.log("[Thumbnails] Container sem videoUrl:", container); return; }
-          if (container.querySelector("img")) { console.log("[Thumbnails] Já tem thumbnail:", videoUrl); return; }
-          console.log("[Thumbnails] Gerando thumbnail para:", videoUrl);
-          try { const thumbnailUrl = await window.generateVideoThumbnail(videoUrl, postId); console.log("[Thumbnails] Gerada:", thumbnailUrl.substring(0, 50) + "...");
-            if (container.getAttribute("data-video-url") === videoUrl) { const img = document.createElement("img"); img.src = thumbnailUrl; img.alt = "Video preview"; img.crossOrigin = "anonymous"; img.style.width = "100%"; img.style.height = "100%"; img.style.objectFit = "cover"; const span = container.querySelector("span"); if (span) span.remove(); container.appendChild(img); console.log("[Thumbnails] Thumbnail aplicada"); }
-          } catch (err) { console.error("[Thumbnails] Falha:", videoUrl, err); }
+          if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === '') { return; }
+          if (container.querySelector("img")) { return; }
+          const thumbnailUrl = await window.generateVideoThumbnail(videoUrl, postId);
+          if (!thumbnailUrl) { return; }
+          if (container.getAttribute("data-video-url") === videoUrl) {
+            const img = document.createElement("img");
+            img.src = thumbnailUrl;
+            img.alt = "Video preview";
+            img.crossOrigin = "anonymous";
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+            const span = container.querySelector("span"); if (span) span.remove();
+            container.appendChild(img);
+          }
         });
       };
     }
