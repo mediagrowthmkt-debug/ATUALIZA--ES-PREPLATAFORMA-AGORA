@@ -691,60 +691,88 @@
         if(leadsSubtitle) leadsSubtitle.textContent = `Leads captados em ${payload.labelMonth||''}`;
         if(leadsCount) leadsCount.textContent = leadCount;
         
-        // Se há dados detalhados dos leads, mostrar análise
-        if(leadsDataArray.length > 0) {
-          const leadsAnalysis = document.getElementById('relatorioLeadsAnalysis');
+        // Se há análise no payload (novo formato) ou dados detalhados, mostrar análise
+        const analysis = payload.leadsAnalysis;
+        if(analysis || leadsDataArray.length > 0) {
+          const leadsAnalysisEl = document.getElementById('relatorioLeadsAnalysis');
           const leadsPlatforms = document.getElementById('relatorioLeadsPlatforms');
           const leadsSources = document.getElementById('relatorioLeadsSources');
           const leadsQuestions = document.getElementById('relatorioLeadsQuestions');
           const leadsAIAnalysis = document.getElementById('relatorioLeadsAIAnalysis');
           
-          // Análise por plataforma
-          const platformStats = {};
-          leadsDataArray.forEach(lead => {
-            const platform = (lead.plataforma || 'Não especificado').toString().trim();
-            platformStats[platform] = (platformStats[platform] || 0) + 1;
-          });
+          // Usar análise do payload se disponível, senão calcular
+          let platforms, sources, topQuestions;
           
-          // Análise por fonte
-          const sourceStats = {};
-          leadsDataArray.forEach(lead => {
-            const source = (lead.source || 'Não especificado').toString().trim();
-            sourceStats[source] = (sourceStats[source] || 0) + 1;
-          });
-          
-          // Principais perguntas
-          const questionStats = {};
-          leadsDataArray.forEach(lead => {
-            const question = (lead.question || '').toString().trim();
-            if(question && question.length > 0) {
-              questionStats[question] = (questionStats[question] || 0) + 1;
-            }
-          });
-          const topQuestions = Object.entries(questionStats)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
+          if(analysis) {
+            // Usar dados pré-processados do payload
+            platforms = analysis.platforms || [];
+            sources = analysis.sources || [];
+            topQuestions = analysis.topQuestions || [];
+          } else {
+            // Fallback: calcular da leadsData (compatibilidade com payloads antigos)
+            const platformStats = {};
+            leadsDataArray.forEach(lead => {
+              const platform = (lead.plataforma || 'Não especificado').toString().trim();
+              platformStats[platform] = (platformStats[platform] || 0) + 1;
+            });
+            
+            const sourceStats = {};
+            leadsDataArray.forEach(lead => {
+              const source = (lead.source || 'Não especificado').toString().trim();
+              sourceStats[source] = (sourceStats[source] || 0) + 1;
+            });
+            
+            const questionStats = {};
+            leadsDataArray.forEach(lead => {
+              const question = (lead.question || '').toString().trim();
+              if(question && question.length > 0) {
+                questionStats[question] = (questionStats[question] || 0) + 1;
+              }
+            });
+            
+            platforms = Object.entries(platformStats)
+              .sort((a, b) => b[1] - a[1])
+              .map(([name, count]) => ({
+                name,
+                count,
+                percent: Math.round((count / leadCount) * 100),
+                emoji: name.toLowerCase().includes('google') ? '🔍' : 
+                       name.toLowerCase().includes('meta') ? '📘' : '📱'
+              }));
+            
+            sources = Object.entries(sourceStats)
+              .sort((a, b) => b[1] - a[1])
+              .map(([name, count]) => ({
+                name,
+                count,
+                percent: Math.round((count / leadCount) * 100),
+                emoji: '🌐'
+              }));
+            
+            topQuestions = Object.entries(questionStats)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([question, count]) => ({
+                question,
+                count,
+                percent: Math.round((count / leadCount) * 100)
+              }));
+          }
           
           // Renderizar plataformas
           if(leadsPlatforms) {
-            const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
-            leadsPlatforms.innerHTML = platformEntries.map(([platform, count]) => {
-              const percentage = Math.round((count / leadCount) * 100);
-              const icon = platform.toLowerCase().includes('google') ? '🔍' : 
-                           platform.toLowerCase().includes('meta') ? '📘' : '📱';
+            leadsPlatforms.innerHTML = platforms.map(p => {
               return `<div class="goal-pill" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.15);">
-                ${icon} ${platform}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
+                ${p.emoji} ${p.name}: <strong>${p.count}</strong> <span style="opacity: 0.7;">(${p.percent}%)</span>
               </div>`;
             }).join('');
           }
           
           // Renderizar fontes
           if(leadsSources) {
-            const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
-            leadsSources.innerHTML = sourceEntries.map(([source, count]) => {
-              const percentage = Math.round((count / leadCount) * 100);
+            leadsSources.innerHTML = sources.map(s => {
               return `<div class="goal-pill" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">
-                🌐 ${source}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
+                ${s.emoji} ${s.name}: <strong>${s.count}</strong> <span style="opacity: 0.7;">(${s.percent}%)</span>
               </div>`;
             }).join('');
           }
@@ -754,16 +782,15 @@
             if(topQuestions.length === 0) {
               leadsQuestions.innerHTML = '<div style="color: #94a3b8; font-size: 0.9rem; padding: 8px;">Nenhuma pergunta registrada</div>';
             } else {
-              leadsQuestions.innerHTML = topQuestions.map(([question, count], index) => {
-                const percentage = Math.round((count / leadCount) * 100);
+              leadsQuestions.innerHTML = topQuestions.map((q, index) => {
                 return `<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;">
                   <div style="display: flex; align-items: start; gap: 8px;">
                     <span style="color: #fbbf24; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">${index + 1}.</span>
                     <div style="flex: 1;">
-                      <div style="color: #e2e8f0; margin-bottom: 4px; line-height: 1.4;">${escapeHtml(question)}</div>
+                      <div style="color: #e2e8f0; margin-bottom: 4px; line-height: 1.4;">${escapeHtml(q.question)}</div>
                       <div style="color: #94a3b8; font-size: 0.85rem;">
-                        <strong style="color: #60a5fa;">${count}</strong> ${count === 1 ? 'pergunta' : 'perguntas'} 
-                        <span style="opacity: 0.7;">(${percentage}% dos leads)</span>
+                        <strong style="color: #60a5fa;">${q.count}</strong> ${q.count === 1 ? 'pergunta' : 'perguntas'} 
+                        <span style="opacity: 0.7;">(${q.percent}% dos leads)</span>
                       </div>
                     </div>
                   </div>
@@ -778,26 +805,29 @@
             const avgLeadsPerDay = (leadCount / 30).toFixed(1);
             insights.push(`📊 <strong>Volume:</strong> ${leadCount} leads gerados em ${payload.labelMonth||''}, com média de ${avgLeadsPerDay} leads/dia.`);
             
-            const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
-            if(platformEntries.length > 0) {
-              const topPlatform = platformEntries[0];
-              const topPlatformPercent = Math.round((topPlatform[1] / leadCount) * 100);
-              insights.push(`📱 <strong>Plataforma líder:</strong> ${topPlatform[0]} com ${topPlatform[1]} leads (${topPlatformPercent}% do total).`);
+            if(platforms.length > 0) {
+              const topPlatform = platforms[0];
+              insights.push(`📱 <strong>Plataforma líder:</strong> ${topPlatform.name} com ${topPlatform.count} leads (${topPlatform.percent}% do total).`);
               
-              if(platformEntries.length > 1 && topPlatformPercent >= 70) {
-                insights.push(`💡 <strong>Recomendação:</strong> Há uma forte concentração em ${topPlatform[0]}. Considere diversificar investimentos em outras plataformas.`);
+              if(platforms.length > 1 && topPlatform.percent >= 70) {
+                insights.push(`💡 <strong>Recomendação:</strong> Há uma forte concentração em ${topPlatform.name}. Considere diversificar investimentos em outras plataformas.`);
               }
             }
             
-            const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
-            if(sourceEntries.length > 0) {
-              const topSource = sourceEntries[0];
-              const topSourcePercent = Math.round((topSource[1] / leadCount) * 100);
-              insights.push(`🌐 <strong>Fonte principal:</strong> ${topSource[0]} com ${topSource[1]} leads (${topSourcePercent}% do total).`);
+            if(sources.length > 0) {
+              const topSource = sources[0];
+              insights.push(`🌐 <strong>Fonte principal:</strong> ${topSource.name} com ${topSource.count} leads (${topSource.percent}% do total).`);
             }
             
-            const leadsComPergunta = leadsDataArray.filter(l => (l.question || '').toString().trim().length > 0).length;
-            const engagementRate = Math.round((leadsComPergunta / leadCount) * 100);
+            // Calcular engajamento (leads com pergunta)
+            let leadsComPergunta = 0;
+            if(analysis && analysis.topQuestions) {
+              leadsComPergunta = analysis.topQuestions.reduce((sum, q) => sum + q.count, 0);
+            } else if(leadsDataArray.length > 0) {
+              leadsComPergunta = leadsDataArray.filter(l => (l.question || '').toString().trim().length > 0).length;
+            }
+            
+            const engagementRate = leadCount > 0 ? Math.round((leadsComPergunta / leadCount) * 100) : 0;
             insights.push(`💬 <strong>Engajamento:</strong> ${engagementRate}% dos leads deixaram perguntas (${leadsComPergunta} de ${leadCount}).`);
             
             if(engagementRate < 30) {
@@ -806,13 +836,13 @@
               insights.push(`✅ <strong>Excelente:</strong> Alta taxa de engajamento! Os leads estão demonstrando interesse genuíno.`);
             }
             
-            if(platformEntries.length >= 2) {
-              insights.push(`🎯 <strong>Diversificação:</strong> Leads provenientes de ${platformEntries.length} plataformas diferentes, demonstrando boa distribuição de canais.`);
+            if(platforms.length >= 2) {
+              insights.push(`🎯 <strong>Diversificação:</strong> Leads provenientes de ${platforms.length} plataformas diferentes, demonstrando boa distribuição de canais.`);
             }
             
             if(topQuestions.length > 0) {
               const topQuestion = topQuestions[0];
-              insights.push(`❓ <strong>Principal dúvida:</strong> "${topQuestion[0]}" apareceu ${topQuestion[1]} ${topQuestion[1] === 1 ? 'vez' : 'vezes'}. Considere criar conteúdo ou FAQ abordando este tema.`);
+              insights.push(`❓ <strong>Principal dúvida:</strong> "${topQuestion.question}" apareceu ${topQuestion.count} ${topQuestion.count === 1 ? 'vez' : 'vezes'}. Considere criar conteúdo ou FAQ abordando este tema.`);
             }
             
             leadsAIAnalysis.innerHTML = insights.map(insight => 
@@ -820,10 +850,10 @@
             ).join('');
           }
           
-          if(leadsAnalysis) leadsAnalysis.style.display = 'block';
-          
-          const platformCount = Object.keys(platformStats).length;
-          const sourceCount = Object.keys(sourceStats).length;
+          if(leadsAnalysisEl) leadsAnalysisEl.style.display = 'block';
+
+          const platformCount = Array.isArray(platforms) ? platforms.length : 0;
+          const sourceCount = Array.isArray(sources) ? sources.length : 0;
           if(leadsDesc) leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${payload.labelMonth||''} através de ${platformCount} plataforma${platformCount === 1 ? '' : 's'} e ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} diferente${sourceCount === 1 ? '' : 's'}.`;
         } else {
           if(leadsDesc) leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${payload.labelMonth||''}.`;
@@ -890,21 +920,24 @@
       let resumo = `📊 RESUMO DO RELATÓRIO - ${mesLabel.toUpperCase()}\n`;
       resumo += `${'='.repeat(60)}\n\n`;
       
-      // Stories
-      const storiesCount = document.querySelectorAll('#relatorioStoriesGrid .story-item').length;
+      // Stories e Posts - USAR DADOS DO PAYLOAD ao invés do DOM
+      const allPosts = Array.isArray(payload.posts) ? payload.posts : [];
+      const storiesCount = allPosts.filter(p => p.target === 'stories').length;
+      const postsCount = allPosts.length - storiesCount;
+      
       resumo += `📸 STORIES PUBLICADOS\n`;
       resumo += `   Quantidade: ${storiesCount} ${storiesCount === 1 ? 'story' : 'stories'}\n\n`;
       
-      // Posts
-      const postsCount = document.querySelectorAll('#relatorioPostsGrid .story-item').length;
       resumo += `📱 POSTS DE FEED PUBLICADOS\n`;
       resumo += `   Quantidade: ${postsCount} ${postsCount === 1 ? 'post' : 'posts'}\n\n`;
       
-      // Objetivos (Planejamento)
-      const goalsDone = document.querySelectorAll('#relatorioGoalsDone .goal-card').length;
-      const goalsProgress = document.querySelectorAll('#relatorioGoalsProgress .goal-card').length;
-      const goalsTodo = document.querySelectorAll('#relatorioGoalsTodo .goal-card').length;
-      const goalsTotal = goalsDone + goalsProgress + goalsTodo;
+      // Objetivos (Planejamento) - usar payload
+      const goals = payload.goals || {};
+      const goalsSummary = goals.summary || {};
+      const goalsTotal = goalsSummary.total || 0;
+      const goalsDone = goalsSummary.done || 0;
+      const goalsProgress = goalsSummary.progress || 0;
+      const goalsTodo = goalsSummary.todo || 0;
       
       if(goalsTotal > 0) {
         resumo += `🎯 OBJETIVOS DO MÊS (PLANEJAMENTO)\n`;
@@ -920,11 +953,12 @@
         resumo += `\n`;
       }
       
-      // Metas
-      const metasAchieved = document.querySelectorAll('#relatorioMetasAchieved .goal-card').length;
-      const metasProgress = document.querySelectorAll('#relatorioMetasProgress .goal-card').length;
-      const metasMissing = document.querySelectorAll('#relatorioMetasMissing .goal-card').length;
-      const metasTotal = metasAchieved + metasProgress + metasMissing;
+      // Metas - usar payload
+      const metas = Array.isArray(payload.metas) ? payload.metas : [];
+      const metasAchieved = metas.filter(m => m.status === 'achieved').length;
+      const metasProgress = metas.filter(m => m.status === 'progress').length;
+      const metasMissing = metas.filter(m => m.status === 'missing').length;
+      const metasTotal = metas.length;
       
       if(metasTotal > 0) {
         resumo += `📈 METAS DO MÊS\n`;
@@ -940,56 +974,46 @@
         resumo += `\n`;
       }
       
-      // Leads
-      const leadsCountEl = document.getElementById('relatorioLeadsCount');
-      const leadsCount = leadsCountEl ? parseInt(leadsCountEl.textContent) || 0 : 0;
+      // Leads - usar payload.leadsAnalysis
+      const leadsCount = payload.leadsCount || 0;
       
       if(leadsCount > 0) {
         resumo += `🎯 LEADS GERADOS\n`;
         resumo += `   Total de leads: ${leadsCount}\n`;
         
+        // Usar análise do payload se disponível
+        const analysis = payload.leadsAnalysis || {};
+        
         // Plataformas
-        const platformsHTML = document.getElementById('relatorioLeadsPlatforms');
-        if(platformsHTML && platformsHTML.innerHTML.trim()) {
+        if(analysis.platforms && analysis.platforms.length > 0) {
           resumo += `\n   Por Plataforma:\n`;
-          const platforms = platformsHTML.querySelectorAll('.goal-pill');
-          platforms.forEach(pill => {
-            const text = pill.textContent.trim();
-            resumo += `   ${text}\n`;
+          analysis.platforms.forEach(p => {
+            resumo += `   ${p.emoji} ${p.name}: ${p.count} (${p.percent}%)\n`;
           });
         }
         
         // Fontes
-        const sourcesHTML = document.getElementById('relatorioLeadsSources');
-        if(sourcesHTML && sourcesHTML.innerHTML.trim()) {
+        if(analysis.sources && analysis.sources.length > 0) {
           resumo += `\n   Por Fonte:\n`;
-          const sources = sourcesHTML.querySelectorAll('.goal-pill');
-          sources.forEach(pill => {
-            const text = pill.textContent.trim();
-            resumo += `   ${text}\n`;
+          analysis.sources.forEach(s => {
+            resumo += `   ${s.emoji} ${s.name}: ${s.count} (${s.percent}%)\n`;
           });
         }
         
         // Top perguntas
-        const questionsHTML = document.getElementById('relatorioLeadsQuestions');
-        if(questionsHTML && questionsHTML.innerHTML.trim()) {
-          const questions = questionsHTML.querySelectorAll('div[style*="background"]');
-          if(questions.length > 0) {
-            resumo += `\n   Principais Perguntas:\n`;
-            questions.forEach((q, idx) => {
-              const questionText = q.querySelector('div[style*="color: #e2e8f0"]')?.textContent?.trim();
-              if(questionText) {
-                resumo += `   ${idx + 1}. ${questionText}\n`;
-              }
-            });
-          }
+        if(analysis.topQuestions && analysis.topQuestions.length > 0) {
+          resumo += `\n   Principais Perguntas:\n`;
+          analysis.topQuestions.forEach((q, idx) => {
+            resumo += `   ${idx + 1}. ${q.question} (${q.count} ${q.count === 1 ? 'lead' : 'leads'})\n`;
+          });
         }
         
         resumo += `\n`;
       }
       
-      // Redes trabalhadas
-      const redesCount = document.querySelectorAll('#relatorioRedesGrid .macro-social-item').length;
+      // Redes trabalhadas - usar payload
+      const redes = Array.isArray(payload.redes) ? payload.redes : [];
+      const redesCount = redes.length;
       if(redesCount > 0) {
         resumo += `🔗 REDES TRABALHADAS\n`;
         resumo += `   Quantidade: ${redesCount} ${redesCount === 1 ? 'rede' : 'redes'} com link configurado\n\n`;

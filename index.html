@@ -14382,7 +14382,11 @@ async function sendIAQuestion(){
   loadRelatorioGoalsNoteLocal(mesISO);
   await renderRelatorioLeads(mesISO); // Aguarda buscar leads do Firestore
   renderRelatorioRedes(mesISO);
-  gerarResumoTexto(mesISO); // Gerar resumo em texto
+  
+  // Aguardar um momento para o DOM ser atualizado
+  setTimeout(() => {
+    gerarResumoTexto(mesISO); // Gerar resumo em texto após renderizar tudo
+  }, 300);
   
       
       if(relatorioPreview){
@@ -14516,9 +14520,31 @@ async function sendIAQuestion(){
       const tenant = clientKey;
       console.log('[buildMonthlyReportData] Total de POSTS:', Array.isArray(POSTS) ? POSTS.length : 0);
       
-      const relevantPosts = filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant)
+      let relevantPosts = filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant)
         .filter(p=> String(p.dateISO||'').startsWith(mesISO))
         .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+
+      // Se não temos posts em memória (por exemplo, usuário não abriu a aba de Posts), buscar direto do Firestore
+      if(relevantPosts.length === 0) {
+        try {
+          console.log('[buildMonthlyReportData] POSTS vazios em memória, buscando do Firestore...');
+          const uid = auth?.currentUser?.uid;
+          if(uid) {
+            const snap = await getDocs(collection(db, 'usuarios', uid, 'posts'));
+            const all = snap.docs.map(d => ({ id: d.id, ...(d.data()||{}) }));
+            console.log('[buildMonthlyReportData] Posts no Firestore:', all.length);
+            const filteredByTenant = filterPostsByClient(all, tenant);
+            relevantPosts = filteredByTenant
+              .filter(p=> String(p.dateISO||'').startsWith(mesISO))
+              .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
+            console.log('[buildMonthlyReportData] Posts relevantes após Firestore:', relevantPosts.length);
+          } else {
+            console.warn('[buildMonthlyReportData] Sem uid para buscar posts do Firestore');
+          }
+        } catch(err) {
+          console.error('[buildMonthlyReportData] Erro ao buscar posts do Firestore:', err);
+        }
+      }
       
       console.log('[buildMonthlyReportData] Posts relevantes (após filtro):', relevantPosts.length);
       console.log('[buildMonthlyReportData] Stories:', relevantPosts.filter(p => p.target === 'stories').length);
@@ -14596,6 +14622,7 @@ async function sendIAQuestion(){
       // Buscar leads diretamente do Firestore (não depende de variável global)
       let leadsCount = 0;
       let leadsData = [];
+      let leadsAnalysis = null;
       try{
         console.log('[buildMonthlyReportData] Buscando leads do Firestore...');
         const uid = auth?.currentUser?.uid;
@@ -14648,6 +14675,62 @@ async function sendIAQuestion(){
           if(leadsData.length > 0) {
             console.log('[buildMonthlyReportData] ✅ Exemplo do primeiro lead:', leadsData[0]);
           }
+          
+          // Análise dos leads para incluir no payload
+          const platformStats = {};
+          const sourceStats = {};
+          const questionStats = {};
+          
+          leadsData.forEach(lead => {
+            // Plataformas
+            const platform = (lead.plataforma || 'Não especificado').toString().trim();
+            platformStats[platform] = (platformStats[platform] || 0) + 1;
+            
+            // Fontes
+            const source = (lead.source || 'Não especificado').toString().trim();
+            sourceStats[source] = (sourceStats[source] || 0) + 1;
+            
+            // Perguntas
+            const question = (lead.question || '').toString().trim();
+            if(question && question.length > 0) {
+              questionStats[question] = (questionStats[question] || 0) + 1;
+            }
+          });
+          
+          // Formatar análise para o payload
+          leadsAnalysis = {
+            platforms: Object.entries(platformStats)
+              .sort((a, b) => b[1] - a[1])
+              .map(([name, count]) => ({
+                name,
+                count,
+                percent: Math.round((count / leadsCount) * 100),
+                emoji: name.toLowerCase().includes('google') ? '🔍' : 
+                       name.toLowerCase().includes('meta') ? '📘' : '📱'
+              })),
+            sources: Object.entries(sourceStats)
+              .sort((a, b) => b[1] - a[1])
+              .map(([name, count]) => ({
+                name,
+                count,
+                percent: Math.round((count / leadsCount) * 100),
+                emoji: '🌐'
+              })),
+            topQuestions: Object.entries(questionStats)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([question, count]) => ({
+                question,
+                count,
+                percent: Math.round((count / leadsCount) * 100)
+              }))
+          };
+          
+          console.log('[buildMonthlyReportData] ✅ Análise dos leads preparada:', {
+            platforms: leadsAnalysis.platforms.length,
+            sources: leadsAnalysis.sources.length,
+            topQuestions: leadsAnalysis.topQuestions.length
+          });
         } else {
           console.warn('[buildMonthlyReportData] ⚠️ Não foi possível buscar leads - uid:', uid, 'clientKey:', clientKey);
         }
@@ -14655,7 +14738,7 @@ async function sendIAQuestion(){
         console.error('[buildMonthlyReportData] ❌ Erro ao buscar leads do Firestore:', err);
       }
       
-      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social, goals, leadsCount, leadsData };
+      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social, goals, leadsCount, leadsData, leadsAnalysis };
     }
 
     // Cria/atualiza um documento de compartilhamento público e retorna o token
