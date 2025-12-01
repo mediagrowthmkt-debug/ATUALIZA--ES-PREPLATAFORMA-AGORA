@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Localização da Foto de Perfil</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #fff;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.02); }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .results {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .result-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    .result-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #a78bfa;
+    }
+    pre {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .photo-preview {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .photo-preview img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 50%;
+      border: 3px solid #667eea;
+    }
+    .status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .status.success { background: #10b981; color: white; }
+    .status.error { background: #ef4444; color: white; }
+    .status.warning { background: #f59e0b; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Localizar Foto de Perfil no Firestore</h1>
+    
+    <div class="input-group">
+      <label>UID do Usuário (Firebase Auth UID)</label>
+      <input type="text" id="uidInput" placeholder="Ex: abc123xyz..." />
+    </div>
+    
+    <div class="input-group">
+      <label>Email (para buscar clientKey)</label>
+      <input type="email" id="emailInput" placeholder="Ex: empresa@email.com" />
+    </div>
+    
+    <button id="searchBtn">🔍 Buscar Foto</button>
+    
+    <div id="results" class="results" style="display:none;"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "671167442487",
+      appId: "1:671167442487:web:c9b750820e647fb8f49b01",
+      measurementId: "G-EMYKTZPQ9Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const uidInput = document.getElementById('uidInput');
+    const emailInput = document.getElementById('emailInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsDiv = document.getElementById('results');
+
+    // Auto-login
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        const provider = new GoogleAuthProvider();
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (err) {
+          console.error('Erro no login:', err);
+        }
+      }
+    });
+
+    searchBtn.onclick = async () => {
+      const uid = uidInput.value.trim();
+      const email = emailInput.value.trim();
+
+      if (!uid) {
+        alert('Digite o UID do usuário');
+        return;
+      }
+
+      searchBtn.disabled = true;
+      searchBtn.textContent = '🔍 Buscando...';
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<p>Buscando dados...</p>';
+
+      try {
+        let html = '';
+        let photoUrl = null;
+
+        // 1. Busca em /usuarios/{uid} (NÃO É USADO PELO DASHBOARD, mas vamos verificar)
+        html += '<div class="result-section">';
+        html += '<div class="result-title">📁 /usuarios/' + uid + ' (documento raiz - NÃO USADO)</div>';
+        
+        const userDocRef = doc(db, 'usuarios', uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          html += '<div class="status warning">⚠️ Documento encontrado mas NÃO é usado pelo dashboard</div>';
+          html += '<pre>' + JSON.stringify(userData, null, 2) + '</pre>';
+        } else {
+          html += '<div class="status error">❌ Documento não existe</div>';
+        }
+        html += '</div>';
+
+        // 2. Busca em /usuarios/{uid}/clients/{clientKey} (LOCALIZAÇÃO CORRETA DO DASHBOARD)
+        if (email) {
+          const clientKey = email.split('@')[0]; // Ex: brunogestormktp@gmail.com → brunogestormktp
+          const safeKey = clientKey.replace(/[^\w-]/g, '_'); // Remove caracteres especiais
+          
+          html += '<div class="result-section">';
+          html += '<div class="result-title">📁 /usuarios/' + uid + '/clients/' + safeKey + ' (DASHBOARD LOCATION)</div>';
+          
+          const clientDocRef = doc(db, 'usuarios', uid, 'clients', safeKey);
+          const clientDocSnap = await getDoc(clientDocRef);
+          
+          if (clientDocSnap.exists()) {
+            const clientData = clientDocSnap.data();
+            html += '<div class="status success">✅ Documento encontrado (CLIENT_PROFILE)</div>';
+            html += '<pre>' + JSON.stringify(clientData, null, 2) + '</pre>';
+            
+            if (clientData.profileLogoUrl) {
+              html += '<div class="status success">✅ profileLogoUrl encontrado! (Este é usado no #profileAvatarImg)</div>';
+              if (!photoUrl) photoUrl = clientData.profileLogoUrl;
+            } else {
+              html += '<div class="status error">❌ Nenhum campo profileLogoUrl encontrado</div>';
+            }
+          } else {
+            html += '<div class="status error">❌ Documento não existe</div>';
+            
+            // Tenta com clientKey sem conversão
+            if (safeKey !== clientKey) {
+              html += '<p style="margin-top:10px;">Tentando sem conversão...</p>';
+              const clientDocRef2 = doc(db, 'usuarios', uid, 'clients', clientKey);
+              const clientDocSnap2 = await getDoc(clientDocRef2);
+              
+              if (clientDocSnap2.exists()) {
+                const clientData2 = clientDocSnap2.data();
+                html += '<div class="status success">✅ Encontrado em /usuarios/' + uid + '/clients/' + clientKey + '</div>';
+                html += '<pre>' + JSON.stringify(clientData2, null, 2) + '</pre>';
+                
+                if (clientData2.profileLogoUrl && !photoUrl) {
+                  photoUrl = clientData2.profileLogoUrl;
+                }
+              }
+            }
+          }
+          html += '</div>';
+        }
+
+        // 3. Lista todas as subcoleções clients
+        html += '<div class="result-section">';
+        html += '<div class="result-title">📂 Todas as subcoleções /usuarios/' + uid + '/clients/*</div>';
+        
+        try {
+          const clientsRef = collection(db, 'usuarios', uid, 'clients');
+          const clientsSnap = await getDocs(clientsRef);
+          
+          if (clientsSnap.empty) {
+            html += '<div class="status warning">⚠️ Nenhuma subcoleção encontrada</div>';
+          } else {
+            html += '<div class="status success">✅ ' + clientsSnap.size + ' documento(s) encontrado(s)</div>';
+            clientsSnap.forEach(doc => {
+              html += '<p style="margin:10px 0;"><strong>ID:</strong> ' + doc.id + '</p>';
+              const data = doc.data();
+              html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+              
+              if (data.profileLogoUrl && !photoUrl) {
+                photoUrl = data.profileLogoUrl;
+              }
+            });
+          }
+        } catch (err) {
+          html += '<div class="status error">❌ Erro ao listar subcoleções: ' + err.message + '</div>';
+        }
+        html += '</div>';
+
+        // 4. Preview da foto
+        if (photoUrl) {
+          html += '<div class="result-section">';
+          html += '<div class="result-title">🖼️ Preview da Foto</div>';
+          html += '<div class="photo-preview">';
+          html += '<img src="' + photoUrl + '" alt="Foto de Perfil" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><text y=%2250%%22 font-size=%2240%22>❌</text></svg>\'"/>';
+          html += '<p style="margin-top:10px;word-break:break-all;color:#94a3b8;">' + photoUrl + '</p>';
+          html += '</div>';
+          html += '</div>';
+        }
+
+        resultsDiv.innerHTML = html;
+
+      } catch (err) {
+        resultsDiv.innerHTML = '<div class="status error">❌ Erro: ' + err.message + '</div>';
+        console.error(err);
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = '🔍 Buscar Foto';
+      }
+    };
+  </script>
+</body>
+</html>

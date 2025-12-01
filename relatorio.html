@@ -4,6 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Relatório do mês</title>
+  
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+  <meta property="og:title" content="📊 Relatório Mensal - MediaGrowth">
+  <meta property="og:description" content="Confira o relatório completo com posts, stories, objetivos, metas e leads gerados durante o mês.">
+  <meta property="og:image" content="">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Relatório Mensal - Resumo de Performance">
+  <meta property="og:site_name" content="MediaGrowth Dashboard">
+  <meta property="og:locale" content="pt_BR">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:title" content="📊 Relatório Mensal - MediaGrowth">
+  <meta name="twitter:description" content="Confira o relatório completo com posts, stories, objetivos, metas e leads gerados durante o mês.">
+  <meta name="twitter:image" content="">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  
   <style>
     :root{ --panel:#111936; --shell-border:rgba(255,255,255,.12); }
     html,body{margin:0;padding:0;background:#0b1020;color:#e2e8f0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";overflow-x:hidden;min-height:100vh}
@@ -198,6 +221,52 @@
       <p class="relatorio-desc" id="relatorioMetasDesc"></p>
     </div>
 
+    <!-- Leads Gerados -->
+    <div class="relatorio-container" id="relatorioLeadsSection" style="display:none">
+      <div class="relatorio-header">
+        <h2>🎯 Leads Gerados</h2>
+        <p class="relatorio-subtitle" id="relatorioLeadsSubtitle"></p>
+      </div>
+      <div class="relatorio-preview">
+        <div class="relatorio-preview-meta" style="justify-content: center; font-size: 1.4rem; padding: 20px;">
+          <span class="meta-item" style="color: #86efac; font-weight: 900; font-size: 2rem;">
+            📊 <span id="relatorioLeadsCount">0</span> leads
+          </span>
+        </div>
+      </div>
+      
+      <!-- Análise Detalhada -->
+      <div class="relatorio-leads-analysis" id="relatorioLeadsAnalysis" style="display:none; margin-top: 20px;">
+        
+        <!-- Por Plataforma -->
+        <div class="relatorio-container" style="margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">📱 Por Plataforma</h3>
+          <div class="relatorio-goals-summary" id="relatorioLeadsPlatforms"></div>
+        </div>
+        
+        <!-- Por Fonte -->
+        <div class="relatorio-container" style="margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">🌐 Por Fonte</h3>
+          <div class="relatorio-goals-summary" id="relatorioLeadsSources"></div>
+        </div>
+        
+        <!-- Principais Perguntas -->
+        <div class="relatorio-container" style="margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">💬 Principais Perguntas</h3>
+          <div id="relatorioLeadsQuestions" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+        
+        <!-- Análise IA -->
+        <div class="relatorio-container" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(139, 92, 246, 0.3);">
+          <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #c4b5fd;">🤖 Análise Inteligente</h3>
+          <div id="relatorioLeadsAIAnalysis" style="color: #e9d5ff; line-height: 1.6; font-size: 0.95rem;"></div>
+        </div>
+        
+      </div>
+      
+      <p class="relatorio-desc" id="relatorioLeadsDesc"></p>
+    </div>
+
     <!-- Redes conectadas -->
     <div class="relatorio-container" id="relatorioRedesSection" style="display:none">
       <div class="relatorio-header">
@@ -207,6 +276,37 @@
       <div class="macro-social-grid" id="relatorioRedesGrid"></div>
       <p class="relatorio-desc" id="relatorioRedesDesc"></p>
     </div>
+    
+    <!-- Resumo em Texto -->
+    <div class="relatorio-container" id="relatorioResumoTextoSection" style="display:none; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3);">
+      <div class="relatorio-header">
+        <h2>📋 Resumo em Texto</h2>
+        <p class="relatorio-subtitle">Copie este resumo para compartilhar facilmente</p>
+      </div>
+      
+      <div style="position: relative;">
+        <button type="button" id="btnCopiarResumo" class="btn secondary small" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4);">
+          📋 Copiar Texto
+        </button>
+        
+        <div id="relatorioResumoTextoContent" style="
+          background: rgba(15, 23, 42, 0.8);
+          border: 1px solid rgba(71, 85, 105, 0.4);
+          border-radius: 8px;
+          padding: 24px;
+          color: #e2e8f0;
+          font-family: 'Courier New', monospace;
+          font-size: 0.95rem;
+          line-height: 1.8;
+          white-space: pre-wrap;
+          overflow-x: auto;
+          min-height: 200px;
+        ">
+          <!-- Será preenchido dinamicamente -->
+        </div>
+      </div>
+    </div>
+    
   </div>
 
   <script type="module">
@@ -233,6 +333,22 @@
   const monthLabel = (()=>{ try{ const [a,m]=mesISO.split('-'); const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return `${nomes[(+m||1)-1]} ${a}` }catch{ return mesISO } })();
   document.getElementById('reportMonth').textContent = monthLabel || '';
   document.getElementById('relatorioHeaderSubtitle').textContent = monthLabel ? `Resumo do mês ${monthLabel}` : '';
+  
+  // Atualizar meta tags Open Graph dinamicamente
+  const currentUrl = window.location.href;
+  document.querySelector('meta[property="og:url"]').setAttribute('content', currentUrl);
+  document.querySelector('meta[name="twitter:url"]').setAttribute('content', currentUrl);
+  
+  if(monthLabel) {
+    const ogTitle = `📊 Relatório de ${monthLabel} - MediaGrowth`;
+    const ogDesc = `Confira o relatório completo de ${monthLabel} com posts, stories, objetivos, metas e leads gerados.`;
+    
+    document.title = ogTitle;
+    document.querySelector('meta[property="og:title"]').setAttribute('content', ogTitle);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', ogDesc);
+    document.querySelector('meta[name="twitter:title"]').setAttribute('content', ogTitle);
+    document.querySelector('meta[name="twitter:description"]').setAttribute('content', ogDesc);
+  }
 
   // App/Auth/DB
     const app = getApps()[0] || initializeApp(firebaseConfig);
@@ -330,8 +446,11 @@
         console.log('[Relatorio] Payload carregado:', {
           hasStories: Array.isArray(payload.posts) ? payload.posts.filter(p => p.target === 'stories').length : 0,
           hasPosts: Array.isArray(payload.posts) ? payload.posts.filter(p => p.target === 'feed').length : 0,
-          totalPosts: Array.isArray(payload.posts) ? payload.posts.length : 0
+          totalPosts: Array.isArray(payload.posts) ? payload.posts.length : 0,
+          leadsCount: payload.leadsCount || 0,
+          leadsDataCount: Array.isArray(payload.leadsData) ? payload.leadsData.length : 0
         });
+        console.log('[Relatorio] leadsData preview:', Array.isArray(payload.leadsData) && payload.leadsData.length > 0 ? payload.leadsData[0] : 'nenhum lead');
         renderFromPayload(payload);
       }catch(err){
         console.error('[Relatorio] Erro ao carregar link público:', err);
@@ -411,6 +530,54 @@
         console.log('[Relatorio] Calendar notes carregadas:', notes.length);
       }
 
+      // 4) Leads por cliente (filtrados pelo mês)
+      let leads = [];
+      if(TENANT && mesISO){
+        try{
+          const leadsSnap = await getDocs(collection(db,'usuarios', uid, 'clients', TENANT, 'leads'));
+          const allLeads = leadsSnap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+          
+          // Filtrar leads pelo mês de criação
+          leads = allLeads.filter(lead => {
+            if(!lead.createdAt) return false;
+            
+            // Converter createdAt para data
+            let leadDate;
+            if(typeof lead.createdAt.toMillis === 'function'){
+              leadDate = new Date(lead.createdAt.toMillis());
+            } else if(typeof lead.createdAt.toDate === 'function'){
+              leadDate = lead.createdAt.toDate();
+            } else if(lead.createdAt.seconds) {
+              leadDate = new Date(lead.createdAt.seconds * 1000);
+            } else if(typeof lead.createdAt === 'number'){
+              leadDate = new Date(lead.createdAt);
+            } else {
+              return false;
+            }
+            
+            // Formatar data no formato YYYY-MM
+            const year = leadDate.getFullYear();
+            const month = String(leadDate.getMonth() + 1).padStart(2, '0');
+            const leadMonthISO = `${year}-${month}`;
+            
+            return leadMonthISO === mesISO;
+          });
+          
+          console.log('[Relatorio] Total de leads no Firestore:', allLeads.length);
+          console.log('[Relatorio] Leads filtrados para o mês', mesISO, ':', leads.length);
+          if(leads.length > 0) {
+            console.log('[Relatorio] Primeiro lead (exemplo):', {
+              name: leads[0].name,
+              plataforma: leads[0].plataforma,
+              source: leads[0].source,
+              question: leads[0].question
+            });
+          }
+        }catch(err){
+          console.warn('[Relatorio] Erro ao carregar leads:', err);
+        }
+      }
+
       const payload = {
         labelMonth: monthLabel,
         metas: (METAS||[]).filter(m=>m && m.ativo!==false).map(m=>{ const cur=(m.meses&&m.meses[mesISO])||{p:'',r:''}; return { descricao:m.descricao||'', unidade:m.unidade||'', direcao:m.direcao||'up', planned: normalizeMetaNumber(cur.p), realized: normalizeMetaNumber(cur.r) }; }),
@@ -424,17 +591,31 @@
           mediaUrls: Array.isArray(p.mediaUrls)?p.mediaUrls.slice(0,4):[]
         })),
         notes,
-        socialLinks: SOCIAL_LINKS||{}
+        socialLinks: SOCIAL_LINKS||{},
+        leadsCount: leads.length,
+        leadsData: leads.map(lead => ({
+          name: lead.name || '',
+          email: lead.email || '',
+          phone: lead.phone || '',
+          question: lead.question || '',
+          plataforma: lead.plataforma || 'Não especificado',
+          source: lead.source || 'Não especificado'
+        }))
       };
       
       console.log('[Relatorio] Payload preparado:', {
         metas: payload.metas.length,
         posts: payload.posts.length,
         stories: payload.posts.filter(p => p.target === 'stories').length,
-        feed: payload.posts.filter(p => (p.target||'feed') === 'feed').length
+        feed: payload.posts.filter(p => (p.target||'feed') === 'feed').length,
+        leadsCount: payload.leadsCount,
+        leadsData: payload.leadsData.length
       });
       
       renderReportSections(payload);
+      
+      // Gerar preview para redes sociais
+      setTimeout(() => generateSocialPreview(payload), 1000);
     }
     function renderReportSections(payload){
       console.log('[Relatorio] renderReportSections chamado - payload:', {
@@ -443,7 +624,8 @@
         hasMetas: Array.isArray(payload.metas),
         metasLength: Array.isArray(payload.metas) ? payload.metas.length : 0,
         hasGoals: payload.goals !== null && payload.goals !== undefined,
-        labelMonth: payload.labelMonth
+        labelMonth: payload.labelMonth,
+        leadsCount: payload.leadsCount || 0
       });
       
       // Stories + Posts (feed)
@@ -490,6 +672,160 @@
         metasSection.style.display='none';
       }
 
+      // Leads Gerados
+      const leadsSection = document.getElementById('relatorioLeadsSection');
+      const leadsSubtitle = document.getElementById('relatorioLeadsSubtitle');
+      const leadsCount = document.getElementById('relatorioLeadsCount');
+      const leadsDesc = document.getElementById('relatorioLeadsDesc');
+      const leadCount = typeof payload.leadsCount === 'number' ? payload.leadsCount : 0;
+      const leadsDataArray = Array.isArray(payload.leadsData) ? payload.leadsData : [];
+      
+      if(leadCount > 0 || TENANT){
+        leadsSection.style.display='block';
+        if(leadsSubtitle) leadsSubtitle.textContent = `Leads captados em ${payload.labelMonth||''}`;
+        if(leadsCount) leadsCount.textContent = leadCount;
+        
+        // Se há dados detalhados dos leads, mostrar análise
+        if(leadsDataArray.length > 0) {
+          const leadsAnalysis = document.getElementById('relatorioLeadsAnalysis');
+          const leadsPlatforms = document.getElementById('relatorioLeadsPlatforms');
+          const leadsSources = document.getElementById('relatorioLeadsSources');
+          const leadsQuestions = document.getElementById('relatorioLeadsQuestions');
+          const leadsAIAnalysis = document.getElementById('relatorioLeadsAIAnalysis');
+          
+          // Análise por plataforma
+          const platformStats = {};
+          leadsDataArray.forEach(lead => {
+            const platform = (lead.plataforma || 'Não especificado').toString().trim();
+            platformStats[platform] = (platformStats[platform] || 0) + 1;
+          });
+          
+          // Análise por fonte
+          const sourceStats = {};
+          leadsDataArray.forEach(lead => {
+            const source = (lead.source || 'Não especificado').toString().trim();
+            sourceStats[source] = (sourceStats[source] || 0) + 1;
+          });
+          
+          // Principais perguntas
+          const questionStats = {};
+          leadsDataArray.forEach(lead => {
+            const question = (lead.question || '').toString().trim();
+            if(question && question.length > 0) {
+              questionStats[question] = (questionStats[question] || 0) + 1;
+            }
+          });
+          const topQuestions = Object.entries(questionStats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+          
+          // Renderizar plataformas
+          if(leadsPlatforms) {
+            const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
+            leadsPlatforms.innerHTML = platformEntries.map(([platform, count]) => {
+              const percentage = Math.round((count / leadCount) * 100);
+              const icon = platform.toLowerCase().includes('google') ? '🔍' : 
+                           platform.toLowerCase().includes('meta') ? '📘' : '📱';
+              return `<div class="goal-pill" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.15);">
+                ${icon} ${platform}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
+              </div>`;
+            }).join('');
+          }
+          
+          // Renderizar fontes
+          if(leadsSources) {
+            const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
+            leadsSources.innerHTML = sourceEntries.map(([source, count]) => {
+              const percentage = Math.round((count / leadCount) * 100);
+              return `<div class="goal-pill" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">
+                🌐 ${source}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
+              </div>`;
+            }).join('');
+          }
+          
+          // Renderizar perguntas
+          if(leadsQuestions) {
+            if(topQuestions.length === 0) {
+              leadsQuestions.innerHTML = '<div style="color: #94a3b8; font-size: 0.9rem; padding: 8px;">Nenhuma pergunta registrada</div>';
+            } else {
+              leadsQuestions.innerHTML = topQuestions.map(([question, count], index) => {
+                const percentage = Math.round((count / leadCount) * 100);
+                return `<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;">
+                  <div style="display: flex; align-items: start; gap: 8px;">
+                    <span style="color: #fbbf24; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">${index + 1}.</span>
+                    <div style="flex: 1;">
+                      <div style="color: #e2e8f0; margin-bottom: 4px; line-height: 1.4;">${escapeHtml(question)}</div>
+                      <div style="color: #94a3b8; font-size: 0.85rem;">
+                        <strong style="color: #60a5fa;">${count}</strong> ${count === 1 ? 'pergunta' : 'perguntas'} 
+                        <span style="opacity: 0.7;">(${percentage}% dos leads)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+              }).join('');
+            }
+          }
+          
+          // IA Insights
+          if(leadsAIAnalysis) {
+            const insights = [];
+            const avgLeadsPerDay = (leadCount / 30).toFixed(1);
+            insights.push(`📊 <strong>Volume:</strong> ${leadCount} leads gerados em ${payload.labelMonth||''}, com média de ${avgLeadsPerDay} leads/dia.`);
+            
+            const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
+            if(platformEntries.length > 0) {
+              const topPlatform = platformEntries[0];
+              const topPlatformPercent = Math.round((topPlatform[1] / leadCount) * 100);
+              insights.push(`📱 <strong>Plataforma líder:</strong> ${topPlatform[0]} com ${topPlatform[1]} leads (${topPlatformPercent}% do total).`);
+              
+              if(platformEntries.length > 1 && topPlatformPercent >= 70) {
+                insights.push(`💡 <strong>Recomendação:</strong> Há uma forte concentração em ${topPlatform[0]}. Considere diversificar investimentos em outras plataformas.`);
+              }
+            }
+            
+            const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
+            if(sourceEntries.length > 0) {
+              const topSource = sourceEntries[0];
+              const topSourcePercent = Math.round((topSource[1] / leadCount) * 100);
+              insights.push(`🌐 <strong>Fonte principal:</strong> ${topSource[0]} com ${topSource[1]} leads (${topSourcePercent}% do total).`);
+            }
+            
+            const leadsComPergunta = leadsDataArray.filter(l => (l.question || '').toString().trim().length > 0).length;
+            const engagementRate = Math.round((leadsComPergunta / leadCount) * 100);
+            insights.push(`💬 <strong>Engajamento:</strong> ${engagementRate}% dos leads deixaram perguntas (${leadsComPergunta} de ${leadCount}).`);
+            
+            if(engagementRate < 30) {
+              insights.push(`⚠️ <strong>Atenção:</strong> Taxa de engajamento baixa. Considere revisar os formulários ou calls-to-action.`);
+            } else if(engagementRate >= 70) {
+              insights.push(`✅ <strong>Excelente:</strong> Alta taxa de engajamento! Os leads estão demonstrando interesse genuíno.`);
+            }
+            
+            if(platformEntries.length >= 2) {
+              insights.push(`🎯 <strong>Diversificação:</strong> Leads provenientes de ${platformEntries.length} plataformas diferentes, demonstrando boa distribuição de canais.`);
+            }
+            
+            if(topQuestions.length > 0) {
+              const topQuestion = topQuestions[0];
+              insights.push(`❓ <strong>Principal dúvida:</strong> "${topQuestion[0]}" apareceu ${topQuestion[1]} ${topQuestion[1] === 1 ? 'vez' : 'vezes'}. Considere criar conteúdo ou FAQ abordando este tema.`);
+            }
+            
+            leadsAIAnalysis.innerHTML = insights.map(insight => 
+              `<div style="margin-bottom: 10px; padding-left: 4px; border-left: 3px solid rgba(168, 85, 247, 0.5);">${insight}</div>`
+            ).join('');
+          }
+          
+          if(leadsAnalysis) leadsAnalysis.style.display = 'block';
+          
+          const platformCount = Object.keys(platformStats).length;
+          const sourceCount = Object.keys(sourceStats).length;
+          if(leadsDesc) leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${payload.labelMonth||''} através de ${platformCount} plataforma${platformCount === 1 ? '' : 's'} e ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} diferente${sourceCount === 1 ? '' : 's'}.`;
+        } else {
+          if(leadsDesc) leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${payload.labelMonth||''}.`;
+        }
+      } else {
+        leadsSection.style.display='none';
+      }
+
       // Redes
       const redesSection = document.getElementById('relatorioRedesSection');
       const redesGrid = document.getElementById('relatorioRedesGrid');
@@ -529,6 +865,170 @@
         redesGrid.replaceChildren(frag);
       } else {
         redesSection.style.display='none';
+      }
+      
+      // Gerar resumo em texto
+      gerarResumoTexto(payload);
+    }
+    
+    // Gera resumo em texto copiável
+    function gerarResumoTexto(payload){
+      const resumoSection = document.getElementById('relatorioResumoTextoSection');
+      const resumoContent = document.getElementById('relatorioResumoTextoContent');
+      const btnCopiar = document.getElementById('btnCopiarResumo');
+      
+      if(!resumoSection || !resumoContent) return;
+      
+      const mesLabel = payload.labelMonth || mesISO || '';
+      
+      let resumo = `📊 RESUMO DO RELATÓRIO - ${mesLabel.toUpperCase()}\n`;
+      resumo += `${'='.repeat(60)}\n\n`;
+      
+      // Stories
+      const storiesCount = document.querySelectorAll('#relatorioStoriesGrid .story-item').length;
+      resumo += `📸 STORIES PUBLICADOS\n`;
+      resumo += `   Quantidade: ${storiesCount} ${storiesCount === 1 ? 'story' : 'stories'}\n\n`;
+      
+      // Posts
+      const postsCount = document.querySelectorAll('#relatorioPostsGrid .story-item').length;
+      resumo += `📱 POSTS DE FEED PUBLICADOS\n`;
+      resumo += `   Quantidade: ${postsCount} ${postsCount === 1 ? 'post' : 'posts'}\n\n`;
+      
+      // Objetivos (Planejamento)
+      const goalsDone = document.querySelectorAll('#relatorioGoalsDone .goal-card').length;
+      const goalsProgress = document.querySelectorAll('#relatorioGoalsProgress .goal-card').length;
+      const goalsTodo = document.querySelectorAll('#relatorioGoalsTodo .goal-card').length;
+      const goalsTotal = goalsDone + goalsProgress + goalsTodo;
+      
+      if(goalsTotal > 0) {
+        resumo += `🎯 OBJETIVOS DO MÊS (PLANEJAMENTO)\n`;
+        resumo += `   Total de objetivos: ${goalsTotal}\n`;
+        resumo += `   ✅ Concluídos: ${goalsDone}\n`;
+        resumo += `   🔄 Em andamento: ${goalsProgress}\n`;
+        resumo += `   ⏳ Não iniciados: ${goalsTodo}\n`;
+        
+        if(goalsTotal > 0) {
+          const percentConcluido = Math.round((goalsDone / goalsTotal) * 100);
+          resumo += `   Taxa de conclusão: ${percentConcluido}%\n`;
+        }
+        resumo += `\n`;
+      }
+      
+      // Metas
+      const metasAchieved = document.querySelectorAll('#relatorioMetasAchieved .goal-card').length;
+      const metasProgress = document.querySelectorAll('#relatorioMetasProgress .goal-card').length;
+      const metasMissing = document.querySelectorAll('#relatorioMetasMissing .goal-card').length;
+      const metasTotal = metasAchieved + metasProgress + metasMissing;
+      
+      if(metasTotal > 0) {
+        resumo += `📈 METAS DO MÊS\n`;
+        resumo += `   Total de metas: ${metasTotal}\n`;
+        resumo += `   ✅ Atingidas: ${metasAchieved}\n`;
+        resumo += `   🔄 Em andamento: ${metasProgress}\n`;
+        resumo += `   ⚠️ Precisa colocar: ${metasMissing}\n`;
+        
+        if(metasTotal > 0) {
+          const percentAtingido = Math.round((metasAchieved / metasTotal) * 100);
+          resumo += `   Taxa de atingimento: ${percentAtingido}%\n`;
+        }
+        resumo += `\n`;
+      }
+      
+      // Leads
+      const leadsCountEl = document.getElementById('relatorioLeadsCount');
+      const leadsCount = leadsCountEl ? parseInt(leadsCountEl.textContent) || 0 : 0;
+      
+      if(leadsCount > 0) {
+        resumo += `🎯 LEADS GERADOS\n`;
+        resumo += `   Total de leads: ${leadsCount}\n`;
+        
+        // Plataformas
+        const platformsHTML = document.getElementById('relatorioLeadsPlatforms');
+        if(platformsHTML && platformsHTML.innerHTML.trim()) {
+          resumo += `\n   Por Plataforma:\n`;
+          const platforms = platformsHTML.querySelectorAll('.goal-pill');
+          platforms.forEach(pill => {
+            const text = pill.textContent.trim();
+            resumo += `   ${text}\n`;
+          });
+        }
+        
+        // Fontes
+        const sourcesHTML = document.getElementById('relatorioLeadsSources');
+        if(sourcesHTML && sourcesHTML.innerHTML.trim()) {
+          resumo += `\n   Por Fonte:\n`;
+          const sources = sourcesHTML.querySelectorAll('.goal-pill');
+          sources.forEach(pill => {
+            const text = pill.textContent.trim();
+            resumo += `   ${text}\n`;
+          });
+        }
+        
+        // Top perguntas
+        const questionsHTML = document.getElementById('relatorioLeadsQuestions');
+        if(questionsHTML && questionsHTML.innerHTML.trim()) {
+          const questions = questionsHTML.querySelectorAll('div[style*="background"]');
+          if(questions.length > 0) {
+            resumo += `\n   Principais Perguntas:\n`;
+            questions.forEach((q, idx) => {
+              const questionText = q.querySelector('div[style*="color: #e2e8f0"]')?.textContent?.trim();
+              if(questionText) {
+                resumo += `   ${idx + 1}. ${questionText}\n`;
+              }
+            });
+          }
+        }
+        
+        resumo += `\n`;
+      }
+      
+      // Redes trabalhadas
+      const redesCount = document.querySelectorAll('#relatorioRedesGrid .macro-social-item').length;
+      if(redesCount > 0) {
+        resumo += `🔗 REDES TRABALHADAS\n`;
+        resumo += `   Quantidade: ${redesCount} ${redesCount === 1 ? 'rede' : 'redes'} com link configurado\n\n`;
+      }
+      
+      // Rodapé
+      resumo += `${'='.repeat(60)}\n`;
+      resumo += `Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}\n`;
+      
+      resumoContent.textContent = resumo;
+      resumoSection.style.display = 'block';
+      
+      // Evento de copiar
+      if(btnCopiar && !btnCopiar.dataset.listenerAdded){
+        btnCopiar.dataset.listenerAdded = 'true';
+        btnCopiar.addEventListener('click', async ()=>{
+          const texto = resumoContent.textContent;
+          try {
+            if(navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(texto);
+              const original = btnCopiar.textContent;
+              btnCopiar.textContent = '✅ Copiado!';
+              btnCopiar.style.background = 'rgba(16, 185, 129, 0.3)';
+              btnCopiar.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+              setTimeout(() => {
+                btnCopiar.textContent = original;
+                btnCopiar.style.background = '';
+                btnCopiar.style.borderColor = '';
+              }, 2000);
+            } else {
+              const textArea = document.createElement('textarea');
+              textArea.value = texto;
+              textArea.style.position = 'fixed';
+              textArea.style.left = '-9999px';
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              alert('✅ Resumo copiado!');
+            }
+          } catch(err) {
+            console.error('Erro ao copiar:', err);
+            alert('Erro ao copiar. Tente selecionar e copiar manualmente.');
+          }
+        });
       }
     }
 
@@ -909,6 +1409,112 @@
         document.getElementById('relatorioHeaderSubtitle').textContent = `Resumo do mês ${payload.labelMonth}`;
       }
       renderReportSections(payload||{});
+      
+      // Gerar preview para redes sociais
+      setTimeout(() => generateSocialPreview(payload), 1000);
+    }
+    
+    // Gera imagem de preview para WhatsApp/Redes Sociais
+    function generateSocialPreview(payload) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 630;
+        const ctx = canvas.getContext('2d');
+        
+        // Fundo gradiente
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#0b1020');
+        gradient.addColorStop(0.5, '#111936');
+        gradient.addColorStop(1, '#1a2847');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Título
+        ctx.fillStyle = '#ff6633';
+        ctx.font = 'bold 72px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('📊 Relatório Mensal', canvas.width / 2, 120);
+        
+        // Mês
+        if(payload && payload.labelMonth) {
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = 'bold 56px Arial, sans-serif';
+          ctx.fillText(payload.labelMonth, canvas.width / 2, 200);
+        }
+        
+        // Linha separadora
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(200, 250);
+        ctx.lineTo(1000, 250);
+        ctx.stroke();
+        
+        // Estatísticas
+        let yPos = 320;
+        const stats = [];
+        
+        // Posts/Stories
+        const postsCount = Array.isArray(payload.posts) ? payload.posts.length : 0;
+        const storiesCount = Array.isArray(payload.posts) ? payload.posts.filter(p => p.target === 'stories').length : 0;
+        const feedCount = postsCount - storiesCount;
+        
+        if(storiesCount > 0) stats.push(`📸 ${storiesCount} Stories`);
+        if(feedCount > 0) stats.push(`📱 ${feedCount} Posts`);
+        
+        // Objetivos
+        if(payload.goals && payload.goals.summary) {
+          const total = payload.goals.summary.total || 0;
+          const done = payload.goals.summary.done || 0;
+          if(total > 0) stats.push(`🎯 ${done}/${total} Objetivos`);
+        }
+        
+        // Metas
+        const metasCount = Array.isArray(payload.metas) ? payload.metas.length : 0;
+        if(metasCount > 0) stats.push(`📈 ${metasCount} Metas`);
+        
+        // Leads
+        const leadsCount = payload.leadsCount || 0;
+        if(leadsCount > 0) stats.push(`🎯 ${leadsCount} Leads`);
+        
+        // Renderizar estatísticas
+        ctx.fillStyle = '#86efac';
+        ctx.font = 'bold 42px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        
+        const leftCol = stats.slice(0, 3);
+        const rightCol = stats.slice(3);
+        
+        leftCol.forEach((stat, i) => {
+          ctx.fillText(stat, 200, yPos + (i * 70));
+        });
+        
+        if(rightCol.length > 0) {
+          ctx.textAlign = 'right';
+          rightCol.forEach((stat, i) => {
+            ctx.fillText(stat, 1000, yPos + (i * 70));
+          });
+        }
+        
+        // Rodapé
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '32px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('MediaGrowth Dashboard', canvas.width / 2, 590);
+        
+        // Converter para data URL e atualizar meta tags
+        const imageDataUrl = canvas.toDataURL('image/png');
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        const twitterImage = document.querySelector('meta[name="twitter:image"]');
+        
+        if(ogImage) ogImage.setAttribute('content', imageDataUrl);
+        if(twitterImage) twitterImage.setAttribute('content', imageDataUrl);
+        
+        console.log('[Relatorio] ✅ Preview gerado para redes sociais');
+      } catch(err) {
+        console.error('[Relatorio] ❌ Erro ao gerar preview:', err);
+      }
     }
 
     // Global error handler para imagens (debug em produção)

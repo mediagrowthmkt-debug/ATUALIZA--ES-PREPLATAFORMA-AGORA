@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Admin Companies</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+    }
+    .btn {
+      background: #ff6600;
+      color: #fff;
+      border: 0;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      margin: 10px 5px;
+    }
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+    .log {
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .log div {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #666;
+      padding-left: 10px;
+    }
+    .log .success {
+      border-left-color: #2e7d32;
+      color: #4caf50;
+    }
+    .log .error {
+      border-left-color: #c62828;
+      color: #f44336;
+    }
+    .log .info {
+      border-left-color: #1976d2;
+      color: #64b5f6;
+    }
+    .log .warning {
+      border-left-color: #f57c00;
+      color: #ffb74d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Fix Admin Companies - Limpar UIDs Incorretos</h1>
+  <p>Este script remove empresas adicionadas com UID incorreto (email convertido) e permite re-adicionar com o UID correto do Firebase Auth.</p>
+  
+  <button class="btn" id="loginBtn">1. Login como Admin</button>
+  <button class="btn" id="scanBtn" disabled>2. Escanear Empresas</button>
+  <button class="btn" id="fixBtn" disabled>3. Limpar UIDs Incorretos</button>
+  
+  <div id="log" class="log"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs,
+      doc,
+      deleteDoc,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginBtn = document.getElementById('loginBtn');
+    const scanBtn = document.getElementById('scanBtn');
+    const fixBtn = document.getElementById('fixBtn');
+    const logDiv = document.getElementById('log');
+
+    let currentUser = null;
+    let incorrectCompanies = [];
+
+    function log(message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = type;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(div);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    loginBtn.onclick = async () => {
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        log(`Erro no login: ${err.message}`, 'error');
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        loginBtn.textContent = `✅ Logado: ${user.email}`;
+        loginBtn.disabled = true;
+        scanBtn.disabled = false;
+        log(`Login realizado: ${user.email}`, 'success');
+      } else {
+        currentUser = null;
+        loginBtn.textContent = '1. Login como Admin';
+        loginBtn.disabled = false;
+        scanBtn.disabled = true;
+        fixBtn.disabled = true;
+      }
+    });
+
+    scanBtn.onclick = async () => {
+      if (!currentUser) {
+        log('Você precisa estar logado!', 'error');
+        return;
+      }
+
+      try {
+        log('🔍 Escaneando empresas vinculadas...', 'info');
+        
+        const companiesRef = collection(db, 'admins', currentUser.uid, 'companies');
+        const snapshot = await getDocs(companiesRef);
+
+        incorrectCompanies = [];
+        const companies = [];
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const companyId = docSnap.id;
+          
+          companies.push({
+            id: companyId,
+            email: data.email,
+            displayName: data.displayName
+          });
+
+          // UID incorreto: contém underscore (foi convertido do email)
+          // UID correto do Firebase: alfanumérico sem underscore
+          if (companyId.includes('_')) {
+            incorrectCompanies.push({
+              id: companyId,
+              email: data.email,
+              displayName: data.displayName
+            });
+          }
+        });
+
+        log(`✅ Total de empresas: ${companies.length}`, 'success');
+        
+        if (incorrectCompanies.length > 0) {
+          log(`⚠️ Empresas com UID INCORRETO (precisa corrigir): ${incorrectCompanies.length}`, 'warning');
+          incorrectCompanies.forEach(c => {
+            log(`   - ${c.email} (UID incorreto: ${c.id})`, 'warning');
+          });
+          fixBtn.disabled = false;
+        } else {
+          log(`✅ Todas as empresas estão com UID correto!`, 'success');
+          fixBtn.disabled = true;
+        }
+
+        companies.forEach(c => {
+          const status = c.id.includes('_') ? '❌ INCORRETO' : '✅ CORRETO';
+          log(`${status} | ${c.email} | UID: ${c.id}`, c.id.includes('_') ? 'error' : 'success');
+        });
+
+      } catch (err) {
+        log(`Erro ao escanear: ${err.message}`, 'error');
+      }
+    };
+
+    fixBtn.onclick = async () => {
+      if (!currentUser) {
+        log('Você precisa estar logado!', 'error');
+        return;
+      }
+
+      if (incorrectCompanies.length === 0) {
+        log('Nenhuma empresa com UID incorreto encontrada!', 'info');
+        return;
+      }
+
+      const confirmMsg = `Isso irá REMOVER ${incorrectCompanies.length} empresa(s) com UID incorreto:\n\n` +
+        incorrectCompanies.map(c => `- ${c.email}`).join('\n') +
+        `\n\nDepois você poderá re-adicionar pelo admin-selector.html com o UID correto.\n\nConfirmar?`;
+
+      if (!confirm(confirmMsg)) {
+        log('Operação cancelada pelo usuário.', 'info');
+        return;
+      }
+
+      try {
+        log('🗑️ Removendo empresas com UID incorreto...', 'info');
+
+        for (const company of incorrectCompanies) {
+          const companyRef = doc(db, 'admins', currentUser.uid, 'companies', company.id);
+          await deleteDoc(companyRef);
+          log(`✅ Removido: ${company.email} (UID: ${company.id})`, 'success');
+        }
+
+        log(`🎉 Limpeza concluída! ${incorrectCompanies.length} empresa(s) removida(s).`, 'success');
+        log('👉 Agora vá para admin-selector.html e adicione novamente as empresas.', 'info');
+        log('✅ Desta vez o sistema usará o UID CORRETO do Firebase Auth!', 'success');
+
+        incorrectCompanies = [];
+        fixBtn.disabled = true;
+
+      } catch (err) {
+        log(`Erro ao limpar: ${err.message}`, 'error');
+      }
+    };
+  </script>
+</body>
+</html>

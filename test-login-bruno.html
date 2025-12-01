@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Login brunogestormktp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+    }
+    .btn {
+      background: #ff6600;
+      color: #fff;
+      border: 0;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      margin: 10px 5px;
+      display: block;
+      width: 100%;
+    }
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+    .log {
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .success { color: #4caf50; }
+    .error { color: #f44336; }
+    .info { color: #64b5f6; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Login - brunogestormktp@gmail.com</h1>
+  <p>Este script testa se a conta ainda funciona normalmente</p>
+  
+  <input type="email" id="email" placeholder="E-mail" value="brunogestormktp@gmail.com">
+  <input type="password" id="password" placeholder="Senha">
+  
+  <button class="btn" id="loginBtn">🔐 Login com Email/Senha</button>
+  <button class="btn" id="googleBtn">🔐 Login com Google</button>
+  <button class="btn" id="checkBtn">🔍 Verificar Documento no Firestore</button>
+  
+  <div id="log" class="log"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc,
+      getDoc,
+      collection,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const logDiv = document.getElementById('log');
+    const loginBtn = document.getElementById('loginBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const checkBtn = document.getElementById('checkBtn');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    function log(message, type = 'info') {
+      const span = document.createElement('div');
+      span.className = type;
+      span.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(span);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    loginBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        log('Digite email e senha!', 'error');
+        return;
+      }
+
+      try {
+        log('🔄 Tentando login com email/senha...', 'info');
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        log(`✅ Login realizado: ${userCredential.user.email}`, 'success');
+        log(`   UID: ${userCredential.user.uid}`, 'success');
+      } catch (err) {
+        log(`❌ Erro no login: ${err.message}`, 'error');
+      }
+    };
+
+    googleBtn.onclick = async () => {
+      try {
+        log('🔄 Tentando login com Google...', 'info');
+        const provider = new GoogleAuthProvider();
+        const userCredential = await signInWithPopup(auth, provider);
+        log(`✅ Login realizado: ${userCredential.user.email}`, 'success');
+        log(`   UID: ${userCredential.user.uid}`, 'success');
+      } catch (err) {
+        log(`❌ Erro no login: ${err.message}`, 'error');
+      }
+    };
+
+    checkBtn.onclick = async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      
+      if (!email) {
+        log('Digite um email!', 'error');
+        return;
+      }
+
+      try {
+        log(`🔍 Buscando documento para: ${email}`, 'info');
+        
+        const usersRef = collection(db, 'usuarios');
+        const q = query(usersRef, where('email', '==', email));
+        const querySnap = await getDocs(q);
+
+        if (querySnap.empty) {
+          log(`❌ NENHUM documento encontrado para ${email}`, 'error');
+          log('   Isso significa que a conta nunca fez login ou foi deletada!', 'error');
+        } else {
+          const userDoc = querySnap.docs[0];
+          const userId = userDoc.id;
+          const userData = userDoc.data();
+          
+          log(`✅ Documento ENCONTRADO!`, 'success');
+          log(`   UID: ${userId}`, 'success');
+          log(`   Email: ${userData.email || 'não definido'}`, 'info');
+          log(`   Nome: ${userData.displayName || 'não definido'}`, 'info');
+          log(`   Total de campos: ${Object.keys(userData).length}`, 'info');
+          log(`   Campos principais: ${Object.keys(userData).slice(0, 10).join(', ')}`, 'info');
+        }
+      } catch (err) {
+        log(`❌ Erro ao buscar: ${err.message}`, 'error');
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        log(`👤 Usuário logado: ${user.email}`, 'success');
+        log(`   UID: ${user.uid}`, 'success');
+        checkBtn.disabled = false;
+      } else {
+        log('👤 Nenhum usuário logado', 'info');
+      }
+    });
+
+    log('✅ Script carregado e pronto!', 'success');
+    log('👉 Clique em "Verificar Documento" para ver se a conta existe no Firestore', 'info');
+  </script>
+</body>
+</html>

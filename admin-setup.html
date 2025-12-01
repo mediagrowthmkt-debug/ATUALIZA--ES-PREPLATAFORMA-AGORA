@@ -1,0 +1,664 @@
+ no<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup Admin - Assistente</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000, #1a1a1a 40%, #ff6600 120%);
+      color: #fff;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #111;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .step {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .step-number {
+      background: #ff6600;
+      color: #000;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      margin-right: 12px;
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-group {
+      margin: 16px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: #cbd5f5;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #ff6600;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .btn {
+      background: #ff6600;
+      color: #000;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 12px;
+      transition: transform 0.2s, filter 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn.secondary {
+      background: #333;
+      color: #fff;
+    }
+
+    .code-block {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .code-block code {
+      color: #4ade80;
+    }
+
+    .success {
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.35);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+      color: #bbf7d0;
+    }
+
+    .warning {
+      background: rgba(245,158,11,.12);
+      border: 1px solid rgba(245,158,11,.35);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+      color: #fde68a;
+    }
+
+    .info {
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.35);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+      color: #bfdbfe;
+      font-size: 0.9rem;
+    }
+
+    .copy-btn {
+      background: #333;
+      border: 1px solid #555;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #bbb;
+      margin-top: 12px;
+    }
+
+    .status.success {
+      color: #86efac;
+    }
+
+    .status.error {
+      color: #fca5a5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Assistente de Setup Admin</h1>
+
+    <!-- STEP 1: Login -->
+    <div class="step" id="step1">
+      <div class="step-title">
+        <span class="step-number">1</span>
+        Fazer Login
+      </div>
+      <p>Primeiro, faça login com a conta que deseja tornar admin:</p>
+      <button class="btn" id="loginBtn">Entrar com Google</button>
+      
+      <div style="margin: 16px 0; text-align: center; color: #666; font-size: 0.9rem;">
+        ── OU ──
+      </div>
+      
+      <div class="input-group">
+        <label>E-mail</label>
+        <input type="email" id="emailLogin" placeholder="seu-email@exemplo.com" autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label>Senha</label>
+        <input type="password" id="passwordLogin" placeholder="Sua senha" autocomplete="current-password">
+      </div>
+      <button class="btn secondary" id="loginEmailBtn">Entrar com E-mail</button>
+      
+      <div style="margin: 16px 0; text-align: center;">
+        <p style="font-size: 0.85rem; color: #bbb; margin: 0 0 12px;">
+          Não tem conta ainda?
+        </p>
+        <button class="btn" id="createAccountBtn" style="background: #333; border: 1px solid #555;">
+          Criar Nova Conta
+        </button>
+      </div>
+      
+      <div class="status" id="loginStatus"></div>
+    </div>
+
+    <!-- STEP 2: Ver UID -->
+    <div class="step" id="step2" style="display:none">
+      <div class="step-title">
+        <span class="step-number">2</span>
+        Seu UID
+      </div>
+      <p>Este é o seu User ID (UID):</p>
+      <div class="input-group">
+        <input type="text" id="uidDisplay" readonly>
+        <button class="copy-btn" onclick="copyToClipboard('uidDisplay')">📋 Copiar UID</button>
+      </div>
+      <div class="info">
+        💡 Guarde este UID. Você precisará dele para criar o documento admin no Firestore.
+      </div>
+      <button class="btn secondary" id="logoutBtn" style="margin-top: 16px;">
+        ← Voltar para Login
+      </button>
+    </div>
+
+    <!-- STEP 3: Criar Admin -->
+    <div class="step" id="step3" style="display:none">
+      <div class="step-title">
+        <span class="step-number">3</span>
+        Criar Conta Admin no Firestore
+      </div>
+      <p>Clique no botão abaixo para criar automaticamente sua conta admin:</p>
+      <button class="btn" id="createAdminBtn">Criar Conta Admin</button>
+      <div class="status" id="createStatus"></div>
+
+      <div class="warning" style="margin-top:20px">
+        <strong>⚠️ Importante:</strong> Esta ação criará um documento na collection <code>/admins</code> com seu UID. 
+        Certifique-se de que as regras do Firestore permitem esta operação.
+      </div>
+    </div>
+
+    <!-- STEP 4: Instruções Manuais (fallback) -->
+    <div class="step" id="step4" style="display:none">
+      <div class="step-title">
+        <span class="step-number">4</span>
+        Criar Admin Manualmente
+      </div>
+      <p>Se a criação automática falhou, siga estas instruções:</p>
+      
+      <h3 style="margin-top:20px">Via Firebase Console:</h3>
+      <ol style="line-height:1.8">
+        <li>Acesse <a href="https://console.firebase.google.com/" target="_blank" style="color:#60a5fa">Firebase Console</a></li>
+        <li>Selecione seu projeto</li>
+        <li>Vá em <strong>Firestore Database</strong></li>
+        <li>Crie uma collection chamada <code>admins</code></li>
+        <li>Adicione um documento com o ID:
+          <div class="input-group">
+            <input type="text" id="uidForManual" readonly>
+            <button class="copy-btn" onclick="copyToClipboard('uidForManual')">📋 Copiar</button>
+          </div>
+        </li>
+        <li>Adicione os seguintes campos:</li>
+      </ol>
+
+      <div class="code-block">
+<code>email: "<span id="emailForManual"></span>"
+displayName: "<span id="nameForManual"></span>"
+role: "admin"
+createdAt: [Timestamp - clique em "Add field" → selecione "timestamp"]</code>
+      </div>
+
+      <h3 style="margin-top:20px">Via Script no Console:</h3>
+      <p>Ou copie este script e execute no Console do Firebase (aba Console):</p>
+      <textarea id="scriptManual" readonly></textarea>
+      <button class="copy-btn" onclick="copyToClipboard('scriptManual')">📋 Copiar Script</button>
+    </div>
+
+    <!-- STEP 5: Verificação -->
+    <div class="step" id="step5" style="display:none">
+      <div class="step-title">
+        <span class="step-number">5</span>
+        Verificar Admin
+      </div>
+      <p>Verifique se você é admin agora:</p>
+      <button class="btn secondary" id="verifyBtn">Verificar Status</button>
+      <div class="status" id="verifyStatus"></div>
+      
+      <div class="success" id="successMessage" style="display:none;margin-top:20px">
+        <strong>✅ Sucesso!</strong><br>
+        Você agora é um administrador. Acesse o painel em:
+        <div class="code-block" style="margin-top:12px">
+          <code id="adminLink"></code>
+        </div>
+        <a href="admin-selector.html" class="btn" style="margin-top:12px;display:block">
+          Ir para Painel Admin
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc,
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    // Garantir persistência LOCAL
+    setPersistence(auth, browserLocalPersistence).catch(err => {
+      console.error('Erro ao configurar persistência:', err);
+    });
+
+    // Copy to clipboard
+    window.copyToClipboard = function(elementId) {
+      const el = document.getElementById(elementId);
+      el.select();
+      document.execCommand('copy');
+      alert('📋 Copiado!');
+    };
+
+    // Logout (voltar para login)
+    document.getElementById('logoutBtn').onclick = async () => {
+      if (confirm('Tem certeza que deseja sair?')) {
+        try {
+          await signOut(auth);
+          document.getElementById('emailLogin').value = '';
+          document.getElementById('passwordLogin').value = '';
+          document.getElementById('loginStatus').textContent = '';
+        } catch (err) {
+          console.error('Erro ao sair:', err);
+          alert('Erro ao sair: ' + err.message);
+        }
+      }
+    };
+
+    // Login com Google
+    document.getElementById('loginBtn').onclick = async () => {
+      try {
+        document.getElementById('loginStatus').textContent = 'Fazendo login...';
+        document.getElementById('loginStatus').className = 'status';
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loginStatus').textContent = 'Erro: ' + err.message;
+        document.getElementById('loginStatus').className = 'status error';
+      }
+    };
+
+    // Login com Email/Senha
+    document.getElementById('loginEmailBtn').onclick = async () => {
+      try {
+        const email = document.getElementById('emailLogin').value.trim();
+        const password = document.getElementById('passwordLogin').value;
+        
+        if (!email || !password) {
+          document.getElementById('loginStatus').textContent = 'Preencha email e senha';
+          document.getElementById('loginStatus').className = 'status error';
+          return;
+        }
+
+        document.getElementById('loginStatus').textContent = 'Fazendo login...';
+        document.getElementById('loginStatus').className = 'status';
+        
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        console.error(err);
+        let errorMsg = 'Erro ao fazer login';
+        
+        if (err.code === 'auth/user-not-found') {
+          errorMsg = 'Usuário não encontrado';
+        } else if (err.code === 'auth/wrong-password') {
+          errorMsg = 'Senha incorreta';
+        } else if (err.code === 'auth/invalid-email') {
+          errorMsg = 'Email inválido';
+        } else if (err.code === 'auth/too-many-requests') {
+          errorMsg = 'Muitas tentativas. Tente novamente mais tarde';
+        }
+        
+        document.getElementById('loginStatus').textContent = errorMsg;
+        document.getElementById('loginStatus').className = 'status error';
+      }
+    };
+
+    // Permitir login com Enter
+    document.getElementById('passwordLogin').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('loginEmailBtn').click();
+      }
+    });
+
+    // Criar nova conta
+    document.getElementById('createAccountBtn').onclick = async () => {
+      try {
+        const email = document.getElementById('emailLogin').value.trim();
+        const password = document.getElementById('passwordLogin').value;
+        
+        if (!email || !password) {
+          document.getElementById('loginStatus').textContent = 'Preencha email e senha para criar conta';
+          document.getElementById('loginStatus').className = 'status error';
+          return;
+        }
+
+        if (password.length < 6) {
+          document.getElementById('loginStatus').textContent = 'A senha deve ter pelo menos 6 caracteres';
+          document.getElementById('loginStatus').className = 'status error';
+          return;
+        }
+
+        document.getElementById('loginStatus').textContent = 'Criando conta...';
+        document.getElementById('loginStatus').className = 'status';
+        
+        await createUserWithEmailAndPassword(auth, email, password);
+        
+        document.getElementById('loginStatus').textContent = '✅ Conta criada com sucesso!';
+        document.getElementById('loginStatus').className = 'status success';
+        
+      } catch (err) {
+        console.error(err);
+        let errorMsg = 'Erro ao criar conta';
+        
+        if (err.code === 'auth/email-already-in-use') {
+          errorMsg = 'Este email já está em uso. Faça login em vez disso.';
+        } else if (err.code === 'auth/invalid-email') {
+          errorMsg = 'Email inválido';
+        } else if (err.code === 'auth/weak-password') {
+          errorMsg = 'Senha muito fraca. Use pelo menos 6 caracteres';
+        }
+        
+        document.getElementById('loginStatus').textContent = errorMsg;
+        document.getElementById('loginStatus').className = 'status error';
+      }
+    };
+
+    // Auth state
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'none';
+        document.getElementById('step4').style.display = 'none';
+        document.getElementById('step5').style.display = 'none';
+        return;
+      }
+
+      currentUser = user;
+      
+      // Show UID
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'block';
+      document.getElementById('step3').style.display = 'block';
+      document.getElementById('step4').style.display = 'block';
+      document.getElementById('step5').style.display = 'block';
+
+      document.getElementById('uidDisplay').value = user.uid;
+      document.getElementById('uidForManual').value = user.uid;
+      document.getElementById('emailForManual').textContent = user.email || '';
+      document.getElementById('nameForManual').textContent = user.displayName || user.email || '';
+
+      const adminLink = `${window.location.origin}/admin-selector.html`;
+      document.getElementById('adminLink').textContent = adminLink;
+
+      // Generate script
+      const script = `firebase.firestore().collection('admins').doc('${user.uid}').set({
+  email: "${user.email || ''}",
+  displayName: "${user.displayName || user.email || ''}",
+  role: "admin",
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+}).then(() => console.log('Admin criado com sucesso!'));`;
+      
+      document.getElementById('scriptManual').value = script;
+
+      document.getElementById('loginStatus').textContent = `✅ Logado como ${user.email}`;
+      document.getElementById('loginStatus').className = 'status success';
+
+      // 🔥 CRIAR ADMIN AUTOMATICAMENTE
+      try {
+        const createStatus = document.getElementById('createStatus');
+        createStatus.textContent = '⏳ Criando conta admin automaticamente...';
+        createStatus.className = 'status';
+
+        const adminRef = doc(db, 'admins', user.uid);
+        
+        // Verifica se já existe
+        const adminSnap = await getDoc(adminRef);
+        
+        if (!adminSnap.exists()) {
+          // Cria novo admin
+          await setDoc(adminRef, {
+            email: user.email || '',
+            displayName: user.displayName || user.email || '',
+            role: 'admin',
+            createdAt: serverTimestamp()
+          });
+          
+          createStatus.textContent = '✅ Conta admin criada! Redirecionando...';
+          createStatus.className = 'status success';
+          
+          // Redireciona para admin-selector após 2 segundos
+          setTimeout(() => {
+            window.location.href = 'admin-selector.html';
+          }, 2000);
+          
+        } else {
+          createStatus.textContent = '✅ Você já é admin! Clique abaixo para acessar o painel.';
+          createStatus.className = 'status success';
+          document.getElementById('successMessage').style.display = 'block';
+        }
+
+      } catch (err) {
+        console.error('Erro ao criar admin automaticamente:', err);
+        const createStatus = document.getElementById('createStatus');
+        createStatus.textContent = '⚠️ Não foi possível criar automaticamente. Use o botão manual abaixo ou siga as instruções do Passo 4.';
+        createStatus.className = 'status error';
+      }
+    });
+
+    // Create Admin
+    document.getElementById('createAdminBtn').onclick = async () => {
+      if (!currentUser) {
+        alert('Faça login primeiro');
+        return;
+      }
+
+      const btn = document.getElementById('createAdminBtn');
+      const status = document.getElementById('createStatus');
+      
+      btn.disabled = true;
+      btn.textContent = 'Criando...';
+      status.textContent = '';
+      status.className = 'status';
+
+      try {
+        const adminRef = doc(db, 'admins', currentUser.uid);
+        await setDoc(adminRef, {
+          email: currentUser.email || '',
+          displayName: currentUser.displayName || currentUser.email || '',
+          role: 'admin',
+          createdAt: serverTimestamp()
+        });
+
+        status.textContent = '✅ Admin criado com sucesso!';
+        status.className = 'status success';
+        
+        // Show verify button
+        setTimeout(() => {
+          document.getElementById('verifyBtn').click();
+        }, 1000);
+
+      } catch (err) {
+        console.error('Erro ao criar admin:', err);
+        status.textContent = '❌ Erro: ' + err.message + '. Use a opção manual.';
+        status.className = 'status error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Criar Conta Admin';
+      }
+    };
+
+    // Verify Admin
+    document.getElementById('verifyBtn').onclick = async () => {
+      if (!currentUser) {
+        alert('Faça login primeiro');
+        return;
+      }
+
+      const btn = document.getElementById('verifyBtn');
+      const status = document.getElementById('verifyStatus');
+      
+      btn.disabled = true;
+      btn.textContent = 'Verificando...';
+      status.textContent = '';
+      status.className = 'status';
+
+      try {
+        const adminRef = doc(db, 'admins', currentUser.uid);
+        const adminSnap = await getDoc(adminRef);
+
+        if (adminSnap.exists()) {
+          status.textContent = '✅ Você é admin!';
+          status.className = 'status success';
+          document.getElementById('successMessage').style.display = 'block';
+        } else {
+          status.textContent = '❌ Você ainda não é admin. Use a opção manual acima.';
+          status.className = 'status error';
+        }
+
+      } catch (err) {
+        console.error('Erro ao verificar:', err);
+        status.textContent = '❌ Erro ao verificar: ' + err.message;
+        status.className = 'status error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verificar Status';
+      }
+    };
+  </script>
+</body>
+</html>

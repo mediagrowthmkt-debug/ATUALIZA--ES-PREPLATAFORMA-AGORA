@@ -5275,62 +5275,6 @@ function renderReviewNotes(post){
     
   </div>
   
-  <!-- Leads Gerados no Mês -->
-  <div class="relatorio-container" id="relatorioLeadsSection" style="display:none">
-    <div class="relatorio-header">
-      <h2>🎯 Leads Gerados</h2>
-      <p class="relatorio-subtitle" id="relatorioLeadsSubtitle">Leads captados durante o mês selecionado</p>
-    </div>
-    
-    <!-- Contador Principal -->
-    <div class="relatorio-preview">
-      <div class="relatorio-preview-meta" style="justify-content: center; font-size: 1.4rem; padding: 20px;">
-        <span class="meta-item" style="color: #86efac; font-weight: 900; font-size: 2rem;">
-          📊 <span id="relatorioLeadsCount">0</span> leads
-        </span>
-      </div>
-    </div>
-    
-    <!-- Análise Detalhada -->
-    <div class="relatorio-leads-analysis" id="relatorioLeadsAnalysis" style="display:none; margin-top: 20px;">
-      
-      <!-- Por Plataforma (Google/Meta) -->
-      <div class="relatorio-container" style="margin-bottom: 16px;">
-        <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">📱 Por Plataforma</h3>
-        <div class="relatorio-goals-summary" id="relatorioLeadsPlatforms">
-          <!-- Será preenchido dinamicamente -->
-        </div>
-      </div>
-      
-      <!-- Por Fonte -->
-      <div class="relatorio-container" style="margin-bottom: 16px;">
-        <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">🌐 Por Fonte</h3>
-        <div class="relatorio-goals-summary" id="relatorioLeadsSources">
-          <!-- Será preenchido dinamicamente -->
-        </div>
-      </div>
-      
-      <!-- Principais Perguntas -->
-      <div class="relatorio-container" style="margin-bottom: 16px;">
-        <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #e2e8f0;">💬 Principais Perguntas</h3>
-        <div id="relatorioLeadsQuestions" style="display: flex; flex-direction: column; gap: 8px;">
-          <!-- Será preenchido dinamicamente -->
-        </div>
-      </div>
-      
-      <!-- Análise IA -->
-      <div class="relatorio-container" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(139, 92, 246, 0.3);">
-        <h3 style="margin: 0 0 12px; font-size: 1.1rem; color: #c4b5fd;">🤖 Análise Inteligente</h3>
-        <div id="relatorioLeadsAIAnalysis" style="color: #e9d5ff; line-height: 1.6; font-size: 0.95rem;">
-          <!-- Será preenchido dinamicamente -->
-        </div>
-      </div>
-      
-    </div>
-    
-    <p class="relatorio-desc" id="relatorioLeadsDesc"></p>
-  </div>
-  
   <!-- Relatório de redes trabalhadas (apenas redes com link configurado) -->
   <div class="relatorio-container" id="relatorioRedesSection" style="display:none">
     <div class="relatorio-header">
@@ -5340,37 +5284,6 @@ function renderReviewNotes(post){
     <div class="macro-social-grid" id="relatorioRedesGrid"></div>
     <p class="relatorio-desc" id="relatorioRedesDesc"></p>
   </div>
-  
-  <!-- Resumo em Texto (Copiável) -->
-  <div class="relatorio-container" id="relatorioResumoTextoSection" style="display:none; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3);">
-    <div class="relatorio-header">
-      <h2>📋 Resumo em Texto</h2>
-      <p class="relatorio-subtitle">Copie este resumo para compartilhar facilmente</p>
-    </div>
-    
-    <div style="position: relative;">
-      <button type="button" id="btnCopiarResumo" class="btn secondary small" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4);">
-        📋 Copiar Texto
-      </button>
-      
-      <div id="relatorioResumoTextoContent" style="
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(71, 85, 105, 0.4);
-        border-radius: 8px;
-        padding: 24px;
-        color: #e2e8f0;
-        font-family: 'Courier New', monospace;
-        font-size: 0.95rem;
-        line-height: 1.8;
-        white-space: pre-wrap;
-        overflow-x: auto;
-        min-height: 200px;
-      ">
-        <!-- Será preenchido dinamicamente -->
-      </div>
-    </div>
-  </div>
-  
 </div>
 <!-- Firebase + App -->
 <script type="module">
@@ -13935,13 +13848,9 @@ async function sendIAQuestion(){
   let relatorioMetasSection, relatorioMetasSubtitle, relatorioMetasAchievedPill, relatorioMetasProgressPill, relatorioMetasMissingPill, relatorioMetasClearFilter;
   let relatorioMetasAchieved, relatorioMetasProgress, relatorioMetasMissing;
   let relatorioGoalsNotesSimple, relatorioGoalsNotesSimpleStatus;
-  // Leads gerados
-  let relatorioLeadsSection, relatorioLeadsSubtitle, relatorioLeadsCount, relatorioLeadsDesc;
   // Redes trabalhadas
   let relatorioRedesSection, relatorioRedesGrid, relatorioRedesDesc, relatorioRedesSubtitle;
   let relatorioStoriesDesc, relatorioPostsDesc, relatorioGoalsDesc, relatorioMetasDesc;
-  // Resumo em texto
-  let relatorioResumoTextoSection, relatorioResumoTextoContent, btnCopiarResumo;
   
     
     function initRelatorio(){
@@ -13984,20 +13893,6 @@ async function sendIAQuestion(){
   relatorioMetasDesc = $("relatorioMetasDesc");
   relatorioGoalsNotesSimple = $("relatorioGoalsNotesSimple");
   relatorioGoalsNotesSimpleStatus = $("relatorioGoalsNotesSimpleStatus");
-  // Leads
-  relatorioLeadsSection = $("relatorioLeadsSection");
-  relatorioLeadsSubtitle = $("relatorioLeadsSubtitle");
-  relatorioLeadsCount = $("relatorioLeadsCount");
-  relatorioLeadsDesc = $("relatorioLeadsDesc");
-  // Redes
-  relatorioRedesSection = $("relatorioRedesSection");
-  relatorioRedesGrid = $("relatorioRedesGrid");
-  relatorioRedesDesc = $("relatorioRedesDesc");
-  relatorioRedesSubtitle = $("relatorioRedesSubtitle");
-  // Resumo em texto
-  relatorioResumoTextoSection = $("relatorioResumoTextoSection");
-  relatorioResumoTextoContent = $("relatorioResumoTextoContent");
-  btnCopiarResumo = $("btnCopiarResumo");
   
         
         if(relatorioGerarBtn){
@@ -14035,10 +13930,6 @@ async function sendIAQuestion(){
         relatorioRedesGrid = $("relatorioRedesGrid");
         relatorioRedesDesc = $("relatorioRedesDesc");
         relatorioRedesSubtitle = $("relatorioRedesSubtitle");
-        // Botão copiar resumo
-        if(btnCopiarResumo){
-          btnCopiarResumo.addEventListener('click', copiarResumoTexto);
-        }
         
       }
     }
@@ -14368,7 +14259,7 @@ async function sendIAQuestion(){
       filterGoals(currentGoalsFilter);
     }
     
-    async function gerarRelatorio(){
+    function gerarRelatorio(){
       if(!relatorioMesInput || !relatorioMesInput.value){
         alert('Por favor, selecione um mês');
         return;
@@ -14380,9 +14271,7 @@ async function sendIAQuestion(){
   renderRelatorioGoals(mesISO);
   renderRelatorioMetas(mesISO);
   loadRelatorioGoalsNoteLocal(mesISO);
-  await renderRelatorioLeads(mesISO); // Aguarda buscar leads do Firestore
   renderRelatorioRedes(mesISO);
-  gerarResumoTexto(mesISO); // Gerar resumo em texto
   
       
       if(relatorioPreview){
@@ -14482,7 +14371,7 @@ async function sendIAQuestion(){
     }
 
     // Monta snapshot dos dados do relatório do mês (para link público)
-    async function buildMonthlyReportData(mesISO){
+    function buildMonthlyReportData(mesISO){
       console.log('[buildMonthlyReportData] Iniciando - mesISO:', mesISO);
       const clientKey = getClientKey();
       console.log('[buildMonthlyReportData] clientKey:', clientKey);
@@ -14592,70 +14481,7 @@ async function sendIAQuestion(){
             .map(i=> ({ label: i.label||'', href: i.href||'', iconInfo: i.iconInfo||null }));
         }
       }catch(_err){ /* fallback para socialLinks */ }
-      
-      // Buscar leads diretamente do Firestore (não depende de variável global)
-      let leadsCount = 0;
-      let leadsData = [];
-      try{
-        console.log('[buildMonthlyReportData] Buscando leads do Firestore...');
-        const uid = auth?.currentUser?.uid;
-        const clientKey = tenant;
-        
-        if(uid && clientKey) {
-          const leadsSnap = await getDocs(collection(db, 'usuarios', uid, 'clients', clientKey, 'leads'));
-          const allLeads = leadsSnap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-          console.log('[buildMonthlyReportData] Total de leads no Firestore:', allLeads.length);
-          
-          const filteredLeads = allLeads.filter(lead => {
-            if(!lead.createdAt) return false;
-            
-            // Converter createdAt para data
-            let leadDate;
-            if(typeof lead.createdAt.toMillis === 'function'){
-              leadDate = new Date(lead.createdAt.toMillis());
-            } else if(typeof lead.createdAt === 'number'){
-              leadDate = new Date(lead.createdAt);
-            } else if(typeof lead.createdAt.toDate === 'function'){
-              leadDate = lead.createdAt.toDate();
-            } else if(lead.createdAt.seconds) {
-              leadDate = new Date(lead.createdAt.seconds * 1000);
-            } else {
-              return false;
-            }
-            
-            // Formatar data no formato YYYY-MM
-            const year = leadDate.getFullYear();
-            const month = String(leadDate.getMonth() + 1).padStart(2, '0');
-            const leadMonthISO = `${year}-${month}`;
-            
-            return leadMonthISO === mesISO;
-          });
-          
-          leadsCount = filteredLeads.length;
-          
-          // Mapear dados dos leads para o payload
-          leadsData = filteredLeads.map(lead => ({
-            name: lead.name || '',
-            email: lead.email || '',
-            phone: lead.phone || '',
-            question: lead.question || '',
-            plataforma: lead.plataforma || 'Não especificado',
-            source: lead.source || 'Não especificado'
-          }));
-          
-          console.log('[buildMonthlyReportData] ✅ Leads filtrados para', mesISO, ':', leadsCount);
-          console.log('[buildMonthlyReportData] ✅ Dados dos leads:', leadsData.length, 'leads com detalhes');
-          if(leadsData.length > 0) {
-            console.log('[buildMonthlyReportData] ✅ Exemplo do primeiro lead:', leadsData[0]);
-          }
-        } else {
-          console.warn('[buildMonthlyReportData] ⚠️ Não foi possível buscar leads - uid:', uid, 'clientKey:', clientKey);
-        }
-      }catch(err){
-        console.error('[buildMonthlyReportData] ❌ Erro ao buscar leads do Firestore:', err);
-      }
-      
-      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social, goals, leadsCount, leadsData };
+      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social, goals };
     }
 
     // Cria/atualiza um documento de compartilhamento público e retorna o token
@@ -14666,19 +14492,15 @@ async function sendIAQuestion(){
       if(!uid) throw new Error('Usuário não autenticado');
       console.log('[createOrUpdateReportShare] uid:', uid);
       
-      const data = await buildMonthlyReportData(mesISO);
+      const data = buildMonthlyReportData(mesISO);
       console.log('[createOrUpdateReportShare] Data gerado:', {
         monthKey: data.monthKey,
         tenant: data.tenant,
         postsCount: Array.isArray(data.posts) ? data.posts.length : 0,
         storiesCount: Array.isArray(data.posts) ? data.posts.filter(p => p.target === 'stories').length : 0,
         feedCount: Array.isArray(data.posts) ? data.posts.filter(p => (p.target||'feed') === 'feed').length : 0,
-        metasCount: Array.isArray(data.metas) ? data.metas.length : 0,
-        leadsCount: data.leadsCount || 0,
-        leadsDataCount: Array.isArray(data.leadsData) ? data.leadsData.length : 0
+        metasCount: Array.isArray(data.metas) ? data.metas.length : 0
       });
-      
-      console.log('[createOrUpdateReportShare] leadsData preview:', Array.isArray(data.leadsData) && data.leadsData.length > 0 ? data.leadsData[0] : 'nenhum lead');
       
       // token aleatório (curto) base36
       const token = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0,20);
@@ -14695,9 +14517,7 @@ async function sendIAQuestion(){
         token,
         monthKey: payload.monthKey,
         tenant: payload.tenant,
-        payloadPostsCount: Array.isArray(payload.payload?.posts) ? payload.payload.posts.length : 0,
-        payloadLeadsCount: payload.payload?.leadsCount || 0,
-        payloadLeadsDataCount: Array.isArray(payload.payload?.leadsData) ? payload.payload.leadsData.length : 0
+        payloadPostsCount: Array.isArray(payload.payload?.posts) ? payload.payload.posts.length : 0
       });
       
       try{
@@ -14810,290 +14630,6 @@ async function sendIAQuestion(){
       filterMetas(currentMetasFilter);
     }
     
-    // Relatório: Leads Gerados no Mês (com análise completa)
-    async function renderRelatorioLeads(mesISO){
-      const leadsSection = document.getElementById('relatorioLeadsSection');
-      const leadsSubtitle = document.getElementById('relatorioLeadsSubtitle');
-      const leadsCount = document.getElementById('relatorioLeadsCount');
-      const leadsDesc = document.getElementById('relatorioLeadsDesc');
-      const leadsAnalysis = document.getElementById('relatorioLeadsAnalysis');
-      const leadsPlatforms = document.getElementById('relatorioLeadsPlatforms');
-      const leadsSources = document.getElementById('relatorioLeadsSources');
-      const leadsQuestions = document.getElementById('relatorioLeadsQuestions');
-      const leadsAIAnalysis = document.getElementById('relatorioLeadsAIAnalysis');
-      
-      if(!leadsSection || !mesISO) {
-        if(leadsSection) leadsSection.style.display = 'none';
-        return;
-      }
-      
-      console.log('[renderRelatorioLeads] Iniciando para mês:', mesISO);
-      
-      // Buscar leads do Firestore
-      let leadsList = [];
-      try {
-        const uid = auth?.currentUser?.uid;
-        const clientKey = getClientKeySafe();
-        
-        if(!uid || !clientKey) {
-          console.warn('[renderRelatorioLeads] Usuário ou cliente não encontrado');
-          leadsSection.style.display = 'none';
-          return;
-        }
-        
-        console.log('[renderRelatorioLeads] Buscando leads - uid:', uid, 'clientKey:', clientKey);
-        
-        // Buscar todos os leads do cliente
-        const leadsSnap = await getDocs(collection(db, 'usuarios', uid, 'clients', clientKey, 'leads'));
-        leadsList = leadsSnap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-        
-        console.log('[renderRelatorioLeads] Total de leads encontrados no Firestore:', leadsList.length);
-        
-        if(leadsList.length > 0) {
-          console.log('[renderRelatorioLeads] Primeiro lead (exemplo):', {
-            id: leadsList[0].id,
-            name: leadsList[0].name,
-            plataforma: leadsList[0].plataforma,
-            source: leadsList[0].source,
-            question: leadsList[0].question,
-            createdAt: leadsList[0].createdAt,
-            createdAtType: typeof leadsList[0].createdAt
-          });
-        }
-      } catch(err) {
-        console.error('[renderRelatorioLeads] Erro ao buscar leads do Firestore:', err);
-        leadsSection.style.display = 'none';
-        return;
-      }
-      
-      // Filtrar leads do mês pela coluna "Quando" (createdAt)
-      const filteredLeads = leadsList.filter(lead => {
-        if(!lead.createdAt) {
-          console.log('[renderRelatorioLeads] Lead sem createdAt:', lead.id);
-          return false;
-        }
-        
-        // Converter createdAt para data
-        let leadDate;
-        try {
-          if(typeof lead.createdAt.toMillis === 'function'){
-            leadDate = new Date(lead.createdAt.toMillis());
-          } else if(typeof lead.createdAt === 'number'){
-            leadDate = new Date(lead.createdAt);
-          } else if(typeof lead.createdAt.toDate === 'function'){
-            leadDate = lead.createdAt.toDate();
-          } else if(lead.createdAt.seconds) {
-            // Firestore Timestamp com seconds
-            leadDate = new Date(lead.createdAt.seconds * 1000);
-          } else {
-            console.warn('[renderRelatorioLeads] Formato de createdAt não reconhecido:', lead.createdAt);
-            return false;
-          }
-          
-          // Formatar data no formato YYYY-MM
-          const year = leadDate.getFullYear();
-          const month = String(leadDate.getMonth() + 1).padStart(2, '0');
-          const leadMonthISO = `${year}-${month}`;
-          
-          const match = leadMonthISO === mesISO;
-          
-          if(match) {
-            console.log('[renderRelatorioLeads] ✅ Lead do mês:', lead.name, 'criado em:', leadDate.toLocaleDateString('pt-BR'));
-          }
-          
-          return match;
-        } catch(err) {
-          console.warn('[renderRelatorioLeads] Erro ao processar lead:', lead.id, err);
-          return false;
-        }
-      });
-      
-      const leadCount = filteredLeads.length;
-      console.log('[renderRelatorioLeads] ✅ Leads filtrados para', mesISO, ':', leadCount);
-      
-      // Sempre mostrar seção (mesmo com 0 leads)
-      leadsSection.style.display = 'block';
-      
-      // Atualizar conteúdo
-      if(leadsSubtitle) {
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
-        leadsSubtitle.textContent = `Leads captados em ${mesNome} ${ano}`;
-      }
-      
-      if(leadsCount) {
-        leadsCount.textContent = leadCount;
-      }
-      
-      // Se não há leads, ocultar análise detalhada
-      if(leadCount === 0) {
-        if(leadsAnalysis) leadsAnalysis.style.display = 'none';
-        if(leadsDesc) {
-          const [ano, mes] = mesISO.split('-');
-          const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-          const mesNome = meses[parseInt(mes)-1] || mes;
-          leadsDesc.textContent = `Nenhum lead foi gerado durante ${mesNome} ${ano}.`;
-        }
-        return;
-      }
-      
-      // ===== ANÁLISE DETALHADA =====
-      
-      // 1. Análise por Plataforma (Google/Meta)
-      const platformStats = {};
-      filteredLeads.forEach(lead => {
-        const platform = (lead.plataforma || 'Não especificado').toString().trim() || 'Não especificado';
-        platformStats[platform] = (platformStats[platform] || 0) + 1;
-      });
-      
-      // 2. Análise por Fonte
-      const sourceStats = {};
-      filteredLeads.forEach(lead => {
-        const source = (lead.source || 'Não especificado').toString().trim() || 'Não especificado';
-        sourceStats[source] = (sourceStats[source] || 0) + 1;
-      });
-      
-      // 3. Principais Perguntas (top 5)
-      const questionStats = {};
-      filteredLeads.forEach(lead => {
-        const question = (lead.question || '').toString().trim();
-        if(question && question.length > 0) {
-          questionStats[question] = (questionStats[question] || 0) + 1;
-        }
-      });
-      const topQuestions = Object.entries(questionStats)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-      
-      // Renderizar análise por plataforma
-      if(leadsPlatforms) {
-        const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
-        leadsPlatforms.innerHTML = platformEntries.map(([platform, count]) => {
-          const percentage = Math.round((count / leadCount) * 100);
-          const icon = platform.toLowerCase().includes('google') ? '🔍' : 
-                       platform.toLowerCase().includes('meta') ? '📘' : '📱';
-          return `<div class="goal-pill" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.15);">
-            ${icon} ${platform}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
-          </div>`;
-        }).join('');
-      }
-      
-      // Renderizar análise por fonte
-      if(leadsSources) {
-        const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
-        leadsSources.innerHTML = sourceEntries.map(([source, count]) => {
-          const percentage = Math.round((count / leadCount) * 100);
-          return `<div class="goal-pill" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">
-            � ${source}: <strong>${count}</strong> <span style="opacity: 0.7;">(${percentage}%)</span>
-          </div>`;
-        }).join('');
-      }
-      
-      // Renderizar principais perguntas
-      if(leadsQuestions) {
-        if(topQuestions.length === 0) {
-          leadsQuestions.innerHTML = '<div style="color: #94a3b8; font-size: 0.9rem; padding: 8px;">Nenhuma pergunta registrada</div>';
-        } else {
-          leadsQuestions.innerHTML = topQuestions.map(([question, count], index) => {
-            const percentage = Math.round((count / leadCount) * 100);
-            return `<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;">
-              <div style="display: flex; align-items: start; gap: 8px;">
-                <span style="color: #fbbf24; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">${index + 1}.</span>
-                <div style="flex: 1;">
-                  <div style="color: #e2e8f0; margin-bottom: 4px; line-height: 1.4;">${escapeHtml(question)}</div>
-                  <div style="color: #94a3b8; font-size: 0.85rem;">
-                    <strong style="color: #60a5fa;">${count}</strong> ${count === 1 ? 'pergunta' : 'perguntas'} 
-                    <span style="opacity: 0.7;">(${percentage}% dos leads)</span>
-                  </div>
-                </div>
-              </div>
-            </div>`;
-          }).join('');
-        }
-      }
-      
-      // ===== ANÁLISE IA (Insights Automáticos) =====
-      if(leadsAIAnalysis) {
-        const insights = [];
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
-        
-        // Insight 1: Volume geral
-        const avgLeadsPerDay = (leadCount / 30).toFixed(1);
-        insights.push(`📊 <strong>Volume:</strong> ${leadCount} leads gerados em ${mesNome} ${ano}, com média de ${avgLeadsPerDay} leads/dia.`);
-        
-        // Insight 2: Plataforma dominante
-        const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
-        if(platformEntries.length > 0) {
-          const topPlatform = platformEntries[0];
-          const topPlatformPercent = Math.round((topPlatform[1] / leadCount) * 100);
-          insights.push(`📱 <strong>Plataforma líder:</strong> ${topPlatform[0]} com ${topPlatform[1]} leads (${topPlatformPercent}% do total).`);
-          
-          if(platformEntries.length > 1 && topPlatformPercent >= 70) {
-            insights.push(`💡 <strong>Recomendação:</strong> Há uma forte concentração em ${topPlatform[0]}. Considere diversificar investimentos em outras plataformas para reduzir dependência.`);
-          }
-        }
-        
-        // Insight 3: Fonte dominante
-        const sourceEntries = Object.entries(sourceStats).sort((a, b) => b[1] - a[1]);
-        if(sourceEntries.length > 0) {
-          const topSource = sourceEntries[0];
-          const topSourcePercent = Math.round((topSource[1] / leadCount) * 100);
-          insights.push(`🌐 <strong>Fonte principal:</strong> ${topSource[0]} com ${topSource[1]} leads (${topSourcePercent}% do total).`);
-        }
-        
-        // Insight 4: Engajamento (perguntas)
-        const leadsComPergunta = filteredLeads.filter(l => (l.question || '').toString().trim().length > 0).length;
-        const engagementRate = Math.round((leadsComPergunta / leadCount) * 100);
-        insights.push(`💬 <strong>Engajamento:</strong> ${engagementRate}% dos leads deixaram perguntas (${leadsComPergunta} de ${leadCount}).`);
-        
-        if(engagementRate < 30) {
-          insights.push(`⚠️ <strong>Atenção:</strong> Taxa de engajamento baixa. Considere revisar os formulários ou calls-to-action para incentivar mais interações.`);
-        } else if(engagementRate >= 70) {
-          insights.push(`✅ <strong>Excelente:</strong> Alta taxa de engajamento! Os leads estão demonstrando interesse genuíno.`);
-        }
-        
-        // Insight 5: Diversificação
-        if(platformEntries.length >= 2) {
-          insights.push(`�🎯 <strong>Diversificação:</strong> Leads provenientes de ${platformEntries.length} plataformas diferentes, demonstrando boa distribuição de canais.`);
-        }
-        
-        // Insight 6: Principais dúvidas
-        if(topQuestions.length > 0) {
-          const topQuestion = topQuestions[0];
-          insights.push(`❓ <strong>Principal dúvida:</strong> "${topQuestion[0]}" apareceu ${topQuestion[1]} ${topQuestion[1] === 1 ? 'vez' : 'vezes'}. Considere criar conteúdo ou FAQ abordando este tema.`);
-        }
-        
-        leadsAIAnalysis.innerHTML = insights.map(insight => 
-          `<div style="margin-bottom: 10px; padding-left: 4px; border-left: 3px solid rgba(168, 85, 247, 0.5);">${insight}</div>`
-        ).join('');
-      }
-      
-      // Mostrar análise detalhada
-      if(leadsAnalysis) leadsAnalysis.style.display = 'block';
-      
-      // Descrição final
-      if(leadsDesc) {
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
-        
-        const platformCount = Object.keys(platformStats).length;
-        const sourceCount = Object.keys(sourceStats).length;
-        
-        leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${mesNome} ${ano} através de ${platformCount} plataforma${platformCount === 1 ? '' : 's'} e ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} diferente${sourceCount === 1 ? '' : 's'}.`;
-      }
-      
-      // Helper para escapar HTML
-      function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-      }
-    }
-    
     // Relatório: Redes trabalhadas (lista apenas redes com link configurado)
     function renderRelatorioRedes(mesISO){
       // mesISO não altera os links, mas mantém consistência com as demais seções
@@ -15158,175 +14694,6 @@ async function sendIAQuestion(){
         frag.appendChild(card);
       });
       relatorioRedesGrid.replaceChildren(frag);
-    }
-    
-    // Gera resumo em texto de todo o relatório
-    function gerarResumoTexto(mesISO){
-      if(!relatorioResumoTextoSection || !relatorioResumoTextoContent || !mesISO) {
-        if(relatorioResumoTextoSection) relatorioResumoTextoSection.style.display = 'none';
-        return;
-      }
-      
-      const [ano, mes] = mesISO.split('-');
-      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[parseInt(mes)-1] || mes;
-      
-      let resumo = `📊 RESUMO DO RELATÓRIO - ${mesNome.toUpperCase()} ${ano}\n`;
-      resumo += `${'='.repeat(60)}\n\n`;
-      
-      // Stories
-      const storiesCount = document.querySelectorAll('#relatorioStoriesGrid .relatorio-story-item').length;
-      resumo += `📸 STORIES PUBLICADOS\n`;
-      resumo += `   Quantidade: ${storiesCount} ${storiesCount === 1 ? 'story' : 'stories'}\n\n`;
-      
-      // Posts
-      const postsCount = document.querySelectorAll('#relatorioPostsGrid .relatorio-story-item').length;
-      resumo += `📱 POSTS DE FEED PUBLICADOS\n`;
-      resumo += `   Quantidade: ${postsCount} ${postsCount === 1 ? 'post' : 'posts'}\n\n`;
-      
-      // Objetivos (Planejamento)
-      const goalsDone = document.querySelectorAll('#relatorioGoalsDone .goal-card').length;
-      const goalsProgress = document.querySelectorAll('#relatorioGoalsProgress .goal-card').length;
-      const goalsTodo = document.querySelectorAll('#relatorioGoalsTodo .goal-card').length;
-      const goalsTotal = goalsDone + goalsProgress + goalsTodo;
-      
-      if(goalsTotal > 0) {
-        resumo += `🎯 OBJETIVOS DO MÊS (PLANEJAMENTO)\n`;
-        resumo += `   Total de objetivos: ${goalsTotal}\n`;
-        resumo += `   ✅ Concluídos: ${goalsDone}\n`;
-        resumo += `   🔄 Em andamento: ${goalsProgress}\n`;
-        resumo += `   ⏳ Não iniciados: ${goalsTodo}\n`;
-        
-        if(goalsTotal > 0) {
-          const percentConcluido = Math.round((goalsDone / goalsTotal) * 100);
-          resumo += `   Taxa de conclusão: ${percentConcluido}%\n`;
-        }
-        resumo += `\n`;
-      }
-      
-      // Metas
-      const metasAchieved = document.querySelectorAll('#relatorioMetasAchieved .goal-card').length;
-      const metasProgress = document.querySelectorAll('#relatorioMetasProgress .goal-card').length;
-      const metasMissing = document.querySelectorAll('#relatorioMetasMissing .goal-card').length;
-      const metasTotal = metasAchieved + metasProgress + metasMissing;
-      
-      if(metasTotal > 0) {
-        resumo += `📈 METAS DO MÊS\n`;
-        resumo += `   Total de metas: ${metasTotal}\n`;
-        resumo += `   ✅ Atingidas: ${metasAchieved}\n`;
-        resumo += `   🔄 Em andamento: ${metasProgress}\n`;
-        resumo += `   ⚠️ Precisa colocar: ${metasMissing}\n`;
-        
-        if(metasTotal > 0) {
-          const percentAtingido = Math.round((metasAchieved / metasTotal) * 100);
-          resumo += `   Taxa de atingimento: ${percentAtingido}%\n`;
-        }
-        resumo += `\n`;
-      }
-      
-      // Leads
-      const leadsCountEl = document.getElementById('relatorioLeadsCount');
-      const leadsCount = leadsCountEl ? parseInt(leadsCountEl.textContent) || 0 : 0;
-      
-      if(leadsCount > 0) {
-        resumo += `🎯 LEADS GERADOS\n`;
-        resumo += `   Total de leads: ${leadsCount}\n`;
-        
-        // Plataformas
-        const platformsHTML = document.getElementById('relatorioLeadsPlatforms');
-        if(platformsHTML && platformsHTML.innerHTML.trim()) {
-          resumo += `\n   Por Plataforma:\n`;
-          const platforms = platformsHTML.querySelectorAll('.goal-pill');
-          platforms.forEach(pill => {
-            const text = pill.textContent.trim();
-            resumo += `   ${text}\n`;
-          });
-        }
-        
-        // Fontes
-        const sourcesHTML = document.getElementById('relatorioLeadsSources');
-        if(sourcesHTML && sourcesHTML.innerHTML.trim()) {
-          resumo += `\n   Por Fonte:\n`;
-          const sources = sourcesHTML.querySelectorAll('.goal-pill');
-          sources.forEach(pill => {
-            const text = pill.textContent.trim();
-            resumo += `   ${text}\n`;
-          });
-        }
-        
-        // Top perguntas
-        const questionsHTML = document.getElementById('relatorioLeadsQuestions');
-        if(questionsHTML && questionsHTML.innerHTML.trim()) {
-          const questions = questionsHTML.querySelectorAll('div[style*="background"]');
-          if(questions.length > 0) {
-            resumo += `\n   Principais Perguntas:\n`;
-            questions.forEach((q, idx) => {
-              const questionText = q.querySelector('div[style*="color: #e2e8f0"]')?.textContent?.trim();
-              if(questionText) {
-                resumo += `   ${idx + 1}. ${questionText}\n`;
-              }
-            });
-          }
-        }
-        
-        resumo += `\n`;
-      }
-      
-      // Redes trabalhadas
-      const redesCount = document.querySelectorAll('#relatorioRedesGrid .macro-social-item').length;
-      if(redesCount > 0) {
-        resumo += `🔗 REDES TRABALHADAS\n`;
-        resumo += `   Quantidade: ${redesCount} ${redesCount === 1 ? 'rede' : 'redes'} com link configurado\n\n`;
-      }
-      
-      // Rodapé
-      resumo += `${'='.repeat(60)}\n`;
-      resumo += `Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}\n`;
-      
-      // Preencher conteúdo
-      relatorioResumoTextoContent.textContent = resumo;
-      relatorioResumoTextoSection.style.display = 'block';
-    }
-    
-    // Copiar resumo para clipboard
-    async function copiarResumoTexto(){
-      if(!relatorioResumoTextoContent) return;
-      
-      const texto = relatorioResumoTextoContent.textContent;
-      
-      try {
-        if(navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(texto);
-          
-          // Feedback visual
-          if(btnCopiarResumo) {
-            const textoOriginal = btnCopiarResumo.textContent;
-            btnCopiarResumo.textContent = '✅ Copiado!';
-            btnCopiarResumo.style.background = 'rgba(16, 185, 129, 0.3)';
-            btnCopiarResumo.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-            
-            setTimeout(() => {
-              btnCopiarResumo.textContent = textoOriginal;
-              btnCopiarResumo.style.background = '';
-              btnCopiarResumo.style.borderColor = '';
-            }, 2000);
-          }
-        } else {
-          // Fallback para navegadores antigos
-          const textArea = document.createElement('textarea');
-          textArea.value = texto;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-9999px';
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          alert('✅ Resumo copiado!');
-        }
-      } catch(err) {
-        console.error('Erro ao copiar resumo:', err);
-        alert('Erro ao copiar. Tente selecionar e copiar manualmente.');
-      }
     }
     
     function exportarRelatorioPDF(){
@@ -24337,7 +23704,146 @@ async function sendIAQuestion(){
         const urlParams = new URLSearchParams(window.location.search);
         const isAdminAccess = urlParams.get('admin') === 'true';
         const clientUid = urlParams.get('uid');
+        const clientKey = urlParams.get('clientKey');
+        const adminEmail = urlParams.get('adminEmail');
         
+        // SE É ACESSO ADMIN: ignora o usuário logado e cria sessão fake
+        if(isAdminAccess && clientUid){
+          console.log('🔐 Acesso Admin detectado - criando sessão simulada para UID:', clientUid, 'ClientKey:', clientKey);
+          
+          let userData;
+          let actualClientKey;
+          
+          if (clientKey) {
+            // Se clientKey foi passado, busca diretamente esse cliente específico
+            console.log('📌 Carregando cliente específico:', clientKey);
+            const clientRef = doc(db, "usuarios", clientUid, "clients", clientKey);
+            const clientSnap = await getDoc(clientRef);
+            
+            if (!clientSnap.exists()) {
+              console.error('❌ Cliente específico não encontrado:', clientKey);
+              mgToast('❌ Cliente não encontrado.');
+              authArea.style.display="flex"; 
+              authArea.setAttribute("aria-hidden","false");
+              return;
+            }
+            
+            userData = clientSnap.data();
+            actualClientKey = clientKey;
+            console.log('✅ Cliente carregado:', actualClientKey, 'Email:', userData.user || userData.email);
+          } else {
+            // Fallback: Se não passou clientKey, pega o primeiro da subcoleção
+            console.log('⚠️ ClientKey não fornecido, buscando primeiro cliente...');
+            const clientsRef = collection(db, "usuarios", clientUid, "clients");
+            const clientsSnap = await getDocs(clientsRef);
+            
+            if (clientsSnap.empty) {
+              console.error('❌ Nenhum cliente encontrado na subcoleção para:', clientUid);
+              mgToast('❌ Nenhum cliente encontrado. Configure um cliente primeiro.');
+              authArea.style.display="flex"; 
+              authArea.setAttribute("aria-hidden","false");
+              return;
+            }
+            
+            // Pega o primeiro cliente
+            const firstClientDoc = clientsSnap.docs[0];
+            userData = firstClientDoc.data();
+            actualClientKey = firstClientDoc.id;
+            
+            console.log('✅ Primeiro cliente encontrado:', actualClientKey, 'Email:', userData.user || userData.email);
+          }
+          
+          USER_DATA = userData;
+          
+          // Cria um objeto "user fake" que simula o usuário estar logado
+          const fakeUser = {
+            uid: clientUid,
+            email: userData.user || userData.email || `client-${clientUid}@fake.local`,
+            displayName: userData.displayName || userData.name || userData.email?.split('@')[0] || 'Cliente',
+            photoURL: userData.CLIENT_PROFILE?.profileLogoUrl || userData.photoURL || null,
+            emailVerified: true,
+            metadata: {
+              creationTime: new Date().toISOString(),
+              lastSignInTime: new Date().toISOString()
+            },
+            providerData: [{
+              providerId: 'admin-session',
+              uid: clientUid,
+              displayName: userData.displayName || userData.email?.split('@')[0],
+              email: userData.email,
+              photoURL: userData.photoURL || null
+            }],
+            _isAdminSession: true,
+            _adminEmail: user?.email || adminEmail || 'admin'
+          };
+          
+          // Armazena o fakeUser globalmente
+          window._adminFakeUser = fakeUser;
+          
+          console.log('✅ Sessão admin criada para:', fakeUser.email);
+          
+          // Define TENANT baseado no email do cliente
+          const tenantFromEmail = (fakeUser.email||'').split('@')[0].toLowerCase();
+          TENANT = tenantFromEmail || clientUid;
+          window.TENANT = TENANT;
+          try{ 
+            document.documentElement.dataset.tenant = TENANT; 
+            document.body.setAttribute('data-client-id', TENANT); 
+          }catch(_){}
+          
+          // Oculta área de autenticação e mostra painel
+          resetStorageUsageState({ loading: true });
+          authArea.style.display="none"; authArea.setAttribute("aria-hidden","true");
+          userArea.style.display="block"; userArea.setAttribute("aria-hidden","false");
+          if(refreshBtn) refreshBtn.style.display = "block";
+          if(notificationWidgetWrap) notificationWidgetWrap.style.display = "flex";
+          if(noteWidget) noteWidget.style.display = "flex";
+          
+          // Atualiza informações do usuário no header
+          const adminBadge = `<span style="background:#7c4dff;color:#fff;padding:2px 8px;border-radius:999px;font-size:0.75rem;margin-left:8px;">ADMIN: ${user?.email || adminEmail || 'Admin'}</span>`;
+          $("userInfo").innerHTML = `Visualizando como: ${fakeUser.displayName || fakeUser.email} ${adminBadge}`;
+          
+          // Exibe botão para voltar ao painel admin
+          const adminPanelBtn = $("adminPanelBtn");
+          if(adminPanelBtn) {
+            adminPanelBtn.style.display = "inline-block";
+            adminPanelBtn.onclick = () => window.location.href = 'admin-selector.html';
+          }
+          
+          // Carrega dados do cliente
+          await loadClientProfile();
+          startClientAccountsListener();
+          syncStorageLimitFromProfile();
+          loadBriefFromUserData();
+          
+          // Carrega posts e outras funcionalidades
+          if(!postsUnsub){
+            postsUnsub = onSnapshot(
+              query(collection(db,"usuarios",clientUid,"posts"), orderBy("dateISO","desc")),
+              (s)=>{
+                const arr = s.docs.map(d=>({...d.data(), id:d.id}));
+                posts = arr;
+                renderCalendar();
+                renderPostsGrid();
+              },
+              (err)=>{ 
+                console.error("Error loading posts:", err); 
+                mgToast("Erro ao carregar posts: "+err.message); 
+              }
+            );
+          }
+          
+          // Carrega outras coleções necessárias
+          loadMetasFromUserData();
+          loadMetaPanelsFromUserData();
+          loadCACFromUserData();
+          renderMetas();
+          if(renderCAC.refresh) renderCAC.refresh();
+          
+          return; // IMPORTANTE: retorna aqui para não processar o código de usuário normal
+        }
+        
+        // USUÁRIO NORMAL (não é acesso admin)
         if(user){
           const tenantFromEmail = (user.email||'').split('@')[0].toLowerCase();
           if(tenantFromEmail){
@@ -24448,29 +23954,69 @@ async function sendIAQuestion(){
             triggerMacroAutoOpen();
           });
         }else{
+          // CÓDIGO DE ACESSO ADMIN MOVIDO PARA O TOPO (antes do if(user))
+          // Não é necessário processar aqui porque já foi tratado acima
+          
+          // Se chegou aqui, é porque não há usuário E não é acesso admin
           // Verifica se é acesso admin sem estar logado
           const urlParams = new URLSearchParams(window.location.search);
           const isAdminAccess = urlParams.get('admin') === 'true';
-          const clientUid = urlParams.get('uid');
-          const adminEmail = urlParams.get('adminEmail');
           
-          if(isAdminAccess && clientUid){
+          if(isAdminAccess){
+            // Se é acesso admin mas chegou aqui, significa que o código do topo já processou
+            // Não fazer nada, apenas aguardar
+            return;
+          }
+          
+          // Usuário não logado e não é acesso admin - mostra login
+          authArea.style.display="flex";
+          authArea.setAttribute("aria-hidden","false");
+        }
             // Admin acessando conta de cliente - cria sessão simulada
-            console.log('🔐 Acesso Admin detectado - criando sessão simulada');
+            console.log('🔐 Acesso Admin detectado - criando sessão simulada para UID:', clientUid, 'ClientKey:', clientKey);
             
-            // Carrega dados do cliente do Firestore
-            const ref = doc(db,"usuarios",clientUid);
-            const snap = await getDoc(ref);
+            let userData;
+            let actualClientKey;
             
-            if (!snap.exists()) {
-              console.error('❌ Usuário não encontrado no Firestore:', clientUid);
-              mgToast('❌ Usuário não encontrado. A conta pode ter sido deletada.');
-              authArea.style.display="flex"; 
-              authArea.setAttribute("aria-hidden","false");
-              return;
+            if (clientKey) {
+              // Se clientKey foi passado, busca diretamente esse cliente específico
+              console.log('📌 Carregando cliente específico:', clientKey);
+              const clientRef = doc(db, "usuarios", clientUid, "clients", clientKey);
+              const clientSnap = await getDoc(clientRef);
+              
+              if (!clientSnap.exists()) {
+                console.error('❌ Cliente específico não encontrado:', clientKey);
+                mgToast('❌ Cliente não encontrado.');
+                authArea.style.display="flex"; 
+                authArea.setAttribute("aria-hidden","false");
+                return;
+              }
+              
+              userData = clientSnap.data();
+              actualClientKey = clientKey;
+              console.log('✅ Cliente carregado:', actualClientKey, 'Email:', userData.user || userData.email);
+            } else {
+              // Fallback: Se não passou clientKey, pega o primeiro da subcoleção
+              console.log('⚠️ ClientKey não fornecido, buscando primeiro cliente...');
+              const clientsRef = collection(db, "usuarios", clientUid, "clients");
+              const clientsSnap = await getDocs(clientsRef);
+              
+              if (clientsSnap.empty) {
+                console.error('❌ Nenhum cliente encontrado na subcoleção para:', clientUid);
+                mgToast('❌ Nenhum cliente encontrado. Configure um cliente primeiro.');
+                authArea.style.display="flex"; 
+                authArea.setAttribute("aria-hidden","false");
+                return;
+              }
+              
+              // Pega o primeiro cliente
+              const firstClientDoc = clientsSnap.docs[0];
+              userData = firstClientDoc.data();
+              actualClientKey = firstClientDoc.id;
+              
+              console.log('✅ Primeiro cliente encontrado:', actualClientKey, 'Email:', userData.user || userData.email);
             }
             
-            const userData = snap.data();
             USER_DATA = userData;
             
             // Cria um objeto "user fake" que simula o usuário estar logado

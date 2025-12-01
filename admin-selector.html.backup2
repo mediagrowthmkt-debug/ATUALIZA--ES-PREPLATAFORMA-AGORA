@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000, #1a1a1a 40%, #ff6600 120%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { font-size: 2.5rem; margin-bottom: 10px; color: #ff6600; }
+    .loading { 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.9); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 9999; 
+    }
+    .spinner {
+      width: 60px; height: 60px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #ff6600;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .admin-info {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logout-btn {
+      background: rgba(255,102,0,0.2);
+      color: #ff6600;
+      border: 1px solid #ff6600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .logout-btn:hover { background: #ff6600; color: #000; }
+    .add-section {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+    .add-section h2 { color: #ff6600; margin-bottom: 20px; }
+    .add-form { display: flex; gap: 10px; }
+    .add-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .add-form button {
+      padding: 12px 30px;
+      background: #ff6600;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .add-form button:disabled { background: #555; cursor: not-allowed; }
+    .companies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .company-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .company-card:hover {
+      transform: translateY(-5px);
+      border-color: #ff6600;
+      box-shadow: 0 10px 25px rgba(255,102,0,0.2);
+    }
+    .company-header { display: flex; gap: 15px; margin-bottom: 15px; }
+    .company-logo {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6600, #ff9944);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      overflow: hidden;
+    }
+    .company-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .company-actions { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-access {
+      flex: 1;
+      padding: 10px;
+      background: #ff6600;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-remove {
+      padding: 10px 15px;
+      background: rgba(255,0,0,0.2);
+      color: #ff4444;
+      border: 1px solid #ff4444;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .error { background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff4444; }
+    .success { background: rgba(68,255,68,0.1); border: 1px solid #44ff44; color: #44ff44; }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p id="loadingMsg" style="position: absolute; bottom: 40%; color: #fff; font-size: 1rem;">Carregando...</p>
+  </div>
+
+  <div class="container" style="display:none;" id="main">
+    <div class="header">
+      <h1>�� Painel Admin</h1>
+      <p>Gerencie o acesso às contas dos seus clientes</p>
+    </div>
+
+    <div class="admin-info">
+      <div>
+        <strong id="adminName">Admin</strong>
+        <p id="adminEmail" style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">admin@example.com</p>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+
+    <div id="msg"></div>
+
+    <div class="add-section">
+      <h2>➕ Adicionar Empresa</h2>
+      <div class="add-form">
+        <input type="email" id="emailInput" placeholder="Digite o e-mail do cliente..." />
+        <button onclick="add()" id="addBtn">Adicionar</button>
+      </div>
+      <p style="margin-top:10px; color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+        💡 Digite o e-mail do cliente cadastrado no sistema
+      </p>
+    </div>
+
+    <div class="companies-grid" id="grid"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+    import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+    import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const functions = getFunctions(app);
+    let user = null;
+    let authChecked = false;
+
+    // Garantir persistência LOCAL (mantém login mesmo fechando navegador)
+    setPersistence(auth, browserLocalPersistence).catch(err => {
+      console.error('Erro ao configurar persistência:', err);
+    });
+
+    onAuthStateChanged(auth, (u) => {
+      console.log('Auth state changed:', u ? u.email : 'no user', 'checked:', authChecked);
+      
+      if (u) {
+        user = u;
+        authChecked = true;
+        init().catch(err => {
+          console.error('Init error:', err);
+          alert('Erro ao inicializar: ' + err.message);
+          document.getElementById('loading').style.display = 'none';
+        });
+      } else {
+        // Aguarda um pouco antes de redirecionar (Firebase pode estar carregando)
+        if (!authChecked) {
+          authChecked = true;
+          console.log('First auth check, waiting...');
+          setTimeout(() => {
+            if (!user) {
+              console.log('No user after wait, redirecting to setup');
+              window.location.href = 'admin-setup.html';
+            }
+          }, 1000);
+        } else {
+          console.log('No user on second check, redirecting immediately');
+          window.location.href = 'admin-setup.html';
+        }
+      }
+    });
+
+    async function init() {
+      try {
+        console.log('Initializing with user:', user.email);
+        
+        document.getElementById('adminName').textContent = user.displayName || 'Admin';
+        document.getElementById('adminEmail').textContent = user.email;
+        
+        await load();
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main').style.display = 'block';
+        console.log('Init complete');
+      } catch (error) {
+        console.error('Error in init:', error);
+        throw error;
+      }
+    }
+
+    async function load() {
+      try {
+        console.log('Loading companies for user:', user.uid);
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        
+        const snap = await getDocs(collection(db, 'admins', user.uid, 'companies'));
+        console.log('Companies found:', snap.size);
+        
+        if (snap.empty) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(255,255,255,0.5);">Nenhuma empresa adicionada</div>';
+          return;
+        }
+
+        for (const d of snap.docs) {
+          const data = d.data();
+          const uid = d.id;
+          const email = data.email || '';
+          let photo = '';
+
+          try {
+            const userDoc = await getDoc(doc(db, 'usuarios', uid));
+            if (userDoc.exists()) {
+              const uData = userDoc.data();
+              if (uData.clients) {
+                for (const k in uData.clients) {
+                  if (uData.clients[k].CLIENT_PROFILE?.profileLogoUrl) {
+                    photo = uData.clients[k].CLIENT_PROFILE.profileLogoUrl;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Error loading company data:', e);
+          }
+
+          const letter = email ? email[0].toUpperCase() : 'E';
+          grid.innerHTML += `
+            <div class="company-card">
+              <div class="company-header">
+                <div class="company-logo">
+                  ${photo ? `<img src="${photo}" alt="${email}">` : letter}
+                </div>
+                <div>
+                  <h3>${email || 'Empresa'}</h3>
+                  <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;">UID: ${uid.substring(0,12)}...</p>
+                </div>
+              </div>
+              <div class="company-actions">
+                <button class="btn-access" onclick="access('${uid}')">Acessar</button>
+                <button class="btn-remove" onclick="remove('${uid}','${email}')">🗑️</button>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error in load():', error);
+        throw error;
+      }
+    }
+
+    window.add = async function() {
+      const input = document.getElementById('emailInput');
+      const email = input.value.trim().toLowerCase();
+      const btn = document.getElementById('addBtn');
+      
+      if (!email) {
+        msg('Insira o e-mail', 'error');
+        return;
+      }
+
+      if (!email.includes('@')) {
+        msg('E-mail inválido', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Buscando...';
+
+      try {
+        // Buscar UID do usuário verificando se existe no Firestore
+        console.log('🔍 Buscando UID para e-mail:', email);
+        const usuariosRef = collection(db, 'usuarios');
+        const snapshot = await getDocs(usuariosRef);
+        
+        console.log('📊 Total de usuários no Firestore:', snapshot.size);
+        
+        let foundUid = null;
+
+        // Verificar se o email existe no Authentication buscando no Firestore
+        // (Firestore UIDs são os mesmos do Authentication)
+        for (const docSnap of snapshot.docs) {
+          const userId = docSnap.id;
+          
+          // Buscar na SUBCOLEÇÃO clients para verificar se o email existe
+          try {
+            const clientsRef = collection(db, 'usuarios', userId, 'clients');
+            const clientsSnap = await getDocs(clientsRef);
+            
+            console.log(`� User ${userId}: ${clientsSnap.size} clients`);
+            
+            for (const clientDoc of clientsSnap.docs) {
+              const clientData = clientDoc.data();
+              console.log(`     Client ${clientDoc.id}:`, {
+                user: clientData.user,
+                name: clientData.name
+              });
+              
+              // Verificar se o e-mail está no campo 'user'
+              if (clientData.user && clientData.user.toLowerCase() === email) {
+                foundUser = docSnap.data();
+                foundUid = userId;
+                console.log('✅ ENCONTRADO! UID:', userId, 'Email:', clientData.user);
+                break;
+              }
+            }
+            
+            if (foundUid) break; // Já encontrou, sai do loop externo
+            
+          } catch (error) {
+            console.error(`   ❌ Erro ao buscar clients de ${userId}:`, error);
+          }
+          
+          console.log('---');
+        }
+
+        if (!foundUser || !foundUid) {
+          console.error('❌ Email não encontrado:', email);
+          msg('❌ Usuário não encontrado com este e-mail', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Adicionar';
+          return;
+        }
+
+        console.log('💾 Salvando empresa no admin...');
+
+        // Adicionar à coleção do admin
+        await setDoc(doc(db, 'admins', user.uid, 'companies', foundUid), {
+          companyName: email,
+          email: email,
+          addedAt: new Date().toISOString()
+        });
+
+        msg(`✅ ${email} adicionado com sucesso!`, 'success');
+        input.value = '';
+        
+        await load();
+
+      } catch (e) {
+        console.error('Erro ao adicionar empresa:', e);
+        msg('Erro: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Adicionar';
+      }
+    };
+
+    window.remove = async function(uid, name) {
+      if (!confirm(`Remover "${name}"?`)) return;
+      try {
+        await deleteDoc(doc(db, 'admins', user.uid, 'companies', uid));
+        msg('✅ Removida!', 'success');
+        await load();
+      } catch (e) {
+        msg('Erro: ' + e.message, 'error');
+      }
+    };
+
+    window.access = function(uid) {
+      window.location.href = `index.html?admin=true&uid=${uid}`;
+    };
+
+    window.logout = async function() {
+      if (confirm('Sair?')) {
+        await signOut(auth);
+        window.location.href = 'admin-setup.html';
+      }
+    };
+
+    function msg(text, type) {
+      const el = document.getElementById('msg');
+      el.innerHTML = `<div class="message ${type}">${text}</div>`;
+      setTimeout(() => el.innerHTML = '', 5000);
+    }
+
+    document.getElementById('emailInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        window.add();
+      }
+    });
+  </script>
+</body>
+</html>

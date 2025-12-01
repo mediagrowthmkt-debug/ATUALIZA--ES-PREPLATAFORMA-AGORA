@@ -33,10 +33,56 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.receiveLead = exports.becomeAgency = void 0;
-const functions = __importStar(require("firebase-functions"));
+exports.receiveLead = exports.becomeAgency = exports.getUserByEmail = void 0;
+const functions = __importStar(require("firebase-functions/v1"));
 const admin = __importStar(require("firebase-admin"));
 admin.initializeApp();
+// 👉 Busca UID de um usuário pelo email (para admins) - usando v1 para compatibilidade
+exports.getUserByEmail = functions.https.onCall(async (data, context) => {
+    var _a, _b;
+    console.log('getUserByEmail called with:', {
+        email: data === null || data === void 0 ? void 0 : data.email,
+        hasAuth: !!context.auth,
+        uid: (_a = context.auth) === null || _a === void 0 ? void 0 : _a.uid,
+        token: (_b = context.auth) === null || _b === void 0 ? void 0 : _b.token
+    });
+    // Verifica se o usuário está logado
+    if (!context.auth) {
+        console.error('No auth context!');
+        throw new functions.https.HttpsError('unauthenticated', 'Faça login primeiro.');
+    }
+    console.log('Auth UID:', context.auth.uid);
+    // Verifica se é admin
+    const adminDoc = await admin.firestore().doc(`admins/${context.auth.uid}`).get();
+    console.log('Admin doc exists:', adminDoc.exists);
+    if (!adminDoc.exists) {
+        throw new functions.https.HttpsError('permission-denied', 'Apenas admins podem buscar usuários.');
+    }
+    const email = ((data === null || data === void 0 ? void 0 : data.email) || '').toString().trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+        throw new functions.https.HttpsError('invalid-argument', 'Email inválido.');
+    }
+    console.log('Searching for email:', email);
+    try {
+        // Busca usuário no Firebase Authentication pelo email
+        const userRecord = await admin.auth().getUserByEmail(email);
+        console.log('User found:', userRecord.uid);
+        return {
+            ok: true,
+            uid: userRecord.uid,
+            email: userRecord.email,
+            displayName: userRecord.displayName || null
+        };
+    }
+    catch (err) {
+        if (err.code === 'auth/user-not-found') {
+            console.log('User not found');
+            throw new functions.https.HttpsError('not-found', 'Usuário não encontrado com este email.');
+        }
+        console.error('getUserByEmail error:', err);
+        throw new functions.https.HttpsError('internal', 'Erro ao buscar usuário.');
+    }
+});
 // 👉 Função para transformar a conta em AGENCIA
 exports.becomeAgency = functions.https.onCall(async (data, context) => {
     // Verifica se o usuário está logado

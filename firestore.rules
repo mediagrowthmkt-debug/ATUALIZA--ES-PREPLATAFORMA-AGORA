@@ -35,8 +35,13 @@ service cloud.firestore {
 
       // O dono (usuário legado) segue com acesso total e agência/cliente têm acesso dentro do próprio contexto
     allow read: if isOwner(userId)
+           || isAdmin()
            || (isSignedIn() && exists(resource) && resource.data.agencyId == request.auth.uid)
            || (isClient() && exists(resource) && sameClientData(resource.data));
+    
+    // Permite admin fazer queries (list) para buscar por email
+    allow list: if isAdmin();
+    
     allow create, update, delete: if isOwner(userId)
            || (isSignedIn()
              && request.resource.data.agencyId is string
@@ -200,7 +205,20 @@ service cloud.firestore {
     match /clientes_index/{clienteId} { allow read: if isAdmin(); allow write: if false; }
 
     /* Lista de admins */
-    match /admins/{uid} { allow read: if isOwner(uid); allow write: if false; }
+    match /admins/{uid} { 
+      allow read: if isOwner(uid) || isAdmin(); 
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isOwner(uid);
+      allow delete: if false;
+      
+      /* Companies gerenciadas pelo admin */
+      match /companies/{companyId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid);
+        allow update: if isOwner(uid);
+        allow delete: if isOwner(uid);
+      }
+    }
 
     /* 🔰 Formulário público de Metas (mantido) */
     match /metasForms/{token} {
