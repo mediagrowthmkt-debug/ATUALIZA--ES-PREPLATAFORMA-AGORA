@@ -4098,8 +4098,8 @@ function renderReviewNotes(post){
   .leads-list{ display:flex; flex-direction:column; gap:8px; }
   .lead-row{
     display:grid;
-    /* Última coluna ampliada para comportar ações de edição */
-    grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px;
+    /* Checkbox + 7 colunas de dados + ações */
+    grid-template-columns: 40px 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px;
     gap:10px;
     align-items:center;
     background: rgba(15,23,42,.45);
@@ -4125,10 +4125,47 @@ function renderReviewNotes(post){
   }
   .lead-fonte{ color:#94a3b8; font-size:.85rem; }
   .lead-when{ color:#94a3b8; font-size:.8rem; text-align:right; }
-  .leads-header{ display:grid; grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 50px; gap:10px; padding: 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; align-items:center; }
-  .leads-header{ grid-template-columns: 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px; }
+  .leads-header{ display:grid; grid-template-columns: 40px 1.2fr 1.2fr .9fr 2fr .7fr .8fr .8fr 110px; gap:10px; padding: 8px; color:#94a3b8; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; font-weight:800; align-items:center; }
   .leads-header > div{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .leads-empty{ color:#94a3b8; padding: 20px; text-align:center; border:1px dashed rgba(148,163,184,.28); border-radius:12px; }
+  
+  /* Bulk Edit */
+  .leads-bulk-toolbar{
+    display: none;
+    background: rgba(56,189,248,.12);
+    border: 1px solid rgba(56,189,248,.35);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    gap: 12px;
+    align-items: center;
+  }
+  .leads-bulk-toolbar.active{ display: flex; }
+  .leads-bulk-info{
+    font-weight: 700;
+    color: #bae6fd;
+    font-size: .95rem;
+  }
+  .leads-bulk-actions{
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .leads-bulk-actions .btn{
+    font-size: .85rem;
+    padding: 8px 12px;
+  }
+  .lead-checkbox{
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--accent, #ff6600);
+  }
+  .lead-row.selected{
+    background: rgba(56,189,248,.15);
+    border-color: rgba(56,189,248,.45);
+  }
   .lead-delete-btn{ 
     background: rgba(220,38,38,.16); 
     border: 1px solid rgba(220,38,38,.45); 
@@ -4180,19 +4217,36 @@ function renderReviewNotes(post){
     .leads-webhook{ grid-template-columns: 1fr; }
     .leads-header{ display:none; }
     .lead-row{ 
-      grid-template-columns: 1fr auto; 
+      grid-template-columns: 40px 1fr auto; 
       gap:6px; 
       align-items:flex-start; 
     }
-    .lead-row .lead-cell:nth-child(-n+6) {
+    .lead-row .lead-cell:first-child {
       grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+      padding-top: 4px;
+    }
+    .lead-row .lead-cell:nth-child(n+2):nth-child(-n+7) {
+      grid-column: 2;
     }
     .lead-row .lead-cell:last-child {
-      grid-column: 2;
-      grid-row: 1 / -1;
+      grid-column: 3;
+      grid-row: 1;
       align-self: center;
     }
     .lead-when{ text-align:left; }
+    .leads-bulk-toolbar{
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .leads-bulk-actions{
+      flex-direction: column;
+      width: 100%;
+    }
+    .leads-bulk-actions .btn{
+      width: 100%;
+    }
   }
 </style>
 <div aria-hidden="true" class="cac-wrap" id="cacWrap" style="display:none">
@@ -4282,7 +4336,29 @@ function renderReviewNotes(post){
       <button class="btn small" id="leadsWebhookCopy" type="button">Copiar URL</button>
       <button class="btn small ghost" id="leadsWebhookRegenerate" type="button" title="Gera um novo token de segurança">Regenerar token</button>
     </div>
-    <div class="leads-header"><div>Nome</div><div>E-mail</div><div>Telefone</div><div>Pergunta</div><div>Plataforma</div><div>Fonte</div><div>Quando</div><div></div></div>
+    <!-- Barra de ferramentas de edição em lote -->
+    <div id="leadsBulkToolbar" class="leads-bulk-toolbar">
+      <div class="leads-bulk-info">
+        <span id="leadsBulkCount">0</span> selecionado(s)
+      </div>
+      <div class="leads-bulk-actions">
+        <button class="btn small" id="leadsBulkEdit" type="button">✎ Editar Selecionados</button>
+        <button class="btn small danger" id="leadsBulkDelete" type="button">× Remover Selecionados</button>
+        <button class="btn small ghost" id="leadsBulkClear" type="button">Limpar Seleção</button>
+      </div>
+    </div>
+
+    <div class="leads-header">
+      <div><input type="checkbox" id="leadsSelectAll" class="lead-checkbox" title="Selecionar todos"/></div>
+      <div>Nome</div>
+      <div>E-mail</div>
+      <div>Telefone</div>
+      <div>Pergunta</div>
+      <div>Plataforma</div>
+      <div>Fonte</div>
+      <div>Quando</div>
+      <div></div>
+    </div>
     <div id="leadsList" class="leads-list"></div>
     <p id="leadsEmpty" class="leads-empty" style="display:none">Nenhum lead recebido ainda.</p>
   </div>
@@ -18608,6 +18684,34 @@ async function sendIAQuestion(){
           if(typeof mgToast==='function') mgToast('Novo token gerado');
         }catch(err){ alert('Não foi possível regenerar: ' + (err?.message||err)); }
       });
+      
+      // Eventos de edição em lote
+      const selectAllCheckbox = $('leadsSelectAll');
+      const bulkEditBtn = $('leadsBulkEdit');
+      const bulkDeleteBtn = $('leadsBulkDelete');
+      const bulkClearBtn = $('leadsBulkClear');
+      
+      selectAllCheckbox?.addEventListener('change', () => {
+        const isChecked = selectAllCheckbox.checked;
+        if(leadsListEl){
+          leadsListEl.querySelectorAll('.lead-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+          });
+          updateBulkToolbar();
+        }
+      });
+      
+      bulkEditBtn?.addEventListener('click', () => {
+        openBulkEditModal();
+      });
+      
+      bulkDeleteBtn?.addEventListener('click', async () => {
+        await bulkDeleteLeads();
+      });
+      
+      bulkClearBtn?.addEventListener('click', () => {
+        clearBulkSelection();
+      });
 
       // Inicializa fluxo
       (async ()=>{
@@ -18803,6 +18907,9 @@ async function sendIAQuestion(){
         const when = formatWhen(l.createdAt || l.updatedAt || null);
         const esc = (s)=> String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
         return `<div class="lead-row" data-lead-id="${l.id || ''}">
+          <div class="lead-cell">
+            <input type="checkbox" class="lead-checkbox" data-lead-id="${l.id || ''}" />
+          </div>
           <div class="lead-cell lead-name" title="${esc(name)}">${esc(name)||'-'}</div>
           <div class="lead-cell lead-email" title="${esc(email)}">${esc(email)||'-'}</div>
           <div class="lead-cell lead-phone" title="${esc(phone)}">${esc(phone)||'-'}</div>
@@ -18835,6 +18942,13 @@ async function sendIAQuestion(){
           const row = btn.closest('.lead-row');
           if(!row) return;
           enterLeadEditMode(row);
+        });
+      });
+      
+      // Bind checkboxes para seleção múltipla
+      leadsListEl.querySelectorAll('.lead-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          updateBulkToolbar();
         });
       });
     }
@@ -18916,6 +19030,207 @@ async function sendIAQuestion(){
           renderLeadsList();
         });
       }
+    }
+
+    // ========= BULK EDIT FUNCTIONS =========
+    
+    function getSelectedLeadIds(){
+      if(!leadsListEl) return [];
+      const checkboxes = leadsListEl.querySelectorAll('.lead-checkbox:checked');
+      return Array.from(checkboxes).map(cb => cb.getAttribute('data-lead-id')).filter(Boolean);
+    }
+    
+    function updateBulkToolbar(){
+      const bulkToolbar = $('leadsBulkToolbar');
+      const bulkCount = $('leadsBulkCount');
+      const selectAllCheckbox = $('leadsSelectAll');
+      
+      const selectedIds = getSelectedLeadIds();
+      const count = selectedIds.length;
+      
+      if(bulkCount) bulkCount.textContent = count;
+      
+      if(bulkToolbar){
+        if(count > 0){
+          bulkToolbar.classList.add('active');
+        } else {
+          bulkToolbar.classList.remove('active');
+        }
+      }
+      
+      // Atualizar estado do checkbox "selecionar todos"
+      if(selectAllCheckbox && leadsListEl){
+        const allCheckboxes = leadsListEl.querySelectorAll('.lead-checkbox');
+        const checkedCount = leadsListEl.querySelectorAll('.lead-checkbox:checked').length;
+        selectAllCheckbox.checked = allCheckboxes.length > 0 && checkedCount === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < allCheckboxes.length;
+      }
+      
+      // Aplicar classe visual nas linhas selecionadas
+      if(leadsListEl){
+        leadsListEl.querySelectorAll('.lead-row').forEach(row => {
+          const checkbox = row.querySelector('.lead-checkbox');
+          if(checkbox && checkbox.checked){
+            row.classList.add('selected');
+          } else {
+            row.classList.remove('selected');
+          }
+        });
+      }
+    }
+    
+    function clearBulkSelection(){
+      if(!leadsListEl) return;
+      leadsListEl.querySelectorAll('.lead-checkbox').forEach(cb => {
+        cb.checked = false;
+      });
+      updateBulkToolbar();
+    }
+    
+    async function bulkDeleteLeads(){
+      const selectedIds = getSelectedLeadIds();
+      if(selectedIds.length === 0){
+        alert('Nenhum lead selecionado.');
+        return;
+      }
+      
+      if(!confirm(`Tem certeza que deseja remover ${selectedIds.length} lead(s)?`)){
+        return;
+      }
+      
+      try{
+        for(const leadId of selectedIds){
+          await deleteLead(leadId);
+        }
+        if(typeof mgToast === 'function'){
+          mgToast(`${selectedIds.length} lead(s) removido(s)!`);
+        }
+        clearBulkSelection();
+      }catch(err){
+        console.error('bulkDeleteLeads', err);
+        alert('Erro ao remover leads: ' + (err?.message || String(err)));
+      }
+    }
+    
+    function openBulkEditModal(){
+      const selectedIds = getSelectedLeadIds();
+      if(selectedIds.length === 0){
+        alert('Nenhum lead selecionado.');
+        return;
+      }
+      
+      // Criar modal de edição em lote
+      const modal = document.createElement('div');
+      modal.className = 'modal show';
+      modal.style.zIndex = '100000';
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width: 600px;">
+          <div class="modal-head">
+            <h3 style="margin: 0;">Editar ${selectedIds.length} Lead(s)</h3>
+            <button class="btn small ghost" id="bulkEditClose" type="button">Fechar</button>
+          </div>
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+            <p style="color: #cbd5f5; margin: 0;">
+              Os campos que você preencher serão aplicados a todos os leads selecionados. 
+              Deixe em branco para não alterar.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Nome</label>
+              <input type="text" id="bulkEditName" class="input" placeholder="Deixe vazio para não alterar" />
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">E-mail</label>
+              <input type="email" id="bulkEditEmail" class="input" placeholder="Deixe vazio para não alterar" />
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Telefone</label>
+              <input type="text" id="bulkEditPhone" class="input" placeholder="Deixe vazio para não alterar" />
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Pergunta</label>
+              <textarea id="bulkEditQuestion" class="input" style="min-height: 80px;" placeholder="Deixe vazio para não alterar"></textarea>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Plataforma</label>
+              <input type="text" id="bulkEditPlataforma" class="input" placeholder="Ex: Google, Meta, etc." />
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Fonte</label>
+              <input type="text" id="bulkEditSource" class="input" placeholder="Deixe vazio para não alterar" />
+            </div>
+          </div>
+          <div class="modal-foot">
+            <button class="btn" id="bulkEditSave" type="button">Salvar Alterações</button>
+            <button class="btn ghost" id="bulkEditCancel" type="button">Cancelar</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Bind events
+      const closeBtn = modal.querySelector('#bulkEditClose');
+      const cancelBtn = modal.querySelector('#bulkEditCancel');
+      const saveBtn = modal.querySelector('#bulkEditSave');
+      
+      const close = () => {
+        modal.remove();
+      };
+      
+      closeBtn?.addEventListener('click', close);
+      cancelBtn?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if(e.target === modal) close();
+      });
+      
+      saveBtn?.addEventListener('click', async () => {
+        const name = modal.querySelector('#bulkEditName').value.trim();
+        const email = modal.querySelector('#bulkEditEmail').value.trim();
+        const phone = modal.querySelector('#bulkEditPhone').value.trim();
+        const question = modal.querySelector('#bulkEditQuestion').value.trim();
+        const plataforma = modal.querySelector('#bulkEditPlataforma').value.trim();
+        const source = modal.querySelector('#bulkEditSource').value.trim();
+        
+        const patch = {};
+        if(name) patch.name = name;
+        if(email) patch.email = email;
+        if(phone) patch.phone = phone;
+        if(question) patch.question = question;
+        if(plataforma) patch.plataforma = plataforma;
+        if(source) patch.source = source;
+        
+        if(Object.keys(patch).length === 0){
+          alert('Nenhum campo foi preenchido.');
+          return;
+        }
+        
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Salvando...';
+        
+        try{
+          for(const leadId of selectedIds){
+            await updateLead(leadId, patch);
+          }
+          
+          if(typeof mgToast === 'function'){
+            mgToast(`${selectedIds.length} lead(s) atualizado(s)!`);
+          }
+          
+          clearBulkSelection();
+          close();
+        }catch(err){
+          console.error('bulkEditLeads', err);
+          alert('Erro ao atualizar leads: ' + (err?.message || String(err)));
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Salvar Alterações';
+        }
+      });
     }
 
     /* ========= Referências Redes ========= */
