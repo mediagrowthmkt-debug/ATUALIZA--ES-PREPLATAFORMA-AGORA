@@ -313,7 +313,8 @@
     // Firebase SDK (modular)
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
-    import { getFirestore, doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, collection, getDocs, setDoc } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js';
 
     // ===== Config igual ao index.html =====
     const firebaseConfig = {
@@ -354,6 +355,7 @@
     const app = getApps()[0] || initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     // Helpers metas (copiados do index de forma mínima)
     const META_MONTHS = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12'];
@@ -614,8 +616,12 @@
       
       renderReportSections(payload);
       
-      // Gerar preview para redes sociais
-      setTimeout(() => generateSocialPreview(payload), 1000);
+      // Gerar preview para redes sociais (async)
+      setTimeout(() => {
+        generateSocialPreview(payload).catch(err => {
+          console.error('[Relatorio] ❌ Erro ao gerar preview:', err);
+        });
+      }, 1000);
     }
     function renderReportSections(payload){
       console.log('[Relatorio] renderReportSections chamado - payload:', {
@@ -1410,13 +1416,19 @@
       }
       renderReportSections(payload||{});
       
-      // Gerar preview para redes sociais
-      setTimeout(() => generateSocialPreview(payload), 1000);
+      // Gerar preview para redes sociais (async)
+      setTimeout(() => {
+        generateSocialPreview(payload).catch(err => {
+          console.error('[Relatorio] ❌ Erro ao gerar preview:', err);
+        });
+      }, 1000);
     }
     
     // Gera imagem de preview para WhatsApp/Redes Sociais
-    function generateSocialPreview(payload) {
+    async function generateSocialPreview(payload) {
       try {
+        console.log('[Relatorio] 📸 Gerando preview social...');
+        
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 630;
@@ -1503,15 +1515,53 @@
         ctx.textAlign = 'center';
         ctx.fillText('MediaGrowth Dashboard', canvas.width / 2, 590);
         
-        // Converter para data URL e atualizar meta tags
-        const imageDataUrl = canvas.toDataURL('image/png');
-        const ogImage = document.querySelector('meta[property="og:image"]');
-        const twitterImage = document.querySelector('meta[name="twitter:image"]');
+        // Converter canvas para blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         
-        if(ogImage) ogImage.setAttribute('content', imageDataUrl);
-        if(twitterImage) twitterImage.setAttribute('content', imageDataUrl);
+        // Verificar se tem token (link compartilhado)
+        if(shareToken) {
+          console.log('[Relatorio] 📤 Fazendo upload da imagem para Firebase Storage...');
+          
+          try {
+            // Upload para Firebase Storage
+            const filename = `preview-${shareToken}.png`;
+            const storageRef = sRef(storage, `previews/${filename}`);
+            await uploadBytes(storageRef, blob);
+            const publicUrl = await getDownloadURL(storageRef);
+            
+            console.log('[Relatorio] ✅ Upload concluído! URL:', publicUrl);
+            
+            // Atualizar meta tags com URL pública
+            const ogImage = document.querySelector('meta[property="og:image"]');
+            const twitterImage = document.querySelector('meta[name="twitter:image"]');
+            
+            if(ogImage) ogImage.setAttribute('content', publicUrl);
+            if(twitterImage) twitterImage.setAttribute('content', publicUrl);
+            
+            // Salvar URL no documento do Firestore para cache
+            try {
+              const shareDoc = doc(db, 'reportShares', shareToken);
+              await setDoc(shareDoc, { previewUrl: publicUrl }, { merge: true });
+              console.log('[Relatorio] ✅ URL salva no Firestore para cache');
+            } catch(err) {
+              console.warn('[Relatorio] ⚠️ Não foi possível salvar URL no Firestore:', err);
+            }
+            
+            console.log('[Relatorio] ✅ Preview gerado e salvo com sucesso!');
+          } catch(uploadErr) {
+            console.error('[Relatorio] ❌ Erro no upload:', uploadErr);
+            // Fallback para data URL
+            const imageDataUrl = canvas.toDataURL('image/png');
+            document.querySelector('meta[property="og:image"]')?.setAttribute('content', imageDataUrl);
+            document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', imageDataUrl);
+          }
+        } else {
+          console.log('[Relatorio] ⚠️ Sem token, usando data URL (pode não funcionar no WhatsApp)');
+          const imageDataUrl = canvas.toDataURL('image/png');
+          document.querySelector('meta[property="og:image"]')?.setAttribute('content', imageDataUrl);
+          document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', imageDataUrl);
+        }
         
-        console.log('[Relatorio] ✅ Preview gerado para redes sociais');
       } catch(err) {
         console.error('[Relatorio] ❌ Erro ao gerar preview:', err);
       }
