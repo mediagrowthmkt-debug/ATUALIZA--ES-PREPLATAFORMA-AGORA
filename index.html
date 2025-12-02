@@ -944,6 +944,8 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .auth-box{width:100%;max-width:380px;background:var(--panel);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);padding:20px}
     .field{margin:10px 0}
     .input{width:100%;background:var(--input);border:1px solid var(--border);color:#fff;border-radius:10px;padding:12px 14px;font-size:.95rem}
+    .input[type="date"]{color-scheme:dark;cursor:pointer}
+    .input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}
     .btn{display:inline-block;border:0;border-radius:12px;padding:10px 14px;font-weight:800;color:#fff;background:var(--accent);cursor:pointer}
     .btn.secondary{background:#333}
     .btn.danger{background:#991b1b;border:1px solid rgba(239,68,68,.6)}
@@ -4166,6 +4168,116 @@ function renderReviewNotes(post){
     background: rgba(56,189,248,.15);
     border-color: rgba(56,189,248,.45);
   }
+  
+  /* Import Modal */
+  .leads-import-actions{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .leads-import-dropzone{
+    border: 2px dashed rgba(148,163,184,.35);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    background: rgba(15,23,42,.45);
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .leads-import-dropzone:hover{
+    border-color: var(--accent);
+    background: rgba(15,23,42,.65);
+  }
+  .leads-import-dropzone.dragover{
+    border-color: var(--accent);
+    background: rgba(255,102,0,.1);
+  }
+  .leads-import-icon{
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: .7;
+  }
+  .leads-import-text{
+    color: #cbd5f5;
+    font-size: .95rem;
+    margin-bottom: 8px;
+  }
+  .leads-import-hint{
+    color: #94a3b8;
+    font-size: .8rem;
+  }
+  .leads-preview-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+    margin-top: 16px;
+  }
+  .leads-preview-table th{
+    background: rgba(15,23,42,.6);
+    padding: 10px 12px;
+    text-align: left;
+    color: #cbd5f5;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(148,163,184,.28);
+  }
+  .leads-preview-table td{
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(148,163,184,.18);
+    color: #e2e8f0;
+  }
+  .leads-preview-table tr:hover{
+    background: rgba(255,255,255,.04);
+  }
+  .leads-preview-container{
+    max-height: 400px;
+    overflow: auto;
+    border: 1px solid rgba(148,163,184,.28);
+    border-radius: 10px;
+  }
+  .leads-import-status{
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-top: 16px;
+    display: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: center;
+    animation: statusFadeIn 0.3s ease;
+  }
+  @keyframes statusFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .leads-import-status.success{
+    background: rgba(34,197,94,.15);
+    border: 2px solid rgba(34,197,94,.5);
+    color: #bbf7d0;
+    display: block;
+    box-shadow: 0 4px 12px rgba(34,197,94,.2);
+  }
+  .leads-import-status.error{
+    background: rgba(248,113,113,.15);
+    border: 2px solid rgba(248,113,113,.5);
+    color: #fecaca;
+    display: block;
+    box-shadow: 0 4px 12px rgba(248,113,113,.2);
+  }
+  .leads-import-status.warning{
+    background: rgba(251,191,36,.15);
+    border: 2px solid rgba(251,191,36,.5);
+    color: #fde68a;
+    display: block;
+    box-shadow: 0 4px 12px rgba(251,191,36,.2);
+  }
+  .leads-import-status.info{
+    background: rgba(59,130,246,.15);
+    border: 2px solid rgba(59,130,246,.5);
+    color: #bfdbfe;
+    display: block;
+    box-shadow: 0 4px 12px rgba(59,130,246,.2);
+  }
   .lead-delete-btn{ 
     background: rgba(220,38,38,.16); 
     border: 1px solid rgba(220,38,38,.45); 
@@ -4211,6 +4323,14 @@ function renderReviewNotes(post){
     border-radius:6px;
     padding:6px 8px;
     font-size:.75rem;
+  }
+  .lead-edit-input[type="date"]{
+    cursor: pointer;
+    color-scheme: dark;
+  }
+  .lead-edit-input[type="date"]::-webkit-calendar-picker-indicator{
+    filter: invert(1);
+    cursor: pointer;
   }
   .lead-editing .lead-cell{ white-space:normal; }
   @media (max-width: 900px){
@@ -4335,6 +4455,13 @@ function renderReviewNotes(post){
       </div>
       <button class="btn small" id="leadsWebhookCopy" type="button">Copiar URL</button>
       <button class="btn small ghost" id="leadsWebhookRegenerate" type="button" title="Gera um novo token de segurança">Regenerar token</button>
+    </div>
+    
+    <!-- Ações de importação -->
+    <div class="leads-import-actions">
+      <button class="btn small" id="leadsImportBtn" type="button">📤 Importar Planilha</button>
+      <button class="btn small ghost" id="leadsDownloadTemplate" type="button">📥 Baixar Template</button>
+      <span class="leads-hint">Importe leads em massa de outras plataformas via CSV/Excel</span>
     </div>
     <!-- Barra de ferramentas de edição em lote -->
     <div id="leadsBulkToolbar" class="leads-bulk-toolbar">
@@ -5457,7 +5584,7 @@ function renderReviewNotes(post){
       setPersistence, browserLocalPersistence, inMemoryPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
     import { getStorage, ref as sRef, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject, getMetadata } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, arrayUnion, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
 
     /* ========= helpers ========= */
@@ -18712,6 +18839,18 @@ async function sendIAQuestion(){
       bulkClearBtn?.addEventListener('click', () => {
         clearBulkSelection();
       });
+      
+      // Eventos de importação em massa
+      const importBtn = $('leadsImportBtn');
+      const downloadTemplateBtn = $('leadsDownloadTemplate');
+      
+      importBtn?.addEventListener('click', () => {
+        openImportModal();
+      });
+      
+      downloadTemplateBtn?.addEventListener('click', () => {
+        downloadLeadsTemplate();
+      });
 
       // Inicializa fluxo
       (async ()=>{
@@ -18974,6 +19113,11 @@ async function sendIAQuestion(){
       row.dataset.editing='1';
       row.classList.add('lead-editing');
       const leadId = row.getAttribute('data-lead-id');
+      
+      // Encontrar o lead no array para pegar a data original
+      const lead = LEADS.find(l => l.id === leadId);
+      const createdAt = lead?.createdAt;
+      
       const fieldMap = [
         { cls:'lead-name', key:'name', type:'text' },
         { cls:'lead-email', key:'email', type:'email' },
@@ -18989,6 +19133,28 @@ async function sendIAQuestion(){
         cell.dataset.originalValue = original;
         cell.innerHTML = `<input class="lead-edit-input" type="${f.type}" data-field="${f.key}" value="${original.replace(/"/g,'&quot;')}">`;
       });
+      
+      // Adicionar campo de data "quando"
+      const whenCell = row.querySelector('.lead-when');
+      if(whenCell){
+        let dateValue = '';
+        if(createdAt){
+          try{
+            // Converter Timestamp do Firebase para formato de input date
+            const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+            // Formato YYYY-MM-DD para input type="date"
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            dateValue = `${year}-${month}-${day}`;
+          }catch(err){
+            console.warn('[Edit Lead] Erro ao converter data:', err);
+          }
+        }
+        const original = whenCell.textContent || '';
+        whenCell.dataset.originalValue = original;
+        whenCell.innerHTML = `<input class="lead-edit-input" type="date" data-field="createdAt" value="${dateValue}">`;
+      }
       // Ações
       const actionsCell = row.querySelector('.lead-actions');
       if(actionsCell){
@@ -19013,7 +19179,24 @@ async function sendIAQuestion(){
             const val = inp.value.trim();
             const cell = inp.closest('.lead-cell');
             const original = cell?.dataset?.originalValue ?? '';
-            if(val !== original){ patch[k] = val; }
+            
+            // Se mudou o valor, adiciona ao patch
+            if(val !== original){
+              // Campo de data precisa ser convertido para Timestamp
+              if(k === 'createdAt' && val){
+                try{
+                  // Converter YYYY-MM-DD para Timestamp do Firebase
+                  const [year, month, day] = val.split('-').map(Number);
+                  const date = new Date(year, month - 1, day);
+                  patch[k] = Timestamp.fromDate(date);
+                }catch(err){
+                  console.warn('[Edit Lead] Erro ao converter data:', err);
+                  patch[k] = val; // Fallback para string
+                }
+              } else {
+                patch[k] = val;
+              }
+            }
           });
           if(Object.keys(patch).length === 0){ 
             // Nada mudou, apenas sair do modo edição
@@ -19164,6 +19347,14 @@ async function sendIAQuestion(){
               <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">Fonte</label>
               <input type="text" id="bulkEditSource" class="input" placeholder="Deixe vazio para não alterar" />
             </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: #cbd5f5; font-size: 0.85rem; font-weight: 700;">📅 Quando (Data)</label>
+              <input type="date" id="bulkEditDate" class="input" style="color-scheme: dark;" />
+              <small style="color: #94a3b8; font-size: 0.75rem;">
+                Deixe vazio para não alterar. Esta data será aplicada a todos os leads selecionados.
+              </small>
+            </div>
           </div>
           <div class="modal-foot">
             <button class="btn" id="bulkEditSave" type="button">Salvar Alterações</button>
@@ -19196,6 +19387,7 @@ async function sendIAQuestion(){
         const question = modal.querySelector('#bulkEditQuestion').value.trim();
         const plataforma = modal.querySelector('#bulkEditPlataforma').value.trim();
         const source = modal.querySelector('#bulkEditSource').value.trim();
+        const dateValue = modal.querySelector('#bulkEditDate').value.trim();
         
         const patch = {};
         if(name) patch.name = name;
@@ -19204,6 +19396,19 @@ async function sendIAQuestion(){
         if(question) patch.question = question;
         if(plataforma) patch.plataforma = plataforma;
         if(source) patch.source = source;
+        
+        // Adicionar data se preenchida
+        if(dateValue){
+          try{
+            const [year, month, day] = dateValue.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            patch.createdAt = Timestamp.fromDate(date);
+          }catch(err){
+            console.warn('[Bulk Edit] Erro ao converter data:', err);
+            alert('Erro ao processar a data. Verifique o formato.');
+            return;
+          }
+        }
         
         if(Object.keys(patch).length === 0){
           alert('Nenhum campo foi preenchido.');
@@ -19231,6 +19436,535 @@ async function sendIAQuestion(){
           saveBtn.textContent = 'Salvar Alterações';
         }
       });
+    }
+
+    // ========= IMPORT FUNCTIONS =========
+    
+    function downloadLeadsTemplate(){
+      // Cria CSV template com colunas corretas
+      const headers = ['name', 'email', 'phone', 'question', 'plataforma', 'source'];
+      const exampleRow = ['João Silva', 'joao@email.com', '(11) 99999-9999', 'Gostaria de saber mais sobre o produto', 'Google', 'Formulário Site'];
+      
+      const csvContent = [
+        headers.join(','),
+        exampleRow.join(','),
+        // Linhas vazias para o usuário preencher
+        ',,,,,',
+        ',,,,,',
+        ',,,,,,'
+      ].join('\n');
+      
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'template_leads.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      if(typeof mgToast === 'function'){
+        mgToast('Template baixado! Preencha e importe.');
+      }
+    }
+    
+    function openImportModal(){
+      const modal = document.createElement('div');
+      modal.className = 'modal show';
+      modal.style.zIndex = '100001';
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width: 800px; max-height: 90vh;">
+          <div class="modal-head">
+            <h3 style="margin: 0;">📤 Importar Leads em Massa</h3>
+            <button class="btn small ghost" id="importModalClose" type="button">Fechar</button>
+          </div>
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; padding: 20px; overflow-y: auto;">
+            <div style="background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.35); border-radius: 10px; padding: 12px;">
+              <strong style="color: #bae6fd; display: block; margin-bottom: 6px;">📋 Instruções:</strong>
+              <ol style="margin: 0; padding-left: 20px; color: #cbd5f5; font-size: 0.9rem; line-height: 1.6;">
+                <li>Baixe o template CSV clicando no botão abaixo</li>
+                <li>Preencha com os dados dos seus leads</li>
+                <li>Salve o arquivo em formato CSV (separado por vírgulas)</li>
+                <li>Faça upload do arquivo preenchido</li>
+                <li>Revise os dados no preview</li>
+                <li>Clique em "Importar" para adicionar os leads</li>
+              </ol>
+            </div>
+            
+            <div style="background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.35); border-radius: 10px; padding: 12px;">
+              <strong style="color: #bbf7d0; display: block; margin-bottom: 6px;">✅ Colunas Reconhecidas (flexível):</strong>
+              <ul style="margin: 0; padding-left: 20px; color: #86efac; font-size: 0.85rem; line-height: 1.5;">
+                <li><code>name</code> ou <code>nome</code> - Nome do lead</li>
+                <li><code>email</code> ou <code>e-mail</code> - E-mail</li>
+                <li><code>phone</code> ou <code>telefone</code> - Telefone</li>
+                <li><code>question</code> ou <code>pergunta</code> ou <code>mensagem</code> - Mensagem</li>
+                <li><code>plataforma</code> ou <code>platform</code> - Origem</li>
+                <li><code>source</code> ou <code>fonte</code> - Fonte específica</li>
+              </ul>
+              <p style="margin: 8px 0 0; color: #86efac; font-size: 0.8rem;">💡 Não precisa ter todas as colunas! O sistema é flexível.</p>
+            </div>
+            
+            <div style="background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.35); border-radius: 10px; padding: 12px;">
+              <strong style="color: #bbf7d0; display: block; margin-bottom: 6px;">💡 Como salvar CSV corretamente:</strong>
+              <ul style="margin: 0; padding-left: 20px; color: #86efac; font-size: 0.85rem; line-height: 1.5;">
+                <li><strong>Excel:</strong> "Salvar Como" → CSV UTF-8 (separado por vírgulas)</li>
+                <li><strong>Google Sheets:</strong> Arquivo → Fazer download → .CSV (separado por vírgulas)</li>
+                <li><strong>LibreOffice:</strong> Salvar Como → Texto CSV (.csv) → UTF-8</li>
+                <li><strong>Importante:</strong> Use vírgula (,) como separador, não ponto e vírgula (;)</li>
+              </ul>
+            </div>
+            
+            <button class="btn" id="importDownloadTemplate" type="button" style="align-self: flex-start;">
+              📥 Baixar Template CSV
+            </button>
+            
+            <div id="importDropzone" class="leads-import-dropzone">
+              <div class="leads-import-icon">📁</div>
+              <div class="leads-import-text">Arraste o arquivo CSV aqui ou clique para selecionar</div>
+              <div class="leads-import-hint">Apenas arquivos .CSV são aceitos</div>
+              <input type="file" id="importFileInput" accept=".csv" style="display: none;" />
+            </div>
+            
+            <div id="importStatus" class="leads-import-status"></div>
+            
+            <div id="importPreviewContainer" style="display: none;">
+              <h4 style="margin: 0 0 12px 0; color: #f8fafc;">📊 Preview dos Dados</h4>
+              <div class="leads-preview-container">
+                <table class="leads-preview-table" id="importPreviewTable"></table>
+              </div>
+              <div style="margin-top: 12px; color: #cbd5f5; font-size: 0.9rem;">
+                <strong id="importPreviewCount">0</strong> lead(s) prontos para importar
+              </div>
+            </div>
+          </div>
+          <div class="modal-foot">
+            <button class="btn" id="importExecuteBtn" type="button" style="display: none;">
+              ✅ Importar Leads
+            </button>
+            <button class="btn ghost" id="importCancelBtn" type="button">Cancelar</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Elementos
+      const closeBtn = modal.querySelector('#importModalClose');
+      const cancelBtn = modal.querySelector('#importCancelBtn');
+      const downloadBtn = modal.querySelector('#importDownloadTemplate');
+      const dropzone = modal.querySelector('#importDropzone');
+      const fileInput = modal.querySelector('#importFileInput');
+      const statusEl = modal.querySelector('#importStatus');
+      const previewContainer = modal.querySelector('#importPreviewContainer');
+      const previewTable = modal.querySelector('#importPreviewTable');
+      const previewCount = modal.querySelector('#importPreviewCount');
+      const executeBtn = modal.querySelector('#importExecuteBtn');
+      
+      let parsedData = [];
+      
+      const close = () => {
+        modal.remove();
+      };
+      
+      closeBtn?.addEventListener('click', close);
+      cancelBtn?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if(e.target === modal) close();
+      });
+      
+      downloadBtn?.addEventListener('click', () => {
+        downloadLeadsTemplate();
+      });
+      
+      // Drag & Drop
+      dropzone?.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      dropzone?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      
+      dropzone?.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+      
+      dropzone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if(files.length > 0){
+          handleFileSelect(files[0]);
+        }
+      });
+      
+      fileInput?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(file){
+          handleFileSelect(file);
+        }
+      });
+      
+      executeBtn?.addEventListener('click', async () => {
+        await executeImport(parsedData);
+      });
+      
+      async function handleFileSelect(file){
+        console.log('[Import] 📁 Arquivo selecionado:', {
+          nome: file.name,
+          tipo: file.type,
+          tamanho: file.size + ' bytes',
+          modificado: new Date(file.lastModified).toLocaleString('pt-BR')
+        });
+        
+        statusEl.className = 'leads-import-status';
+        statusEl.textContent = '';
+        previewContainer.style.display = 'none';
+        executeBtn.style.display = 'none';
+        parsedData = [];
+        
+        const fileName = file.name.toLowerCase();
+        
+        if(!fileName.endsWith('.csv')){
+          console.error('[Import] ❌ Formato inválido:', fileName);
+          statusEl.className = 'leads-import-status error';
+          statusEl.textContent = `❌ Formato não suportado: "${file.name}". Apenas arquivos .CSV são aceitos.`;
+          return;
+        }
+        
+        console.log('[Import] ✅ Formato válido (CSV), iniciando processamento...');
+        await parseCSV(file);
+      }
+      
+      async function parseCSV(file){
+        try{
+          statusEl.className = 'leads-import-status info';
+          statusEl.textContent = '⏳ Processando arquivo CSV...';
+          
+          const text = await file.text();
+          console.log('[CSV Import] Arquivo lido, tamanho:', text.length, 'caracteres');
+          
+          // Remove BOM se presente
+          const cleanText = text.replace(/^\uFEFF/, '');
+          
+          // Divide em linhas
+          const lines = cleanText.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+          console.log('[CSV Import] Total de linhas:', lines.length);
+          
+          if(lines.length < 2){
+            statusEl.className = 'leads-import-status error';
+            statusEl.textContent = '❌ Arquivo vazio ou sem dados. O arquivo deve ter pelo menos o cabeçalho e uma linha de dados.';
+            return;
+          }
+          
+          // Detecta separador automaticamente (TAB, vírgula ou ponto-e-vírgula)
+          const firstLine = lines[0];
+          let separator = ',';
+          if(firstLine.includes('\t')){
+            separator = '\t';
+            console.log('[CSV Import] 📋 Detectado formato EXCEL/PLANILHA (separador TAB)');
+          } else if(firstLine.includes(';')){
+            separator = ';';
+            console.log('[CSV Import] 📋 Detectado formato CSV com ponto-e-vírgula');
+          } else {
+            console.log('[CSV Import] 📋 Detectado formato CSV padrão (vírgula)');
+          }
+          
+          // Parse header
+          const headerLine = lines[0];
+          console.log('[CSV Import] Header:', headerLine);
+          const headers = parseCSVLine(headerLine, separator).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+          console.log('[CSV Import] Colunas encontradas:', headers);
+          
+          // ✅ NENHUMA COLUNA É OBRIGATÓRIA - aceita qualquer estrutura
+          if(headers.length === 0){
+            statusEl.className = 'leads-import-status error';
+            statusEl.textContent = '❌ Não foi possível identificar as colunas. Verifique se a primeira linha contém os nomes das colunas.';
+            return;
+          }
+          
+          // Parse dados
+          const data = [];
+          let skippedLines = 0;
+          
+          for(let i = 1; i < lines.length; i++){
+            const line = lines[i];
+            if(!line || line.trim() === '') continue;
+            
+            const values = parseCSVLine(line, separator);
+            console.log(`[CSV Import] Linha ${i}:`, values);
+            
+            const row = {};
+            headers.forEach((header, index) => {
+              const value = values[index] || '';
+              row[header] = value.trim().replace(/^["']|["']$/g, '');
+            });
+            
+            // ✅ Aceita QUALQUER linha que tenha pelo menos UM campo preenchido
+            const hasAnyData = Object.values(row).some(v => v && v.trim().length > 0);
+            
+            if(hasAnyData){
+              data.push(row);
+            } else {
+              console.warn(`[CSV Import] Linha ${i} ignorada: completamente vazia`, row);
+              skippedLines++;
+            }
+          }
+          
+          console.log('[CSV Import] Leads válidos:', data.length);
+          console.log('[CSV Import] Linhas ignoradas:', skippedLines);
+          
+          if(data.length === 0){
+            statusEl.className = 'leads-import-status error';
+            statusEl.textContent = '❌ Nenhum lead válido encontrado. Certifique-se de preencher nome e email em cada linha.';
+            return;
+          }
+          
+          parsedData = data;
+          displayPreview(data);
+          
+          statusEl.className = 'leads-import-status success';
+          let msg = `✅ Arquivo processado com sucesso! ${data.length} lead(s) válido(s) encontrado(s).`;
+          if(skippedLines > 0){
+            msg += ` (${skippedLines} linha(s) ignorada(s) por dados incompletos)`;
+          }
+          statusEl.textContent = msg;
+          executeBtn.style.display = 'inline-block';
+          
+        }catch(err){
+          console.error('[CSV Import] Erro:', err);
+          statusEl.className = 'leads-import-status error';
+          statusEl.textContent = '❌ Erro ao processar arquivo CSV: ' + (err?.message || String(err));
+        }
+      }
+      
+      function parseCSVLine(line, separator = ','){
+        // Parser ULTRA-FLEXÍVEL que aceita TAB, vírgula ou ponto-e-vírgula
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        let i = 0;
+        
+        while(i < line.length){
+          const char = line[i];
+          const nextChar = line[i + 1];
+          
+          if(char === '"'){
+            if(inQuotes && nextChar === '"'){
+              // Aspas duplas escapadas ""
+              current += '"';
+              i += 2;
+              continue;
+            } else {
+              // Toggle estado de aspas
+              inQuotes = !inQuotes;
+              i++;
+              continue;
+            }
+          }
+          
+          if(char === separator && !inQuotes){
+            // Fim do campo
+            result.push(current.trim());
+            current = '';
+            i++;
+            continue;
+          }
+          
+          current += char;
+          i++;
+        }
+        
+        // Último campo
+        result.push(current.trim());
+        
+        // Remove aspas externas se houver
+        return result.map(val => {
+          const trimmed = val.trim();
+          if((trimmed.startsWith('"') && trimmed.endsWith('"')) || 
+             (trimmed.startsWith("'") && trimmed.endsWith("'"))){
+            return trimmed.slice(1, -1).trim();
+          }
+          return trimmed;
+        });
+      }
+      
+      function displayPreview(data){
+        if(!data || data.length === 0){
+          previewContainer.style.display = 'none';
+          return;
+        }
+        
+        // Mapeia nomes técnicos para nomes amigáveis
+        const headerMap = {
+          'name': 'Nome',
+          'email': 'E-mail',
+          'phone': 'Telefone',
+          'question': 'Pergunta',
+          'plataforma': 'Plataforma',
+          'source': 'Fonte'
+        };
+        
+        // Descobre TODAS as colunas presentes nos dados (flexível!)
+        const allKeys = new Set();
+        data.forEach(row => {
+          Object.keys(row).forEach(key => {
+            if(key && key.trim()) allKeys.add(key.trim());
+          });
+        });
+        
+        const keys = Array.from(allKeys);
+        
+        // Se não houver colunas, não mostra preview
+        if(keys.length === 0){
+          previewContainer.style.display = 'none';
+          return;
+        }
+        
+        let html = '<thead><tr>';
+        keys.forEach(key => {
+          const displayName = headerMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
+          html += `<th>${displayName}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        
+        const displayData = data.slice(0, 10); // Mostrar apenas primeiros 10
+        displayData.forEach(row => {
+          html += '<tr>';
+          keys.forEach(key => {
+            const value = row[key] || '-';
+            const displayValue = value.length > 30 ? value.substring(0, 30) + '...' : value;
+            const cellClass = value === '-' || !value ? 'style="color: #64748b; font-style: italic;"' : '';
+            html += `<td ${cellClass} title="${value}">${displayValue}</td>`;
+          });
+          html += '</tr>';
+        });
+        
+        if(data.length > 10){
+          html += `<tr><td colspan="${keys.length}" style="text-align: center; color: #94a3b8; font-style: italic; padding: 12px;">
+            ... e mais ${data.length - 10} lead(s)
+          </td></tr>`;
+        }
+        
+        html += '</tbody>';
+        
+        previewTable.innerHTML = html;
+        previewCount.textContent = data.length;
+        previewContainer.style.display = 'block';
+      }
+      
+      async function executeImport(data){
+        if(!data || data.length === 0){
+          alert('Nenhum dado para importar.');
+          return;
+        }
+        
+        executeBtn.disabled = true;
+        executeBtn.textContent = 'Importando...';
+        statusEl.className = 'leads-import-status info';
+        statusEl.textContent = '⏳ Importando leads...';
+        
+        try{
+          const uid = auth?.currentUser?.uid;
+          const clientKey = getClientKeySafe();
+          
+          if(!uid || !clientKey){
+            throw new Error('Sessão expirada ou cliente não selecionado.');
+          }
+          
+          let successCount = 0;
+          let errorCount = 0;
+          let emptyCount = 0;
+          
+          for(let i = 0; i < data.length; i++){
+            const row = data[i];
+            
+            // Atualizar progresso
+            statusEl.textContent = `⏳ Importando ${i + 1} de ${data.length}...`;
+            
+            try{
+              // Verificar se há pelo menos um campo preenchido
+              const hasData = Object.values(row).some(v => v && String(v).trim().length > 0);
+              
+              if(!hasData){
+                emptyCount++;
+                continue;
+              }
+              
+              // Cria objeto dinâmico - APENAS com campos que existem e não estão vazios
+              const leadData = {
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              };
+              
+              // Adiciona campos de forma condicional
+              if(row.name && String(row.name).trim()){
+                leadData.name = String(row.name).trim();
+              }
+              if(row.email && String(row.email).trim()){
+                leadData.email = String(row.email).trim();
+              }
+              if(row.phone && String(row.phone).trim()){
+                leadData.phone = String(row.phone).trim();
+              }
+              if(row.question && String(row.question).trim()){
+                leadData.question = String(row.question).trim();
+              }
+              if(row.plataforma && String(row.plataforma).trim()){
+                leadData.plataforma = String(row.plataforma).trim();
+              }
+              if(row.source && String(row.source).trim()){
+                leadData.source = String(row.source).trim();
+              }
+              
+              const colRef = collection(db, 'usuarios', uid, 'clients', clientKey, 'leads');
+              await addDoc(colRef, leadData);
+              successCount++;
+              
+            }catch(err){
+              console.error('[Import] Erro ao importar lead:', row, err);
+              errorCount++;
+            }
+          }
+          
+          console.log('[Import] Resultado:', { successCount, errorCount, emptyCount });
+          
+          let message = `✅ Importação concluída! ${successCount} lead(s) adicionado(s)`;
+          let statusClass = 'success';
+          
+          if(errorCount > 0){
+            message += `, ${errorCount} erro(s)`;
+            statusClass = 'warning';
+          }
+          if(emptyCount > 0){
+            message += `, ${emptyCount} vazio(s) ignorado(s)`;
+          }
+          
+          statusEl.className = `leads-import-status ${statusClass}`;
+          statusEl.textContent = message;
+          
+          if(typeof mgToast === 'function'){
+            mgToast(`${successCount} lead(s) importado(s)!`);
+          }
+          
+          executeBtn.style.display = 'none';
+          previewContainer.style.display = 'none';
+          
+          setTimeout(() => {
+            close();
+          }, 2500);
+          
+        }catch(err){
+          console.error('[Import] Erro geral:', err);
+          statusEl.className = 'leads-import-status error';
+          statusEl.textContent = '❌ Erro na importação: ' + (err?.message || String(err));
+          executeBtn.disabled = false;
+          executeBtn.textContent = '✅ Importar Leads';
+        }
+      }
     }
 
     /* ========= Referências Redes ========= */
