@@ -21286,6 +21286,13 @@ async function sendIAQuestion(){
     }
     
     async function insertImageFromFile(file){ 
+      // Validação de tamanho: máximo 5MB
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if(file.size > maxSize){
+        alert('Erro: A imagem é muito grande. Tamanho máximo: 5MB');
+        return;
+      }
+
       const tempBox = document.createElement("span");
       tempBox.className = "media-resizable";
       tempBox.contentEditable = "false";
@@ -21302,14 +21309,9 @@ async function sendIAQuestion(){
         selectMediaBox(tempBox);
         scheduleNoteAutoSave();
       }else{
-        const r = new FileReader();
-        r.onload = () => {
-          tempBox.innerHTML = `<img alt="imagem" src="${String(r.result)}" crossorigin="anonymous">`;
-          tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
-          selectMediaBox(tempBox);
-          scheduleNoteAutoSave();
-        };
-        r.readAsDataURL(file);
+        // Remove o elemento temporário se o upload falhar
+        tempBox.remove();
+        alert('Erro ao fazer upload da imagem. Verifique sua conexão e tente novamente.');
       }
     }
     
@@ -21345,6 +21347,13 @@ async function sendIAQuestion(){
     }
     
     async function insertVideoFromFile(file){ 
+      // Validação de tamanho: máximo 10MB
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if(file.size > maxSize){
+        alert('Erro: O vídeo é muito grande. Tamanho máximo: 10MB');
+        return;
+      }
+
       const tempBox = document.createElement("span");
       tempBox.className = "media-resizable";
       tempBox.contentEditable = "false";
@@ -21361,14 +21370,9 @@ async function sendIAQuestion(){
         selectMediaBox(tempBox);
         scheduleNoteAutoSave();
       }else{
-        const r = new FileReader();
-        r.onload = () => {
-          tempBox.innerHTML = `<video controls src="${String(r.result)}" crossorigin="anonymous"></video>`;
-          tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
-          selectMediaBox(tempBox);
-          scheduleNoteAutoSave();
-        };
-        r.readAsDataURL(file);
+        // Remove o elemento temporário se o upload falhar
+        tempBox.remove();
+        alert('Erro ao fazer upload do vídeo. Verifique sua conexão e tente novamente.');
       }
     }
     
