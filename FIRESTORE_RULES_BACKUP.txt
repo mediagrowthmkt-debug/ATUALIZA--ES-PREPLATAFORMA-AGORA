@@ -1,0 +1,16 @@
+========================================
+REGRAS DO FIRESTORE - MEDIAGROWTH A5349
+========================================
+
+⚠️ ATENÇÃO: Cole estas regras no Firebase Console
+URL: https://console.firebase.google.com/project/mediagrowth-a5349/firestore/rules
+
+INSTRUÇÕES:
+1. Abra o link acima
+2. Apague TODAS as regras atuais
+3. Cole o conteúdo abaixo
+4. Clique em "Publicar"
+
+========================================
+INÍCIO DAS REGRAS - COPIE DAQUI ⬇️
+========================================

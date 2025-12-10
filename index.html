@@ -1331,9 +1331,10 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .note-title{font-weight:900}
     .note-meta{font-size:.85rem;color:#ddd}
     .tag{font-size:.75rem;font-weight:800;background:#333;padding:3px 8px;border-radius:999px}
-    .media-resizable{display:inline-block;max-width:100%;border:1px dashed rgba(255,255,255,.25);border-radius:6px;overflow:auto;resize:both;padding:2px;margin:6px 2px;vertical-align:middle;background:rgba(255,255,255,.02)}
+    .media-resizable{display:inline-block;max-width:100%;border:1px dashed rgba(255,255,255,.25);border-radius:6px;overflow:hidden;resize:both;padding:2px;margin:6px 2px;vertical-align:middle;background:rgba(255,255,255,.02);box-sizing:border-box}
     .media-resizable img,.media-resizable video{display:block;max-width:100%;height:auto;pointer-events:none}
     .media-resizable.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.25) inset}
+    .note-editor .media-resizable{max-width:calc(100% - 4px)}
 
     /* ===== IA CHAT ===== */
     .ia-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:12px;min-height:0}
@@ -14124,6 +14125,7 @@ async function sendIAQuestion(){
       if(currentSection==="notes"){
         setSectionVisibility({notes:true});
         renderNotes();
+        normalizeNoteEditorMedia();
       } else if(currentSection==="calendar"){
         setSectionVisibility({calendar:true});
         ensureCalendar();
@@ -20917,7 +20919,11 @@ async function sendIAQuestion(){
       const purifier = window.DOMPurify;
       if(purifier && typeof purifier.sanitize === 'function'){
         try{
-          safe = purifier.sanitize(html, { USE_PROFILES: { html: true } });
+          safe = purifier.sanitize(html, { 
+            USE_PROFILES: { html: true },
+            ADD_ATTR: ['style'],
+            ALLOWED_ATTR: ['style', 'class', 'src', 'alt', 'href', 'target', 'rel', 'controls', 'crossorigin', 'contenteditable']
+          });
         }catch(err){
           console.warn('DOMPurify sanitize error', err);
           safe = sanitizeMarkdownHtml(html);
@@ -21020,6 +21026,7 @@ async function sendIAQuestion(){
             const len = (noteEditor.textContent||'').length;
             restoreEditableSelection(noteEditor, { start: len, end: len });
             noteEditor.focus();
+            setTimeout(()=>normalizeNoteEditorMedia(), 50);
           }
           currentNoteId = n.id;
           noteTitle.value=n.title||generateNoteTitleFromMarkdown(markdown)||"";
@@ -21283,6 +21290,20 @@ async function sendIAQuestion(){
       lastMediaBox.replaceWith(link); link.appendChild(lastMediaBox); selectMediaBox(lastMediaBox);
     });
     document.addEventListener("click",(e)=>{ if(!noteEditor.contains(e.target) && lastMediaBox){ lastMediaBox.classList.remove("selected"); lastMediaBox=null; } });
+
+    function normalizeNoteEditorMedia(){
+      if(!noteEditor) return;
+      const mediaBoxes = noteEditor.querySelectorAll('.media-resizable');
+      const editorWidth = noteEditor.offsetWidth;
+      if(!editorWidth) return;
+      const maxWidth = editorWidth - 20; // subtrair padding/margem
+      mediaBoxes.forEach(box => {
+        const currentWidth = box.offsetWidth;
+        if(currentWidth > maxWidth){
+          box.style.width = Math.min(420, maxWidth) + 'px';
+        }
+      });
+    }
 
     function updateAutoSaveStatus(message){
       if(noteAutoSaveStatus) noteAutoSaveStatus.textContent = message;
@@ -24122,7 +24143,11 @@ async function sendIAQuestion(){
       const purifier = window.DOMPurify;
       if(purifier && typeof purifier.sanitize === 'function'){
         try{
-          return purifier.sanitize(raw, { USE_PROFILES: { html: true } });
+          return purifier.sanitize(raw, { 
+            USE_PROFILES: { html: true },
+            ADD_ATTR: ['style'],
+            ALLOWED_ATTR: ['style', 'class', 'src', 'alt', 'href', 'target', 'rel', 'controls', 'crossorigin', 'contenteditable']
+          });
         }catch(err){
           console.warn('DOMPurify sanitize error', err);
         }
@@ -24132,9 +24157,14 @@ async function sendIAQuestion(){
       const blocked = ['script','style','iframe','object','embed','link','meta'];
       blocked.forEach(tag=>{ template.content.querySelectorAll(tag).forEach(el=> el.remove()); });
       template.content.querySelectorAll('*').forEach(node=>{
+        const isMediaResizable = node.classList && node.classList.contains('media-resizable');
         Array.from(node.attributes).forEach(attr=>{
           const name = attr.name.toLowerCase();
-          if(name.startsWith('on') || name === 'style'){
+          if(name.startsWith('on')){
+            node.removeAttribute(attr.name);
+            return;
+          }
+          if(name === 'style' && !isMediaResizable){
             node.removeAttribute(attr.name);
             return;
           }
@@ -24265,7 +24295,28 @@ async function sendIAQuestion(){
             return blockquoteToMarkdown(node, context);
           case 'hr':
             return '\n---\n\n';
-          case 'span':
+          case 'span': {
+            // Preserve media-resizable wrapper with width
+            if(node.classList && node.classList.contains('media-resizable')){
+              const width = node.style.width || '420px';
+              const img = node.querySelector('img');
+              const video = node.querySelector('video');
+              if(img){
+                const src = (img.getAttribute('src') || '').trim();
+                const alt = (img.getAttribute('alt') || '').trim();
+                if(src){
+                  return `<span class="media-resizable" contenteditable="false" style="width:${width}"><img alt="${alt}" src="${src}" crossorigin="anonymous"></span>`;
+                }
+              }
+              if(video){
+                const src = (video.getAttribute('src') || '').trim();
+                if(src){
+                  return `<span class="media-resizable" contenteditable="false" style="width:${width}"><video controls src="${src}" crossorigin="anonymous"></video></span>`;
+                }
+              }
+            }
+            return convertChildren(node, context);
+          }
           case 'section':
           case 'article':
           case 'header':

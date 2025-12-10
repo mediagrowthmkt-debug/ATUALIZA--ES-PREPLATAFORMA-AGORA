@@ -9,6 +9,14 @@ service cloud.firestore {
       return isSignedIn() &&
              exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
+    
+    /* ===== Helper para verificar se é um usuário válido ===== */
+    function isValidUser() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) ||
+        isAdmin()
+      );
+    }
 
     /* ===== Novos helpers multi-tenant ===== */
     function isAgency() {
@@ -34,28 +42,37 @@ service cloud.firestore {
     match /usuarios/{userId} {
 
       // O dono (usuário legado) segue com acesso total e agência/cliente têm acesso dentro do próprio contexto
-    allow read: if isOwner(userId)
+      // IMPORTANTE: Permite leitura se o usuário estiver autenticado e for o próprio dono
+      allow read: if isOwner(userId)
            || isAdmin()
-           || (isSignedIn() && exists(resource) && resource.data.agencyId == request.auth.uid)
+           || (isSignedIn() && exists(resource) && 'agencyId' in resource.data && resource.data.agencyId == request.auth.uid)
            || (isClient() && exists(resource) && sameClientData(resource.data));
     
     // Permite admin fazer queries (list) para buscar por email
     allow list: if isAdmin();
     
+    // Permite criação e atualização se for o dono
     allow create, update, delete: if isOwner(userId)
+           || isAdmin()
            || (isSignedIn()
+             && 'agencyId' in request.resource.data
              && request.resource.data.agencyId is string
              && request.resource.data.agencyId == request.auth.uid)
            || (isClient()
+             && 'agencyId' in request.resource.data
              && request.resource.data.agencyId == request.auth.token.agencyId
+             && 'clientId' in request.resource.data
              && request.resource.data.clientId == request.auth.token.clientId);
 
       /* posts (mantido) */
       match /posts/{postId} {
+        // Permite leitura e escrita se for o dono
         allow read, write: if isOwner(userId);
+        
+        // Permite para agências com verificação segura
         allow read, update, create, delete: if isAgency() && (
-          (exists(resource) && sameAgencyData(resource.data)) ||
-          sameAgencyReq(request.resource.data)
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
         );
 
         /* 🔰 Atualização pública via link (mantido) */

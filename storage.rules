@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Permite leitura para qualquer pessoa (necessário para visualizar posts públicos)
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+    
+    // Regras para uploads de usuários
+    match /users/{userId}/{allPaths=**} {
+      // Permite escrita apenas para o próprio usuário ou admins
+      allow write: if request.auth != null && (
+        request.auth.uid == userId ||
+        exists(/databases/(default)/documents/admins/$(request.auth.uid))
+      );
+    }
+    
+    // Regras para uploads temporários
+    match /temp/{allPaths=**} {
+      allow write: if request.auth != null;
+      allow read: if true;
+    }
+    
+    // Regras para uploads públicos
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
