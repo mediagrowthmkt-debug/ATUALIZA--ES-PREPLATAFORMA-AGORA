@@ -21259,13 +21259,119 @@ async function sendIAQuestion(){
       scheduleNoteAutoSave({ force: true });
     });
     let lastMediaBox=null;
-    function insertImageFromFile(file){ const r=new FileReader(); r.onload=()=>insertImageBox(String(r.result)); r.readAsDataURL(file); }
+    
+    async function uploadNoteImage(file){
+      const uid = auth.currentUser?.uid;
+      if(!uid){ 
+        console.error('Usuário não autenticado');
+        return null;
+      }
+      if(!STORAGE){
+        console.error('Storage não inicializado');
+        return null;
+      }
+      try{
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 10);
+        const ext = file.name.split('.').pop() || 'png';
+        const fileName = `note-image-${timestamp}-${randomId}.${ext}`;
+        const storageRef = ref(STORAGE, `usuarios/${uid}/notes-images/${fileName}`);
+        const uploadTask = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(uploadTask.ref);
+        return downloadURL;
+      }catch(err){
+        console.error('Erro ao fazer upload da imagem:', err);
+        return null;
+      }
+    }
+    
+    async function insertImageFromFile(file){ 
+      const tempBox = document.createElement("span");
+      tempBox.className = "media-resizable";
+      tempBox.contentEditable = "false";
+      tempBox.innerHTML = `<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.6);">Carregando imagem...</div>`;
+      tempBox.style.width = "420px";
+      const range = getCurrentRange();
+      if(range) range.insertNode(tempBox);
+      else noteEditor.appendChild(tempBox);
+      
+      const downloadURL = await uploadNoteImage(file);
+      if(downloadURL){
+        tempBox.innerHTML = `<img alt="imagem" src="${downloadURL}" crossorigin="anonymous">`;
+        tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
+        selectMediaBox(tempBox);
+        scheduleNoteAutoSave();
+      }else{
+        const r = new FileReader();
+        r.onload = () => {
+          tempBox.innerHTML = `<img alt="imagem" src="${String(r.result)}" crossorigin="anonymous">`;
+          tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
+          selectMediaBox(tempBox);
+          scheduleNoteAutoSave();
+        };
+        r.readAsDataURL(file);
+      }
+    }
+    
     function insertImageBox(src){
       const box=document.createElement("span"); box.className="media-resizable"; box.contentEditable="false"; box.innerHTML=`<img alt="imagem" src="${src}" crossorigin="anonymous">`; box.style.width="420px";
       box.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(box); });
       const range=getCurrentRange(); if(range) range.insertNode(box); else noteEditor.appendChild(box); selectMediaBox(box);
     }
-    function insertVideoFromFile(file){ const r=new FileReader(); r.onload=()=>insertVideoBox(String(r.result)); r.readAsDataURL(file); }
+    
+    async function uploadNoteVideo(file){
+      const uid = auth.currentUser?.uid;
+      if(!uid){ 
+        console.error('Usuário não autenticado');
+        return null;
+      }
+      if(!STORAGE){
+        console.error('Storage não inicializado');
+        return null;
+      }
+      try{
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 10);
+        const ext = file.name.split('.').pop() || 'mp4';
+        const fileName = `note-video-${timestamp}-${randomId}.${ext}`;
+        const storageRef = ref(STORAGE, `usuarios/${uid}/notes-videos/${fileName}`);
+        const uploadTask = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(uploadTask.ref);
+        return downloadURL;
+      }catch(err){
+        console.error('Erro ao fazer upload do vídeo:', err);
+        return null;
+      }
+    }
+    
+    async function insertVideoFromFile(file){ 
+      const tempBox = document.createElement("span");
+      tempBox.className = "media-resizable";
+      tempBox.contentEditable = "false";
+      tempBox.innerHTML = `<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.6);">Carregando vídeo...</div>`;
+      tempBox.style.width = "420px";
+      const range = getCurrentRange();
+      if(range) range.insertNode(tempBox);
+      else noteEditor.appendChild(tempBox);
+      
+      const downloadURL = await uploadNoteVideo(file);
+      if(downloadURL){
+        tempBox.innerHTML = `<video controls src="${downloadURL}" crossorigin="anonymous"></video>`;
+        tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
+        selectMediaBox(tempBox);
+        scheduleNoteAutoSave();
+      }else{
+        const r = new FileReader();
+        r.onload = () => {
+          tempBox.innerHTML = `<video controls src="${String(r.result)}" crossorigin="anonymous"></video>`;
+          tempBox.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(tempBox); });
+          selectMediaBox(tempBox);
+          scheduleNoteAutoSave();
+        };
+        r.readAsDataURL(file);
+      }
+    }
+    
     function insertVideoBox(src){
       const box=document.createElement("span"); box.className="media-resizable"; box.contentEditable="false"; box.innerHTML=`<video controls src="${src}" crossorigin="anonymous"></video>`; box.style.width="420px";
       box.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(box); });
