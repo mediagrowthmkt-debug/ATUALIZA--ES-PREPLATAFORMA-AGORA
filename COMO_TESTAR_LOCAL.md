@@ -1,6 +1,6 @@
 # 🚀 Como Executar o Projeto Localmente
 
-## Opção 1: Script Automático (Recomendado)
+## ⭐ Opção 1: Script Automático (RECOMENDADO - SEM PROBLEMAS DE CACHE)
 
 Execute o script no terminal:
 
@@ -14,13 +14,22 @@ Ou se preferir:
 bash start-local.sh
 ```
 
-O servidor iniciará automaticamente e você verá:
-- ✅ URL de acesso (ex: http://localhost:8000)
-- 📂 Diretório do projeto
-- 💡 Instruções para parar o servidor
-- 🌐 **O navegador abrirá automaticamente** uma nova guia com o projeto
+O script usa automaticamente o **servidor customizado Python** que:
+- ✅ **ZERO problemas de cache** - Alterações aparecem instantaneamente!
+- ✅ Abre o navegador automaticamente
+- ✅ Recarregue normalmente com F5 ou CMD+R
+- ✅ Não precisa de CTRL+SHIFT+R
+- ✅ Funciona perfeitamente para desenvolvimento
 
-## Opção 2: Comando Direto Python
+## Opção 2: Servidor Customizado Direto
+
+```bash
+python3 server-dev.py
+```
+
+Este é o servidor customizado que resolve TODOS os problemas de cache!
+
+## Opção 3: Comando Direto Python (pode ter cache)
 
 Se preferir executar manualmente:
 
@@ -34,7 +43,7 @@ Ou com Python 2:
 python -m SimpleHTTPServer 8000
 ```
 
-## Opção 3: Node.js (http-server)
+## Opção 4: Node.js (http-server)
 
 Se você tem Node.js instalado:
 
@@ -42,7 +51,7 @@ Se você tem Node.js instalado:
 npx http-server -p 8000 -c-1
 ```
 
-## Opção 4: PHP
+## Opção 5: PHP
 
 Se você tem PHP instalado:
 
@@ -76,32 +85,31 @@ Pressione **CTRL + C** no terminal
 
 ## Dicas
 
-- 🔥 O script usa **http-server (Node.js)** se disponível - sem problemas de cache!
-- 🔥 Se usar Python, use **CTRL+SHIFT+R** (ou **CMD+SHIFT+R** no Mac) para forçar reload sem cache
-- 🔄 Para ver alterações, recarregue a página (F5 ou CMD+R)
+- 🔥 **USE `./start-local.sh` - Sem problemas de cache!**
+- 🔥 O servidor customizado (`server-dev.py`) resolve TODOS os problemas
+- 🔄 Recarregue normalmente com F5 ou CMD+R - funciona perfeitamente!
 - 🐛 Use o Console do navegador (F12) para debug
 - 📱 Teste em diferentes tamanhos de tela
 
-## Solução para "Tela Branca" ou "No Response"
+## ✅ Solução DEFINITIVA (Já implementada!)
 
-Se a página ficar em branco após recarregar:
+O problema de cache está **100% resolvido** ao usar:
 
-### Solução 1: Recarregar sem Cache (RECOMENDADO)
-- **Windows/Linux:** Pressione `CTRL + SHIFT + R`
-- **Mac:** Pressione `CMD + SHIFT + R`
-- Ou: Abra DevTools (F12) → Clique com botão direito no reload → "Empty Cache and Hard Reload"
-
-### Solução 2: Usar http-server (Melhor opção)
 ```bash
-npx http-server -p 8000 -c-1
+./start-local.sh
 ```
-O parâmetro `-c-1` desabilita totalmente o cache
 
-### Solução 3: Limpar Cache do Navegador
-1. Abra DevTools (F12)
-2. Vá em "Network" ou "Rede"
-3. Marque "Disable cache" ou "Desativar cache"
-4. Mantenha DevTools aberto enquanto desenvolve
+Ou diretamente:
+
+```bash
+python3 server-dev.py
+```
+
+**Por quê funciona?**
+- O servidor customizado envia headers HTTP que desabilitam completamente o cache
+- Você pode recarregar normalmente (F5 ou CMD+R)
+- Não precisa mais usar CTRL+SHIFT+R
+- Alterações aparecem instantaneamente
 
 ## Portas Alternativas
 

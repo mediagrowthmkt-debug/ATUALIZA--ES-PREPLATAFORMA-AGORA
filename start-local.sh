@@ -3,6 +3,16 @@
 echo "🚀 Iniciando servidor local do Dashboard MediaGrowth..."
 echo ""
 
+# Verifica se o servidor customizado existe
+if [ -f "server-dev.py" ]; then
+    if command -v python3 &> /dev/null; then
+        echo "✅ Usando servidor customizado (SEM CACHE)"
+        echo ""
+        python3 server-dev.py
+        exit 0
+    fi
+fi
+
 PORT=8000
 
 if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
