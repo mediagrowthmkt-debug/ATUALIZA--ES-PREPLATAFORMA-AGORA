@@ -76,10 +76,32 @@ Pressione **CTRL + C** no terminal
 
 ## Dicas
 
-- 🔥 O servidor Python é simples e não requer instalação adicional
-- 🔄 Para ver alterações, apenas recarregue a página (F5 ou CMD+R)
+- 🔥 O script usa **http-server (Node.js)** se disponível - sem problemas de cache!
+- 🔥 Se usar Python, use **CTRL+SHIFT+R** (ou **CMD+SHIFT+R** no Mac) para forçar reload sem cache
+- 🔄 Para ver alterações, recarregue a página (F5 ou CMD+R)
 - 🐛 Use o Console do navegador (F12) para debug
 - 📱 Teste em diferentes tamanhos de tela
+
+## Solução para "Tela Branca" ou "No Response"
+
+Se a página ficar em branco após recarregar:
+
+### Solução 1: Recarregar sem Cache (RECOMENDADO)
+- **Windows/Linux:** Pressione `CTRL + SHIFT + R`
+- **Mac:** Pressione `CMD + SHIFT + R`
+- Ou: Abra DevTools (F12) → Clique com botão direito no reload → "Empty Cache and Hard Reload"
+
+### Solução 2: Usar http-server (Melhor opção)
+```bash
+npx http-server -p 8000 -c-1
+```
+O parâmetro `-c-1` desabilita totalmente o cache
+
+### Solução 3: Limpar Cache do Navegador
+1. Abra DevTools (F12)
+2. Vá em "Network" ou "Rede"
+3. Marque "Disable cache" ou "Desativar cache"
+4. Mantenha DevTools aberto enquanto desenvolve
 
 ## Portas Alternativas
 
