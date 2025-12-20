@@ -1,0 +1,54 @@
+═══════════════════════════════════════════════════════════════
+🚀 COMANDO PARA EXECUTAR O PROJETO LOCALMENTE
+═══════════════════════════════════════════════════════════════
+
+Copie e cole este comando no terminal:
+
+./start-local.sh
+
+
+Ou este (se o primeiro não funcionar):
+
+bash start-local.sh
+
+
+Ou este (comando direto Python):
+
+python3 -m http.server 8000
+
+
+═══════════════════════════════════════════════════════════════
+📝 O QUE ACONTECERÁ:
+═══════════════════════════════════════════════════════════════
+
+1. ✅ Servidor HTTP iniciará na porta 8000
+2. 🌐 Projeto estará disponível em: http://localhost:8000
+3. 🔄 Você poderá testar todas as funcionalidades
+4. 💾 Fazer alterações e recarregar a página para ver
+5. ⏹️  Parar o servidor com CTRL+C quando terminar
+
+═══════════════════════════════════════════════════════════════
+🧪 CHECKLIST DE TESTES ANTES DO COMMIT:
+═══════════════════════════════════════════════════════════════
+
+[ ] Abrir http://localhost:8000 no navegador
+[ ] Fazer login no sistema
+[ ] Navegar entre as abas
+[ ] Testar a nova aba "Estruturação"
+[ ] Clicar nos checkboxes e verificar se salvam
+[ ] Adicionar anotações e verificar auto-save
+[ ] Abrir Console (F12) e verificar se não há erros
+[ ] Testar em tela mobile (F12 > Toggle Device Toolbar)
+[ ] Tudo funcionando? Pode fazer o commit!
+
+═══════════════════════════════════════════════════════════════
+💡 DICAS:
+═══════════════════════════════════════════════════════════════
+
+• Use CTRL+C para parar o servidor
+• F5 ou CMD+R para recarregar a página após alterações
+• F12 para abrir o Console do navegador e ver erros
+• CTRL+SHIFT+I para abrir DevTools
+• Se porta 8000 estiver ocupada, use: python3 -m http.server 8001
+
+═══════════════════════════════════════════════════════════════
