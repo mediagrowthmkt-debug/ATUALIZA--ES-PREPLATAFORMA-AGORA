@@ -40,28 +40,8 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Função para abrir o navegador
-open_browser() {
-    sleep 2  # Aguarda 2 segundos para o servidor iniciar
-    
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        open "$URL"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        if command -v xdg-open &> /dev/null; then
-            xdg-open "$URL"
-        elif command -v gnome-open &> /dev/null; then
-            gnome-open "$URL"
-        fi
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-        # Windows
-        start "$URL"
-    fi
-}
-
-# Abre o navegador em background
-open_browser &
+# Aguarda 2 segundos e abre o navegador
+(sleep 2 && open "$URL") &
 
 # Inicia o servidor HTTP simples do Python
 $PYTHON_CMD -m http.server $PORT
