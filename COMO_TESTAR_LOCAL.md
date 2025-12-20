@@ -18,6 +18,7 @@ O servidor iniciará automaticamente e você verá:
 - ✅ URL de acesso (ex: http://localhost:8000)
 - 📂 Diretório do projeto
 - 💡 Instruções para parar o servidor
+- 🌐 **O navegador abrirá automaticamente** uma nova guia com o projeto
 
 ## Opção 2: Comando Direto Python
 
