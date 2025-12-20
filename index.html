@@ -1336,6 +1336,77 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .media-resizable.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.25) inset}
     .note-editor .media-resizable{max-width:calc(100% - 4px)}
 
+    /* ===== ESTRUTURAÇÃO (GAMIFICAÇÃO) ===== */
+    .estruturacao-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:16px;padding-bottom:40px}
+    .estruturacao-header{background:var(--panel);border:1px solid var(--shell-border);border-radius:14px;padding:20px;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+    .estruturacao-title{font-size:1.8rem;font-weight:900;margin:0 0 8px;background:linear-gradient(135deg,#ff6600,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .estruturacao-subtitle{font-size:1rem;color:rgba(255,255,255,.7);margin:0}
+    .estruturacao-progress-bar{margin-top:16px;height:12px;background:rgba(0,0,0,.4);border-radius:999px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.1)}
+    .estruturacao-progress-fill{height:100%;background:linear-gradient(90deg,#ff6600,#ffaa00);transition:width .6s ease;border-radius:999px;position:relative;overflow:hidden}
+    .estruturacao-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 2s infinite}
+    @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    .estruturacao-progress-text{display:flex;justify-content:space-between;margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.6)}
+    .estruturacao-weeks{display:flex;flex-direction:column;gap:20px}
+    .estruturacao-week{background:var(--panel);border:1px solid var(--shell-border);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:all .3s ease}
+    .estruturacao-week.completed{border-color:#2e7d32;box-shadow:0 8px 22px rgba(46,125,50,.3)}
+    .estruturacao-week-header{padding:16px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--shell-border);cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .2s ease}
+    .estruturacao-week-header:hover{background:rgba(255,255,255,.06)}
+    .estruturacao-week-badge{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff6600,#ffaa00);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(255,102,0,.4)}
+    .estruturacao-week.completed .estruturacao-week-badge{background:linear-gradient(135deg,#2e7d32,#4caf50)}
+    .estruturacao-week-info{flex:1;min-width:0}
+    .estruturacao-week-title{font-size:1.1rem;font-weight:900;margin:0 0 4px;color:#fff}
+    .estruturacao-week-desc{font-size:.85rem;color:rgba(255,255,255,.6);margin:0}
+    .estruturacao-week-progress{display:flex;align-items:center;gap:12px;font-size:.85rem;color:rgba(255,255,255,.7)}
+    .estruturacao-week-progress-mini{width:80px;height:6px;background:rgba(0,0,0,.4);border-radius:999px;overflow:hidden}
+    .estruturacao-week-progress-mini-fill{height:100%;background:linear-gradient(90deg,#ff6600,#ffaa00);transition:width .3s ease}
+    .estruturacao-week.completed .estruturacao-week-progress-mini-fill{background:linear-gradient(90deg,#2e7d32,#4caf50)}
+    .estruturacao-week-chevron{font-size:1.2rem;color:rgba(255,255,255,.4);transition:transform .3s ease}
+    .estruturacao-week.open .estruturacao-week-chevron{transform:rotate(180deg)}
+    .estruturacao-week-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+    .estruturacao-week.open .estruturacao-week-body{max-height:5000px}
+    .estruturacao-week-content{padding:20px;display:flex;flex-direction:column;gap:16px}
+    .estruturacao-blocks{display:flex;flex-direction:column;gap:12px}
+    .estruturacao-block{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;transition:all .3s ease}
+    .estruturacao-block.completed{border-color:#2e7d32;background:rgba(46,125,50,.08)}
+    .estruturacao-block-header{padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:background .2s ease}
+    .estruturacao-block-header:hover{background:rgba(255,255,255,.04)}
+    .estruturacao-checkbox-wrap{position:relative;width:24px;height:24px;flex-shrink:0;margin-top:2px}
+    .estruturacao-checkbox{width:24px;height:24px;border:2px solid rgba(255,255,255,.3);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s ease;background:rgba(0,0,0,.3)}
+    .estruturacao-checkbox:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.05)}
+    .estruturacao-checkbox.checked{border-color:#2e7d32;background:#2e7d32}
+    .estruturacao-checkbox.checked::after{content:'✓';color:#fff;font-size:16px;font-weight:900}
+    .estruturacao-block-info{flex:1;min-width:0}
+    .estruturacao-block-title{font-size:1rem;font-weight:800;margin:0 0 6px;color:#fff;line-height:1.3}
+    .estruturacao-block-items{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.5;margin:0}
+    .estruturacao-block-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .estruturacao-block.open .estruturacao-block-body{max-height:2000px}
+    .estruturacao-block-content{padding:0 16px 16px 52px;display:flex;flex-direction:column;gap:12px}
+    .estruturacao-items{display:flex;flex-direction:column;gap:8px}
+    .estruturacao-item{display:flex;align-items:flex-start;gap:10px;padding:8px;background:rgba(0,0,0,.2);border-radius:8px;border:1px solid rgba(255,255,255,.06);transition:background .2s ease}
+    .estruturacao-item:hover{background:rgba(255,255,255,.04)}
+    .estruturacao-item-checkbox-wrap{width:20px;height:20px;flex-shrink:0;margin-top:2px}
+    .estruturacao-item-checkbox{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;background:rgba(0,0,0,.4)}
+    .estruturacao-item-checkbox:hover{border-color:rgba(255,255,255,.5)}
+    .estruturacao-item-checkbox.checked{border-color:#2e7d32;background:#2e7d32}
+    .estruturacao-item-checkbox.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:900}
+    .estruturacao-item-text{flex:1;font-size:.9rem;color:rgba(255,255,255,.8);line-height:1.4;min-width:0}
+    .estruturacao-item.completed .estruturacao-item-text{color:rgba(255,255,255,.5);text-decoration:line-through}
+    .estruturacao-notes-area{margin-top:8px}
+    .estruturacao-notes-label{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .estruturacao-notes-label::before{content:'📝'}
+    .estruturacao-textarea{width:100%;min-height:80px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;color:#fff;font-size:.9rem;resize:vertical;font-family:inherit;transition:border-color .2s ease}
+    .estruturacao-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.15)}
+    .estruturacao-textarea::placeholder{color:rgba(255,255,255,.4)}
+    .estruturacao-arrow{text-align:center;padding:8px 0;font-size:1.5rem;color:rgba(255,255,255,.3)}
+    @media (max-width:820px){
+      .estruturacao-week-header{padding:12px 16px}
+      .estruturacao-week-badge{width:40px;height:40px;font-size:1rem}
+      .estruturacao-week-title{font-size:1rem}
+      .estruturacao-week-progress{flex-direction:column;align-items:flex-start;gap:6px}
+      .estruturacao-block-content{padding-left:16px}
+      .estruturacao-title{font-size:1.4rem}
+    }
+
     /* ===== IA CHAT ===== */
     .ia-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:12px;min-height:0}
     .ia-shell{display:flex;gap:12px;min-height:0}
@@ -5120,6 +5191,24 @@ function renderReviewNotes(post){
 </div>
 <div class="notes-list" id="notesList"></div>
 </div>
+
+<!-- ESTRUTURAÇÃO -->
+<div aria-hidden="true" class="estruturacao-wrap" id="estruturacaoWrap" style="display:none">
+  <div class="estruturacao-header">
+    <h2 class="estruturacao-title">🎯 Estruturação de Marketing e Comercial</h2>
+    <p class="estruturacao-subtitle">Acompanhe o progresso de cada etapa do processo de estruturação</p>
+    <div class="estruturacao-progress-bar">
+      <div class="estruturacao-progress-fill" id="estruturacaoProgressFill" style="width:0%"></div>
+    </div>
+    <div class="estruturacao-progress-text">
+      <span id="estruturacaoProgressText">0% concluído</span>
+      <span id="estruturacaoProgressCount">0 de 0 itens</span>
+    </div>
+  </div>
+
+  <div class="estruturacao-weeks" id="estruturacaoWeeks"></div>
+</div>
+
 <!-- ACESSOS -->
 <div aria-hidden="true" class="access-wrap" id="accessWrap" style="display:none">
   <div class="access-header">
@@ -6865,6 +6954,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
   const sectionTabs = $("sectionTabs"), widgetsGrid = $("widgetsGrid"), demandasWrap = $("demandasWrap"), notesWrap = $("notesWrap"), metasWrap = $("metasWrap"), iframeDica = $("iframedica"), filesWrap = $("filesWrap"), foldersList = $("foldersList"), filesPane = $("filesPane"), filesList = $("filesList"), fileInput = $("fileInput"), uploadFilesBtn = $("uploadFilesBtn"), newFolderBtn = $("newFolder"), filesBreadcrumb = $("filesBreadcrumb"), subfoldersGrid = $("subfoldersGrid"), filesEmpty = $("filesEmpty"), filesViewToggle = $("filesViewToggle"), viewAllFilesBtn = $("viewAllFilesBtn"), filePreviewModal = $("filePreviewModal"), filePreviewTitle = $("filePreviewTitle"), filePreviewContent = $("filePreviewContent"), filePreviewInfo = $("filePreviewInfo"), filePreviewClose = $("filePreviewClose"), uploadProgress = $("uploadProgress"), uploadProgressText = $("uploadProgressText"), uploadProgressBar = $("uploadProgressBar"), uploadProgressPercent = $("uploadProgressPercent"), storageUsage = $("storageUsage"), storageUsagePercent = $("storageUsagePercent"), storageUsageFill = $("storageUsageFill"), storageUsageSummary = $("storageUsageSummary"), storageUsageHint = $("storageUsageHint"), filesBulkBar = $("filesBulkBar"), filesBulkCount = $("filesBulkCount"), filesBulkStatus = $("filesBulkStatus"), filesBulkUndo = $("filesBulkUndo"), filesSelectAll = $("filesSelectAll"), trafegoWrap = $("trafegoWrap"), trafegoDemandasBody = $("trafegoDemandasBody"), trafegoAddDemanda = $("trafegoAddDemanda"), trafegoMetricsBody = $("trafegoMetricsBody"), trafegoAddMetricRow = $("trafegoAddMetricRow"), trafegoCampaignsBody = $("trafegoCampaignsBody"), trafegoAddCampaign = $("trafegoAddCampaign"), trafegoCampaignStatusFilter = $("trafegoCampaignStatusFilter"), trafegoCampaignSearch = $("trafegoCampaignSearch"), trafegoCampaignsEmpty = $("trafegoCampaignsEmpty"), trafegoOptimizationsBody = $("trafegoOptimizationsBody"), trafegoAddOptimization = $("trafegoAddOptimization"), trafegoOptimizationPlatformFilter = $("trafegoOptimizationPlatformFilter"), trafegoOptimizationRecurrenceFilter = $("trafegoOptimizationRecurrenceFilter"), trafegoOptimizationStatusFilter = $("trafegoOptimizationStatusFilter"), trafegoOptimizationSearch = $("trafegoOptimizationSearch"), trafegoOptimizationsEmpty = $("trafegoOptimizationsEmpty"), trafegoHistoryBody = $("trafegoHistoryBody"), trafegoHistoryPlatformFilter = $("trafegoHistoryPlatformFilter"), trafegoHistorySearch = $("trafegoHistorySearch"), trafegoHistoryEmpty = $("trafegoHistoryEmpty");
     const trafegoCampaignsEmptyDefault = trafegoCampaignsEmpty ? trafegoCampaignsEmpty.textContent : '';
     const trafegoOptimizationsEmptyDefault = trafegoOptimizationsEmpty ? trafegoOptimizationsEmpty.textContent : '';
+    const estruturacaoWrap = $("estruturacaoWrap");
     let macroTabBadgeEl = null;
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = true;
@@ -11240,6 +11330,7 @@ async function sendIAQuestion(){
       { id:"leads",     name:"Leads" },
       { id:"refSocial", name:"Referências" },
       { id:"notes",     name:"Anotações" },
+      { id:"estruturacao", name:"Estruturação" },
       { id:"access",    name:"Acessos" },
       { id:"arquivos",  name:"Arquivos" },
       { id:"concorrentes", name:"Concorrentes" },
@@ -11646,7 +11737,7 @@ async function sendIAQuestion(){
       uploadClientLogo(file);
     });
 
-    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false}){
+    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false, estruturacao=false}){
       widgetsGrid.style.display = widgets? "flex":"none";
       iframeDica.style.display  = widgets? "block":"none";
       metasWrap.style.display = metas? "block":"none"; metasWrap.setAttribute("aria-hidden", metas? "false":"true");
@@ -11658,6 +11749,7 @@ async function sendIAQuestion(){
       filesWrap.style.display   = files? "flex":"none";  filesWrap.setAttribute("aria-hidden", files? "false":"true");
       iaWrap.style.display      = ia? "block":"none"; iaWrap.setAttribute("aria-hidden", ia? "false":"true");
       competitorsWrap.style.display = concorrentes? "block":"none"; competitorsWrap.setAttribute("aria-hidden", concorrentes? "false":"true");
+      if(estruturacaoWrap) { estruturacaoWrap.style.display = estruturacao? "flex":"none"; estruturacaoWrap.setAttribute("aria-hidden", estruturacao? "false":"true"); }
       refSocialWrap.style.display = refSocial? "block":"none"; refSocialWrap.setAttribute("aria-hidden", refSocial? "false":"true");
       cacWrap.style.display = cac? "block":"none"; cacWrap.setAttribute("aria-hidden", cac? "false":"true");
       leadsWrap.style.display = leads? "block":"none"; leadsWrap.setAttribute("aria-hidden", leads? "false":"true");
@@ -14162,6 +14254,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="concorrentes"){
         setSectionVisibility({concorrentes:true});
         renderCompetitors();
+      } else if(currentSection==="estruturacao"){
+        setSectionVisibility({estruturacao:true});
+        renderEstruturacao();
       } else if(currentSection==="relatorio"){
         setSectionVisibility({relatorio:true});
         initRelatorio();
@@ -21615,6 +21710,567 @@ async function sendIAQuestion(){
     function loadAccessesFromUserData(){ ACCESSES = Array.isArray(USER_DATA.accesses) ? USER_DATA.accesses : []; }
     function saveAccessesToUserData(){ USER_DATA.accesses = ACCESSES; }
     async function persistAccesses(){ saveAccessesToUserData(); const uid=auth.currentUser?.uid; if(!uid) return; await setDoc(doc(db,"usuarios",uid), { accesses: ACCESSES }, { merge:true }); }
+
+    /* ===== ESTRUTURAÇÃO (GAMIFICAÇÃO) ===== */
+    const ESTRUTURACAO_DATA = [
+      {
+        id: 'semana1',
+        title: 'Semana 1',
+        subtitle: 'Clareza e Diagnóstico Estratégico',
+        description: 'Entender profundamente o negócio, o mercado e os gargalos antes de qualquer execução',
+        blocks: [
+          {
+            id: 'dir_estrategico',
+            title: 'Direcionamento Estratégico',
+            items: [
+              'Onde a empresa quer chegar',
+              'Objetivo financeiro e de crescimento',
+              'Expectativa de faturamento',
+              'Volume de vendas desejado',
+              'Posicionamento de marca no mercado'
+            ]
+          },
+          {
+            id: 'momento_atual',
+            title: 'Análise do Momento Atual',
+            items: [
+              'Situação atual do marketing',
+              'Situação atual das vendas',
+              'Presença digital (site, redes sociais, anúncios)',
+              'Canais atuais de aquisição',
+              'Gargalos visíveis de conversão'
+            ]
+          },
+          {
+            id: 'mercado_concorrencia',
+            title: 'Análise de Mercado e Concorrência',
+            items: [
+              'Concorrentes diretos e indiretos',
+              'Como se posicionam',
+              'Promessas que fazem',
+              'Pontos fortes e fracos',
+              'Onde todos falam a mesma coisa',
+              'Oportunidades de diferenciação (Oceano Azul)'
+            ]
+          },
+          {
+            id: 'matriz_cdt',
+            title: 'MATRIZ CDT — Características, Dores e Soluções',
+            items: [
+              'Características: o que a empresa é, faz e entrega',
+              'Dores: problemas reais, frustrações, medos e objeções do cliente',
+              'Soluções (Transformações): como a empresa resolve essas dores'
+            ]
+          },
+          {
+            id: 'estrutura_time',
+            title: 'Estrutura e Time Atual',
+            items: [
+              'Time interno do cliente',
+              'Funções e responsabilidades',
+              'Quem faz o quê',
+              'Onde o marketing depende do cliente',
+              'Onde o marketing executa de forma independente'
+            ]
+          },
+          {
+            id: 'entendimento_negocio',
+            title: 'Entendimento Profundo do Negócio',
+            items: [
+              'Processo comercial atual',
+              'Ticket médio',
+              'Margem',
+              'Ciclo de venda',
+              'Principais objeções',
+              'Principais pontos de perda de venda'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'semana2',
+        title: 'Semana 2',
+        subtitle: 'Posicionamento e Estrutura de Crescimento',
+        description: 'Definir para quem vender, o que vender e por que o cliente deve escolher essa empresa',
+        blocks: [
+          {
+            id: 'puv',
+            title: 'Definição da PUV (Proposta Única de Valor)',
+            items: [
+              'Diferencial real da empresa',
+              'Por que ela é a melhor escolha',
+              'O que faz diferente do mercado',
+              'Mensagem simples, direta e defendível'
+            ]
+          },
+          {
+            id: 'pai',
+            title: 'Definição do PAI (Público-Alvo Ideal)',
+            items: [
+              'Perfil do cliente ideal',
+              'Características demográficas',
+              'Comportamento de compra',
+              'Dores e desejos',
+              'Objeções',
+              'Momento de decisão'
+            ]
+          },
+          {
+            id: 'benchmarks',
+            title: 'Estudo de Mercado e Benchmarks',
+            items: [
+              'Estratégias que já funcionaram no nicho',
+              'Tipos de anúncios vencedores',
+              'Modelos de oferta',
+              'Estruturas de funil'
+            ]
+          },
+          {
+            id: 'melhorias',
+            title: 'Pontos de Melhoria Imediatos',
+            items: [
+              'Ajustes rápidos de alto impacto',
+              'Correções de comunicação',
+              'Ajustes de oferta',
+              'Melhorias no processo comercial',
+              'Cliente Oculto'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'semana3_4',
+        title: 'Semanas 3 e 4',
+        subtitle: 'Metas, Estratégias e Plano de Ação',
+        description: 'Transformar estratégia em execução prática',
+        blocks: [
+          {
+            id: 'metas',
+            title: 'Definição de Metas',
+            items: [
+              'Metas anuais',
+              'Metas mensais',
+              'Metas por canal',
+              'Metas de leads, conversão e vendas',
+              'Médias de custo por cliques no Google'
+            ]
+          },
+          {
+            id: 'visao_temporal',
+            title: 'Visão de Curto, Médio e Longo Prazo',
+            items: [
+              'Curto prazo: gerar demanda',
+              'Médio prazo: previsibilidade',
+              'Longo prazo: marca forte e crescimento sustentável'
+            ]
+          },
+          {
+            id: 'google',
+            title: 'Estruturação do Google (Plano de ação)',
+            items: [
+              'Google Ads',
+              'Google Meu Negócio',
+              'Palavras-chave estratégicas',
+              'Funis de intenção',
+              'Captação de demanda pronta'
+            ]
+          },
+          {
+            id: 'site_seo',
+            title: 'Estruturação do Site e SEO',
+            items: [
+              'Arquitetura do site',
+              'Páginas de venda',
+              'SEO estratégico',
+              'Conteúdo para ranqueamento (BLOGS)',
+              'Posicionamento da marca'
+            ]
+          },
+          {
+            id: 'redes_sociais',
+            title: 'Estruturação das Redes Sociais',
+            items: [
+              'Objetivo das redes',
+              'Tipos de conteúdo',
+              'Frequência',
+              'Linguagem',
+              'Conteúdos de autoridade, prova social e conversão'
+            ]
+          },
+          {
+            id: 'copywriting',
+            title: 'Copywriting',
+            items: [
+              'Anúncios (Google e Meta)',
+              'Site',
+              'Blogs',
+              'Mensagens comerciais (DISPAROS, MENSAGENS DE RELACIONAMENTO)',
+              'Scripts de venda comercial'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'semana5',
+        title: 'Semana 5',
+        subtitle: 'Produção de Conteúdo e Materiais',
+        description: 'Criar os ativos que sustentam a estratégia',
+        blocks: [
+          {
+            id: 'conteudo_redes',
+            title: 'Conteúdo para Redes Sociais (gravado com o cliente)',
+            items: [
+              'Institucional',
+              'Autoridade',
+              'Prova social',
+              'Conversão'
+            ]
+          },
+          {
+            id: 'conteudo_anuncios',
+            title: 'Conteúdo para Anúncios',
+            items: [
+              'Vídeos curtos',
+              'Criativos para Meta e Google',
+              'Estrutura de anúncios testáveis'
+            ]
+          },
+          {
+            id: 'stories',
+            title: 'Stories Iniciais',
+            items: [
+              'Padrão visual',
+              'Bastidores',
+              'Oferta',
+              'Autoridade'
+            ]
+          },
+          {
+            id: 'materiais',
+            title: 'Organização de Materiais',
+            items: [
+              'Estrutura de pastas',
+              'Organização de vídeos, artes e copys',
+              'Processo simples para o cliente'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'semana6',
+        title: 'Semana 6',
+        subtitle: 'CRM e Automações',
+        description: 'Organizar vendas e aumentar conversão sem aumentar tráfego',
+        blocks: [
+          {
+            id: 'crm',
+            title: 'Estruturação do CRM',
+            items: [
+              'Entrada de leads',
+              'Funil de vendas',
+              'Etapas',
+              'Responsáveis',
+              'SLA de atendimento',
+              'Implementação e treinamento'
+            ]
+          },
+          {
+            id: 'automacoes',
+            title: 'Automações',
+            items: [
+              'Mensagens automáticas',
+              'Follow-ups',
+              'Confirmações',
+              'Nutrição de leads baseada na Matriz CDT'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'semana7',
+        title: 'Semana 7',
+        subtitle: 'Operação e Entregas Finais',
+        description: 'Deixar tudo padronizado, funcional e escalável',
+        blocks: [
+          {
+            id: 'paginas',
+            title: 'Entrega de Páginas de Venda',
+            items: [
+              'Landing pages',
+              'Páginas de serviço',
+              'Estrutura focada em conversão'
+            ]
+          },
+          {
+            id: 'site',
+            title: 'Entrega do Site',
+            items: [
+              'Site funcional',
+              'Alinhado à estratégia',
+              'Preparado para tráfego e SEO'
+            ]
+          },
+          {
+            id: 'criativos',
+            title: 'Entrega de Criativos Editados',
+            items: [
+              'Anúncios',
+              'Artes',
+              'Vídeos',
+              'Copys'
+            ]
+          },
+          {
+            id: 'padronizacoes',
+            title: 'Padronizações',
+            items: [
+              'Google Ads padronizado',
+              'Redes sociais padronizadas',
+              'Comunicação visual',
+              'Linguagem de marca'
+            ]
+          },
+          {
+            id: 'posts',
+            title: 'Entrega de Posts',
+            items: [
+              'Calendário inicial',
+              'Conteúdos prontos',
+              'Direção clara de continuidade'
+            ]
+          }
+        ]
+      }
+    ];
+
+    let ESTRUTURACAO_STATE = {};
+
+    function loadEstruturacaoFromUserData(){
+      ESTRUTURACAO_STATE = USER_DATA.estruturacao || {};
+    }
+
+    function saveEstruturacaoToUserData(){
+      USER_DATA.estruturacao = ESTRUTURACAO_STATE;
+    }
+
+    async function persistEstruturacao(){
+      saveEstruturacaoToUserData();
+      const uid = auth.currentUser?.uid;
+      if(!uid) return;
+      try{
+        await setDoc(doc(db, "usuarios", uid), { estruturacao: ESTRUTURACAO_STATE }, { merge: true });
+      }catch(err){
+        console.error('Erro ao salvar estruturação:', err);
+      }
+    }
+
+    function calculateProgress(){
+      let total = 0;
+      let completed = 0;
+      
+      ESTRUTURACAO_DATA.forEach(week => {
+        week.blocks.forEach(block => {
+          total += block.items.length;
+          const blockState = ESTRUTURACAO_STATE[week.id]?.blocks?.[block.id];
+          if(blockState){
+            block.items.forEach((_, idx) => {
+              if(blockState.items?.[idx]?.completed) completed++;
+            });
+          }
+        });
+      });
+      
+      return { total, completed, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+    }
+
+    function renderEstruturacao(){
+      loadEstruturacaoFromUserData();
+      
+      const weeksContainer = document.getElementById('estruturacaoWeeks');
+      const progressFill = document.getElementById('estruturacaoProgressFill');
+      const progressText = document.getElementById('estruturacaoProgressText');
+      const progressCount = document.getElementById('estruturacaoProgressCount');
+      
+      if(!weeksContainer) return;
+      
+      const progress = calculateProgress();
+      if(progressFill) progressFill.style.width = `${progress.percentage}%`;
+      if(progressText) progressText.textContent = `${progress.percentage}% concluído`;
+      if(progressCount) progressCount.textContent = `${progress.completed} de ${progress.total} itens`;
+      
+      weeksContainer.innerHTML = '';
+      
+      ESTRUTURACAO_DATA.forEach((week, weekIdx) => {
+        const weekState = ESTRUTURACAO_STATE[week.id] || { blocks: {} };
+        
+        let weekTotal = 0;
+        let weekCompleted = 0;
+        week.blocks.forEach(block => {
+          weekTotal += block.items.length;
+          const blockState = weekState.blocks[block.id];
+          if(blockState){
+            block.items.forEach((_, idx) => {
+              if(blockState.items?.[idx]?.completed) weekCompleted++;
+            });
+          }
+        });
+        
+        const weekProgress = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
+        const isCompleted = weekProgress === 100;
+        
+        const weekEl = document.createElement('div');
+        weekEl.className = `estruturacao-week ${isCompleted ? 'completed' : ''}`;
+        weekEl.innerHTML = `
+          <div class="estruturacao-week-header">
+            <div class="estruturacao-week-badge">${weekIdx + 1}</div>
+            <div class="estruturacao-week-info">
+              <h3 class="estruturacao-week-title">${week.title}</h3>
+              <p class="estruturacao-week-desc">${week.subtitle}</p>
+            </div>
+            <div class="estruturacao-week-progress">
+              <span>${weekCompleted}/${weekTotal}</span>
+              <div class="estruturacao-week-progress-mini">
+                <div class="estruturacao-week-progress-mini-fill" style="width:${weekProgress}%"></div>
+              </div>
+            </div>
+            <span class="estruturacao-week-chevron">▾</span>
+          </div>
+          <div class="estruturacao-week-body">
+            <div class="estruturacao-week-content">
+              <div class="estruturacao-blocks" data-week-id="${week.id}"></div>
+            </div>
+          </div>
+        `;
+        
+        const header = weekEl.querySelector('.estruturacao-week-header');
+        header.addEventListener('click', () => {
+          weekEl.classList.toggle('open');
+        });
+        
+        const blocksContainer = weekEl.querySelector('.estruturacao-blocks');
+        
+        week.blocks.forEach((block, blockIdx) => {
+          const blockState = weekState.blocks[block.id] || { items: {}, notes: '' };
+          const blockCompleted = block.items.every((_, idx) => blockState.items[idx]?.completed);
+          
+          const blockEl = document.createElement('div');
+          blockEl.className = `estruturacao-block ${blockCompleted ? 'completed' : ''}`;
+          blockEl.innerHTML = `
+            <div class="estruturacao-block-header">
+              <div class="estruturacao-checkbox-wrap">
+                <div class="estruturacao-checkbox ${blockCompleted ? 'checked' : ''}" data-week-id="${week.id}" data-block-id="${block.id}"></div>
+              </div>
+              <div class="estruturacao-block-info">
+                <h4 class="estruturacao-block-title">${block.title}</h4>
+                <p class="estruturacao-block-items">${block.items.length} item${block.items.length !== 1 ? 's' : ''}</p>
+              </div>
+            </div>
+            <div class="estruturacao-block-body">
+              <div class="estruturacao-block-content">
+                <div class="estruturacao-items"></div>
+                <div class="estruturacao-notes-area">
+                  <div class="estruturacao-notes-label">Anotações</div>
+                  <textarea class="estruturacao-textarea" placeholder="Adicione suas anotações sobre este bloco..." data-week-id="${week.id}" data-block-id="${block.id}">${blockState.notes || ''}</textarea>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          const blockHeader = blockEl.querySelector('.estruturacao-block-header');
+          const blockCheckbox = blockEl.querySelector('.estruturacao-checkbox');
+          
+          blockCheckbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleBlock(week.id, block.id);
+          });
+          
+          blockHeader.addEventListener('click', () => {
+            blockEl.classList.toggle('open');
+          });
+          
+          const itemsContainer = blockEl.querySelector('.estruturacao-items');
+          
+          block.items.forEach((item, itemIdx) => {
+            const itemState = blockState.items[itemIdx] || { completed: false };
+            
+            const itemEl = document.createElement('div');
+            itemEl.className = `estruturacao-item ${itemState.completed ? 'completed' : ''}`;
+            itemEl.innerHTML = `
+              <div class="estruturacao-item-checkbox-wrap">
+                <div class="estruturacao-item-checkbox ${itemState.completed ? 'checked' : ''}" data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}"></div>
+              </div>
+              <div class="estruturacao-item-text">${item}</div>
+            `;
+            
+            const itemCheckbox = itemEl.querySelector('.estruturacao-item-checkbox');
+            itemCheckbox.addEventListener('click', () => {
+              toggleItem(week.id, block.id, itemIdx);
+            });
+            
+            itemsContainer.appendChild(itemEl);
+          });
+          
+          const textarea = blockEl.querySelector('.estruturacao-textarea');
+          let saveTimeout;
+          textarea.addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+              saveBlockNotes(week.id, block.id, textarea.value);
+            }, 1000);
+          });
+          
+          blocksContainer.appendChild(blockEl);
+          
+          if(blockIdx < week.blocks.length - 1){
+            const arrow = document.createElement('div');
+            arrow.className = 'estruturacao-arrow';
+            arrow.textContent = '↓';
+            blocksContainer.appendChild(arrow);
+          }
+        });
+        
+        weeksContainer.appendChild(weekEl);
+      });
+    }
+
+    function toggleItem(weekId, blockId, itemIdx){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false };
+      
+      ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].completed = !ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].completed;
+      
+      persistEstruturacao();
+      renderEstruturacao();
+    }
+
+    function toggleBlock(weekId, blockId){
+      const week = ESTRUTURACAO_DATA.find(w => w.id === weekId);
+      const block = week?.blocks.find(b => b.id === blockId);
+      if(!week || !block) return;
+      
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      
+      const allCompleted = block.items.every((_, idx) => ESTRUTURACAO_STATE[weekId].blocks[blockId].items[idx]?.completed);
+      
+      block.items.forEach((_, idx) => {
+        if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[idx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[idx] = { completed: false };
+        ESTRUTURACAO_STATE[weekId].blocks[blockId].items[idx].completed = !allCompleted;
+      });
+      
+      persistEstruturacao();
+      renderEstruturacao();
+    }
+
+    function saveBlockNotes(weekId, blockId, notes){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      
+      ESTRUTURACAO_STATE[weekId].blocks[blockId].notes = notes;
+      
+      persistEstruturacao();
+    }
 
     function renderAccesses(){
       loadAccessesFromUserData();
