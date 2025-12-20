@@ -9,11 +9,29 @@ import socketserver
 import os
 import sys
 from datetime import datetime
+from urllib.parse import unquote
 
 PORT = 8000
 
 class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     """Handler HTTP que desabilita completamente o cache"""
+    
+    def do_GET(self):
+        """Override GET para redirecionar raiz e evitar 404"""
+        # Se tentar acessar /mediagrowthmkt ou qualquer path que não existe, redireciona para index.html
+        if self.path in ['/', '/index.html', '/index']:
+            self.path = '/index.html'
+        elif not os.path.exists('.' + unquote(self.path)):
+            # Se o arquivo não existe, redireciona para index.html (SPA behavior)
+            self.path = '/index.html'
+        
+        return super().do_GET()
+    
+    def do_POST(self):
+        """Ignora POST requests (Firebase usa)"""
+        self.send_response(200)
+        self.end_headers()
+        return
     
     def end_headers(self):
         """Adiciona headers para desabilitar cache"""
@@ -28,7 +46,9 @@ class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         """Log personalizado com timestamp"""
         timestamp = datetime.now().strftime('%H:%M:%S')
-        print(f"[{timestamp}] {args[0]}")
+        # Ignora logs de arquivos comuns
+        if '404' not in str(args):
+            print(f"[{timestamp}] {args[0]}")
 
 def find_free_port(start_port):
     """Encontra uma porta livre começando da porta especificada"""
