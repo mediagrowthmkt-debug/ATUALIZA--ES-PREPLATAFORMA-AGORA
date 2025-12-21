@@ -22616,13 +22616,7 @@ async function sendIAQuestion(){
       return icons[ext] || '📎';
     }
 
-    function formatFileSize(bytes){
-      if(!bytes || bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-    }
+    // formatFileSize já definida globalmente - usar a existente
 
     function renderAccesses(){
       loadAccessesFromUserData();
@@ -29435,17 +29429,6 @@ function renderReviewNotes(post){
 
   // Rebuild on modal open/content changes
   document.addEventListener('DOMContentLoaded', function(){
-
-  // Filtro por mês
-  if (el.filterMonth && !el.filterMonth.dataset.bound){
-    el.filterMonth.dataset.bound = '1';
-    el.filterMonth.addEventListener('change', render);
-  }
-  if (el.clearFilter && !el.clearFilter.dataset.bound){
-    el.clearFilter.dataset.bound = '1';
-    el.clearFilter.addEventListener('click', function(){ if(el.filterMonth){ el.filterMonth.value = ''; } render(); });
-  }
-
     var pm = document.getElementById('postModal');
     if(!pm) return;
     var obs = new MutationObserver(function(){
@@ -30509,110 +30492,50 @@ function renderReviewNotes(post){
 </div>
 <div id="mg-iframe-container"></div>
 <!-- === MediaGrowth: Firebase iFrames Persist (per user/email + per client) === -->
+<!-- DESABILITADO: Este módulo usa credenciais placeholder. Usar o módulo abaixo com credenciais reais -->
+<!--
 <script type="module">
-// ===== 1) Cole seu firebaseConfig aqui =====
-const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI.firebaseapp.com",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
-};
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { 
-  getFirestore, enableIndexedDbPersistence, collection, addDoc, onSnapshot, 
-  deleteDoc, doc, serverTimestamp, query, orderBy, getDocs, writeBatch 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-enableIndexedDbPersistence(db).catch(()=>{});
-
-// ===== Util =====
-const qs = new URLSearchParams(location.search);
-const pathClient = location.pathname.replace(/^\/+/, '').split('/')[0];
-let clientKey = (typeof window.TENANT === 'string' && window.TENANT)
-  || document.body.getAttribute('data-client-id')
-  || qs.get('client')
-  || pathClient;
-if (!clientKey) {
-  console.warn('Cliente não definido na URL; usando chave "no-client".');
-  clientKey = 'no-client';
-}
-try { document.body.setAttribute('data-client-id', clientKey); } catch(_) {}
-const adminParam = (qs.get('iframeAdmin') === '1') || localStorage.getItem('mg_iframe_admin') === '1';
-const container = document.getElementById('mg-iframe-container');
-function sanitizeSrc(raw){ try{ const u=new URL(raw.trim()); return u.toString(); }catch(e){ return (raw||'').trim(); } }
-function renderList(list){
-  container.innerHTML='';
-  list.forEach(item=>{
-    const wrap=document.createElement('div');
-    wrap.className='mg-iframe-wrap';
-    wrap.style.position='relative'; wrap.style.margin='12px 0';
-    if(item.title){
-      const h=document.createElement('div'); h.textContent=item.title;
-      h.style.margin='6px 0'; h.style.fontWeight='600'; h.style.color='#ddd'; wrap.appendChild(h);
-    }
-    const f=document.createElement('iframe'); f.src=item.src; f.width='100%'; f.height='640'; f.loading='lazy'; f.style.border='1px solid #333'; wrap.appendChild(f);
-    const rm=document.createElement('button'); rm.textContent='Remover'; rm.className='mg-remove';
-    rm.style.cssText='display:none;position:absolute;top:8px;right:8px;background:#000a;color:#fff;border:1px solid #fff3;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer';
-    rm.addEventListener('click', async ()=>{ if(!window.mgCloud.ctx) return; await deleteDoc(window.mgCloud.docRef(item.id)); });
-    wrap.appendChild(rm);
-    container.appendChild(wrap);
-  });
-  document.body.classList.toggle('mg-admin', adminParam);
-  Array.from(document.querySelectorAll('.mg-remove')).forEach(b=> b.style.display = adminParam ? 'inline-block' : 'none');
-}
-
-// ===== Cloud ctx (USERS path) =====
-window.mgCloud = {
-  ctx:null,
-  docRef:(id)=>{ const {uid}=window.mgCloud.ctx; return doc(db,'usuarios',uid,'clients',clientKey,'iframes',id); },
-  async add(src,title){ if(!window.mgCloud.ctx) return alert('Faça login para salvar na nuvem.'); await addDoc(window.mgCloud.ctx.colRef,{src:sanitizeSrc(src),title:title||'',createdAt:serverTimestamp()}); },
-  async importLocalStorage(){
-    if(!window.mgCloud.ctx) return;
-    const key='mg_iframes_'+clientKey;
-    let local=[]; try{ local=JSON.parse(localStorage.getItem(key))||[]; }catch(e){}
-    if(!local.length) return alert('Nada no localStorage.');
-    const snap=await getDocs(window.mgCloud.ctx.colRef); const existing=new Set(); snap.forEach(d=> existing.add((d.get('src')||'').trim()));
-    const batch=writeBatch(db); let count=0;
-    local.forEach(it=>{ const src=sanitizeSrc(it.src||''); if(!src || existing.has(src)) return; const ref=doc(window.mgCloud.ctx.colRef); batch.set(ref,{src,title:it.title||'',createdAt:serverTimestamp()}); count++; });
-    if(count>0){ await batch.commit(); alert('Importados '+count+' iFrames.'); } else { alert('Nada novo para importar.'); }
-  }
-};
-
-// ===== Auth + snapshot =====
-onAuthStateChanged(auth, (user)=>{
-  if(user){
-    const colRef = collection(db,'usuarios',user.uid,'clients',clientKey,'iframes');
-    const q = query(colRef, orderBy('createdAt'));
-    if(window.mgCloud.ctx && window.mgCloud.ctx.unsub){ window.mgCloud.ctx.unsub(); }
-    const unsub = onSnapshot(q, snap=>{
-      const list=[]; snap.forEach(d=> list.push({ id:d.id, ...d.data() }));
-      renderList(list);
+// Script de iframes desabilitado - usando credenciais do app principal
+</script>
+-->
+<script>
+// iFrames container - funcionalidade movida para app principal
+(function(){
+  const container = document.getElementById('mg-iframe-container');
+  if(!container) return;
+  
+  const qs = new URLSearchParams(location.search);
+  const pathClient = location.pathname.replace(/^\/+/, '').split('/')[0];
+  let clientKey = (typeof window.TENANT === 'string' && window.TENANT)
+    || document.body.getAttribute('data-client-id')
+    || qs.get('client')
+    || pathClient || 'no-client';
+  
+  const adminParam = (qs.get('iframeAdmin') === '1') || localStorage.getItem('mg_iframe_admin') === '1';
+  
+  function sanitizeSrc(raw){ try{ const u=new URL(raw.trim()); return u.toString(); }catch(e){ return (raw||'').trim(); } }
+  
+  function renderList(list){
+    container.innerHTML='';
+    list.forEach(item=>{
+      const wrap=document.createElement('div');
+      wrap.className='mg-iframe-wrap';
+      wrap.style.position='relative'; wrap.style.margin='12px 0';
+      if(item.title){
+        const h=document.createElement('div'); h.textContent=item.title;
+        h.style.margin='6px 0'; h.style.fontWeight='600'; h.style.color='#ddd'; wrap.appendChild(h);
+      }
+      const f=document.createElement('iframe'); f.src=item.src; f.width='100%'; f.height='640'; f.loading='lazy'; f.style.border='1px solid #333'; wrap.appendChild(f);
+      container.appendChild(wrap);
     });
-    window.mgCloud.ctx = { uid:user.uid, colRef, unsub };
-    if(qs.get('import')==='1'){ window.mgCloud.importLocalStorage(); }
-  }else{
-    renderList([]);
   }
-});
-
-// ===== Importar <iframe data-persist="true"> do DOM para localStorage =====
-(function importDOM(){
-  if(qs.get('import')!=='1') return;
-  const key='mg_iframes_'+clientKey;
-  const existing=Array.from(document.querySelectorAll('iframe[data-persist="true"]'));
-  if(!existing.length) return;
-  let local=[]; try{ local=JSON.parse(localStorage.getItem(key))||[]; }catch(e){}
-  existing.forEach(el=>{ const src=el.getAttribute('src')||''; const title=el.getAttribute('title')||el.getAttribute('data-title')||''; if(src) local.push({src,title}); });
-  const seen=new Set(); const out=[]; local.forEach(it=>{ const s=(it.src||'').trim(); if(s && !seen.has(s)){ seen.add(s); out.push({src:s,title:it.title||''}); }});
-  localStorage.setItem(key, JSON.stringify(out));
-  alert('iFrames do DOM adicionados ao localStorage. Clique "Importar do localStorage" para enviar ao Firebase.');
+  
+  // Placeholder - iframes devem ser carregados pelo app principal
+  window.mgCloud = window.mgCloud || {
+    ctx: null,
+    add: function(){ console.warn('mgCloud.add: use o sistema principal'); },
+    importLocalStorage: function(){ console.warn('mgCloud.importLocalStorage: use o sistema principal'); }
+  };
 })();
 </script>
 <!-- === /MediaGrowth: Firebase iFrames Persist === -->
@@ -30861,27 +30784,26 @@ onAuthStateChanged(auth, (user)=>{
 <script type="module">
 /* ===== 1) Firebase config – COLE OS SEUS DADOS ===== */
 const firebaseConfig = {
-  apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
-  authDomain: "mediagrowth-a5349.firebaseapp.com",
-  projectId: "mediagrowth-a5349",
-  storageBucket: "mediagrowth-a5349.firebasestorage.app",
-  messagingSenderId: "1074237637946",
-  appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+  apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+  authDomain: "mediagrowth-a5349.firebaseapp.com",
+  projectId: "mediagrowth-a5349",
+  storageBucket: "mediagrowth-a5349.firebasestorage.app",
+  messagingSenderId: "1074237637946",
+  appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
 };
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, enableIndexedDbPersistence, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app  = initializeApp(firebaseConfig);
+// Reutilizar app Firebase se já existir
+const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 // tornar auth acessível globalmente (planilha Macro depende)
 window.auth = auth;
 window.onAuthStateChanged = onAuthStateChanged;
-enableIndexedDbPersistence(db).catch(()=>{});
-
-/* ===== 2) Cliente (por URL ?client=... ou data-client-id no <body>) ===== */
+try { enableIndexedDbPersistence(db).catch(()=>{}); } catch(e) {}/* ===== 2) Cliente (por URL ?client=... ou data-client-id no <body>) ===== */
 const qs = new URLSearchParams(location.search);
 const pathClient = location.pathname.replace(/^\/+/, '').split('/')[0];
 let clientKey = (typeof window.TENANT === 'string' && window.TENANT)
