@@ -1378,6 +1378,17 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-block-info{flex:1;min-width:0}
     .estruturacao-block-title{font-size:1rem;font-weight:800;margin:0 0 6px;color:#fff;line-height:1.3}
     .estruturacao-block-items{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.5;margin:0}
+    
+    /* Resumo do bloco */
+    .estruturacao-block-summary{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .estruturacao-block-summary-item{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+    .estruturacao-block-summary-item.completed{background:rgba(46,125,50,.2);color:#81c784}
+    .estruturacao-block-summary-item.notes{background:rgba(255,193,7,.15);color:#ffd54f}
+    .estruturacao-block-summary-item.files{background:rgba(33,150,243,.15);color:#64b5f6}
+    .estruturacao-block-summary-item .icon{font-size:.8rem}
+    .estruturacao-block-summary-preview{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px;max-height:40px;overflow:hidden;line-height:1.4}
+    .estruturacao-block-summary-preview span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+    
     .estruturacao-block-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
     .estruturacao-block.open .estruturacao-block-body{max-height:2000px}
     .estruturacao-block-content{padding:0 16px 16px 52px;display:flex;flex-direction:column;gap:12px}
@@ -1391,6 +1402,195 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-item-checkbox.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:900}
     .estruturacao-item-text{flex:1;font-size:.9rem;color:rgba(255,255,255,.8);line-height:1.4;min-width:0}
     .estruturacao-item.completed .estruturacao-item-text{color:rgba(255,255,255,.5);text-decoration:line-through}
+    
+    /* ===== WEEK EXTRAS (Texto, Arquivos, Checklist por semana) ===== */
+    .estruturacao-week-extras{margin-bottom:16px;padding:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+    .estruturacao-week-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .estruturacao-week-action-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);border-radius:8px;padding:8px 14px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:6px}
+    .estruturacao-week-action-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+    .estruturacao-week-action-btn.active{background:rgba(255,102,0,.15);border-color:var(--accent);color:var(--accent)}
+    .estruturacao-week-expand{display:flex;flex-direction:column;gap:16px}
+    .estruturacao-week-expand.hidden{display:none}
+    .estruturacao-week-section-label{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .estruturacao-week-note{width:100%;min-height:100px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px;color:#fff;font-size:.9rem;resize:vertical;font-family:inherit;transition:border-color .2s ease}
+    .estruturacao-week-note:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.15)}
+    .estruturacao-week-note::placeholder{color:rgba(255,255,255,.4)}
+    .estruturacao-week-files{display:flex;flex-direction:column;gap:10px}
+    .estruturacao-week-files-header{display:flex;align-items:center;gap:10px}
+    .estruturacao-week-upload-btn{background:rgba(255,102,0,.12);border:1px solid rgba(255,102,0,.4);color:var(--accent);border-radius:8px;padding:8px 14px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:6px}
+    .estruturacao-week-upload-btn:hover{background:rgba(255,102,0,.2);border-color:rgba(255,102,0,.6)}
+    .estruturacao-week-paste-zone{border:2px dashed rgba(255,255,255,.2);border-radius:10px;padding:20px;text-align:center;color:rgba(255,255,255,.5);font-size:.85rem;cursor:pointer;transition:all .2s ease;background:rgba(0,0,0,.2)}
+    .estruturacao-week-paste-zone:hover,.estruturacao-week-paste-zone.dragover{border-color:var(--accent);background:rgba(255,102,0,.08);color:var(--accent)}
+    .estruturacao-week-paste-zone p{margin:4px 0}
+    .estruturacao-week-files-list{display:flex;flex-wrap:wrap;gap:10px}
+    .estruturacao-week-file{position:relative;width:80px;height:80px;border-radius:10px;overflow:visible;border:2px solid rgba(255,255,255,.15);background:#111;cursor:zoom-in;transition:all .2s ease;z-index:1}
+    .estruturacao-week-file:hover{border-color:var(--accent);transform:scale(1.05);z-index:9999}
+    .estruturacao-week-file img,.estruturacao-week-file video{width:100%;height:100%;object-fit:cover;border-radius:8px}
+    
+    /* Ícone de zoom - removido pois usamos JS overlay */
+    .estruturacao-week-file::after{
+      display:none;
+    }
+    .estruturacao-week-file:hover::after{
+      display:none;
+    }
+    
+    /* Zoom effect on hover for week files */
+    .estruturacao-week-file:hover::before{
+      display:none;
+    }
+    .estruturacao-week-file:hover img,
+    .estruturacao-week-file:hover video{
+      /* Removido - usando JS overlay */
+    }
+    
+    .estruturacao-week-file-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .2s ease;pointer-events:none;z-index:10}
+    .estruturacao-week-file:hover .estruturacao-week-file-overlay{opacity:1;pointer-events:auto}
+    .estruturacao-week-file-overlay button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+    .estruturacao-week-file-overlay button:hover{background:rgba(255,255,255,.4)}
+    .estruturacao-week-file-overlay button.delete:hover{background:rgba(255,80,80,.8)}
+    .estruturacao-week-file-doc{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:1.8rem;color:rgba(255,255,255,.7)}
+    .estruturacao-week-file-doc span{font-size:.6rem;margin-top:4px;color:rgba(255,255,255,.5);text-transform:uppercase;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .estruturacao-week-checklist{display:flex;flex-direction:column;gap:10px}
+    .estruturacao-week-checklist-header{display:flex;align-items:center;gap:10px}
+    .estruturacao-week-checklist-add{background:rgba(46,125,50,.15);border:1px solid rgba(46,125,50,.4);color:#4caf50;border-radius:8px;padding:8px 14px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s ease}
+    .estruturacao-week-checklist-add:hover{background:rgba(46,125,50,.25);border-color:rgba(46,125,50,.6)}
+    .estruturacao-week-checklist-items{display:flex;flex-direction:column;gap:8px}
+    .estruturacao-week-check{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid rgba(255,255,255,.08)}
+    .estruturacao-week-check-box{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;background:rgba(0,0,0,.4);flex-shrink:0}
+    .estruturacao-week-check-box:hover{border-color:rgba(255,255,255,.5)}
+    .estruturacao-week-check-box.checked{border-color:#2e7d32;background:#2e7d32}
+    .estruturacao-week-check-box.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:900}
+    .estruturacao-week-check-input{flex:1;background:transparent;border:none;color:#fff;font-size:.9rem;outline:none}
+    .estruturacao-week-check-input::placeholder{color:rgba(255,255,255,.4)}
+    .estruturacao-week-check.completed .estruturacao-week-check-input{color:rgba(255,255,255,.5);text-decoration:line-through}
+    .estruturacao-week-check-delete{background:none;border:none;color:rgba(255,100,100,.6);cursor:pointer;font-size:1rem;padding:0 4px;opacity:.6;transition:opacity .2s ease}
+    .estruturacao-week-check-delete:hover{opacity:1}
+    .estruturacao-week-checklist-empty{font-size:.8rem;color:rgba(255,255,255,.4);text-align:center;padding:12px}
+    
+    /* Item extras minimalista */
+    .estruturacao-item{position:relative;display:flex;flex-direction:column;align-items:stretch}
+    .estruturacao-item-main{display:flex;align-items:center;gap:10px}
+    .estruturacao-item-toggle{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;padding:2px 8px;margin-left:auto;opacity:.7;transition:all .2s ease;display:flex;align-items:center;gap:4px}
+    .estruturacao-item-toggle:hover{opacity:1;color:var(--accent)}
+    .estruturacao-item.has-extras .estruturacao-item-toggle{color:var(--accent);opacity:1}
+    .estruturacao-item-extras{display:none;margin-top:10px;margin-left:34px;padding:12px;background:rgba(0,0,0,.3);border-radius:10px;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:10px}
+    .estruturacao-item.open .estruturacao-item-extras{display:flex}
+    
+    /* Mini actions bar */
+    .estruturacao-item-actions{display:flex;gap:6px;margin-bottom:8px}
+    .estruturacao-item-action{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px 10px;font-size:.7rem;color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:4px}
+    .estruturacao-item-action:hover{background:rgba(255,102,0,.15);border-color:rgba(255,102,0,.3);color:var(--accent)}
+    .estruturacao-item-action.active{background:rgba(255,102,0,.2);border-color:rgba(255,102,0,.4);color:var(--accent)}
+    
+    /* Note area */
+    .estruturacao-item-note{width:100%;min-height:80px;max-height:500px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px;color:#fff;font-size:.85rem;resize:none;font-family:inherit;transition:border-color .2s ease, height .1s ease;overflow-y:auto;line-height:1.5}
+    .estruturacao-item-note:focus{outline:none;border-color:var(--accent)}
+    .estruturacao-item-note::placeholder{color:rgba(255,255,255,.35)}
+    
+    /* Files area */
+    .estruturacao-item-files{display:flex;flex-direction:column;gap:8px}
+    .estruturacao-item-files-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .estruturacao-item-file{position:relative;width:60px;height:60px;border-radius:8px;overflow:visible;border:2px solid rgba(255,255,255,.12);background:#111;cursor:zoom-in;transition:all .2s ease;z-index:1}
+    .estruturacao-item-file:hover{border-color:var(--accent);transform:scale(1.05);z-index:9999}
+    .estruturacao-item-file img,.estruturacao-item-file video{width:100%;height:100%;object-fit:cover;border-radius:6px}
+    
+    /* Ícone de zoom - removido pois usamos JS overlay */
+    .estruturacao-item-file::after{
+      display:none;
+    }
+    .estruturacao-item-file:hover::after{
+      display:none;
+    }
+    
+    /* Zoom effect on hover */
+    .estruturacao-item-file:hover::before{
+      display:none;
+    }
+    .estruturacao-item-file:hover img,
+    .estruturacao-item-file:hover video{
+      /* Removido - usando JS overlay */
+    }
+    
+    /* Overlay de Zoom Global */
+    .zoom-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.92);
+      z-index:9999999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:0;
+      visibility:hidden;
+      transition:opacity .2s ease, visibility .2s ease;
+      pointer-events:none;
+      flex-direction:column;
+      gap:20px;
+    }
+    .zoom-overlay.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+    .zoom-overlay img,
+    .zoom-overlay video{
+      max-width:90vw;
+      max-height:80vh;
+      object-fit:contain;
+      border-radius:12px;
+      border:4px solid var(--accent);
+      box-shadow:0 20px 80px rgba(0,0,0,.9);
+      background:#000;
+    }
+    .zoom-overlay-actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .zoom-overlay-btn{
+      background:rgba(255,255,255,.15);
+      border:2px solid rgba(255,255,255,.3);
+      color:#fff;
+      padding:12px 24px;
+      border-radius:30px;
+      font-size:.95rem;
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      transition:all .2s ease;
+    }
+    .zoom-overlay-btn:hover{
+      background:rgba(255,255,255,.25);
+      border-color:rgba(255,255,255,.5);
+    }
+    .zoom-overlay-btn.delete{
+      background:rgba(244,67,54,.2);
+      border-color:rgba(244,67,54,.5);
+      color:#ff6b6b;
+    }
+    .zoom-overlay-btn.delete:hover{
+      background:rgba(244,67,54,.4);
+      border-color:#f44336;
+    }
+    .zoom-overlay-hint{
+      font-size:.8rem;
+      color:rgba(255,255,255,.5);
+      text-align:center;
+    }
+    
+    .estruturacao-item-file-doc{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:rgba(255,255,255,.6)}
+    .estruturacao-item-file-doc span{font-size:.5rem;margin-top:2px;color:rgba(255,255,255,.4);max-width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .estruturacao-item-file-delete{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;color:#ff6b6b;border-radius:50%;width:18px;height:18px;font-size:.6rem;cursor:pointer;opacity:0;transition:opacity .2s ease;display:flex;align-items:center;justify-content:center}
+    .estruturacao-item-file:hover .estruturacao-item-file-delete{opacity:1}
+    
+    /* Drop zone */
+    .estruturacao-item-dropzone{border:2px dashed rgba(255,255,255,.15);border-radius:8px;padding:12px;text-align:center;color:rgba(255,255,255,.4);font-size:.75rem;cursor:pointer;transition:all .2s ease;background:rgba(0,0,0,.2)}
+    .estruturacao-item-dropzone:hover,.estruturacao-item-dropzone.dragover{border-color:var(--accent);background:rgba(255,102,0,.08);color:var(--accent)}
+    .estruturacao-item-dropzone-icon{font-size:1.2rem;margin-bottom:4px}
+    
     .estruturacao-notes-area{margin-top:8px}
     .estruturacao-notes-label{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:6px;display:flex;align-items:center;gap:6px}
     .estruturacao-notes-label::before{content:'📝'}
@@ -22134,6 +22334,40 @@ async function sendIAQuestion(){
       if(progressText) progressText.textContent = `${progress.percentage}% concluído`;
       if(progressCount) progressCount.textContent = `${progress.completed} de ${progress.total} itens`;
       
+      // Salvar estado de quais weeks estão abertas antes de recriar
+      const openWeeks = new Set();
+      const openBlocks = new Map(); // Map<weekIdx, Set<blockIdx>>
+      const openItems = new Map(); // Map<"weekIdx-blockIdx", Set<itemIdx>>
+      const existingWeeks = weeksContainer.querySelectorAll('.estruturacao-week');
+      existingWeeks.forEach((weekEl, weekIdx) => {
+        if(weekEl.classList.contains('open')){
+          openWeeks.add(weekIdx);
+        }
+        // Salvar blocos abertos dentro desta week
+        const blocks = weekEl.querySelectorAll('.estruturacao-block');
+        blocks.forEach((blockEl, blockIdx) => {
+          if(blockEl.classList.contains('open')){
+            if(!openBlocks.has(weekIdx)){
+              openBlocks.set(weekIdx, new Set());
+            }
+            openBlocks.get(weekIdx).add(blockIdx);
+          }
+          // Salvar itens abertos dentro deste bloco
+          const items = blockEl.querySelectorAll('.estruturacao-item.open');
+          if(items.length > 0){
+            const itemIndices = new Set();
+            items.forEach((itemEl) => {
+              const allItems = Array.from(blockEl.querySelectorAll('.estruturacao-item'));
+              const realIdx = allItems.indexOf(itemEl);
+              if(realIdx !== -1) itemIndices.add(realIdx);
+            });
+            if(itemIndices.size > 0){
+              openItems.set(`${weekIdx}-${blockIdx}`, itemIndices);
+            }
+          }
+        });
+      });
+      
       weeksContainer.innerHTML = '';
       
       ESTRUTURACAO_DATA.forEach((week, weekIdx) => {
@@ -22154,8 +22388,14 @@ async function sendIAQuestion(){
         const weekProgress = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
         const isCompleted = weekProgress === 100;
         
+        // Estado da semana (note, files, checklist)
+        const weekDataState = weekState.weekData || { note: '', files: [], checklist: [] };
+        const weekHasContent = weekDataState.note || (weekDataState.files && weekDataState.files.length > 0) || (weekDataState.checklist && weekDataState.checklist.length > 0);
+        
         const weekEl = document.createElement('div');
-        weekEl.className = `estruturacao-week ${isCompleted ? 'completed' : ''}`;
+        // Restaurar estado de abertura se estava aberto antes
+        const wasOpen = openWeeks.has(weekIdx);
+        weekEl.className = `estruturacao-week ${isCompleted ? 'completed' : ''} ${wasOpen ? 'open' : ''}`;
         weekEl.innerHTML = `
           <div class="estruturacao-week-header">
             <div class="estruturacao-week-badge">${weekIdx + 1}</div>
@@ -22173,24 +22413,145 @@ async function sendIAQuestion(){
           </div>
           <div class="estruturacao-week-body">
             <div class="estruturacao-week-content">
+              <!-- Área de Texto, Arquivos e Checklist da Semana -->
+              <div class="estruturacao-week-extras" data-week-id="${week.id}">
+                <div class="estruturacao-week-actions">
+                  <button class="estruturacao-week-action-btn ${weekDataState.note ? 'active' : ''}" data-action="toggle-week-note" title="Digitar Texto">📝 Texto</button>
+                  <button class="estruturacao-week-action-btn ${weekDataState.files && weekDataState.files.length > 0 ? 'active' : ''}" data-action="toggle-week-files" title="Arquivos/Imagens">📎 Arquivos</button>
+                  <button class="estruturacao-week-action-btn ${weekDataState.checklist && weekDataState.checklist.length > 0 ? 'active' : ''}" data-action="toggle-week-checklist" title="Adicionar Checklist">✅ Checklist</button>
+                </div>
+                <div class="estruturacao-week-expand ${weekHasContent ? '' : 'hidden'}">
+                  <!-- Área de Texto -->
+                  <div class="estruturacao-week-note-section" style="${weekDataState.note ? '' : 'display:none'}">
+                    <div class="estruturacao-week-section-label">📝 Anotações da Semana</div>
+                    <textarea class="estruturacao-week-note" placeholder="Digite suas anotações para esta semana..." data-week-id="${week.id}">${weekDataState.note || ''}</textarea>
+                  </div>
+                  <!-- Área de Arquivos/Imagens -->
+                  <div class="estruturacao-week-files-section" style="${weekDataState.files && weekDataState.files.length > 0 ? '' : 'display:none'}">
+                    <div class="estruturacao-week-section-label">📷 Imagens e Arquivos</div>
+                    <div class="estruturacao-week-files">
+                      <div class="estruturacao-week-files-header">
+                        <button class="estruturacao-week-upload-btn" data-week-id="${week.id}">📁 Upload</button>
+                      </div>
+                      <div class="estruturacao-week-paste-zone" data-week-id="${week.id}">
+                        <p>📋 Cole uma imagem (Ctrl+V) ou arraste arquivos aqui</p>
+                        <p style="font-size:.7rem;opacity:.6">Clique para selecionar arquivos</p>
+                      </div>
+                      <div class="estruturacao-week-files-list" data-week-id="${week.id}"></div>
+                    </div>
+                  </div>
+                  <!-- Checklist da Semana -->
+                  <div class="estruturacao-week-checklist-section" style="${weekDataState.checklist && weekDataState.checklist.length > 0 ? '' : 'display:none'}">
+                    <div class="estruturacao-week-section-label">✅ Checklist da Semana</div>
+                    <div class="estruturacao-week-checklist">
+                      <div class="estruturacao-week-checklist-header">
+                        <button class="estruturacao-week-checklist-add" data-week-id="${week.id}">+ Adicionar item</button>
+                      </div>
+                      <div class="estruturacao-week-checklist-items" data-week-id="${week.id}"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="estruturacao-blocks" data-week-id="${week.id}"></div>
             </div>
           </div>
         `;
         
         const header = weekEl.querySelector('.estruturacao-week-header');
-        header.addEventListener('click', () => {
+        header.addEventListener('click', (e) => {
+          // Só toggle se clicou diretamente no header, não em elementos internos que propagaram
+          // Verificar se o clique veio de dentro do body da week
+          if(e.target.closest('.estruturacao-week-body')){
+            return;
+          }
+          if(e.target.closest('.estruturacao-block') || 
+             e.target.closest('.estruturacao-item') || 
+             e.target.closest('.estruturacao-checkbox') || 
+             e.target.closest('.estruturacao-checkbox-wrap') ||
+             e.target.closest('.estruturacao-item-checkbox') || 
+             e.target.closest('.estruturacao-item-checkbox-wrap') ||
+             e.target.closest('.estruturacao-week-check-box') ||
+             e.target.closest('button') || 
+             e.target.closest('textarea') || 
+             e.target.closest('input') || 
+             e.target.closest('.estruturacao-week-extras') || 
+             e.target.closest('.estruturacao-week-check') || 
+             e.target.closest('.estruturacao-week-checklist')){
+            return;
+          }
           weekEl.classList.toggle('open');
         });
         
+        // Prevenir que cliques dentro do body da week propaguem para o header
+        const weekBody = weekEl.querySelector('.estruturacao-week-body');
+        if(weekBody){
+          weekBody.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+        }
+        
+        // Event listeners para a semana
+        setupWeekExtrasListeners(weekEl, week.id, weekDataState);
+        
         const blocksContainer = weekEl.querySelector('.estruturacao-blocks');
+        
+        // Pegar blocos abertos desta week
+        const thisWeekOpenBlocks = openBlocks.get(weekIdx) || new Set();
         
         week.blocks.forEach((block, blockIdx) => {
           const blockState = weekState.blocks[block.id] || { items: {}, notes: '' };
           const blockCompleted = block.items.every((_, idx) => blockState.items[idx]?.completed);
           
+          // Calcular resumo do bloco
+          let completedCount = 0;
+          let notesCount = 0;
+          let filesCount = 0;
+          let notesPreviews = [];
+          
+          block.items.forEach((item, idx) => {
+            const itemState = blockState.items[idx];
+            if(itemState?.completed) completedCount++;
+            if(itemState?.note && itemState.note.trim()) {
+              notesCount++;
+              // Pegar preview da nota (primeiros 30 chars)
+              const preview = itemState.note.trim().substring(0, 40);
+              notesPreviews.push(preview + (itemState.note.length > 40 ? '...' : ''));
+            }
+            if(itemState?.files && itemState.files.length > 0) filesCount += itemState.files.length;
+          });
+          
+          // Gerar HTML do resumo
+          let summaryHtml = '';
+          if(completedCount > 0 || notesCount > 0 || filesCount > 0){
+            summaryHtml = '<div class="estruturacao-block-summary">';
+            if(completedCount > 0){
+              summaryHtml += `<span class="estruturacao-block-summary-item completed"><span class="icon">✅</span> ${completedCount}/${block.items.length}</span>`;
+            }
+            if(notesCount > 0){
+              summaryHtml += `<span class="estruturacao-block-summary-item notes"><span class="icon">📝</span> ${notesCount} nota${notesCount > 1 ? 's' : ''}</span>`;
+            }
+            if(filesCount > 0){
+              summaryHtml += `<span class="estruturacao-block-summary-item files"><span class="icon">📎</span> ${filesCount} arquivo${filesCount > 1 ? 's' : ''}</span>`;
+            }
+            summaryHtml += '</div>';
+            
+            // Adicionar preview das notas (máximo 2)
+            if(notesPreviews.length > 0){
+              summaryHtml += '<div class="estruturacao-block-summary-preview">';
+              notesPreviews.slice(0, 2).forEach(preview => {
+                summaryHtml += `<span>📌 ${preview}</span>`;
+              });
+              if(notesPreviews.length > 2){
+                summaryHtml += `<span style="opacity:.5">... e mais ${notesPreviews.length - 2}</span>`;
+              }
+              summaryHtml += '</div>';
+            }
+          }
+          
           const blockEl = document.createElement('div');
-          blockEl.className = `estruturacao-block ${blockCompleted ? 'completed' : ''}`;
+          // Restaurar estado de abertura do bloco se estava aberto antes
+          const wasBlockOpen = thisWeekOpenBlocks.has(blockIdx);
+          blockEl.className = `estruturacao-block ${blockCompleted ? 'completed' : ''} ${wasBlockOpen ? 'open' : ''}`;
           blockEl.innerHTML = `
             <div class="estruturacao-block-header">
               <div class="estruturacao-checkbox-wrap">
@@ -22198,102 +22559,200 @@ async function sendIAQuestion(){
               </div>
               <div class="estruturacao-block-info">
                 <h4 class="estruturacao-block-title">${block.title}</h4>
-                <p class="estruturacao-block-items">${block.items.length} item${block.items.length !== 1 ? 's' : ''}</p>
+                <p class="estruturacao-block-items">${block.items.length} item${block.items.length !== 1 ? 's' : ''}${completedCount > 0 ? ` • ${completedCount} concluído${completedCount > 1 ? 's' : ''}` : ''}</p>
+                ${summaryHtml}
               </div>
             </div>
             <div class="estruturacao-block-body">
               <div class="estruturacao-block-content">
                 <div class="estruturacao-items"></div>
-                <div class="estruturacao-notes-area">
-                  <div class="estruturacao-notes-label">Anotações</div>
-                  <textarea class="estruturacao-textarea" placeholder="Adicione suas anotações sobre este bloco..." data-week-id="${week.id}" data-block-id="${block.id}">${blockState.notes || ''}</textarea>
-                </div>
-                <div class="estruturacao-extras">
-                  <div class="estruturacao-extra-section">
-                    <div class="estruturacao-extra-header">
-                      <h5 class="estruturacao-extra-title">✅ Checklist Personalizada <span class="estruturacao-extra-count" data-custom-count="${week.id}-${block.id}">0</span></h5>
-                    </div>
-                    <div class="estruturacao-custom-checklist" data-week-id="${week.id}" data-block-id="${block.id}"></div>
-                    <button class="estruturacao-add-btn" data-action="add-custom-item" data-week-id="${week.id}" data-block-id="${block.id}">
-                      <span>+</span> Adicionar item
-                    </button>
-                  </div>
-                  <div class="estruturacao-extra-section">
-                    <div class="estruturacao-extra-header">
-                      <h5 class="estruturacao-extra-title">📎 Arquivos <span class="estruturacao-extra-count" data-files-count="${week.id}-${block.id}">0</span></h5>
-                    </div>
-                    <div class="estruturacao-files-list" data-week-id="${week.id}" data-block-id="${block.id}"></div>
-                    <button class="estruturacao-add-btn" data-action="add-file" data-week-id="${week.id}" data-block-id="${block.id}">
-                      <span>📁</span> Adicionar arquivo
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           `;
           
           const blockHeader = blockEl.querySelector('.estruturacao-block-header');
           const blockCheckbox = blockEl.querySelector('.estruturacao-checkbox');
+          const blockCheckboxWrap = blockEl.querySelector('.estruturacao-checkbox-wrap');
           
           blockCheckbox.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleBlock(week.id, block.id);
           });
           
-          blockHeader.addEventListener('click', () => {
+          // Prevenir propagação do wrapper também
+          if(blockCheckboxWrap){
+            blockCheckboxWrap.addEventListener('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+          
+          blockHeader.addEventListener('click', (e) => {
+            // Só toggle se clicou diretamente no header do bloco
+            if(e.target.closest('.estruturacao-item') || 
+               e.target.closest('.estruturacao-item-checkbox') || 
+               e.target.closest('.estruturacao-item-checkbox-wrap') ||
+               e.target.closest('button') || 
+               e.target.closest('textarea') || 
+               e.target.closest('input') || 
+               e.target.closest('.estruturacao-item-expand')){
+              return;
+            }
+            e.stopPropagation();
             blockEl.classList.toggle('open');
+          });
+          
+          // Prevenir que cliques dentro do bloco propaguem para o week header
+          blockEl.addEventListener('click', (e) => {
+            e.stopPropagation();
           });
           
           const itemsContainer = blockEl.querySelector('.estruturacao-items');
           
+          // Pegar itens abertos deste bloco
+          const thisBlockOpenItems = openItems.get(`${weekIdx}-${blockIdx}`) || new Set();
+          
           block.items.forEach((item, itemIdx) => {
-            const itemState = blockState.items[itemIdx] || { completed: false };
+            const itemState = blockState.items[itemIdx] || { completed: false, note: '', files: [] };
+            const hasExtras = (itemState.note && itemState.note.trim().length > 0) || (itemState.files && itemState.files.length > 0);
             
             const itemEl = document.createElement('div');
-            itemEl.className = `estruturacao-item ${itemState.completed ? 'completed' : ''}`;
+            // Restaurar estado de abertura do item se estava aberto antes
+            const wasItemOpen = thisBlockOpenItems.has(itemIdx);
+            itemEl.className = `estruturacao-item ${itemState.completed ? 'completed' : ''} ${hasExtras ? 'has-extras' : ''} ${wasItemOpen ? 'open' : ''}`;
+            
+            // Altura salva do textarea
+            const savedHeight = itemState.noteHeight || 80;
+            
             itemEl.innerHTML = `
-              <div class="estruturacao-item-checkbox-wrap">
-                <div class="estruturacao-item-checkbox ${itemState.completed ? 'checked' : ''}" data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}"></div>
+              <div class="estruturacao-item-main">
+                <div class="estruturacao-item-checkbox-wrap">
+                  <div class="estruturacao-item-checkbox ${itemState.completed ? 'checked' : ''}" data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}"></div>
+                </div>
+                <div class="estruturacao-item-text">${item}</div>
+                <button class="estruturacao-item-toggle" title="Adicionar informações">📎</button>
               </div>
-              <div class="estruturacao-item-text">${item}</div>
+              <div class="estruturacao-item-extras">
+                <textarea class="estruturacao-item-note" placeholder="📝 Adicione notas, informações ou observações..." data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}" style="height:${savedHeight}px">${itemState.note || ''}</textarea>
+                <div class="estruturacao-item-files">
+                  <div class="estruturacao-item-files-grid" data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}"></div>
+                  <div class="estruturacao-item-dropzone" data-week-id="${week.id}" data-block-id="${block.id}" data-item-idx="${itemIdx}">
+                    <div class="estruturacao-item-dropzone-icon">📁</div>
+                    <div>Arraste arquivos ou clique para enviar</div>
+                    <div style="font-size:.65rem;margin-top:4px;opacity:.7">Imagens, vídeos, PDFs, documentos</div>
+                  </div>
+                </div>
+              </div>
             `;
             
             const itemCheckbox = itemEl.querySelector('.estruturacao-item-checkbox');
-            itemCheckbox.addEventListener('click', () => {
+            const itemCheckboxWrap = itemEl.querySelector('.estruturacao-item-checkbox-wrap');
+            
+            itemCheckbox.addEventListener('click', (e) => {
+              e.stopPropagation();
               toggleItem(week.id, block.id, itemIdx);
+            });
+            
+            // Prevenir propagação do wrapper também
+            if(itemCheckboxWrap){
+              itemCheckboxWrap.addEventListener('click', (e) => {
+                e.stopPropagation();
+              });
+            }
+            
+            const toggleBtn = itemEl.querySelector('.estruturacao-item-toggle');
+            toggleBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              itemEl.classList.toggle('open');
+            });
+            
+            const noteArea = itemEl.querySelector('.estruturacao-item-note');
+            let noteSaveTimeout;
+            let heightSaveTimeout;
+            
+            // Função para auto-resize do textarea
+            function autoResizeTextarea(){
+              noteArea.style.height = 'auto';
+              const newHeight = Math.max(80, noteArea.scrollHeight);
+              noteArea.style.height = newHeight + 'px';
+              
+              // Salvar altura com debounce
+              clearTimeout(heightSaveTimeout);
+              heightSaveTimeout = setTimeout(() => {
+                saveItemNoteHeight(week.id, block.id, itemIdx, newHeight);
+              }, 1000);
+            }
+            
+            noteArea.addEventListener('input', (e) => {
+              e.stopPropagation();
+              autoResizeTextarea();
+              clearTimeout(noteSaveTimeout);
+              noteSaveTimeout = setTimeout(() => {
+                saveItemNote(week.id, block.id, itemIdx, noteArea.value);
+                updateItemHasExtras(itemEl, week.id, block.id, itemIdx);
+              }, 500);
+            });
+            noteArea.addEventListener('click', (e) => e.stopPropagation());
+            noteArea.addEventListener('focus', (e) => e.stopPropagation());
+            
+            // Auto-resize inicial se já tiver conteúdo
+            if(noteArea.value){
+              setTimeout(() => {
+                noteArea.style.height = 'auto';
+                const initialHeight = Math.max(80, noteArea.scrollHeight);
+                noteArea.style.height = initialHeight + 'px';
+              }, 50);
+            }
+            
+            // Dropzone handlers
+            const dropzone = itemEl.querySelector('.estruturacao-item-dropzone');
+            dropzone.addEventListener('click', (e) => {
+              e.stopPropagation();
+              promptItemFileUpload(week.id, block.id, itemIdx);
+            });
+            dropzone.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dropzone.classList.add('dragover');
+            });
+            dropzone.addEventListener('dragleave', (e) => {
+              e.stopPropagation();
+              dropzone.classList.remove('dragover');
+            });
+            dropzone.addEventListener('drop', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dropzone.classList.remove('dragover');
+              const files = e.dataTransfer?.files;
+              if(files && files.length > 0){
+                Array.from(files).forEach(file => handleItemFileUpload(week.id, block.id, itemIdx, file));
+              }
+            });
+            
+            // Paste handler for images
+            noteArea.addEventListener('paste', (e) => {
+              const items = e.clipboardData?.items;
+              if(items){
+                for(let i = 0; i < items.length; i++){
+                  if(items[i].type.indexOf('image') !== -1){
+                    e.preventDefault();
+                    const file = items[i].getAsFile();
+                    if(file) handleItemFileUpload(week.id, block.id, itemIdx, file);
+                    break;
+                  }
+                }
+              }
+            });
+            
+            // Render existing files
+            renderItemFiles(itemEl, week.id, block.id, itemIdx, itemState);
+            
+            // Prevenir que cliques dentro do item propaguem para o week header ou block header
+            itemEl.addEventListener('click', (e) => {
+              e.stopPropagation();
             });
             
             itemsContainer.appendChild(itemEl);
           });
-          
-          const textarea = blockEl.querySelector('.estruturacao-textarea');
-          let saveTimeout;
-          textarea.addEventListener('input', () => {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-              saveBlockNotes(week.id, block.id, textarea.value);
-            }, 1000);
-          });
-          
-          // Renderizar checklist personalizada e arquivos
-          renderCustomChecklist(blockEl, week.id, block.id, blockState);
-          renderBlockFiles(blockEl, week.id, block.id, blockState);
-          
-          // Event listeners para botões de adicionar
-          const addCustomBtn = blockEl.querySelector('[data-action="add-custom-item"]');
-          const addFileBtn = blockEl.querySelector('[data-action="add-file"]');
-          
-          if(addCustomBtn){
-            addCustomBtn.addEventListener('click', () => {
-              addCustomChecklistItem(week.id, block.id);
-            });
-          }
-          
-          if(addFileBtn){
-            addFileBtn.addEventListener('click', () => {
-              promptFileUpload(week.id, block.id);
-            });
-          }
           
           blocksContainer.appendChild(blockEl);
           
@@ -22312,13 +22771,322 @@ async function sendIAQuestion(){
     function toggleItem(weekId, blockId, itemIdx){
       if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
       if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
-      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false, note: '' };
       
       ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].completed = !ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].completed;
       
       persistEstruturacao();
       renderEstruturacao();
     }
+    
+    function saveItemNote(weekId, blockId, itemIdx, note){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false, note: '', files: [] };
+      
+      ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].note = note;
+      persistEstruturacao();
+    }
+    
+    function saveItemNoteHeight(weekId, blockId, itemIdx, height){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false, note: '', files: [] };
+      
+      ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx].noteHeight = height;
+      persistEstruturacao();
+    }
+    
+    function ensureItemState(weekId, blockId, itemIdx){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {} };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId]) ESTRUTURACAO_STATE[weekId].blocks[blockId] = { items: {}, notes: '' };
+      if(!ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx]) ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx] = { completed: false, note: '', files: [] };
+      const itemState = ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx];
+      if(!itemState.files) itemState.files = [];
+      return itemState;
+    }
+    
+    function updateItemHasExtras(itemEl, weekId, blockId, itemIdx){
+      const itemState = ESTRUTURACAO_STATE[weekId]?.blocks[blockId]?.items[itemIdx] || {};
+      const hasExtras = (itemState.note && itemState.note.trim().length > 0) || (itemState.files && itemState.files.length > 0);
+      itemEl.classList.toggle('has-extras', hasExtras);
+    }
+    
+    function promptItemFileUpload(weekId, blockId, itemIdx){
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,video/*,application/pdf,.doc,.docx,.txt,.xls,.xlsx';
+      input.multiple = true;
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      
+      input.addEventListener('change', () => {
+        const files = input.files;
+        if(files && files.length > 0){
+          Array.from(files).forEach(file => handleItemFileUpload(weekId, blockId, itemIdx, file));
+        }
+        document.body.removeChild(input);
+      });
+      
+      input.click();
+    }
+    
+    async function handleItemFileUpload(weekId, blockId, itemIdx, file){
+      try{
+        if(typeof auth === 'undefined' || !auth){
+          console.error('Firebase Auth não inicializado');
+          alert('Sistema de autenticação não disponível.');
+          return;
+        }
+        
+        const uid = auth.currentUser?.uid;
+        if(!uid){
+          alert('Faça login para enviar arquivos.');
+          return;
+        }
+        
+        const safeTenant = (typeof TENANT!=="undefined" && TENANT) ? TENANT : null;
+        if(!safeTenant || safeTenant === 'no-client'){
+          alert('Cliente não definido.');
+          return;
+        }
+        
+        if(!STORAGE){
+          try{ 
+            STORAGE = getStorage(app); 
+          }catch(err){ 
+            console.error('Storage error:', err); 
+            alert('Storage não disponível.'); 
+            return; 
+          }
+        }
+        
+        if(typeof mgToast === 'function') mgToast('Enviando...');
+        
+        const safeName = (file.name||'file').replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `users/${uid}/tenant-${safeTenant}/estruturacao/${weekId}/${blockId}/item${itemIdx}/${Date.now()}_${safeName}`;
+        const ref = sRef(STORAGE, path);
+        
+        await uploadBytes(ref, file);
+        const url = await getDownloadURL(ref);
+        
+        const itemState = ensureItemState(weekId, blockId, itemIdx);
+        itemState.files.push({
+          name: file.name || 'arquivo',
+          size: file.size,
+          type: file.type,
+          url: url,
+          path: path,
+          uploadedAt: Date.now()
+        });
+        
+        persistEstruturacao();
+        renderEstruturacao();
+        
+        if(typeof mgToast === 'function') mgToast('Arquivo enviado!');
+      }catch(err){
+        console.error('Upload error:', err);
+        alert('Erro ao enviar: ' + (err?.message || String(err)));
+      }
+    }
+    
+    async function deleteItemFile(weekId, blockId, itemIdx, fileIdx){
+      const itemState = ESTRUTURACAO_STATE[weekId]?.blocks[blockId]?.items[itemIdx];
+      if(!itemState?.files?.[fileIdx]) return;
+      
+      if(!confirm('Remover este arquivo?')) return;
+      
+      const file = itemState.files[fileIdx];
+      
+      try{
+        if(file.path && STORAGE && typeof deleteObject !== 'undefined'){
+          const ref = sRef(STORAGE, file.path);
+          await deleteObject(ref);
+        }
+      }catch(err){
+        console.warn('Erro ao deletar:', err);
+      }
+      
+      itemState.files.splice(fileIdx, 1);
+      persistEstruturacao();
+      renderEstruturacao();
+      
+      if(typeof mgToast === 'function') mgToast('Arquivo removido!');
+    }
+    
+    function renderItemFiles(itemEl, weekId, blockId, itemIdx, itemState){
+      const container = itemEl.querySelector(`.estruturacao-item-files-grid[data-week-id="${weekId}"][data-block-id="${blockId}"][data-item-idx="${itemIdx}"]`);
+      if(!container) return;
+      
+      const files = itemState.files || [];
+      container.innerHTML = '';
+      
+      if(files.length === 0) return;
+      
+      files.forEach((file, fIdx) => {
+        const fileEl = document.createElement('div');
+        fileEl.className = 'estruturacao-item-file';
+        
+        const isImage = file.type?.startsWith('image/');
+        const isVideo = file.type?.startsWith('video/');
+        
+        if(isImage){
+          fileEl.innerHTML = `
+            <img src="${file.url}" alt="${file.name}">
+            <button class="estruturacao-item-file-delete" title="Remover">✕</button>
+          `;
+        }else if(isVideo){
+          fileEl.innerHTML = `
+            <video src="${file.url}" muted></video>
+            <button class="estruturacao-item-file-delete" title="Remover">✕</button>
+          `;
+        }else{
+          const icon = getFileIcon(file.name);
+          fileEl.innerHTML = `
+            <div class="estruturacao-item-file-doc">
+              ${icon}
+              <span>${file.name}</span>
+            </div>
+            <button class="estruturacao-item-file-delete" title="Remover">✕</button>
+          `;
+        }
+        
+        fileEl.addEventListener('click', (e) => {
+          // Ignorar clique no botão delete
+          if(e.target.classList.contains('estruturacao-item-file-delete')){
+            return;
+          }
+          e.stopPropagation();
+          e.preventDefault();
+          // Para imagens/vídeos abre zoom, para outros abre link
+          if(isImage || isVideo){
+            showZoomOverlay(file.url, isVideo, () => {
+              deleteItemFile(weekId, blockId, itemIdx, fIdx);
+            });
+          }else{
+            window.open(file.url, '_blank');
+          }
+        });
+        
+        const deleteBtn = fileEl.querySelector('.estruturacao-item-file-delete');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteItemFile(weekId, blockId, itemIdx, fIdx);
+        });
+        
+        container.appendChild(fileEl);
+      });
+    }
+    
+    function getFileIcon(filename){
+      const ext = (filename || '').split('.').pop()?.toLowerCase() || '';
+      const icons = {
+        'pdf': '📄',
+        'doc': '📝', 'docx': '📝',
+        'xls': '📊', 'xlsx': '📊',
+        'ppt': '📽️', 'pptx': '📽️',
+        'txt': '📃',
+        'zip': '📦', 'rar': '📦',
+        'mp3': '🎵', 'wav': '🎵',
+        'mp4': '🎬', 'mov': '🎬', 'avi': '🎬'
+      };
+      return icons[ext] || '📁';
+    }
+
+    // ===== ZOOM OVERLAY PARA IMAGENS =====
+    let zoomOverlayEl = null;
+    let currentZoomDeleteCallback = null;
+    
+    function createZoomOverlay(){
+      if(zoomOverlayEl) return zoomOverlayEl;
+      
+      zoomOverlayEl = document.createElement('div');
+      zoomOverlayEl.className = 'zoom-overlay';
+      zoomOverlayEl.id = 'zoomOverlay';
+      zoomOverlayEl.innerHTML = '';
+      document.body.appendChild(zoomOverlayEl);
+      
+      // Fechar ao clicar no overlay (mas não nos botões ou mídia)
+      zoomOverlayEl.addEventListener('click', (e) => {
+        if(e.target === zoomOverlayEl){
+          hideZoomOverlay();
+        }
+      });
+      
+      // Fechar com ESC
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && zoomOverlayEl?.classList.contains('active')){
+          hideZoomOverlay();
+        }
+      });
+      
+      return zoomOverlayEl;
+    }
+    
+    function showZoomOverlay(url, isVideo = false, onDelete = null){
+      const overlay = createZoomOverlay();
+      currentZoomDeleteCallback = onDelete;
+      
+      let mediaHtml;
+      if(isVideo){
+        mediaHtml = `<video src="${url}" autoplay loop muted playsinline controls></video>`;
+      }else{
+        mediaHtml = `<img src="${url}" alt="Zoom">`;
+      }
+      
+      // Montar HTML com botões
+      overlay.innerHTML = `
+        ${mediaHtml}
+        <div class="zoom-overlay-actions">
+          ${onDelete ? `<button class="zoom-overlay-btn delete" id="zoomDeleteBtn">
+            <span>🗑️</span> Excluir
+          </button>` : ''}
+          <button class="zoom-overlay-btn" id="zoomCloseBtn">
+            <span>✕</span> Fechar
+          </button>
+        </div>
+        <div class="zoom-overlay-hint">Pressione ESC ou clique fora da imagem para fechar</div>
+      `;
+      
+      // Event listeners para os botões
+      const closeBtn = overlay.querySelector('#zoomCloseBtn');
+      if(closeBtn){
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          hideZoomOverlay();
+        });
+      }
+      
+      const deleteBtn = overlay.querySelector('#zoomDeleteBtn');
+      if(deleteBtn && onDelete){
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if(confirm('Tem certeza que deseja excluir este arquivo?')){
+            hideZoomOverlay();
+            onDelete();
+          }
+        });
+      }
+      
+      // Mostrar overlay
+      requestAnimationFrame(() => {
+        overlay.classList.add('active');
+      });
+    }
+    
+    function hideZoomOverlay(){
+      if(zoomOverlayEl){
+        zoomOverlayEl.classList.remove('active');
+        currentZoomDeleteCallback = null;
+        // Limpar conteúdo após animação
+        setTimeout(() => {
+          if(zoomOverlayEl && !zoomOverlayEl.classList.contains('active')){
+            zoomOverlayEl.innerHTML = '';
+          }
+        }, 200);
+      }
+    }
+    // ===== FIM ZOOM OVERLAY =====
 
     function toggleBlock(weekId, blockId){
       const week = ESTRUTURACAO_DATA.find(w => w.id === weekId);
@@ -22376,19 +23144,24 @@ async function sendIAQuestion(){
         const input = itemEl.querySelector('.estruturacao-custom-item-input');
         const deleteBtn = itemEl.querySelector('.estruturacao-custom-item-delete');
         
-        checkbox.addEventListener('click', () => {
+        checkbox.addEventListener('click', (e) => {
+          e.stopPropagation();
           toggleCustomItem(weekId, blockId, idx);
         });
         
         let inputTimeout;
-        input.addEventListener('input', () => {
+        input.addEventListener('input', (e) => {
+          e.stopPropagation();
           clearTimeout(inputTimeout);
           inputTimeout = setTimeout(() => {
             updateCustomItemText(weekId, blockId, idx, input.value);
           }, 500);
         });
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('focus', (e) => e.stopPropagation());
         
-        deleteBtn.addEventListener('click', () => {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           deleteCustomItem(weekId, blockId, idx);
         });
         
@@ -22433,11 +23206,13 @@ async function sendIAQuestion(){
         const downloadBtn = fileEl.querySelector('.download-file');
         const deleteBtn = fileEl.querySelector('.delete-file');
         
-        downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           downloadBlockFile(file);
         });
         
-        deleteBtn.addEventListener('click', () => {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           deleteBlockFile(weekId, blockId, idx);
         });
         
@@ -22603,18 +23378,390 @@ async function sendIAQuestion(){
       if(typeof mgToast === 'function') mgToast('Arquivo removido!');
     }
 
-    function getFileIcon(filename){
-      const ext = (filename||'').split('.').pop().toLowerCase();
-      const icons = {
-        pdf: '📄', doc: '📝', docx: '📝', txt: '📝',
-        xls: '📊', xlsx: '📊', csv: '📊',
-        jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', svg: '🖼️',
-        mp4: '🎥', mov: '🎥', avi: '🎥',
-        mp3: '🎵', wav: '🎵',
-        zip: '📦', rar: '📦', '7z': '📦'
-      };
-      return icons[ext] || '📎';
+    // ===== WEEK-LEVEL FUNCTIONS (Texto, Arquivos, Checklist por semana) =====
+    
+    function ensureWeekDataState(weekId){
+      if(!ESTRUTURACAO_STATE[weekId]) ESTRUTURACAO_STATE[weekId] = { blocks: {}, weekData: {} };
+      if(!ESTRUTURACAO_STATE[weekId].weekData) ESTRUTURACAO_STATE[weekId].weekData = {};
+      const weekData = ESTRUTURACAO_STATE[weekId].weekData;
+      if(!weekData.note) weekData.note = '';
+      if(!weekData.files) weekData.files = [];
+      if(!weekData.checklist) weekData.checklist = [];
+      return weekData;
     }
+    
+    function setupWeekExtrasListeners(weekEl, weekId, weekDataState){
+      // Action buttons
+      const actionBtns = weekEl.querySelectorAll('.estruturacao-week-action-btn');
+      actionBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          const expandArea = weekEl.querySelector('.estruturacao-week-expand');
+          expandArea.classList.remove('hidden');
+          
+          if(action === 'toggle-week-note'){
+            const noteSection = weekEl.querySelector('.estruturacao-week-note-section');
+            const isVisible = noteSection.style.display !== 'none';
+            noteSection.style.display = isVisible ? 'none' : '';
+            if(!isVisible) noteSection.querySelector('textarea').focus();
+          }
+          if(action === 'toggle-week-files'){
+            const filesSection = weekEl.querySelector('.estruturacao-week-files-section');
+            filesSection.style.display = filesSection.style.display === 'none' ? '' : 'none';
+          }
+          if(action === 'toggle-week-checklist'){
+            const checklistSection = weekEl.querySelector('.estruturacao-week-checklist-section');
+            checklistSection.style.display = checklistSection.style.display === 'none' ? '' : 'none';
+          }
+        });
+      });
+      
+      // Textarea note handler
+      const noteTextarea = weekEl.querySelector('.estruturacao-week-note');
+      if(noteTextarea){
+        let noteSaveTimeout;
+        noteTextarea.addEventListener('input', (e) => {
+          e.stopPropagation();
+          clearTimeout(noteSaveTimeout);
+          noteSaveTimeout = setTimeout(() => {
+            saveWeekNote(weekId, noteTextarea.value);
+          }, 800);
+        });
+        noteTextarea.addEventListener('click', (e) => e.stopPropagation());
+        noteTextarea.addEventListener('focus', (e) => e.stopPropagation());
+      }
+      
+      // Upload button handler
+      const uploadBtn = weekEl.querySelector('.estruturacao-week-upload-btn');
+      if(uploadBtn){
+        uploadBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          promptWeekFileUpload(weekId);
+        });
+      }
+      
+      // Paste zone handlers
+      const pasteZone = weekEl.querySelector('.estruturacao-week-paste-zone');
+      if(pasteZone){
+        pasteZone.addEventListener('click', (e) => {
+          e.stopPropagation();
+          promptWeekFileUpload(weekId);
+        });
+        pasteZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pasteZone.classList.add('dragover');
+        });
+        pasteZone.addEventListener('dragleave', (e) => {
+          e.stopPropagation();
+          pasteZone.classList.remove('dragover');
+        });
+        pasteZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pasteZone.classList.remove('dragover');
+          const files = e.dataTransfer.files;
+          if(files.length > 0){
+            handleWeekFileUpload(weekId, files[0]);
+          }
+        });
+        pasteZone.addEventListener('paste', (e) => {
+          e.stopPropagation();
+          const items = e.clipboardData?.items;
+          if(items){
+            for(let i=0;i<items.length;i++){
+              if(items[i].type.indexOf('image') !== -1){
+                const blob = items[i].getAsFile();
+                if(blob) handleWeekFileUpload(weekId, blob);
+                break;
+              }
+            }
+          }
+        });
+        pasteZone.setAttribute('tabindex', '0');
+      }
+      
+      // Add checklist item button
+      const addChecklistBtn = weekEl.querySelector('.estruturacao-week-checklist-add');
+      if(addChecklistBtn){
+        addChecklistBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          addWeekChecklistEntry(weekId);
+        });
+      }
+      
+      // Render existing files and checklist
+      renderWeekFiles(weekEl, weekId, weekDataState);
+      renderWeekChecklist(weekEl, weekId, weekDataState);
+    }
+    
+    function saveWeekNote(weekId, note){
+      const weekData = ensureWeekDataState(weekId);
+      weekData.note = note;
+      persistEstruturacao();
+    }
+    
+    function promptWeekFileUpload(weekId){
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,application/pdf,.doc,.docx,.txt,.xls,.xlsx';
+      input.multiple = false;
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      
+      input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if(file){
+          handleWeekFileUpload(weekId, file);
+        }
+        document.body.removeChild(input);
+      });
+      
+      input.click();
+    }
+    
+    async function handleWeekFileUpload(weekId, file){
+      try{
+        if(typeof auth === 'undefined' || !auth){
+          console.error('Firebase Auth não inicializado');
+          alert('Sistema de autenticação não disponível. Recarregue a página.');
+          return;
+        }
+        
+        const uid = auth.currentUser?.uid;
+        if(!uid){
+          alert('Faça login para enviar arquivos.');
+          return;
+        }
+        
+        const safeTenant = (typeof TENANT!=="undefined" && TENANT) ? TENANT : null;
+        if(!safeTenant || safeTenant === 'no-client'){
+          alert('Cliente não definido na URL.');
+          return;
+        }
+        
+        if(!STORAGE){
+          try{ 
+            if(typeof getStorage === 'undefined'){
+              throw new Error('getStorage não disponível');
+            }
+            STORAGE = getStorage(app); 
+          }
+          catch(err){ 
+            console.error('Storage init error:', err); 
+            alert('Storage não inicializado. Recarregue a página.'); 
+            return; 
+          }
+        }
+        
+        if(typeof mgToast === 'function') mgToast('Enviando arquivo...');
+        
+        const safeName = (file.name||'file').replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `users/${uid}/tenant-${safeTenant}/estruturacao/${weekId}/weekFiles/${Date.now()}_${safeName}`;
+        const ref = sRef(STORAGE, path);
+        
+        await uploadBytes(ref, file);
+        const url = await getDownloadURL(ref);
+        
+        const weekData = ensureWeekDataState(weekId);
+        weekData.files.push({
+          name: file.name || 'imagem.png',
+          size: file.size,
+          type: file.type,
+          url: url,
+          path: path,
+          uploadedAt: Date.now()
+        });
+        
+        persistEstruturacao();
+        renderEstruturacao();
+        
+        if(typeof mgToast === 'function') mgToast('Arquivo enviado com sucesso!');
+      }catch(err){
+        console.error('handleWeekFileUpload error:', err);
+        alert('Erro ao enviar arquivo: ' + (err?.message || String(err)));
+      }
+    }
+    
+    async function deleteWeekFile(weekId, fileIdx){
+      const weekData = ESTRUTURACAO_STATE[weekId]?.weekData;
+      if(!weekData?.files?.[fileIdx]) return;
+      
+      if(!confirm('Remover este arquivo?')) return;
+      
+      const file = weekData.files[fileIdx];
+      
+      try{
+        if(file.path && STORAGE && typeof deleteObject !== 'undefined'){
+          const ref = sRef(STORAGE, file.path);
+          await deleteObject(ref);
+        }
+      }catch(err){
+        console.warn('Erro ao deletar arquivo do storage:', err);
+      }
+      
+      weekData.files.splice(fileIdx, 1);
+      persistEstruturacao();
+      renderEstruturacao();
+      
+      if(typeof mgToast === 'function') mgToast('Arquivo removido!');
+    }
+    
+    function renderWeekFiles(weekEl, weekId, weekDataState){
+      const container = weekEl.querySelector(`.estruturacao-week-files-list[data-week-id="${weekId}"]`);
+      if(!container) return;
+      
+      const files = weekDataState.files || [];
+      container.innerHTML = '';
+      
+      if(files.length === 0) return;
+      
+      files.forEach((file, fIdx) => {
+        const fileEl = document.createElement('div');
+        fileEl.className = 'estruturacao-week-file';
+        
+        const isImage = file.type?.startsWith('image/');
+        
+        if(isImage){
+          fileEl.innerHTML = `
+            <img src="${file.url}" alt="${file.name}">
+            <div class="estruturacao-week-file-overlay">
+              <button class="view" title="Ver">👁️</button>
+              <button class="delete" title="Remover">🗑️</button>
+            </div>
+          `;
+        }else{
+          const icon = getFileIcon(file.name);
+          fileEl.innerHTML = `
+            <div class="estruturacao-week-file-doc">
+              ${icon}
+              <span>${file.name}</span>
+            </div>
+            <div class="estruturacao-week-file-overlay">
+              <button class="view" title="Baixar">⬇️</button>
+              <button class="delete" title="Remover">🗑️</button>
+            </div>
+          `;
+        }
+        
+        const viewBtn = fileEl.querySelector('.view');
+        const deleteBtn = fileEl.querySelector('.delete');
+        
+        viewBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Para imagens abre zoom, para outros abre link
+          if(isImage){
+            showZoomOverlay(file.url, false, () => {
+              deleteWeekFile(weekId, fIdx);
+            });
+          }else{
+            window.open(file.url, '_blank');
+          }
+        });
+        
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteWeekFile(weekId, fIdx);
+        });
+        
+        container.appendChild(fileEl);
+      });
+    }
+    
+    function addWeekChecklistEntry(weekId){
+      const weekData = ensureWeekDataState(weekId);
+      weekData.checklist.push({ text: '', completed: false });
+      persistEstruturacao();
+      renderEstruturacao();
+    }
+    
+    function toggleWeekCheckEntry(weekId, checkIdx){
+      const weekData = ESTRUTURACAO_STATE[weekId]?.weekData;
+      if(!weekData?.checklist?.[checkIdx]) return;
+      
+      weekData.checklist[checkIdx].completed = !weekData.checklist[checkIdx].completed;
+      persistEstruturacao();
+      renderEstruturacao();
+    }
+    
+    function updateWeekCheckText(weekId, checkIdx, text){
+      const weekData = ESTRUTURACAO_STATE[weekId]?.weekData;
+      if(!weekData?.checklist?.[checkIdx]) return;
+      
+      weekData.checklist[checkIdx].text = text;
+      persistEstruturacao();
+    }
+    
+    function deleteWeekCheckEntry(weekId, checkIdx){
+      const weekData = ESTRUTURACAO_STATE[weekId]?.weekData;
+      if(!weekData?.checklist?.[checkIdx]) return;
+      
+      if(confirm('Remover este item da checklist?')){
+        weekData.checklist.splice(checkIdx, 1);
+        persistEstruturacao();
+        renderEstruturacao();
+      }
+    }
+    
+    function renderWeekChecklist(weekEl, weekId, weekDataState){
+      const container = weekEl.querySelector(`.estruturacao-week-checklist-items[data-week-id="${weekId}"]`);
+      if(!container) return;
+      
+      const checklist = weekDataState.checklist || [];
+      container.innerHTML = '';
+      
+      if(checklist.length === 0){
+        container.innerHTML = '<div class="estruturacao-week-checklist-empty">Nenhum item ainda</div>';
+        return;
+      }
+      
+      checklist.forEach((check, cIdx) => {
+        const checkEl = document.createElement('div');
+        checkEl.className = `estruturacao-week-check ${check.completed ? 'completed' : ''}`;
+        checkEl.innerHTML = `
+          <div class="estruturacao-week-check-box ${check.completed ? 'checked' : ''}"></div>
+          <input type="text" class="estruturacao-week-check-input" value="${check.text || ''}" placeholder="Digite o item...">
+          <button class="estruturacao-week-check-delete" title="Remover">✕</button>
+        `;
+        
+        const checkbox = checkEl.querySelector('.estruturacao-week-check-box');
+        const input = checkEl.querySelector('.estruturacao-week-check-input');
+        const deleteBtn = checkEl.querySelector('.estruturacao-week-check-delete');
+        
+        checkbox.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleWeekCheckEntry(weekId, cIdx);
+        });
+        
+        let inputTimeout;
+        input.addEventListener('input', (e) => {
+          e.stopPropagation();
+          clearTimeout(inputTimeout);
+          inputTimeout = setTimeout(() => {
+            updateWeekCheckText(weekId, cIdx, input.value);
+          }, 500);
+        });
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('focus', (e) => e.stopPropagation());
+        
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteWeekCheckEntry(weekId, cIdx);
+        });
+        
+        // Prevenir que cliques dentro do check propaguem para o week header
+        checkEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+        
+        container.appendChild(checkEl);
+      });
+    }
+    
+    // ===== FIM WEEK-LEVEL FUNCTIONS =====
+    
+    // ===== FIM ITEM-LEVEL FUNCTIONS =====
 
     // formatFileSize já definida globalmente - usar a existente
 
@@ -30638,10 +31785,28 @@ function renderReviewNotes(post){
 
 
 <!-- === Tenant slug routing (per-user URL like /empresa) === -->
-<script>
-(function(){
+<script type="module">
+(async function(){
   if(window.__MG_SLUG_ROUTER_INSTALLED__) return;
   window.__MG_SLUG_ROUTER_INSTALLED__ = true;
+
+  // Import Firebase modules dynamically
+  const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+  const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+  const { getFirestore, doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVAGfImLTkVfk14-GoSvo_og4FFux7nHQ",
+    authDomain: "mediagrowth-a5349.firebaseapp.com",
+    projectId: "mediagrowth-a5349",
+    storageBucket: "mediagrowth-a5349.firebasestorage.app",
+    messagingSenderId: "1074237637946",
+    appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
   function slugifyEmail(email){
     if(!email) return '';
@@ -30707,67 +31872,38 @@ function renderReviewNotes(post){
   }
 
   // Listen to auth changes without interfering with existing handlers
-  (function attachSlugAuthListener(){
-    if(!window.__MG_SLUG_ONAUTH_PATCHED__){
-      window.__MG_SLUG_ONAUTH_PATCHED__ = true;
-      if(typeof onAuthStateChanged === 'function' && typeof auth !== 'undefined'){
-        try{
-          onAuthStateChanged(auth, async (user) => {
-            if(user){
-              try{
-                await resolveTenantFromPathOrProfile(user);
-                await guardRouteForUser(user);
-                if(typeof ensureCalendar === 'function'){ try{ ensureCalendar(); }catch(_e){} }
-                // Rehydrate UI data now that TENANT is confirmed
-                try{ if(typeof loadBriefFromUserData === 'function') loadBriefFromUserData(); }catch(_e){}
-                try{ if(typeof renderDashboard === 'function') renderDashboard(USER_DATA); }catch(_e){}
-                try{ if(typeof buildTabs === 'function') buildTabs(); }catch(_e){}
-                try{ if(typeof loadNotesFromUserData === 'function') loadNotesFromUserData(); }catch(_e){}
-                try{ if(typeof loadNoteTemplatesFromUserData === 'function') loadNoteTemplatesFromUserData(); }catch(_e){}
-                try{ if(typeof loadAccessesFromUserData === 'function') loadAccessesFromUserData(); }catch(_e){}
-                try{ if(typeof rerenderBySection === 'function') rerenderBySection(); }catch(_e){}
-              }catch(err){ console.error('slug flow', err); }
-            }else{
-              history.replaceState({}, '', '/');
-              TENANT = getTenantFromHostOrPath();
-              window.TENANT = TENANT;
-              document.documentElement.dataset.tenant = TENANT;
-              try { document.body.setAttribute('data-client-id', TENANT); } catch(_) {}
-            }
-          });
-        }catch(e){ console.warn('Could not attach onAuthStateChanged slug listener', e); }
-      }else{
-        // Retry once after DOM ready in case libs load later
-        document.addEventListener('DOMContentLoaded', function(){
-          if(typeof onAuthStateChanged === 'function' && typeof auth !== 'undefined'){
-            try{
-              onAuthStateChanged(auth, async (user) => {
-                if(user){
-                  try{
-                    await resolveTenantFromPathOrProfile(user);
-                    await guardRouteForUser(user);
-                    if(typeof ensureCalendar === 'function'){ try{ ensureCalendar(); }catch(_e){} }
-                  }catch(err){ console.error('slug flow late', err); }
-                }else{
-                  history.replaceState({}, '', '/');
-                  TENANT = getTenantFromHostOrPath();
-                  window.TENANT = TENANT;
-                  document.documentElement.dataset.tenant = TENANT;
-                  try { document.body.setAttribute('data-client-id', TENANT); } catch(_) {}
-                }
-              });
-            }catch(e){ console.warn('Late attach failed', e); }
-          }
-        });
-      }
-    }
-  })();
+  if(!window.__MG_SLUG_ONAUTH_PATCHED__){
+    window.__MG_SLUG_ONAUTH_PATCHED__ = true;
+    try{
+      onAuthStateChanged(auth, async (user) => {
+        if(user){
+          try{
+            await resolveTenantFromPathOrProfile(user);
+            await guardRouteForUser(user);
+            if(typeof ensureCalendar === 'function'){ try{ ensureCalendar(); }catch(_e){} }
+            // Rehydrate UI data now that TENANT is confirmed
+            try{ if(typeof loadBriefFromUserData === 'function') loadBriefFromUserData(); }catch(_e){}
+            try{ if(typeof renderDashboard === 'function') renderDashboard(window.USER_DATA); }catch(_e){}
+            try{ if(typeof buildTabs === 'function') buildTabs(); }catch(_e){}
+            try{ if(typeof loadNotesFromUserData === 'function') loadNotesFromUserData(); }catch(_e){}
+            try{ if(typeof loadNoteTemplatesFromUserData === 'function') loadNoteTemplatesFromUserData(); }catch(_e){}
+            try{ if(typeof loadAccessesFromUserData === 'function') loadAccessesFromUserData(); }catch(_e){}
+            try{ if(typeof rerenderBySection === 'function') rerenderBySection(); }catch(_e){}
+          }catch(err){ console.error('slug flow', err); }
+        }else{
+          history.replaceState({}, '', '/');
+          window.TENANT = getTenantFromHostOrPath();
+          document.documentElement.dataset.tenant = window.TENANT;
+          try { document.body.setAttribute('data-client-id', window.TENANT); } catch(_) {}
+        }
+      });
+    }catch(e){ console.warn('Could not attach onAuthStateChanged slug listener', e); }
+  }
 
   // Keep TENANT synced when user uses back/forward navigation
   window.addEventListener('popstate', () => {
     const pathSlug = (location.pathname||'/').replace(/^\/+/, '').split('/')[0] || '';
     if(pathSlug){
-      TENANT = pathSlug;
       window.TENANT = pathSlug;
       document.documentElement.dataset.tenant = pathSlug;
       try { document.body.setAttribute('data-client-id', pathSlug); } catch(_) {}
@@ -30794,7 +31930,7 @@ const firebaseConfig = {
 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, enableIndexedDbPersistence, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, enableIndexedDbPersistence, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Reutilizar app Firebase se já existir
 const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
