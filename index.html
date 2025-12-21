@@ -11555,8 +11555,8 @@ async function sendIAQuestion(){
 
     /* ========= seções ========= */
     const SECTIONS = [
+      { id:"estruturacao", name:"Estruturação" },
       { id:"macro",    name:"Macro" },
-      { id:"briefing",  name:"Briefing" },
       { id:"demandas",  name:"Planejamento" },
       { id:"ia",        name:"I.A" },
       { id:"calendar",  name:"Calendário" },
@@ -11566,13 +11566,12 @@ async function sendIAQuestion(){
       { id:"leads",     name:"Leads" },
       { id:"refSocial", name:"Referências" },
       { id:"notes",     name:"Anotações" },
-      { id:"estruturacao", name:"Estruturação" },
       { id:"access",    name:"Acessos" },
       { id:"arquivos",  name:"Arquivos" },
       { id:"concorrentes", name:"Concorrentes" },
       { id:"relatorio", name:"Relatório" }
     ];
-    let currentSection = localStorage.getItem("mg_currentSection") || "macro";
+    let currentSection = localStorage.getItem("mg_currentSection") || "estruturacao";
     if(currentSection==="other") currentSection="demandas";
     let USER_DATA = {};
     let CLIENT_PROFILE = {};
