@@ -1408,8 +1408,8 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-block-summary-item.notes{background:rgba(255,193,7,.15);color:#ffd54f}
     .estruturacao-block-summary-item.files{background:rgba(33,150,243,.15);color:#64b5f6}
     .estruturacao-block-summary-item .icon{font-size:.8rem}
-    .estruturacao-block-summary-preview{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px;max-height:40px;overflow:hidden;line-height:1.4}
-    .estruturacao-block-summary-preview span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+    .estruturacao-block-summary-preview{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 10px;line-height:1.4}
+    .estruturacao-block-summary-preview span{display:inline;white-space:nowrap}
     
     .estruturacao-block-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
     .estruturacao-block.open .estruturacao-block-body{max-height:2000px}
@@ -23436,15 +23436,12 @@ async function sendIAQuestion(){
             }
             summaryHtml += '</div>';
             
-            // Adicionar preview das notas (máximo 2)
+            // Adicionar preview das notas (todas, sem limite)
             if(notesPreviews.length > 0){
               summaryHtml += '<div class="estruturacao-block-summary-preview">';
-              notesPreviews.slice(0, 2).forEach(preview => {
+              notesPreviews.forEach(preview => {
                 summaryHtml += `<span>📌 ${preview}</span>`;
               });
-              if(notesPreviews.length > 2){
-                summaryHtml += `<span style="opacity:.5">... e mais ${notesPreviews.length - 2}</span>`;
-              }
               summaryHtml += '</div>';
             }
           }
