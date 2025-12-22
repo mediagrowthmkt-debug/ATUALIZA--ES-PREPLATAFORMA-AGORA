@@ -1347,10 +1347,32 @@ html, body{ -webkit-text-size-adjust: 100%; }
     @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
     .estruturacao-progress-text{display:flex;justify-content:space-between;margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.6)}
     .estruturacao-weeks{display:flex;flex-direction:column;gap:20px}
-    .estruturacao-week{background:var(--panel);border:1px solid var(--shell-border);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:all .3s ease}
+    .estruturacao-week{background:var(--panel);border:1px solid var(--shell-border);border-radius:14px;overflow:visible;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:all .3s ease;position:relative;z-index:1}
+    .estruturacao-week:has(.estruturacao-disclaimer-icon:hover){z-index:9999}
     .estruturacao-week.completed{border-color:#2e7d32;box-shadow:0 8px 22px rgba(46,125,50,.3)}
-    .estruturacao-week-header{padding:16px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--shell-border);cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .2s ease}
+    .estruturacao-week-header{padding:16px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--shell-border);cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .2s ease;border-radius:14px 14px 0 0;overflow:visible;position:relative}
     .estruturacao-week-header:hover{background:rgba(255,255,255,.06)}
+    /* Disclaimers Icons */
+    .estruturacao-disclaimers{display:flex;align-items:center;gap:6px;margin-left:auto;margin-right:8px;position:relative;z-index:50}
+    .estruturacao-disclaimer-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:help;position:relative;transition:all .2s ease;border:1px solid rgba(255,255,255,.15)}
+    .estruturacao-disclaimer-icon:hover{transform:scale(1.15);z-index:999999}
+    .estruturacao-disclaimer-icon.icon-explain{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}
+    .estruturacao-disclaimer-icon.icon-explain:hover{box-shadow:0 0 12px rgba(59,130,246,.6)}
+    .estruturacao-disclaimer-icon.icon-warning{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+    .estruturacao-disclaimer-icon.icon-warning:hover{box-shadow:0 0 12px rgba(245,158,11,.6)}
+    .estruturacao-disclaimer-icon.icon-importance{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+    .estruturacao-disclaimer-icon.icon-importance:hover{box-shadow:0 0 12px rgba(16,185,129,.6)}
+    .estruturacao-disclaimer-tooltip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);width:320px;background:rgba(20,20,25,.98);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transition:all .25s ease;z-index:999999}
+    .estruturacao-disclaimer-icon:hover .estruturacao-disclaimer-tooltip{opacity:1;visibility:visible;pointer-events:auto}
+    .estruturacao-disclaimer-tooltip::before{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid rgba(255,255,255,.2)}
+    .estruturacao-disclaimer-tooltip::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid rgba(20,20,25,.98)}
+    .estruturacao-disclaimer-tooltip-title{font-size:.9rem;font-weight:800;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    .estruturacao-disclaimer-tooltip.tooltip-explain .estruturacao-disclaimer-tooltip-title{color:#60a5fa}
+    .estruturacao-disclaimer-tooltip.tooltip-warning .estruturacao-disclaimer-tooltip-title{color:#fbbf24}
+    .estruturacao-disclaimer-tooltip.tooltip-importance .estruturacao-disclaimer-tooltip-title{color:#34d399}
+    .estruturacao-disclaimer-tooltip-content{font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.5;margin:0}
+    .estruturacao-disclaimer-tooltip-content ul{margin:6px 0 0;padding-left:18px}
+    .estruturacao-disclaimer-tooltip-content li{margin-bottom:4px}
     .estruturacao-week-badge{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff6600,#ffaa00);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(255,102,0,.4)}
     .estruturacao-week.completed .estruturacao-week-badge{background:linear-gradient(135deg,#2e7d32,#4caf50)}
     .estruturacao-week-info{flex:1;min-width:0}
@@ -1641,6 +1663,246 @@ html, body{ -webkit-text-size-adjust: 100%; }
       .estruturacao-extra-section{padding:12px}
       .estruturacao-file-item{flex-wrap:wrap}
       .estruturacao-file-actions{width:100%;justify-content:flex-end}
+      .estruturacao-disclaimers{gap:4px;margin-left:8px;margin-right:4px}
+      .estruturacao-disclaimer-icon{width:24px;height:24px;font-size:.7rem}
+      .estruturacao-disclaimer-tooltip{width:260px;left:auto;right:-20px;transform:none;padding:12px}
+      .estruturacao-disclaimer-tooltip::before,.estruturacao-disclaimer-tooltip::after{left:auto;right:28px;transform:none}
+    }
+    @media (max-width:480px){
+      .estruturacao-disclaimers{gap:3px}
+      .estruturacao-disclaimer-icon{width:22px;height:22px;font-size:.65rem}
+      .estruturacao-disclaimer-tooltip{width:240px;right:-10px;padding:10px}
+      .estruturacao-disclaimer-tooltip-title{font-size:.8rem}
+      .estruturacao-disclaimer-tooltip-content{font-size:.75rem}
+    }
+
+    /* ===== ENTREGÁVEIS MEDIAGROWTH (ESTILO DROPDOWN) ===== */
+    .entregaveis-week{
+      margin-top:20px;
+      border-color:rgba(0,200,83,.3) !important;
+    }
+    .entregaveis-week .estruturacao-week-header{
+      background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));
+    }
+    .entregaveis-week .estruturacao-week-header:hover{
+      background:linear-gradient(135deg,rgba(0,200,83,.12),rgba(0,200,83,.04));
+    }
+    .entregaveis-intro{
+      text-align:center;
+      margin-bottom:24px;
+      padding:16px;
+      background:rgba(0,200,83,.06);
+      border:1px solid rgba(0,200,83,.15);
+      border-radius:12px;
+    }
+    .entregaveis-intro p{
+      margin:0;
+      font-size:.95rem;
+      color:rgba(255,255,255,.85);
+      line-height:1.6;
+    }
+    /* Galeria de Entregáveis */
+    .entregaveis-gallery{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:16px;
+      margin-bottom:32px;
+    }
+    .entregavel-card{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:14px;
+      overflow:hidden;
+      transition:all .3s ease;
+      display:flex;
+      flex-direction:column;
+    }
+    .entregavel-card:hover{
+      border-color:rgba(0,200,83,.4);
+      transform:translateY(-4px);
+      box-shadow:0 12px 32px rgba(0,200,83,.15);
+    }
+    .entregavel-image{
+      aspect-ratio:3/4;
+      background:linear-gradient(135deg,rgba(0,200,83,.1),rgba(0,0,0,.3));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      position:relative;
+    }
+    .entregavel-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .entregavel-image-placeholder{
+      font-size:3rem;
+      color:rgba(255,255,255,.15);
+    }
+    .entregavel-info{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      flex:1;
+    }
+    .entregavel-name{
+      font-size:.9rem;
+      font-weight:800;
+      color:#fff;
+      margin:0;
+      line-height:1.3;
+    }
+    .entregavel-desc{
+      font-size:.75rem;
+      color:rgba(255,255,255,.6);
+      margin:0;
+      line-height:1.4;
+      flex:1;
+    }
+    .entregavel-value{
+      font-size:.7rem;
+      color:rgba(0,200,83,.8);
+      font-weight:700;
+      margin-top:4px;
+      padding-top:8px;
+      border-top:1px dashed rgba(255,255,255,.1);
+    }
+    /* Seção de Valor Total */
+    .entregaveis-valor-section{
+      background:linear-gradient(135deg,#00c853,#1b5e20);
+      border-radius:16px;
+      padding:32px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .entregaveis-valor-section::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374zM48.97 0l3.657 3.657-1.414 1.414L46.143 0h2.828zM11.03 0L7.372 3.657 8.787 5.07 13.857 0H11.03zm32.284 0L49.8 6.485 48.384 7.9l-7.9-7.9h2.83zM16.686 0L10.2 6.485 11.616 7.9l7.9-7.9h-2.83zM22.344 0L13.858 8.485 15.272 9.9l9.9-9.9h-2.828zM32 0l-3.486 3.485-1.414-1.414L30.172 0H32zm-6.142 0L16.2 9.657l1.414 1.414L28.97 0h-3.112zm12.142 0L48.97 10.97l-1.414 1.415L35.172 0h2.828z' fill='%23ffffff' fill-opacity='.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+    .entregaveis-valor-comparativo{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:24px;
+      margin-bottom:24px;
+    }
+    .entregaveis-valor-item{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      align-items:center;
+    }
+    .entregaveis-valor-label{
+      font-size:.8rem;
+      color:rgba(255,255,255,.7);
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+    .entregaveis-valor-original{
+      font-size:1.3rem;
+      color:rgba(255,255,255,.5);
+      text-decoration:line-through;
+      font-weight:700;
+    }
+    .entregaveis-valor-divider{
+      font-size:2rem;
+      color:rgba(255,255,255,.3);
+      align-self:center;
+    }
+    .entregaveis-valor-final{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+    }
+    .entregaveis-valor-main{
+      font-size:3rem;
+      font-weight:900;
+      color:#fff;
+      text-shadow:0 4px 20px rgba(0,0,0,.4);
+      line-height:1;
+    }
+    .entregaveis-valor-parcelado{
+      font-size:1.1rem;
+      color:rgba(255,255,255,.9);
+      font-weight:700;
+    }
+    .entregaveis-valor-urgencia{
+      display:inline-block;
+      background:rgba(0,0,0,.25);
+      padding:8px 20px;
+      border-radius:30px;
+      font-size:.9rem;
+      font-weight:800;
+      color:#fff;
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.2);
+    }
+    .entregaveis-country-toggle{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      margin-bottom:20px;
+    }
+    .entregaveis-country-btn{
+      background:rgba(255,255,255,.1);
+      border:2px solid rgba(255,255,255,.2);
+      color:#fff;
+      padding:10px 24px;
+      border-radius:30px;
+      font-size:.9rem;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .2s ease;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .entregaveis-country-btn:hover{
+      background:rgba(255,255,255,.2);
+      border-color:rgba(255,255,255,.4);
+    }
+    .entregaveis-country-btn.active{
+      background:#fff;
+      color:#1b5e20;
+      border-color:#fff;
+    }
+    @media (max-width:820px){
+      .entregaveis-gallery{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+      }
+      .entregaveis-valor-main{
+        font-size:2.2rem;
+      }
+      .entregaveis-header,.entregaveis-content{
+        padding:16px;
+      }
+      .entregaveis-valor-section{
+        padding:24px 16px;
+      }
+    }
+    @media (max-width:480px){
+      .entregaveis-gallery{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+      }
+      .entregavel-info{
+        padding:10px;
+      }
+      .entregavel-name{
+        font-size:.8rem;
+      }
+      .entregaveis-valor-main{
+        font-size:1.8rem;
+      }
     }
 
     /* ===== IA CHAT ===== */
@@ -5443,6 +5705,348 @@ function renderReviewNotes(post){
   </div>
 
   <div class="estruturacao-weeks" id="estruturacaoWeeks"></div>
+
+  <!-- ENTREGÁVEIS MEDIAGROWTH - DROPDOWN ESTILO SEMANA -->
+  <div class="estruturacao-week entregaveis-week" id="entregaveisWeek">
+    <div class="estruturacao-week-header" onclick="document.getElementById('entregaveisWeek').classList.toggle('open')">
+      <div class="estruturacao-week-badge" style="background:linear-gradient(135deg,#00c853,#1b5e20)">🎁</div>
+      <div class="estruturacao-week-info">
+        <h3 class="estruturacao-week-title">Tudo que você vai receber</h3>
+        <p class="estruturacao-week-desc">Conheça todos os entregáveis inclusos na sua estruturação</p>
+      </div>
+      <div class="estruturacao-week-progress">
+        <span>18 entregáveis</span>
+      </div>
+      <span class="estruturacao-week-chevron">▾</span>
+    </div>
+    <div class="estruturacao-week-body">
+      <div class="estruturacao-week-content">
+        <div class="entregaveis-intro">
+          <p>Durante as semanas de estruturação, você receberá todos estes materiais e serviços profissionais para transformar seu marketing e comercial.</p>
+        </div>
+
+        <!-- Galeria de Entregáveis -->
+        <div class="entregaveis-gallery" id="entregaveisGallery">
+          
+          <!-- 1. Diagnóstico Estratégico Completo -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Diagnóstico Estratégico Completo.png" alt="Diagnóstico Estratégico Completo">
+              <div class="entregavel-image-placeholder" style="display:none">�</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Diagnóstico Estratégico Completo</h4>
+              <p class="entregavel-desc">⭐️ Análise completa do modelo de negócio</p>
+              <p class="entregavel-desc">⭐️ Diagnóstico de marketing e vendas</p>
+              <p class="entregavel-desc">⭐️ Identificação de gargalos de conversão</p>
+              <p class="entregavel-desc">⭐️ Análise de posicionamento da marca</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 2. Direcionamento Estratégico e Metas -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Direcionamento Estratégico e Metas.png" alt="Direcionamento Estratégico e Metas">
+              <div class="entregavel-image-placeholder" style="display:none">🎯</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Direcionamento Estratégico e Metas</h4>
+              <p class="entregavel-desc">⭐️ Definição de objetivo financeiro</p>
+              <p class="entregavel-desc">⭐️ Metas anuais, mensais e por canal</p>
+              <p class="entregavel-desc">⭐️ Definição de KPIs</p>
+              <p class="entregavel-desc">⭐️ Métricas mínimas de viabilidade</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 3. Análise de Concorrência e Mercado -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Análise de Concorrência e Mercado.png" alt="Análise de Concorrência e Mercado">
+              <div class="entregavel-image-placeholder" style="display:none">�</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Análise de Concorrência e Mercado</h4>
+              <p class="entregavel-desc">⭐️ Análise de concorrentes diretos e indiretos</p>
+              <p class="entregavel-desc">⭐️ Estudo de promessas e ofertas do mercado</p>
+              <p class="entregavel-desc">⭐️ Identificação de pontos fracos exploráveis</p>
+              <p class="entregavel-desc">⭐️ Oportunidades de diferenciação</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 4. Matriz CDT -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/matriz cdt.png" alt="Matriz CDT">
+              <div class="entregavel-image-placeholder" style="display:none">📋</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Matriz CDT</h4>
+              <p class="entregavel-desc">⭐️ Mapeamento completo do negócio</p>
+              <p class="entregavel-desc">⭐️ Identificação das dores reais do cliente</p>
+              <p class="entregavel-desc">⭐️ Mapeamento de objeções</p>
+              <p class="entregavel-desc">⭐️ Definição das transformações prometidas</p>
+              <span class="entregavel-value">Valor: R$ 750</span>
+            </div>
+          </div>
+
+          <!-- 5. PUV - Proposta Única de Valor -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/puv Proposta única de valor.png" alt="PUV - Proposta Única de Valor">
+              <div class="entregavel-image-placeholder" style="display:none">�</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">PUV - Proposta Única de Valor</h4>
+              <p class="entregavel-desc">⭐️ Definição do diferencial competitivo</p>
+              <p class="entregavel-desc">⭐️ Construção da mensagem central da marca</p>
+              <p class="entregavel-desc">⭐️ Direcionamento de posicionamento</p>
+              <span class="entregavel-value">Valor: R$ 750</span>
+            </div>
+          </div>
+
+          <!-- 6. PAI - Público Alvo Ideal -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/p.a.i público alvo ideal.png" alt="PAI - Público Alvo Ideal">
+              <div class="entregavel-image-placeholder" style="display:none">👥</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">PAI - Público Alvo Ideal</h4>
+              <p class="entregavel-desc">⭐️ Definição do perfil do cliente ideal</p>
+              <p class="entregavel-desc">⭐️ Mapeamento de comportamento de compra</p>
+              <p class="entregavel-desc">⭐️ Identificação de objeções</p>
+              <p class="entregavel-desc">⭐️ Análise do momento de decisão</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 7. Estruturação de Anúncios Pagos -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/estruturação  anúncios pagos.png" alt="Estruturação de Anúncios Pagos">
+              <div class="entregavel-image-placeholder" style="display:none">�</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Estruturação de Anúncios Pagos</h4>
+              <p class="entregavel-desc">⭐️ Estruturação de campanhas Meta Ads e Google Ads</p>
+              <p class="entregavel-desc">⭐️ Definição de funis de intenção</p>
+              <p class="entregavel-desc">⭐️ Planejamento de públicos e palavras-chave</p>
+              <p class="entregavel-desc">⭐️ Estratégia de captação de demanda</p>
+              <span class="entregavel-value">Valor: R$ 700</span>
+            </div>
+          </div>
+
+          <!-- 8. Estruturação Site & SEO -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Estruturação  Site & SEO.png" alt="Estruturação Site & SEO">
+              <div class="entregavel-image-placeholder" style="display:none">🌐</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Estruturação Site & SEO</h4>
+              <p class="entregavel-desc">⭐️ Definição da arquitetura do site</p>
+              <p class="entregavel-desc">⭐️ Estruturação de páginas de venda</p>
+              <p class="entregavel-desc">⭐️ Direcionamento estratégico de SEO</p>
+              <p class="entregavel-desc">⭐️ Planejamento de conteúdos para ranqueamento</p>
+              <p class="entregavel-desc">⭐️ Planejamento de conteúdos para os blogs</p>
+              <span class="entregavel-value">Valor: R$ 1.500</span>
+            </div>
+          </div>
+
+          <!-- 9. Estratégias para Redes Sociais -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Estratégias para as  Redes Sociais.png" alt="Estratégias para Redes Sociais">
+              <div class="entregavel-image-placeholder" style="display:none">📱</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Estratégias para Redes Sociais</h4>
+              <p class="entregavel-desc">⭐️ Definição do objetivo das redes</p>
+              <p class="entregavel-desc">⭐️ Planejamento de tipos de conteúdo</p>
+              <p class="entregavel-desc">⭐️ Definição de frequência ideal</p>
+              <p class="entregavel-desc">⭐️ Alinhamento da linguagem da marca</p>
+              <span class="entregavel-value">Valor: R$ 525</span>
+            </div>
+          </div>
+
+          <!-- 10. Copywriting Estratégico -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Copywriting Estratégico.png" alt="Copywriting Estratégico">
+              <div class="entregavel-image-placeholder" style="display:none">✍️</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Copywriting Estratégico</h4>
+              <p class="entregavel-desc">⭐️ Criação de copy/script para anúncios</p>
+              <p class="entregavel-desc">⭐️ Criação de copy/script para site</p>
+              <p class="entregavel-desc">⭐️ Criação de copy/script para mensagens comerciais</p>
+              <p class="entregavel-desc">⭐️ Desenvolvimento de scripts de venda</p>
+              <span class="entregavel-value">Valor: R$ 600</span>
+            </div>
+          </div>
+
+          <!-- 11. Produção de Conteúdo Guiada -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Produção de Conteúdo Guiada.png" alt="Produção de Conteúdo Guiada">
+              <div class="entregavel-image-placeholder" style="display:none">🎬</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Produção de Conteúdo Guiada</h4>
+              <p class="entregavel-desc">⭐️ Criação de roteiros de vídeo</p>
+              <p class="entregavel-desc">⭐️ Direção estratégica de gravação</p>
+              <p class="entregavel-desc">⭐️ Planejamento de conteúdos institucionais, meio e fundo de funil</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 12. Criativos para Anúncios Patrocinados -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Criativos para  anúncios patrocinados.png" alt="Criativos para Anúncios Patrocinados">
+              <div class="entregavel-image-placeholder" style="display:none">🎨</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Criativos para Anúncios</h4>
+              <p class="entregavel-desc">⭐️ Criação de criativo institucional</p>
+              <p class="entregavel-desc">⭐️ Criação de criativo de meio de funil</p>
+              <p class="entregavel-desc">⭐️ Criação de criativo de fundo de funil</p>
+              <p class="entregavel-desc">⭐️ Variações para testes de performance</p>
+              <span class="entregavel-value">Valor: R$ 700</span>
+            </div>
+          </div>
+
+          <!-- 13. CRM e Automações -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/acesso CRM e Automações.png" alt="CRM e Automações">
+              <div class="entregavel-image-placeholder" style="display:none">⚙️</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">CRM e Automações</h4>
+              <p class="entregavel-desc">⭐️ Configuração do CRM</p>
+              <p class="entregavel-desc">⭐️ Estruturação do funil de vendas</p>
+              <p class="entregavel-desc">⭐️ Implementação de automações de mensagens</p>
+              <p class="entregavel-desc">⭐️ Configuração de follow-ups e nutrição</p>
+              <p class="entregavel-desc">⭐️ Disponibilidade de 1 ano de uso CRM mediagrowth</p>
+              <span class="entregavel-value">Valor: R$ 950</span>
+            </div>
+          </div>
+
+          <!-- 14. Estruturação do Processo Comercial -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Estruturação do Processo Comercial.png" alt="Estruturação do Processo Comercial">
+              <div class="entregavel-image-placeholder" style="display:none">💼</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Estruturação do Processo Comercial</h4>
+              <p class="entregavel-desc">⭐️ Mapeamento do processo de vendas</p>
+              <p class="entregavel-desc">⭐️ Identificação de pontos de perda</p>
+              <p class="entregavel-desc">⭐️ Análise do ciclo de vendas</p>
+              <p class="entregavel-desc">⭐️ Estruturação de objeções comerciais</p>
+              <span class="entregavel-value">Valor: R$ 1.000</span>
+            </div>
+          </div>
+
+          <!-- 15. Landing Pages Estratégicas -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Landing pages estratégicas.png" alt="Landing Pages Estratégicas">
+              <div class="entregavel-image-placeholder" style="display:none">🚀</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Landing Pages Estratégicas</h4>
+              <p class="entregavel-desc">⭐️ Criação de até 3 landing pages</p>
+              <p class="entregavel-desc">⭐️ Estrutura focada em conversão</p>
+              <p class="entregavel-desc">⭐️ Copy alinhada à estratégia definida</p>
+              <span class="entregavel-value">Valor: R$ 1.750</span>
+            </div>
+          </div>
+
+          <!-- 16. Construção ou Atualização de Website -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Construção ou atualização de website.png" alt="Construção ou Atualização de Website">
+              <div class="entregavel-image-placeholder" style="display:none">🖥️</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Construção ou Atualização de Website</h4>
+              <p class="entregavel-desc">⭐️ Construção ou atualização do site institucional</p>
+              <p class="entregavel-desc">⭐️ Estrutura alinhada à estratégia</p>
+              <p class="entregavel-desc">⭐️ Design funcional e responsivo</p>
+              <p class="entregavel-desc">⭐️ Preparação para tráfego e SEO</p>
+              <span class="entregavel-value">Valor: R$ 2.000</span>
+            </div>
+          </div>
+
+          <!-- 17. Padronização Visual e de Comunicação -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/Padronização visual  e de comunicação.png" alt="Padronização Visual e de Comunicação">
+              <div class="entregavel-image-placeholder" style="display:none">✨</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Padronização Visual e de Comunicação</h4>
+              <p class="entregavel-desc">⭐️ Padronização visual da marca</p>
+              <p class="entregavel-desc">⭐️ Padronização de linguagem e tom de voz</p>
+              <p class="entregavel-desc">⭐️ Alinhamento de comunicação em todos os canais</p>
+              <span class="entregavel-value">Valor: R$ 1.250</span>
+            </div>
+          </div>
+
+          <!-- 18. Plataforma Mediagrowth -->
+          <div class="entregavel-card">
+            <div class="entregavel-image">
+              <img src="assets/entregaveis mediagrwoth/_plataforma mediagrowth.png" alt="Plataforma Mediagrowth">
+              <div class="entregavel-image-placeholder" style="display:none">🚀</div>
+            </div>
+            <div class="entregavel-info">
+              <h4 class="entregavel-name">Plataforma Mediagrowth</h4>
+              <p class="entregavel-desc">⭐️ Visão macro vendas e marketing</p>
+              <p class="entregavel-desc">⭐️ Acesso planejamento</p>
+              <p class="entregavel-desc">⭐️ IA treinada com dados da empresa</p>
+              <p class="entregavel-desc">⭐️ Calendário de conteúdo/planejamento</p>
+              <p class="entregavel-desc">⭐️ Gestão de metas</p>
+              <p class="entregavel-desc">⭐️ Gestão de leads</p>
+              <p class="entregavel-desc">⭐️ Gestão de referências</p>
+              <p class="entregavel-desc">⭐️ Bloco de notas estratégico</p>
+              <p class="entregavel-desc">⭐️ Gestão de senhas e acessos</p>
+              <p class="entregavel-desc">⭐️ Gestão de arquivos</p>
+              <span class="entregavel-value">Valor: R$ 197</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Seção de Valor -->
+        <div class="entregaveis-valor-section">
+          <div class="entregaveis-country-toggle">
+            <button class="entregaveis-country-btn active" data-country="BR" onclick="event.stopPropagation();toggleEntregaveisCountry('BR')">🇧🇷 Brasil</button>
+            <button class="entregaveis-country-btn" data-country="US" onclick="event.stopPropagation();toggleEntregaveisCountry('US')">🇺🇸 USA</button>
+          </div>
+
+          <div class="entregaveis-valor-comparativo">
+            <div class="entregaveis-valor-item">
+              <span class="entregaveis-valor-label">Investimento necessário</span>
+              <span class="entregaveis-valor-original" id="entregaveisValorOriginal">R$ 17.672</span>
+            </div>
+            <span class="entregaveis-valor-divider">→</span>
+            <div class="entregaveis-valor-item entregaveis-valor-final">
+              <span class="entregaveis-valor-label">Seu investimento</span>
+              <span class="entregaveis-valor-main" id="entregaveisValorFinal">R$ 5.000</span>
+              <span class="entregaveis-valor-parcelado" id="entregaveisValorParcelado">ou 5x de R$ 1.000,00</span>
+            </div>
+          </div>
+
+          <span class="entregaveis-valor-urgencia">🔥 Válida somente hoje</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ACESSOS -->
@@ -7193,7 +7797,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     const estruturacaoWrap = $("estruturacaoWrap");
     let macroTabBadgeEl = null;
     let macroTabHasUpdate = false;
-    let macroAutoOpenPending = true;
+    let macroAutoOpenPending = false; // Desativado - iniciar na aba estruturação
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
     const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
@@ -11571,7 +12175,8 @@ async function sendIAQuestion(){
       { id:"concorrentes", name:"Concorrentes" },
       { id:"relatorio", name:"Relatório" }
     ];
-    let currentSection = localStorage.getItem("mg_currentSection") || "estruturacao";
+    // Sempre iniciar na aba "estruturação" ao carregar a página
+    let currentSection = "estruturacao";
     if(currentSection==="other") currentSection="demandas";
     let USER_DATA = {};
     let CLIENT_PROFILE = {};
@@ -22278,7 +22883,160 @@ async function sendIAQuestion(){
       }
     ];
 
-    let ESTRUTURACAO_STATE = {};
+    // Disclaimers para cada semana de estruturação
+    const ESTRUTURACAO_DISCLAIMERS = {
+      semana1: {
+        explain: {
+          title: '📘 Explicação da Semana 1',
+          content: `<ul>
+            <li><strong>Direcionamento Estratégico:</strong> Definir metas claras de crescimento e posicionamento.</li>
+            <li><strong>Momento Atual:</strong> Diagnóstico completo da situação de marketing e vendas.</li>
+            <li><strong>Mercado e Concorrência:</strong> Identificar oportunidades e diferenciais competitivos.</li>
+            <li><strong>Matriz CDT:</strong> Mapear características, dores e soluções do negócio.</li>
+            <li><strong>Estrutura do Time:</strong> Entender quem faz o quê para alinhar responsabilidades.</li>
+            <li><strong>Entendimento do Negócio:</strong> Conhecer ticket médio, ciclo de venda e objeções.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>Campanhas serão criadas "no escuro" sem direcionamento.</li>
+            <li>Investimento em tráfego sem saber o que realmente funciona.</li>
+            <li>Comunicação genérica que não conecta com o cliente.</li>
+            <li>Desalinhamento entre marketing e vendas.</li>
+            <li>Perda de tempo e dinheiro com estratégias erradas.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `Esta é a <strong>fundação de todo o projeto</strong>. Sem clareza e diagnóstico, qualquer ação será apenas "achismo". Investir tempo aqui evita retrabalho e garante que cada real investido tenha direcionamento estratégico.`
+        }
+      },
+      semana2: {
+        explain: {
+          title: '📘 Explicação da Semana 2',
+          content: `<ul>
+            <li><strong>PUV:</strong> Criar uma proposta única que diferencia a empresa da concorrência.</li>
+            <li><strong>PAI:</strong> Definir exatamente quem é o cliente ideal para direcionar toda comunicação.</li>
+            <li><strong>Benchmarks:</strong> Aprender com o que já funciona no mercado.</li>
+            <li><strong>Melhorias Imediatas:</strong> Quick wins que geram resultados rápidos.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>A empresa será "mais uma" no mercado, sem diferencial.</li>
+            <li>Anúncios atrairão pessoas erradas, desperdiçando verba.</li>
+            <li>Taxa de conversão baixa por falta de conexão com o público.</li>
+            <li>Oportunidades de melhoria rápida serão ignoradas.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `<strong>Posicionamento é poder.</strong> Quem não se diferencia, compete por preço. Esta semana define a identidade única que fará os clientes escolherem você, não a concorrência.`
+        }
+      },
+      semana3_4: {
+        explain: {
+          title: '📘 Explicação das Semanas 3 e 4',
+          content: `<ul>
+            <li><strong>Metas:</strong> Transformar objetivos em números mensuráveis.</li>
+            <li><strong>Visão Temporal:</strong> Planejar curto, médio e longo prazo.</li>
+            <li><strong>Google:</strong> Estruturar captação de demanda pronta.</li>
+            <li><strong>Site e SEO:</strong> Base para autoridade e conversão orgânica.</li>
+            <li><strong>Redes Sociais:</strong> Definir presença digital estratégica.</li>
+            <li><strong>Copywriting:</strong> Criar textos que vendem em todos os canais.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>Ações sem metas = impossível medir sucesso.</li>
+            <li>Foco só no curto prazo, sem construção de marca.</li>
+            <li>Google Ads mal estruturado = dinheiro jogado fora.</li>
+            <li>Site sem estratégia = visitantes que não convertem.</li>
+            <li>Redes sociais sem propósito = esforço sem resultado.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `<strong>Estratégia sem execução é sonho. Execução sem estratégia é pesadelo.</strong> Aqui transformamos todo o diagnóstico em um plano de ação concreto com metas, canais e copywriting definidos.`
+        }
+      },
+      semana5: {
+        explain: {
+          title: '📘 Explicação da Semana 5',
+          content: `<ul>
+            <li><strong>Conteúdo para Redes:</strong> Produção de vídeos de autoridade, institucional e conversão.</li>
+            <li><strong>Conteúdo para Anúncios:</strong> Criativos testáveis para Meta e Google.</li>
+            <li><strong>Stories:</strong> Padrão visual e conteúdo de bastidores.</li>
+            <li><strong>Organização de Materiais:</strong> Estrutura de pastas e processos claros.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>Anúncios com criativos fracos = baixa taxa de clique.</li>
+            <li>Redes sociais vazias ou sem padrão profissional.</li>
+            <li>Materiais desorganizados = caos operacional.</li>
+            <li>Dependência constante do cliente para produção.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `<strong>Conteúdo é o combustível do marketing digital.</strong> Sem materiais de qualidade, campanhas não performam. Esta semana garante que você tenha um arsenal de conteúdos prontos para usar.`
+        }
+      },
+      semana6: {
+        explain: {
+          title: '📘 Explicação da Semana 6',
+          content: `<ul>
+            <li><strong>CRM:</strong> Sistema para gerenciar leads, funil de vendas e responsabilidades.</li>
+            <li><strong>Automações:</strong> Mensagens automáticas, follow-ups e nutrição de leads.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>Leads esquecidos = vendas perdidas.</li>
+            <li>Sem SLA = atendimento lento e despadronizado.</li>
+            <li>Falta de follow-up = 80% das vendas perdidas.</li>
+            <li>Sem automação = time sobrecarregado com tarefas repetitivas.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `<strong>CRM não é sobre tecnologia, é sobre não perder dinheiro.</strong> A maioria das empresas perde vendas por falta de organização comercial. Automações multiplicam a capacidade do time.`
+        }
+      },
+      semana7: {
+        explain: {
+          title: '📘 Explicação da Semana 7',
+          content: `<ul>
+            <li><strong>Páginas de Venda:</strong> Landing pages otimizadas para conversão.</li>
+            <li><strong>Site:</strong> Entrega funcional e alinhada à estratégia.</li>
+            <li><strong>Criativos:</strong> Anúncios, artes e vídeos editados.</li>
+            <li><strong>Padronizações:</strong> Google Ads, redes sociais e linguagem de marca.</li>
+            <li><strong>Posts:</strong> Calendário inicial e direção de continuidade.</li>
+          </ul>`
+        },
+        warning: {
+          title: '⚠️ Se não for feito...',
+          content: `<ul>
+            <li>Estrutura incompleta = operação travada.</li>
+            <li>Falta de padronização = comunicação inconsistente.</li>
+            <li>Sem calendário = redes sociais abandonadas após início.</li>
+            <li>Projeto sem entrega final = expectativas frustradas.</li>
+          </ul>`
+        },
+        importance: {
+          title: '🎯 Por que estamos fazendo isso?',
+          content: `<strong>Esta semana é a entrega final que deixa tudo funcionando.</strong> É aqui que toda a estratégia se materializa em ativos prontos para uso. Uma estrutura escalável que permite crescimento contínuo.`
+        }
+      }
+    };
+
+    let ESTRUTURACAO_STATE = {};;
 
     function loadEstruturacaoFromUserData(){
       ESTRUTURACAO_STATE = USER_DATA.estruturacao || {};
@@ -22317,6 +23075,52 @@ async function sendIAQuestion(){
       
       return { total, completed, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
     }
+
+    // Função para alternar valores entre Brasil e USA na seção de entregáveis
+    function toggleEntregaveisCountry(country){
+      const valorOriginal = document.getElementById('entregaveisValorOriginal');
+      const valorFinal = document.getElementById('entregaveisValorFinal');
+      const valorParcelado = document.getElementById('entregaveisValorParcelado');
+      const btns = document.querySelectorAll('.entregaveis-country-btn');
+      
+      btns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.country === country);
+      });
+      
+      // Atualizar valores dos cards
+      const cards = document.querySelectorAll('.entregavel-value');
+      
+      if(country === 'US'){
+        if(valorOriginal) valorOriginal.textContent = '$ 3,495';
+        if(valorFinal) valorFinal.textContent = '$ 1,000';
+        if(valorParcelado) valorParcelado.textContent = 'or 5x of $ 200.00';
+        
+        // Atualizar valores individuais dos cards para USD (18 entregáveis)
+        const valoresUSD = [
+          '$ 200', '$ 200', '$ 200', '$ 150', '$ 150', '$ 200',   // 1-6
+          '$ 140', '$ 300', '$ 105', '$ 120', '$ 200', '$ 140', // 7-12
+          '$ 190', '$ 200', '$ 350', '$ 400', '$ 250', '$ 40'  // 13-18
+        ];
+        cards.forEach((card, idx) => {
+          if(valoresUSD[idx]) card.textContent = 'Value: ' + valoresUSD[idx];
+        });
+      } else {
+        if(valorOriginal) valorOriginal.textContent = 'R$ 17.672';
+        if(valorFinal) valorFinal.textContent = 'R$ 5.000';
+        if(valorParcelado) valorParcelado.textContent = 'ou 5x de R$ 1.000,00';
+        
+        // Atualizar valores individuais dos cards para BRL (18 entregáveis)
+        const valoresBRL = [
+          'R$ 1.000', 'R$ 1.000', 'R$ 1.000', 'R$ 750', 'R$ 750', 'R$ 1.000',  // 1-6
+          'R$ 700', 'R$ 1.500', 'R$ 525', 'R$ 600', 'R$ 1.000', 'R$ 700',  // 7-12
+          'R$ 950', 'R$ 1.000', 'R$ 1.750', 'R$ 2.000', 'R$ 1.250', 'R$ 197'  // 13-18
+        ];
+        cards.forEach((card, idx) => {
+          if(valoresBRL[idx]) card.textContent = 'Valor: ' + valoresBRL[idx];
+        });
+      }
+    }
+    window.toggleEntregaveisCountry = toggleEntregaveisCountry;
 
     function renderEstruturacao(){
       loadEstruturacaoFromUserData();
@@ -22391,6 +23195,34 @@ async function sendIAQuestion(){
         const weekDataState = weekState.weekData || { note: '', files: [], checklist: [] };
         const weekHasContent = weekDataState.note || (weekDataState.files && weekDataState.files.length > 0) || (weekDataState.checklist && weekDataState.checklist.length > 0);
         
+        // Gerar HTML dos disclaimers
+        const disclaimers = ESTRUTURACAO_DISCLAIMERS[week.id];
+        const disclaimersHtml = disclaimers ? `
+          <div class="estruturacao-disclaimers">
+            <div class="estruturacao-disclaimer-icon icon-explain" title="Explicação">
+              📘
+              <div class="estruturacao-disclaimer-tooltip tooltip-explain">
+                <div class="estruturacao-disclaimer-tooltip-title">📘 ${disclaimers.explain.title.replace('📘 ', '')}</div>
+                <div class="estruturacao-disclaimer-tooltip-content">${disclaimers.explain.content}</div>
+              </div>
+            </div>
+            <div class="estruturacao-disclaimer-icon icon-warning" title="Aviso">
+              ⚠️
+              <div class="estruturacao-disclaimer-tooltip tooltip-warning">
+                <div class="estruturacao-disclaimer-tooltip-title">⚠️ ${disclaimers.warning.title.replace('⚠️ ', '')}</div>
+                <div class="estruturacao-disclaimer-tooltip-content">${disclaimers.warning.content}</div>
+              </div>
+            </div>
+            <div class="estruturacao-disclaimer-icon icon-importance" title="Importância">
+              🎯
+              <div class="estruturacao-disclaimer-tooltip tooltip-importance">
+                <div class="estruturacao-disclaimer-tooltip-title">🎯 ${disclaimers.importance.title.replace('🎯 ', '')}</div>
+                <div class="estruturacao-disclaimer-tooltip-content">${disclaimers.importance.content}</div>
+              </div>
+            </div>
+          </div>
+        ` : '';
+        
         const weekEl = document.createElement('div');
         // Restaurar estado de abertura se estava aberto antes
         const wasOpen = openWeeks.has(weekIdx);
@@ -22402,6 +23234,7 @@ async function sendIAQuestion(){
               <h3 class="estruturacao-week-title">${week.title}</h3>
               <p class="estruturacao-week-desc">${week.subtitle}</p>
             </div>
+            ${disclaimersHtml}
             <div class="estruturacao-week-progress">
               <span>${weekCompleted}/${weekTotal}</span>
               <div class="estruturacao-week-progress-mini">
@@ -22475,7 +23308,9 @@ async function sendIAQuestion(){
              e.target.closest('input') || 
              e.target.closest('.estruturacao-week-extras') || 
              e.target.closest('.estruturacao-week-check') || 
-             e.target.closest('.estruturacao-week-checklist')){
+             e.target.closest('.estruturacao-week-checklist') ||
+             e.target.closest('.estruturacao-disclaimers') ||
+             e.target.closest('.estruturacao-disclaimer-icon')){
             return;
           }
           weekEl.classList.toggle('open');
