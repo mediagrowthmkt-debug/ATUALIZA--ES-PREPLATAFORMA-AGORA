@@ -1784,6 +1784,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
       position:absolute;
       inset:0;
       background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374zM48.97 0l3.657 3.657-1.414 1.414L46.143 0h2.828zM11.03 0L7.372 3.657 8.787 5.07 13.857 0H11.03zm32.284 0L49.8 6.485 48.384 7.9l-7.9-7.9h2.83zM16.686 0L10.2 6.485 11.616 7.9l7.9-7.9h-2.83zM22.344 0L13.858 8.485 15.272 9.9l9.9-9.9h-2.828zM32 0l-3.486 3.485-1.414-1.414L30.172 0H32zm-6.142 0L16.2 9.657l1.414 1.414L28.97 0h-3.112zm12.142 0L48.97 10.97l-1.414 1.415L35.172 0h2.828z' fill='%23ffffff' fill-opacity='.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+      pointer-events:none;
     }
     .entregaveis-valor-comparativo{
       display:flex;
@@ -6025,8 +6026,8 @@ function renderReviewNotes(post){
         <!-- Seção de Valor -->
         <div class="entregaveis-valor-section">
           <div class="entregaveis-country-toggle">
-            <button class="entregaveis-country-btn active" data-country="BR" onclick="event.stopPropagation();toggleEntregaveisCountry('BR')">🇧🇷 Brasil</button>
-            <button class="entregaveis-country-btn" data-country="US" onclick="event.stopPropagation();toggleEntregaveisCountry('US')">🇺🇸 USA</button>
+            <button class="entregaveis-country-btn active" data-country="BR" id="entregaveisBtnBR">🇧🇷 Brasil</button>
+            <button class="entregaveis-country-btn" data-country="US" id="entregaveisBtnUS">🇺🇸 USA</button>
           </div>
 
           <div class="entregaveis-valor-comparativo">
@@ -6048,6 +6049,72 @@ function renderReviewNotes(post){
     </div>
   </div>
 </div>
+
+<!-- Script para toggle de país nos entregáveis (deve estar fora do module) -->
+<script>
+function toggleEntregaveisCountry(country){
+  const valorOriginal = document.getElementById('entregaveisValorOriginal');
+  const valorFinal = document.getElementById('entregaveisValorFinal');
+  const valorParcelado = document.getElementById('entregaveisValorParcelado');
+  const btns = document.querySelectorAll('.entregaveis-country-btn');
+  
+  btns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.country === country);
+  });
+  
+  const cards = document.querySelectorAll('.entregavel-value');
+  
+  if(country === 'US'){
+    if(valorOriginal) valorOriginal.textContent = '$ 3,495';
+    if(valorFinal) valorFinal.textContent = '$ 1,000';
+    if(valorParcelado) valorParcelado.textContent = 'or 5x of $ 200.00';
+    
+    const valoresUSD = [
+      '$ 200', '$ 200', '$ 200', '$ 150', '$ 150', '$ 200',
+      '$ 140', '$ 300', '$ 105', '$ 120', '$ 200', '$ 140',
+      '$ 190', '$ 200', '$ 350', '$ 400', '$ 250', '$ 40'
+    ];
+    cards.forEach((card, idx) => {
+      if(valoresUSD[idx]) card.textContent = 'Value: ' + valoresUSD[idx];
+    });
+  } else {
+    if(valorOriginal) valorOriginal.textContent = 'R$ 17.672';
+    if(valorFinal) valorFinal.textContent = 'R$ 5.000';
+    if(valorParcelado) valorParcelado.textContent = 'ou 5x de R$ 1.000,00';
+    
+    const valoresBRL = [
+      'R$ 1.000', 'R$ 1.000', 'R$ 1.000', 'R$ 750', 'R$ 750', 'R$ 1.000',
+      'R$ 700', 'R$ 1.500', 'R$ 525', 'R$ 600', 'R$ 1.000', 'R$ 700',
+      'R$ 950', 'R$ 1.000', 'R$ 1.750', 'R$ 2.000', 'R$ 1.250', 'R$ 197'
+    ];
+    cards.forEach((card, idx) => {
+      if(valoresBRL[idx]) card.textContent = 'Valor: ' + valoresBRL[idx];
+    });
+  }
+}
+
+// Adicionar event listeners quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function(){
+  const btnBR = document.getElementById('entregaveisBtnBR');
+  const btnUS = document.getElementById('entregaveisBtnUS');
+  
+  if(btnBR){
+    btnBR.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleEntregaveisCountry('BR');
+    });
+  }
+  
+  if(btnUS){
+    btnUS.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleEntregaveisCountry('US');
+    });
+  }
+});
+</script>
 
 <!-- ACESSOS -->
 <div aria-hidden="true" class="access-wrap" id="accessWrap" style="display:none">
