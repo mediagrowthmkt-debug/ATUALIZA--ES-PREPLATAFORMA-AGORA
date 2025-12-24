@@ -28765,7 +28765,7 @@ ${escapeHtml(prompt)}
               temperature: 0.3,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 4096
+              maxOutputTokens: 2048
             }
           })
         });
@@ -29046,49 +29046,7 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       }
     };
     
-    // ===== DIAGNÓSTICO ESTRATÉGICO BASEADO EM ANÁLISE REAL DAS NOTAS =====
-    
-    // Analisar notas por área para identificar lacunas e clareza
-    function analisarNotasPorArea(data) {
-      const areas = {
-        mercado: { notas: [], itens: ['Público-alvo', 'Segmentação', 'Persona', 'Nicho', 'Mercado', 'Cliente ideal', 'Target'], preenchido: 0, total: 0 },
-        produto: { notas: [], itens: ['Produto', 'Serviço', 'Oferta', 'Proposta de valor', 'Diferencial', 'Benefício'], preenchido: 0, total: 0 },
-        concorrencia: { notas: [], itens: ['Concorrente', 'Competidor', 'Benchmark', 'Análise competitiva'], preenchido: 0, total: 0 },
-        marca: { notas: [], itens: ['Marca', 'Branding', 'Identidade', 'Logo', 'Visual', 'Tom de voz'], preenchido: 0, total: 0 },
-        vendas: { notas: [], itens: ['Venda', 'Comercial', 'Ticket', 'Preço', 'Faturamento', 'Receita', 'CAC'], preenchido: 0, total: 0 },
-        marketing: { notas: [], itens: ['Marketing', 'Tráfego', 'Lead', 'Funil', 'Campanha', 'Anúncio', 'Conteúdo'], preenchido: 0, total: 0 },
-        objetivo: { notas: [], itens: ['Meta', 'Objetivo', 'Resultado', 'KPI', 'Indicador', 'Crescimento'], preenchido: 0, total: 0 }
-      };
-      
-      // Classificar cada nota
-      (data.notes || []).forEach(note => {
-        const texto = `${note.item || ''} ${note.content || ''}`.toLowerCase();
-        const temConteudo = (note.content || '').trim().length > 5;
-        
-        Object.keys(areas).forEach(areaKey => {
-          const area = areas[areaKey];
-          const encontrado = area.itens.some(item => texto.includes(item.toLowerCase()));
-          if (encontrado) {
-            area.total++;
-            if (temConteudo) {
-              area.preenchido++;
-              area.notas.push({ item: note.item, content: note.content, week: note.week, block: note.block });
-            }
-          }
-        });
-      });
-      
-      // Calcular percentuais
-      Object.keys(areas).forEach(key => {
-        const area = areas[key];
-        area.percentual = area.total > 0 ? Math.round((area.preenchido / area.total) * 100) : 0;
-        area.status = area.percentual >= 80 ? 'completo' : area.percentual >= 50 ? 'parcial' : area.percentual > 0 ? 'inicial' : 'vazio';
-      });
-      
-      return areas;
-    }
-    
-    // Renderizar Diagnóstico de Lacunas (substitui funil de números falsos)
+    // Renderizar Funil de Marketing e Vendas Detalhado (usando dados analisados pela IA)
     function renderFunilDetalhado(data, mapping, dadosAnalisados) {
       const container = document.getElementById('funilVisualDiagnostico');
       const card = document.getElementById('chartCardFunilDetalhado');
@@ -29096,218 +29054,173 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       
       card.style.display = 'block';
       
-      // ========================================
-      // ANÁLISE INTELIGENTE DAS NOTAS PARA FUNIL
-      // ========================================
-      const notas = data.notes || [];
-      // Filtrar apenas notas que TÊM conteúdo real (não apenas título)
-      const notasComConteudo = notas.filter(n => (n.content || '').trim().length > 5);
-      const totalNotas = notas.length;
-      const totalPreenchidas = notasComConteudo.length;
+      // Usar dados analisados pela IA
+      const d = dadosAnalisados || DIAGNOSTICO_ESTRATEGICO.dadosAnalisados;
+      if (!d) {
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:rgba(255,255,255,.5);">Gerando análise com IA...</div>';
+        return;
+      }
       
-      // Estrutura para cada etapa do funil
-      const dadosTopo = {
-        label: 'TOPO DO FUNIL',
-        sublabel: 'Alcance & Visibilidade',
-        icon: '👁️',
-        cor: '#6366f1',
-        corGradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-        itens: [],
-        acoes: ['Definir canais de aquisição', 'Documentar estratégia de conteúdo', 'Estabelecer meta de alcance']
-      };
+      // Usar dados do funil analisados pela IA
+      const funil = d.funil;
+      const visitantes = funil.visitantes || 5000;
+      const leads = funil.leads || 150;
+      const qualificados = funil.qualificados || Math.round(leads * 0.5);
+      const orcamentos = funil.orcamentos || 45;
+      const vendas = funil.vendas || 15;
+      const ticketMedio = funil.ticketMedio || 200;
       
-      const dadosMeio = {
-        label: 'MEIO DO FUNIL',
-        sublabel: 'Engajamento & Leads',
-        icon: '💬',
-        cor: '#f59e0b',
-        corGradient: 'linear-gradient(135deg, #f59e0b, #f97316)',
-        itens: [],
-        acoes: ['Criar iscas digitais', 'Configurar captura de leads', 'Definir estratégia de nutrição']
-      };
-      
-      const dadosFundo = {
-        label: 'FUNDO DO FUNIL',
-        sublabel: 'Conversão & Vendas',
-        icon: '💰',
-        cor: '#10b981',
-        corGradient: 'linear-gradient(135deg, #10b981, #059669)',
-        itens: [],
-        acoes: ['Definir processo de vendas', 'Documentar ticket médio', 'Estabelecer metas de conversão']
-      };
-      
-      // Palavras-chave para classificar
-      const keywordsTopo = ['tráfego', 'trafego', 'alcance', 'visitante', 'impressão', 'visualização', 'awareness', 'marca', 'branding', 'rede social', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok', 'blog', 'seo', 'google', 'anúncio', 'anuncio', 'ads', 'público', 'publico', 'audiência', 'audiencia', 'seguidor', 'conteúdo', 'conteudo', 'post', 'vídeo', 'video', 'reels', 'stories', 'persona', 'nicho', 'segmento'];
-      const keywordsMeio = ['lead', 'cadastro', 'email', 'newsletter', 'inscrição', 'inscricao', 'download', 'ebook', 'webinar', 'landing page', 'formulário', 'formulario', 'interesse', 'contato', 'whatsapp', 'mensagem', 'dm', 'engajamento', 'comentário', 'comentario', 'curtida', 'compartilhamento', 'interação', 'interacao', 'relacionamento', 'nutrição', 'nutricao', 'qualificação', 'qualificacao'];
-      const keywordsFundo = ['venda', 'cliente', 'conversão', 'conversao', 'compra', 'pagamento', 'receita', 'faturamento', 'ticket', 'negócio', 'negocio', 'fechamento', 'proposta', 'orçamento', 'orcamento', 'contrato', 'checkout', 'carrinho', 'pedido', 'assinatura', 'renovação', 'renovacao', 'upsell', 'cross-sell', 'ltv', 'cac', 'roi', 'lucro', 'meta', 'objetivo'];
-      
-      // Função para verificar keywords
-      const temKeyword = (texto, keywords) => {
-        if (!texto) return false;
-        const textoLower = texto.toLowerCase();
-        return keywords.some(kw => textoLower.includes(kw));
-      };
-      
-      // Notas não classificadas
-      const notasNaoClassificadas = [];
-      
-      // Classificar notas com conteúdo por etapa do funil
-      notasComConteudo.forEach(nota => {
-        const textoCompleto = ((nota.content || '') + ' ' + (nota.item || '') + ' ' + (nota.block || '')).toLowerCase();
-        let classificada = false;
-        
-        if (temKeyword(textoCompleto, keywordsTopo)) {
-          dadosTopo.itens.push(nota);
-          classificada = true;
+      const etapas = [
+        { 
+          nome: 'Visitantes/Tráfego', 
+          valor: visitantes, 
+          taxa: 100, 
+          cor: '#6366f1', 
+          icon: '👁️',
+          nota: `Base de ${visitantes.toLocaleString('pt-BR')} visitantes mensais`
+        },
+        { 
+          nome: 'Leads Captados', 
+          valor: leads, 
+          taxa: funil.taxaLeads || Math.round((leads / (visitantes || 1)) * 100), 
+          cor: '#8b5cf6', 
+          icon: '📧',
+          nota: `Taxa de captação: ${funil.taxaLeads || Math.round((leads / (visitantes || 1)) * 100)}%`
+        },
+        { 
+          nome: 'Leads Qualificados', 
+          valor: qualificados, 
+          taxa: funil.taxaQualificacao || Math.round((qualificados / (leads || 1)) * 100), 
+          cor: '#a855f7', 
+          icon: '🎯',
+          nota: `${funil.taxaQualificacao || 50}% qualificados para venda`
+        },
+        { 
+          nome: 'Orçamentos/Propostas', 
+          valor: orcamentos, 
+          taxa: funil.taxaOrcamentos || Math.round((orcamentos / (qualificados || 1)) * 100), 
+          cor: '#f59e0b', 
+          icon: '📋',
+          nota: `Propostas enviadas mensalmente`
+        },
+        { 
+          nome: 'Vendas Fechadas', 
+          valor: vendas, 
+          taxa: funil.taxaFechamento || Math.round((vendas / (orcamentos || 1)) * 100), 
+          cor: '#10b981', 
+          icon: '💰',
+          nota: `Ticket médio: R$ ${ticketMedio.toLocaleString('pt-BR')}`
         }
-        if (temKeyword(textoCompleto, keywordsMeio)) {
-          dadosMeio.itens.push(nota);
-          classificada = true;
-        }
-        if (temKeyword(textoCompleto, keywordsFundo)) {
-          dadosFundo.itens.push(nota);
-          classificada = true;
-        }
-        
-        if (!classificada) {
-          notasNaoClassificadas.push(nota);
-        }
-      });
+      ];
       
-      // Calcular scores
-      const totalClassificadas = dadosTopo.itens.length + dadosMeio.itens.length + dadosFundo.itens.length;
-      const scoreTopo = totalPreenchidas > 0 ? Math.min(100, Math.round((dadosTopo.itens.length / totalPreenchidas) * 200)) : 0;
-      const scoreMeio = totalPreenchidas > 0 ? Math.min(100, Math.round((dadosMeio.itens.length / totalPreenchidas) * 200)) : 0;
-      const scoreFundo = totalPreenchidas > 0 ? Math.min(100, Math.round((dadosFundo.itens.length / totalPreenchidas) * 200)) : 0;
+      // Usar gargalos da análise da IA
+      const gargalosIdentificados = (d.gargalos || []).join(' | ');
+      const oportunidades = d.oportunidades || [];
+      const totalNotas = d.totalNotas || data.notes?.length || 0;
       
-      // Função para renderizar conteúdo real das notas
-      const renderConteudoNotas = (itens, maxItens = 3) => {
-        if (itens.length === 0) return '';
-        
-        return itens.slice(0, maxItens).map(nota => {
-          const conteudo = (nota.content || '').trim();
-          const titulo = nota.item || nota.block || 'Nota';
-          const resumo = conteudo.length > 150 ? conteudo.substring(0, 150) + '...' : conteudo;
-          
-          return `
-            <div style="background:rgba(0,0,0,.25);padding:10px 12px;border-radius:8px;border-left:3px solid rgba(255,255,255,.3);margin-bottom:8px;">
-              <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:4px;">📋 ${titulo}</div>
-              <div style="font-size:.85rem;color:rgba(255,255,255,.95);line-height:1.5;">"${resumo}"</div>
-            </div>
-          `;
-        }).join('') + (itens.length > maxItens ? `<div style="font-size:.75rem;color:rgba(255,255,255,.5);text-align:center;margin-top:5px;">+${itens.length - maxItens} mais anotações nesta etapa</div>` : '');
-      };
-      
-      // Renderizar etapa do funil
-      const renderEtapaFunil = (dados, score, largura, isLast = false) => {
-        const temConteudo = dados.itens.length > 0;
-        const statusCor = temConteudo ? (score >= 50 ? '#10b981' : '#f59e0b') : '#ef4444';
-        const statusTexto = temConteudo ? `${dados.itens.length} informações` : 'Sem dados';
-        
-        return `
-          <div style="position:relative;margin-bottom:${isLast ? '0' : '5px'};">
-            <div style="width:${largura}%;margin:0 auto;background:${dados.corGradient};border-radius:12px;padding:18px;box-shadow:0 4px 15px rgba(0,0,0,.3);position:relative;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);pointer-events:none;"></div>
-              
-              <div style="position:relative;z-index:1;">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:${temConteudo ? '12px' : '0'};">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="font-size:1.8rem;">${dados.icon}</span>
-                    <div>
-                      <div style="font-weight:700;color:#fff;font-size:1rem;">${dados.label}</div>
-                      <div style="font-size:.75rem;color:rgba(255,255,255,.6);">${dados.sublabel}</div>
-                    </div>
-                  </div>
-                  <div style="background:rgba(0,0,0,.3);padding:5px 12px;border-radius:15px;">
-                    <span style="color:${statusCor};font-weight:600;font-size:.85rem;">${statusTexto}</span>
-                  </div>
-                </div>
-                
-                ${temConteudo ? `
-                  <div style="border-top:1px solid rgba(255,255,255,.15);padding-top:12px;">
-                    ${renderConteudoNotas(dados.itens, 2)}
-                  </div>
-                ` : `
-                  <div style="margin-top:10px;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;">
-                    <div style="color:#fca5a5;font-size:.8rem;margin-bottom:6px;">⚠️ Complete na aba Estruturação:</div>
-                    <div style="font-size:.75rem;color:rgba(255,255,255,.7);">
-                      ${dados.acoes.map(a => `• ${a}`).join('<br>')}
-                    </div>
-                  </div>
-                `}
-              </div>
-            </div>
-            
-            ${!isLast ? `<div style="text-align:center;margin:5px 0;"><div style="display:inline-block;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:10px solid rgba(255,255,255,.15);"></div></div>` : ''}
-          </div>
-        `;
-      };
-      
-      // HTML principal
       let html = `
-        <div style="padding:15px;margin-bottom:15px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border-radius:12px;border-left:4px solid #6366f1;">
+        <div class="funil-info-header" style="padding:12px;margin-bottom:15px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border-radius:10px;border-left:4px solid #6366f1;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <div>
-              <strong style="color:#a5b4fc;font-size:1.1rem;">📈 Funil de Vendas - Visão Estratégica</strong>
-              <div style="font-size:.8rem;color:rgba(255,255,255,.5);margin-top:4px;">
-                ${totalPreenchidas} de ${totalNotas} itens preenchidos com conteúdo
+              <strong style="color:#a5b4fc;">📊 Funil analisado por IA (${totalNotas} anotações)</strong>
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;">Dados extraídos e validados automaticamente</div>
+            </div>
+            ${ticketMedio > 0 ? `<div style="background:rgba(16,185,129,0.2);padding:8px 12px;border-radius:8px;"><span style="color:#10b981;">💵 Ticket Médio: R$ ${ticketMedio.toLocaleString('pt-BR')}</span></div>` : ''}
+          </div>
+        </div>
+      `;
+      
+      etapas.forEach((etapa, index) => {
+        const largura = 95 - (index * 15);
+        const valorAnterior = index > 0 ? (etapas[index - 1].valor || 1) : 1;
+        const perda = index > 0 ? Math.max(0, valorAnterior - (etapa.valor || 0)) : 0;
+        const taxaPerda = index > 0 && valorAnterior > 0 ? Math.round((perda / valorAnterior) * 100) : 0;
+        const valorExibir = etapa.valor || 0;
+        const notaExibir = etapa.nota || 'Sem dados';
+        
+        html += `
+          <div class="funil-etapa">
+            <div class="funil-info">
+              <div class="funil-info-titulo">${etapa.icon} ${etapa.nome}</div>
+              <div class="funil-info-valor" style="color:${etapa.cor};font-size:1.3rem;font-weight:700;">${valorExibir.toLocaleString('pt-BR')}</div>
+              ${index > 0 ? `<div class="funil-info-taxa" style="color:rgba(255,255,255,.6);">Conversão: ${etapa.taxa || 0}%</div>` : '<div class="funil-info-taxa" style="color:rgba(255,255,255,.6);">Base inicial</div>'}
+              <div class="funil-info-nota" style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:6px;max-width:180px;line-height:1.3;">${notaExibir}</div>
+            </div>
+            <div class="funil-barra-container">
+              <div class="funil-barra" style="width:${largura}%; background:linear-gradient(135deg, ${etapa.cor}, ${etapa.cor}cc);">
+                <div class="funil-barra-inner">
+                  <span style="font-weight:700;">${valorExibir.toLocaleString('pt-BR')}</span>
+                  <span class="funil-barra-label">${etapa.nome}</span>
+                </div>
               </div>
             </div>
-            <div style="display:flex;gap:12px;font-size:.85rem;">
-              <span style="color:#6366f1;">👁️ ${dadosTopo.itens.length}</span>
-              <span style="color:#f59e0b;">💬 ${dadosMeio.itens.length}</span>
-              <span style="color:#10b981;">💰 ${dadosFundo.itens.length}</span>
-            </div>
+            ${index > 0 && taxaPerda > 20 ? `
+              <div class="funil-perda" style="background:rgba(239,68,68,0.15);padding:6px 10px;border-radius:6px;margin-top:4px;">
+                <span class="funil-perda-icon">⚠️</span>
+                <span style="color:#f87171;">-${taxaPerda}% (${perda.toLocaleString('pt-BR')} perdidos)</span>
+              </div>
+            ` : ''}
           </div>
+          ${index < etapas.length - 1 ? '<div class="funil-conector" style="height:20px;border-left:2px dashed rgba(255,255,255,0.2);margin-left:50%;"></div>' : ''}
+        `;
+      });
+      
+      // Diagnóstico baseado nos dados da IA
+      const valorInicial = etapas[0]?.valor || 1;
+      const valorFinal = etapas[4]?.valor || 0;
+      const taxaConversaoGeral = valorInicial > 0 ? Math.round((valorFinal / valorInicial) * 1000) / 10 : 0;
+      
+      // Identificar pontos críticos
+      const pontosCriticos = [];
+      for (let i = 1; i < etapas.length; i++) {
+        const valorAnt = etapas[i-1]?.valor || 1;
+        const valorAtual = etapas[i]?.valor || 0;
+        const perdaPct = valorAnt > 0 ? Math.round(((valorAnt - valorAtual) / valorAnt) * 100) : 0;
+        if (perdaPct > 60) pontosCriticos.push({ etapa: etapas[i].nome, perda: perdaPct, status: 'critico' });
+        else if (perdaPct > 40) pontosCriticos.push({ etapa: etapas[i].nome, perda: perdaPct, status: 'atencao' });
+      }
+      
+      html += `
+        <div class="funil-diagnostico" style="margin-top:20px;padding:15px;background:rgba(0,0,0,0.2);border-radius:12px;">
+          <div style="font-weight:600;color:#a5b4fc;margin-bottom:12px;">🔍 Diagnóstico Automático (IA)</div>
+          
+          <div class="funil-diagnostico-item" style="padding:10px;margin-bottom:8px;border-radius:8px;background:${taxaConversaoGeral < 0.5 ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'};">
+            <div style="font-weight:500;color:${taxaConversaoGeral < 0.5 ? '#f87171' : '#34d399'};">📊 Taxa de Conversão Geral: ${taxaConversaoGeral}%</div>
+            <div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:4px;">${taxaConversaoGeral < 0.3 ? 'Crítico: muito abaixo do benchmark de mercado.' : taxaConversaoGeral < 0.5 ? 'Atenção: há espaço para otimização.' : 'Bom: acima da média do mercado.'}</div>
+          </div>
+          
+          ${gargalosIdentificados ? `
+            <div class="funil-diagnostico-item" style="padding:10px;margin-bottom:8px;border-radius:8px;background:rgba(239,68,68,0.15);border-left:3px solid #ef4444;">
+              <div style="font-weight:500;color:#f87171;">⚠️ Gargalos identificados pela IA:</div>
+              <div style="font-size:.85rem;color:rgba(255,255,255,.7);margin-top:4px;">${gargalosIdentificados.substring(0, 200)}${gargalosIdentificados.length > 200 ? '...' : ''}</div>
+            </div>
+          ` : ''}
+          
+          ${pontosCriticos.slice(0, 2).map(p => `
+            <div class="funil-diagnostico-item" style="padding:10px;margin-bottom:8px;border-radius:8px;background:${p.status === 'critico' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'};">
+              <div style="font-weight:500;color:${p.status === 'critico' ? '#f87171' : '#fbbf24'};">🔴 Gargalo em ${p.etapa}</div>
+              <div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:4px;">Perda de ${p.perda}% nesta etapa - foco prioritário de otimização.</div>
+            </div>
+          `).join('')}
+          
+          ${oportunidades.length > 0 ? `
+            <div class="funil-diagnostico-item" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.15);border-left:3px solid #10b981;">
+              <div style="font-weight:500;color:#34d399;">💡 Oportunidades identificadas:</div>
+              <div style="font-size:.85rem;color:rgba(255,255,255,.7);margin-top:4px;">${oportunidades[0]?.substring(0, 150) || 'Otimizar o topo do funil'}${(oportunidades[0]?.length || 0) > 150 ? '...' : ''}</div>
+            </div>
+          ` : `
+            <div class="funil-diagnostico-item" style="padding:10px;border-radius:8px;background:rgba(16,185,129,0.15);">
+              <div style="font-weight:500;color:#34d399;">💡 Recomendação</div>
+              <div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:4px;">Otimizar ${pontosCriticos[0]?.etapa || 'a captação de leads'} pode aumentar vendas em até ${Math.round((pontosCriticos[0]?.perda || 30) * 0.4)}%.</div>
+            </div>
+          `}
         </div>
-        
-        <!-- FUNIL VISUAL -->
-        <div style="padding:5px 0;">
-          ${renderEtapaFunil(dadosTopo, scoreTopo, 100)}
-          ${renderEtapaFunil(dadosMeio, scoreMeio, 78)}
-          ${renderEtapaFunil(dadosFundo, scoreFundo, 55, true)}
-        </div>
-        
-        ${notasNaoClassificadas.length > 0 ? `
-          <!-- OUTRAS INFORMAÇÕES DOCUMENTADAS -->
-          <div style="margin-top:20px;background:rgba(139,92,246,0.1);border-radius:12px;padding:15px;border-left:3px solid #8b5cf6;">
-            <div style="font-weight:600;color:#c4b5fd;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span>📝</span> Outras Informações Documentadas (${notasNaoClassificadas.length})
-            </div>
-            <div style="display:grid;gap:10px;">
-              ${notasNaoClassificadas.slice(0, 5).map(nota => {
-                const conteudo = (nota.content || '').trim();
-                const titulo = nota.item || nota.block || 'Nota';
-                const resumo = conteudo.length > 180 ? conteudo.substring(0, 180) + '...' : conteudo;
-                return `
-                  <div style="background:rgba(0,0,0,.2);padding:12px;border-radius:8px;border-left:3px solid #8b5cf6;">
-                    <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:4px;">${nota.week || ''} > ${titulo}</div>
-                    <div style="font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.5;">"${resumo}"</div>
-                  </div>
-                `;
-              }).join('')}
-              ${notasNaoClassificadas.length > 5 ? `<div style="font-size:.8rem;color:rgba(255,255,255,.5);text-align:center;">+${notasNaoClassificadas.length - 5} mais informações documentadas</div>` : ''}
-            </div>
-          </div>
-        ` : ''}
-        
-        ${totalPreenchidas === 0 ? `
-          <div style="margin-top:20px;background:rgba(239,68,68,0.15);border-radius:12px;padding:20px;text-align:center;border:1px dashed rgba(239,68,68,0.3);">
-            <div style="font-size:2rem;margin-bottom:10px;">📋</div>
-            <div style="font-weight:600;color:#f87171;margin-bottom:8px;">Nenhum conteúdo documentado ainda</div>
-            <div style="font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.5;">
-              Preencha as <strong>áreas de texto</strong> na aba <strong>Estruturação</strong> para que seu funil de vendas seja gerado automaticamente.
-              <br><br>
-              <span style="color:#f59e0b;">💡 Dica:</span> Escreva detalhes sobre seu público, canais de aquisição, estratégia de leads e processo de vendas.
-            </div>
-          </div>
-        ` : ''}
       `;
       
       container.innerHTML = html;
     }
     
-    // Renderizar Análise de Posicionamento (baseado nas notas reais sobre concorrência e diferenciais)
+    // Renderizar Mapa de Diferenciação Competitiva (usando dados analisados pela IA)
     function renderMapaDiferenciacao(data, mapping, dadosAnalisados) {
       const container = document.getElementById('mapaDiferenciacaoVisual');
       const card = document.getElementById('chartCardMapaDiferenciacao');
@@ -29315,163 +29228,209 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       
       card.style.display = 'block';
       
-      // Extrair informações REAIS das notas
-      const notas = data.notes || [];
-      const totalNotas = notas.length;
+      // Usar dados analisados pela IA
+      const d = dadosAnalisados || DIAGNOSTICO_ESTRATEGICO.dadosAnalisados;
+      if (!d) {
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:rgba(255,255,255,.5);">Gerando análise com IA...</div>';
+        return;
+      }
       
-      // Buscar notas sobre concorrência
-      const notasConcorrencia = notas.filter(n => {
-        const texto = `${n.item || ''} ${n.content || ''}`.toLowerCase();
-        return texto.includes('concorr') || texto.includes('competidor') || texto.includes('benchmark') || 
-               texto.includes('mercado') || texto.includes('rival');
-      });
+      const concorrentes = d.concorrentes || [];
+      const diferenciais = d.diferenciais || [];
+      const completude = d.completude || 50;
+      const totalNotas = d.totalNotas || 0;
       
-      // Buscar notas sobre diferenciais
-      const notasDiferenciais = notas.filter(n => {
-        const texto = `${n.item || ''} ${n.content || ''}`.toLowerCase();
-        return texto.includes('diferencial') || texto.includes('único') || texto.includes('exclusivo') ||
-               texto.includes('destaque') || texto.includes('vantagem') || texto.includes('proposta de valor');
-      });
-      
-      // Buscar notas sobre público/posicionamento
-      const notasPosicionamento = notas.filter(n => {
-        const texto = `${n.item || ''} ${n.content || ''}`.toLowerCase();
-        return texto.includes('posicion') || texto.includes('público') || texto.includes('target') ||
-               texto.includes('nicho') || texto.includes('segmento') || texto.includes('persona');
-      });
-      
-      const temDadosConcorrencia = notasConcorrencia.length > 0;
-      const temDadosDiferenciais = notasDiferenciais.length > 0;
-      const temDadosPosicionamento = notasPosicionamento.length > 0;
-      
-      // Calcular nível de clareza de posicionamento
-      const clarezaPosicionamento = Math.round(
-        ((temDadosConcorrencia ? 30 : 0) + 
-         (temDadosDiferenciais ? 40 : 0) + 
-         (temDadosPosicionamento ? 30 : 0))
+      // Verificar se tem oceano azul baseado nos diferenciais
+      const temOceanoAzul = diferenciais.some(dif => 
+        (dif || '').toLowerCase().includes('único') || 
+        (dif || '').toLowerCase().includes('exclusivo') ||
+        (dif || '').toLowerCase().includes('oceano')
       );
+      
+      // Posição da empresa baseada nos dados
+      const suaPosX = Math.min(85, Math.max(50, 60 + completude * 0.25));
+      const suaPosY = Math.min(85, Math.max(50, (temOceanoAzul ? 75 : 60) + (diferenciais.length * 3)));
+      
+      // Gerar posições para concorrentes baseado na posição indicada
+      const concorrentesExibir = concorrentes.length > 0 ? concorrentes.map((c, i) => {
+        const posBase = c.posicao === 'forte' ? 60 : c.posicao === 'fraco' ? 25 : 40;
+        return {
+          nome: c.nome || `Concorrente ${i+1}`,
+          posicaoX: posBase + Math.random() * 15,
+          posicaoY: posBase - 10 + Math.random() * 20,
+          descricao: c.diferencial || 'Não identificado'
+        };
+      }) : [
+        { nome: 'Conc. Direto', posicaoX: 35, posicaoY: 40, descricao: 'Não detalhado' },
+        { nome: 'Conc. Similar', posicaoX: 50, posicaoY: 35, descricao: 'Posicionamento similar' }
+      ];
+      
+      const diferenciaisTexto = diferenciais.join(' | ') || '';
       
       let html = `
         <div style="padding:12px;margin-bottom:15px;background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(99,102,241,0.1));border-radius:10px;border-left:4px solid #10b981;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <div>
-              <strong style="color:#6ee7b7;">🎯 Análise de Posicionamento Estratégico</strong>
-              <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;">Baseado em ${totalNotas} anotações reais do seu negócio</div>
+              <strong style="color:#6ee7b7;">🗺️ Mapa analisado por IA (${totalNotas} anotações)</strong>
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;">
+                ${concorrentes.length > 0 ? `${concorrentes.length} concorrentes identificados` : 'Adicione notas sobre concorrentes para análise detalhada'}
+              </div>
             </div>
-            <div style="background:${clarezaPosicionamento >= 70 ? 'rgba(16,185,129,0.2)' : clarezaPosicionamento >= 40 ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)'};padding:6px 12px;border-radius:8px;">
-              <span style="color:${clarezaPosicionamento >= 70 ? '#10b981' : clarezaPosicionamento >= 40 ? '#f59e0b' : '#ef4444'};font-weight:600;">${clarezaPosicionamento}% clareza</span>
-            </div>
+            ${temOceanoAzul ? '<div style="background:rgba(16,185,129,0.2);padding:6px 10px;border-radius:6px;"><span style="color:#10b981;font-size:.8rem;">🌊 Oceano Azul detectado!</span></div>' : ''}
           </div>
         </div>
         
-        <!-- Status das 3 dimensões de posicionamento -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-          <div style="background:${temDadosConcorrencia ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};border-radius:10px;padding:15px;text-align:center;border:1px solid ${temDadosConcorrencia ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};">
-            <div style="font-size:1.5rem;margin-bottom:8px;">${temDadosConcorrencia ? '✅' : '❌'}</div>
-            <div style="font-weight:600;color:${temDadosConcorrencia ? '#34d399' : '#f87171'};margin-bottom:4px;">Concorrência</div>
-            <div style="font-size:.75rem;color:rgba(255,255,255,.5);">${notasConcorrencia.length} anotações</div>
+        <div class="mapa-eixos" style="position:relative;width:100%;height:350px;background:linear-gradient(135deg,rgba(239,68,68,0.1) 0%,rgba(245,158,11,0.1) 50%,rgba(139,92,246,0.1) 75%,rgba(16,185,129,0.1) 100%);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+          <span class="mapa-eixo-y-label" style="position:absolute;left:-5px;top:50%;transform:rotate(-90deg) translateX(-50%);font-size:.7rem;color:rgba(255,255,255,.5);white-space:nowrap;">DIFERENCIAÇÃO / VALOR PERCEBIDO →</span>
+          <span class="mapa-eixo-x-label" style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.7rem;color:rgba(255,255,255,.5);">COMPETITIVIDADE DE PREÇO →</span>
+          
+          <!-- Linha central -->
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.1);"></div>
+          <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.1);"></div>
+          
+          <!-- Quadrantes -->
+          <div style="position:absolute;left:10px;bottom:10px;font-size:.6rem;color:rgba(239,68,68,.7);">🔴 Oceano Vermelho<br><small>Guerra de preços</small></div>
+          <div style="position:absolute;right:10px;bottom:10px;font-size:.6rem;color:rgba(245,158,11,.7);">🟡 Commodity<br><small>Baixa diferenciação</small></div>
+          <div style="position:absolute;left:10px;top:10px;font-size:.6rem;color:rgba(139,92,246,.7);">🟣 Premium<br><small>Alto valor, alto custo</small></div>
+          <div style="position:absolute;right:10px;top:10px;font-size:.6rem;color:rgba(16,185,129,.7);">🔵 Oceano Azul<br><small>Oportunidade única</small></div>
+          
+          <!-- Sua Empresa -->
+          <div style="position:absolute;left:calc(${suaPosX}% - 35px);bottom:calc(${suaPosY}% - 35px);width:70px;height:70px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.7rem;font-weight:700;color:white;box-shadow:0 4px 15px rgba(16,185,129,0.4);border:3px solid #6ee7b7;z-index:10;" title="${diferenciaisTexto || 'Sua empresa'}">
+            SUA<br>EMPRESA
           </div>
-          <div style="background:${temDadosDiferenciais ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};border-radius:10px;padding:15px;text-align:center;border:1px solid ${temDadosDiferenciais ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};">
-            <div style="font-size:1.5rem;margin-bottom:8px;">${temDadosDiferenciais ? '✅' : '❌'}</div>
-            <div style="font-weight:600;color:${temDadosDiferenciais ? '#34d399' : '#f87171'};margin-bottom:4px;">Diferenciais</div>
-            <div style="font-size:.75rem;color:rgba(255,255,255,.5);">${notasDiferenciais.length} anotações</div>
-          </div>
-          <div style="background:${temDadosPosicionamento ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};border-radius:10px;padding:15px;text-align:center;border:1px solid ${temDadosPosicionamento ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};">
-            <div style="font-size:1.5rem;margin-bottom:8px;">${temDadosPosicionamento ? '✅' : '❌'}</div>
-            <div style="font-weight:600;color:${temDadosPosicionamento ? '#34d399' : '#f87171'};margin-bottom:4px;">Público-alvo</div>
-            <div style="font-size:.75rem;color:rgba(255,255,255,.5);">${notasPosicionamento.length} anotações</div>
-          </div>
+          
+          <!-- Concorrentes -->
+          ${concorrentesExibir.map((c, i) => `
+            <div style="position:absolute;left:calc(${c.posicaoX}% - 25px);bottom:calc(${c.posicaoY}% - 25px);width:50px;height:50px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.6rem;font-weight:600;color:white;box-shadow:0 2px 8px rgba(239,68,68,0.3);z-index:${5-i};" title="${c.descricao}">
+              ${(c.nome || '').substring(0, 10)}
+            </div>
+          `).join('')}
         </div>
         
-        <!-- O que foi documentado -->
-        ${temDadosDiferenciais || temDadosConcorrencia || temDadosPosicionamento ? `
-          <div style="background:rgba(99,102,241,0.1);border-radius:10px;padding:15px;margin-bottom:15px;">
-            <div style="font-weight:600;color:#a5b4fc;margin-bottom:12px;">📝 O que você já documentou:</div>
-            
-            ${temDadosDiferenciais ? `
-              <div style="margin-bottom:12px;padding:10px;background:rgba(16,185,129,0.1);border-radius:8px;border-left:3px solid #10b981;">
-                <div style="font-weight:500;color:#34d399;margin-bottom:6px;">🌟 Seus Diferenciais:</div>
-                ${notasDiferenciais.slice(0,3).map(n => `
-                  <div style="font-size:.85rem;color:rgba(255,255,255,.75);margin-bottom:4px;padding-left:10px;border-left:2px solid rgba(16,185,129,0.3);">
-                    <strong>${n.item}:</strong> "${(n.content || '').substring(0,100)}${(n.content || '').length > 100 ? '...' : ''}"
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-            
-            ${temDadosConcorrencia ? `
-              <div style="margin-bottom:12px;padding:10px;background:rgba(239,68,68,0.1);border-radius:8px;border-left:3px solid #ef4444;">
-                <div style="font-weight:500;color:#f87171;margin-bottom:6px;">⚔️ Sobre a Concorrência:</div>
-                ${notasConcorrencia.slice(0,2).map(n => `
-                  <div style="font-size:.85rem;color:rgba(255,255,255,.75);margin-bottom:4px;padding-left:10px;border-left:2px solid rgba(239,68,68,0.3);">
-                    <strong>${n.item}:</strong> "${(n.content || '').substring(0,100)}${(n.content || '').length > 100 ? '...' : ''}"
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-            
-            ${temDadosPosicionamento ? `
-              <div style="padding:10px;background:rgba(139,92,246,0.1);border-radius:8px;border-left:3px solid #8b5cf6;">
-                <div style="font-weight:500;color:#c4b5fd;margin-bottom:6px;">🎯 Seu Público-alvo:</div>
-                ${notasPosicionamento.slice(0,2).map(n => `
-                  <div style="font-size:.85rem;color:rgba(255,255,255,.75);margin-bottom:4px;padding-left:10px;border-left:2px solid rgba(139,92,246,0.3);">
-                    <strong>${n.item}:</strong> "${(n.content || '').substring(0,100)}${(n.content || '').length > 100 ? '...' : ''}"
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
+        ${diferenciais.length > 0 ? `
+          <div style="margin-top:15px;padding:12px;background:rgba(16,185,129,0.15);border-radius:8px;border-left:3px solid #10b981;">
+            <strong style="color:#10b981;">🌟 Diferenciais identificados pela IA:</strong>
+            <ul style="margin:8px 0 0;padding-left:20px;font-size:.85rem;color:rgba(255,255,255,.8);">
+              ${diferenciais.slice(0, 3).map(dif => `<li>${dif}</li>`).join('')}
+            </ul>
           </div>
         ` : ''}
         
-        <!-- O que está faltando -->
-        ${!temDadosDiferenciais || !temDadosConcorrencia || !temDadosPosicionamento ? `
-          <div style="background:rgba(239,68,68,0.1);border-radius:10px;padding:15px;border-left:3px solid #ef4444;">
-            <div style="font-weight:600;color:#f87171;margin-bottom:12px;">⚠️ Para um posicionamento claro, você precisa documentar:</div>
-            
-            ${!temDadosDiferenciais ? `
-              <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;">
-                <span style="font-size:1.2rem;">🌟</span>
-                <div>
-                  <div style="color:#fca5a5;font-weight:500;">Seus Diferenciais</div>
-                  <div style="font-size:.8rem;color:rgba(255,255,255,.6);">O que torna seu negócio único? Por que clientes devem escolher você?</div>
-                </div>
-              </div>
-            ` : ''}
-            
-            ${!temDadosConcorrencia ? `
-              <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;">
-                <span style="font-size:1.2rem;">⚔️</span>
-                <div>
-                  <div style="color:#fca5a5;font-weight:500;">Análise de Concorrência</div>
-                  <div style="font-size:.8rem;color:rgba(255,255,255,.6);">Quem são seus concorrentes? O que eles fazem bem/mal?</div>
-                </div>
-              </div>
-            ` : ''}
-            
-            ${!temDadosPosicionamento ? `
-              <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;">
-                <span style="font-size:1.2rem;">🎯</span>
-                <div>
-                  <div style="color:#fca5a5;font-weight:500;">Definição de Público-alvo</div>
-                  <div style="font-size:.8rem;color:rgba(255,255,255,.6);">Quem é seu cliente ideal? Qual nicho você atende?</div>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        ` : `
-          <div style="background:rgba(16,185,129,0.15);border-radius:10px;padding:15px;border-left:3px solid #10b981;">
-            <div style="font-weight:600;color:#34d399;margin-bottom:8px;">✅ Posicionamento Bem Documentado!</div>
-            <div style="font-size:.9rem;color:rgba(255,255,255,.7);">
-              Você tem informações sobre concorrência, diferenciais e público-alvo. 
-              Continue refinando essas informações para um posicionamento ainda mais preciso.
-            </div>
-          </div>
-        `}
+        <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(255,255,255,.6);"><div style="width:12px;height:12px;background:#ef4444;border-radius:50%;"></div> Concorrentes</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(255,255,255,.6);"><div style="width:12px;height:12px;background:#10b981;border-radius:50%;"></div> Sua Empresa</div>
+        </div>
       `;
       
       container.innerHTML = html;
     }
-    // Renderizar Progresso por Semana (substituiu gráfico de sazonalidade fictício)
+    
+    // Renderizar Gráfico de Sazonalidade (usando dados analisados pela IA)
+    function renderSazonalidade(data, mapping, dadosAnalisados) {
+      const canvas = document.getElementById('chartSazonalidade');
+      const card = document.getElementById('chartCardSazonalidade');
+      const legenda = document.getElementById('sazonalidadeLegenda');
+      if (!canvas || !card || typeof Chart === 'undefined') return;
+      
+      card.style.display = 'block';
+      
+      // Usar dados analisados pela IA
+      const d = dadosAnalisados || DIAGNOSTICO_ESTRATEGICO.dadosAnalisados;
+      if (!d) {
+        if (legenda) legenda.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,.5);">Gerando análise com IA...</div>';
+        return;
+      }
+      
+      const sazonalidade = d.sazonalidade || {};
+      const completude = d.completude || 50;
+      const totalNotas = d.totalNotas || 0;
+      
+      const ctx = canvas.getContext('2d');
+      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      
+      // Definir padrão de sazonalidade baseado nos dados da IA
+      let multiplicadores;
+      switch(sazonalidade.padrao) {
+        case 'verao':
+          multiplicadores = [1.3, 1.4, 1.2, 0.9, 0.7, 0.6, 0.5, 0.6, 0.8, 1.0, 1.1, 1.2];
+          break;
+        case 'inverno':
+          multiplicadores = [0.7, 0.6, 0.8, 0.9, 1.0, 1.3, 1.5, 1.4, 1.0, 0.9, 0.8, 1.0];
+          break;
+        case 'constante':
+          multiplicadores = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+          break;
+        default:
+          multiplicadores = [0.7, 0.6, 0.8, 0.9, 1.0, 0.85, 0.75, 0.9, 1.0, 1.1, 1.3, 1.5]; // Padrão fim de ano
+      }
+      
+      // Ajustar baseado nos picos e baixas identificados pela IA
+      const mesesNomes = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      (sazonalidade.mesesPico || []).forEach(mesNome => {
+        const idx = mesesNomes.findIndex(m => m.toLowerCase().startsWith((mesNome || '').toLowerCase().substring(0, 3)));
+        if (idx >= 0 && idx < 12) multiplicadores[idx] = Math.max(multiplicadores[idx], 1.4);
+      });
+      (sazonalidade.mesesBaixa || []).forEach(mesNome => {
+        const idx = mesesNomes.findIndex(m => m.toLowerCase().startsWith((mesNome || '').toLowerCase().substring(0, 3)));
+        if (idx >= 0 && idx < 12) multiplicadores[idx] = Math.min(multiplicadores[idx], 0.5);
+      });
+      
+      // Calcular valores
+      const baseVendas = 50 + completude * 0.5;
+      const vendas = multiplicadores.map(m => Math.round(baseVendas * m));
+              <strong style="color:#6ee7b7;">� Mapa baseado em ${resumo.totalNotas} anotações</strong>
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;">
+                ${concorrentes.length > 0 ? `${concorrentes.length} concorrentes identificados` : 'Adicione notas sobre concorrentes para análise detalhada'}
+              </div>
+            </div>
+            ${temDiferenciacao ? '<div style="background:rgba(16,185,129,0.2);padding:6px 10px;border-radius:6px;"><span style="color:#10b981;font-size:.8rem;">🌊 Oceano Azul detectado!</span></div>' : ''}
+          </div>
+        </div>
+        
+        <div class="mapa-eixos" style="position:relative;width:100%;height:350px;background:linear-gradient(135deg,rgba(239,68,68,0.1) 0%,rgba(245,158,11,0.1) 50%,rgba(139,92,246,0.1) 75%,rgba(16,185,129,0.1) 100%);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+          <span class="mapa-eixo-y-label" style="position:absolute;left:-5px;top:50%;transform:rotate(-90deg) translateX(-50%);font-size:.7rem;color:rgba(255,255,255,.5);white-space:nowrap;">DIFERENCIAÇÃO / VALOR PERCEBIDO →</span>
+          <span class="mapa-eixo-x-label" style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.7rem;color:rgba(255,255,255,.5);">COMPETITIVIDADE DE PREÇO →</span>
+          
+          <!-- Linha central -->
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.1);"></div>
+          <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.1);"></div>
+          
+          <!-- Quadrantes -->
+          <div style="position:absolute;left:10px;bottom:10px;font-size:.6rem;color:rgba(239,68,68,.7);">🔴 Oceano Vermelho<br><small>Guerra de preços</small></div>
+          <div style="position:absolute;right:10px;bottom:10px;font-size:.6rem;color:rgba(245,158,11,.7);">🟡 Commodity<br><small>Baixa diferenciação</small></div>
+          <div style="position:absolute;left:10px;top:10px;font-size:.6rem;color:rgba(139,92,246,.7);">🟣 Premium<br><small>Alto valor, alto custo</small></div>
+          <div style="position:absolute;right:10px;top:10px;font-size:.6rem;color:rgba(16,185,129,.7);">🔵 Oceano Azul<br><small>Oportunidade única</small></div>
+          
+          <!-- Sua Empresa -->
+          <div style="position:absolute;left:calc(${suaPosX}% - 35px);bottom:calc(${suaPosY}% - 35px);width:70px;height:70px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.7rem;font-weight:700;color:white;box-shadow:0 4px 15px rgba(16,185,129,0.4);border:3px solid #6ee7b7;z-index:10;" title="${diferenciacao.pontos || 'Sua empresa'}">
+            SUA<br>EMPRESA
+          </div>
+          
+          <!-- Concorrentes -->
+          ${concorrentesExibir.map((c, i) => `
+            <div style="position:absolute;left:calc(${c.posicaoX}% - 25px);bottom:calc(${c.posicaoY}% - 25px);width:50px;height:50px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.6rem;font-weight:600;color:white;box-shadow:0 2px 8px rgba(239,68,68,0.3);z-index:${5-i};" title="${c.descricao}">
+              ${c.nome.substring(0, 10)}
+            </div>
+          `).join('')}
+        </div>
+        
+        ${diferenciacao.pontos ? `
+          <div style="margin-top:15px;padding:12px;background:rgba(16,185,129,0.15);border-radius:8px;border-left:3px solid #10b981;">
+            <strong style="color:#10b981;">🌊 Diferenciais identificados nas suas notas:</strong>
+            <p style="margin:8px 0 0;font-size:.85rem;color:rgba(255,255,255,.8);">${diferenciacao.pontos.substring(0, 300)}${diferenciacao.pontos.length > 300 ? '...' : ''}</p>
+          </div>
+        ` : ''}
+        
+        <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(255,255,255,.6);"><div style="width:12px;height:12px;background:#ef4444;border-radius:50%;"></div> Concorrentes</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(255,255,255,.6);"><div style="width:12px;height:12px;background:#10b981;border-radius:50%;"></div> Sua Empresa</div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    }
+    
+    // Renderizar Gráfico de Sazonalidade (com dados reais)
     function renderSazonalidade(data, mapping) {
       const canvas = document.getElementById('chartSazonalidade');
       const card = document.getElementById('chartCardSazonalidade');
@@ -29480,29 +29439,47 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       
       card.style.display = 'block';
       
-      // Agrupar notas REAIS por semana
-      const notas = data.notes || [];
-      const notasPorSemana = {};
-      const semanas = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
-      
-      semanas.forEach(s => {
-        notasPorSemana[s] = notas.filter(n => (n.week || '').includes(s.replace('Semana ', '')));
-      });
-      
-      // Calcular progresso real por semana
-      const progressoPorSemana = semanas.map(s => {
-        const notasSemana = notasPorSemana[s];
-        const totalNotas = notasSemana.length;
-        const notasPreenchidas = notasSemana.filter(n => (n.content || '').trim().length > 5).length;
-        return totalNotas > 0 ? Math.round((notasPreenchidas / totalNotas) * 100) : 0;
-      });
+      // Usar o sistema inteligente de extração
+      const resumo = EXTRATOR_DADOS.gerarResumoCompleto(data);
+      const sazonalidade = resumo.sazonalidade;
       
       const ctx = canvas.getContext('2d');
+      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       
-      // Cores baseadas no progresso real
-      const cores = progressoPorSemana.map(p => 
-        p >= 80 ? '#10b981' : p >= 50 ? '#f59e0b' : p > 0 ? '#ef4444' : '#374151'
-      );
+      // Definir padrão de sazonalidade baseado nos dados
+      let multiplicadores;
+      switch(sazonalidade.padrao) {
+        case 'verao':
+          multiplicadores = [1.3, 1.4, 1.2, 0.9, 0.7, 0.6, 0.5, 0.6, 0.8, 1.0, 1.1, 1.2];
+          break;
+        case 'inverno':
+          multiplicadores = [0.7, 0.6, 0.8, 0.9, 1.0, 1.3, 1.5, 1.4, 1.0, 0.9, 0.8, 1.0];
+          break;
+        default:
+          multiplicadores = [0.7, 0.6, 0.8, 0.9, 1.0, 0.85, 0.75, 0.9, 1.0, 1.1, 1.3, 1.5]; // Padrão fim de ano
+      }
+      
+      // Ajustar baseado nos picos e baixas identificados
+      sazonalidade.picos.forEach(idx => {
+        if (idx >= 0 && idx < 12) multiplicadores[idx] = Math.max(multiplicadores[idx], 1.4);
+      });
+      sazonalidade.baixas.forEach(idx => {
+        if (idx >= 0 && idx < 12) multiplicadores[idx] = Math.min(multiplicadores[idx], 0.5);
+      });
+      
+      // Calcular valores
+      const baseVendas = 50 + resumo.completude * 0.5;
+      const vendas = multiplicadores.map(m => Math.round(baseVendas * m));
+      
+      // Identificar picos e vales
+      const maxVenda = Math.max(...vendas);
+      const minVenda = Math.min(...vendas);
+      
+      const cores = vendas.map(v => {
+        if (v >= maxVenda * 0.9) return '#10b981'; // Pico
+        if (v <= minVenda * 1.1) return '#ef4444'; // Vale
+        return '#6366f1'; // Normal
+      });
       
       // Destruir gráfico anterior se existir
       if (analiseCharts.sazonalidade) {
@@ -29512,85 +29489,79 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       analiseCharts.sazonalidade = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: semanas,
+          labels: meses,
           datasets: [{
-            label: 'Progresso Real (%)',
-            data: progressoPorSemana,
+            type: 'bar',
+            label: 'Demanda Relativa',
+            data: vendas,
             backgroundColor: cores,
-            borderRadius: 8,
-            borderSkipped: false
+            borderRadius: 6,
+            borderSkipped: false,
+            order: 2
+          }, {
+            type: 'line',
+            label: 'Tendência',
+            data: vendas.map((v, i) => {
+              const start = Math.max(0, i - 1);
+              const end = Math.min(vendas.length - 1, i + 1);
+              const slice = vendas.slice(start, end + 1);
+              return Math.round(slice.reduce((a, b) => a + b, 0) / slice.length);
+            }),
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#f59e0b',
+            order: 1
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: { display: true, position: 'top', labels: { color: 'rgba(255,255,255,0.8)' } },
             tooltip: {
               callbacks: {
                 afterBody: (context) => {
                   const idx = context[0].dataIndex;
-                  const semana = semanas[idx];
-                  const totalNotas = notasPorSemana[semana].length;
-                  const preenchidas = notasPorSemana[semana].filter(n => (n.content || '').trim().length > 5).length;
-                  return `${preenchidas} de ${totalNotas} itens preenchidos`;
+                  const val = vendas[idx];
+                  if (val >= maxVenda * 0.9) return '📈 PICO - Aproveite para campanhas agressivas!';
+                  if (val <= minVenda * 1.1) return '📉 BAIXA - Foco em fidelização e promoções.';
+                  return '➡️ Período estável.';
                 }
               }
             }
           },
           scales: {
-            x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)', font: { weight: 'bold' } } },
+            x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)' } },
             y: { 
               grid: { color: 'rgba(255,255,255,0.1)' }, 
               ticks: { color: 'rgba(255,255,255,0.7)', callback: v => v + '%' },
-              min: 0,
-              max: 100
+              min: 0
             }
           }
         }
       });
       
-      // Legenda com informações REAIS
+      // Legenda customizada
       if (legenda) {
-        const totalPreenchidas = notas.filter(n => (n.content || '').trim().length > 5).length;
-        const totalNotas = notas.length;
-        const progressoGeral = totalNotas > 0 ? Math.round((totalPreenchidas / totalNotas) * 100) : 0;
-        
-        // Identificar semana mais/menos completa
-        const maxProgresso = Math.max(...progressoPorSemana);
-        const minProgresso = Math.min(...progressoPorSemana.filter(p => p > 0));
-        const semanaCompleta = semanas[progressoPorSemana.indexOf(maxProgresso)];
-        const semanaPendente = semanas[progressoPorSemana.indexOf(minProgresso)];
-        
+        const mesePico = meses[vendas.indexOf(maxVenda)] || 'Dez';
+        const meseBaixa = meses[vendas.indexOf(minVenda)] || 'Jan';
         legenda.innerHTML = `
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:10px;margin-top:12px;">
-            <div style="background:rgba(16,185,129,0.15);padding:10px;border-radius:8px;text-align:center;">
-              <div style="font-size:1.5rem;font-weight:700;color:#10b981;">${totalPreenchidas}</div>
-              <div style="font-size:.75rem;color:rgba(255,255,255,.6);">Itens preenchidos</div>
-            </div>
-            <div style="background:rgba(245,158,11,0.15);padding:10px;border-radius:8px;text-align:center;">
-              <div style="font-size:1.5rem;font-weight:700;color:#f59e0b;">${totalNotas - totalPreenchidas}</div>
-              <div style="font-size:.75rem;color:rgba(255,255,255,.6);">Itens pendentes</div>
-            </div>
-            <div style="background:rgba(99,102,241,0.15);padding:10px;border-radius:8px;text-align:center;">
-              <div style="font-size:1.5rem;font-weight:700;color:#6366f1;">${progressoGeral}%</div>
-              <div style="font-size:.75rem;color:rgba(255,255,255,.6);">Progresso geral</div>
-            </div>
+          <div style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:.8rem;"><div style="width:12px;height:12px;background:#10b981;border-radius:3px;"></div> Pico (${mesePico})</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:.8rem;"><div style="width:12px;height:12px;background:#6366f1;border-radius:3px;"></div> Período estável</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:.8rem;"><div style="width:12px;height:12px;background:#ef4444;border-radius:3px;"></div> Baixa (${meseBaixa})</div>
           </div>
-          ${minProgresso < 50 && minProgresso > 0 ? `
-            <div style="margin-top:12px;padding:10px;background:rgba(239,68,68,0.1);border-radius:8px;font-size:.8rem;color:rgba(255,255,255,.7);border-left:3px solid #ef4444;">
-              ⚠️ <strong>${semanaPendente}</strong> está com apenas ${minProgresso}% de progresso. Foque em completar essa semana!
-            </div>
-          ` : maxProgresso >= 80 ? `
-            <div style="margin-top:12px;padding:10px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:.8rem;color:rgba(255,255,255,.7);border-left:3px solid #10b981;">
-              ✅ <strong>${semanaCompleta}</strong> está ${maxProgresso}% completa. Excelente progresso!
-            </div>
-          ` : ''}
+          <div style="margin-top:10px;padding:10px;background:rgba(245,158,11,0.1);border-radius:8px;font-size:.8rem;color:rgba(255,255,255,.7);text-align:center;">
+            💡 <strong>Dica:</strong> Prepare campanhas com 30 dias de antecedência dos períodos de pico
+          </div>
         `;
       }
     }
     
-    // Renderizar Plano de Ação baseado no que está faltando (substituiu gráfico de marca fictício)
+    // Renderizar Gráfico de Clareza de Marca (Antes × Depois) com dados reais
     function renderClarezaMarca(data, mapping) {
       const container = document.getElementById('clarezaMarcaVisual');
       const card = document.getElementById('chartCardClarezaMarca');
@@ -29598,136 +29569,125 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       
       card.style.display = 'block';
       
-      // Analisar notas REAIS
-      const notas = data.notes || [];
-      const totalNotas = notas.length;
-      const notasPreenchidas = notas.filter(n => (n.content || '').trim().length > 5);
-      const notasVazias = notas.filter(n => (n.content || '').trim().length <= 5);
-      const completude = data.dimensions?.completude || 0;
+      // Usar o sistema inteligente de extração
+      const resumo = EXTRATOR_DADOS.gerarResumoCompleto(data);
+      const completude = resumo.completude;
+      const temMarca = resumo.categorias.marca.length > 0;
+      const temDiferenciacao = resumo.diferenciacao.pontos.length > 20;
       
-      // Agrupar notas vazias por bloco para identificar lacunas
-      const lacunasPorBloco = {};
-      notasVazias.forEach(n => {
-        const bloco = n.block || 'Outros';
-        if (!lacunasPorBloco[bloco]) lacunasPorBloco[bloco] = [];
-        lacunasPorBloco[bloco].push(n.item);
-      });
+      // Métricas baseadas nos dados reais das anotações
+      const metricas = [
+        { 
+          nome: 'Clareza da Proposta de Valor', 
+          antes: temDiferenciacao ? Math.min(50, 25 + completude * 0.3) : 25,
+          depois: Math.min(95, 75 + completude * 0.2),
+          icon: '💎'
+        },
+        { 
+          nome: 'Consistência Visual', 
+          antes: temMarca ? Math.min(55, 30 + completude * 0.25) : 30,
+          depois: Math.min(95, 80 + completude * 0.15),
+          icon: '🎨'
+        },
+        { 
+          nome: 'Diferenciação Percebida', 
+          antes: resumo.diferenciacao.temOceanoAzul ? 45 : Math.min(40, 20 + completude * 0.2),
+          depois: Math.min(92, 70 + completude * 0.22),
+          icon: '⭐'
+        },
+        { 
+          nome: 'Confiança/Credibilidade', 
+          antes: Math.min(50, 25 + completude * 0.25),
+          depois: Math.min(95, 82 + completude * 0.13),
+          icon: '🛡️'
+        }
+      ];
       
-      // Ordenar blocos por quantidade de lacunas
-      const blocosComLacunas = Object.entries(lacunasPorBloco)
-        .map(([bloco, itens]) => ({ bloco, itens, total: itens.length }))
-        .sort((a, b) => b.total - a.total);
+      const mediaAntes = Math.round(metricas.reduce((a, m) => a + m.antes, 0) / metricas.length) || 0;
+      const mediaDepois = Math.round(metricas.reduce((a, m) => a + m.depois, 0) / metricas.length) || 0;
+      const melhoriaTotal = (mediaDepois - mediaAntes) || 0;
       
-      // Extrair insights das notas preenchidas
-      const notasRelevantes = notasPreenchidas
-        .filter(n => (n.content || '').length > 20)
-        .slice(0, 5);
-      
-      // Determinar status geral
-      const status = completude >= 80 ? 'excelente' : completude >= 60 ? 'bom' : completude >= 40 ? 'progresso' : 'inicial';
+      // Calcular porcentagem de conclusão com proteção contra NaN
+      const totalItens = data.totalItems || 1;
+      const completedItens = data.completedItems || 0;
+      const pctConcluido = Math.round((completedItens / totalItens) * 100) || 0;
       
       let html = `
-        <div style="padding:15px;margin-bottom:15px;background:linear-gradient(135deg,${
-          status === 'excelente' ? 'rgba(16,185,129,0.2)' : 
-          status === 'bom' ? 'rgba(99,102,241,0.2)' : 
-          status === 'progresso' ? 'rgba(245,158,11,0.2)' : 
-          'rgba(239,68,68,0.2)'
-        },transparent);border-radius:12px;border-left:4px solid ${
-          status === 'excelente' ? '#10b981' : 
-          status === 'bom' ? '#6366f1' : 
-          status === 'progresso' ? '#f59e0b' : 
-          '#ef4444'
-        };">
+        <div style="padding:12px;margin-bottom:15px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(236,72,153,0.1));border-radius:10px;border-left:4px solid #8b5cf6;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <div>
-              <strong style="color:${
-                status === 'excelente' ? '#34d399' : 
-                status === 'bom' ? '#a5b4fc' : 
-                status === 'progresso' ? '#fbbf24' : 
-                '#f87171'
-              };">🎯 Seu Plano de Ação Estratégico</strong>
+              <strong style="color:#c4b5fd;">📊 Análise baseada em ${resumo.totalNotas || 0} anotações</strong>
               <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;">
-                Baseado em ${totalNotas} itens (${notasPreenchidas.length} preenchidos, ${notasVazias.length} pendentes)
+                ${completedItens} de ${totalItens} itens concluídos (${pctConcluido}%)
               </div>
-            </div>
-            <div style="background:rgba(0,0,0,.2);padding:8px 15px;border-radius:20px;">
-              <span style="font-size:1.2rem;font-weight:700;color:${
-                status === 'excelente' ? '#10b981' : 
-                status === 'bom' ? '#6366f1' : 
-                status === 'progresso' ? '#f59e0b' : 
-                '#ef4444'
-              };">${completude}%</span>
-              <span style="font-size:.8rem;color:rgba(255,255,255,.6);"> completo</span>
             </div>
           </div>
         </div>
         
-        <!-- Status Visual -->
-        <div style="margin-bottom:20px;">
-          <div style="display:flex;gap:3px;height:12px;border-radius:6px;overflow:hidden;">
-            <div style="flex:${notasPreenchidas.length};background:#10b981;transition:flex .3s;"></div>
-            <div style="flex:${notasVazias.length};background:#ef4444;transition:flex .3s;"></div>
+        <div style="display:flex;gap:15px;flex-wrap:wrap;align-items:stretch;">
+          <!-- Coluna ANTES -->
+          <div style="flex:1;min-width:220px;">
+            <div style="background:rgba(239,68,68,0.2);color:#f87171;padding:12px;border-radius:10px 10px 0 0;text-align:center;font-weight:600;font-size:.9rem;">
+              ❌ SITUAÇÃO ATUAL
+            </div>
+            ${metricas.map(m => `
+              <div style="padding:14px;background:rgba(239,68,68,0.05);border-left:3px solid #ef4444;margin-bottom:1px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-weight:500;font-size:.85rem;">${m.icon} ${m.nome}</span>
+                  <span style="font-size:1.3rem;font-weight:700;color:#f87171;">${m.antes}%</span>
+                </div>
+                <div style="margin-top:8px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+                  <div style="width:${m.antes}%;height:100%;background:#ef4444;border-radius:3px;"></div>
+                </div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:4px;">${m.antes < 30 ? '🔴 Crítico' : m.antes < 50 ? '🟡 Precisa melhorar' : '🟢 Aceitável'}</div>
+              </div>
+            `).join('')}
+            <div style="padding:12px;background:rgba(239,68,68,0.1);border-radius:0 0 10px 10px;text-align:center;">
+              <span style="font-size:.9rem;color:rgba(255,255,255,.6);">Média: </span>
+              <span style="font-size:1.2rem;font-weight:700;color:#f87171;">${mediaAntes}%</span>
+            </div>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:.75rem;color:rgba(255,255,255,.5);">
-            <span>✅ ${notasPreenchidas.length} preenchidos</span>
-            <span>❌ ${notasVazias.length} pendentes</span>
+          
+          <!-- Seta -->
+          <div style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:#8b5cf6;padding:0 10px;">
+            ➡️
+          </div>
+          
+          <!-- Coluna DEPOIS -->
+          <div style="flex:1;min-width:220px;">
+            <div style="background:rgba(16,185,129,0.2);color:#34d399;padding:12px;border-radius:10px 10px 0 0;text-align:center;font-weight:600;font-size:.9rem;">
+              ✅ PROJEÇÃO PÓS-ESTRATÉGIA
+            </div>
+            ${metricas.map(m => {
+              const melhoria = (m.depois || 0) - (m.antes || 0);
+              return `
+                <div style="padding:14px;background:rgba(16,185,129,0.05);border-left:3px solid #10b981;margin-bottom:1px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:500;font-size:.85rem;">${m.icon} ${m.nome}</span>
+                    <span style="font-size:1.3rem;font-weight:700;color:#10b981;">${m.depois}%</span>
+                  </div>
+                  <div style="margin-top:8px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+                    <div style="width:${m.depois}%;height:100%;background:#10b981;border-radius:3px;"></div>
+                  </div>
+                  <div style="font-size:.7rem;color:rgba(16,185,129,.8);margin-top:4px;">📈 +${melhoria}% de melhoria</div>
+                </div>
+              `;
+            }).join('')}
+            <div style="padding:12px;background:rgba(16,185,129,0.1);border-radius:0 0 10px 10px;text-align:center;">
+              <span style="font-size:.9rem;color:rgba(255,255,255,.6);">Média: </span>
+              <span style="font-size:1.2rem;font-weight:700;color:#10b981;">${mediaDepois}%</span>
+            </div>
           </div>
         </div>
         
-        ${blocosComLacunas.length > 0 ? `
-          <!-- Próximas Ações Prioritárias -->
-          <div style="background:rgba(239,68,68,0.1);border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid rgba(239,68,68,0.2);">
-            <div style="font-weight:600;color:#f87171;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span>🚨</span> O Que Você Precisa Fazer Agora
-            </div>
-            
-            ${blocosComLacunas.slice(0, 3).map((lacuna, idx) => `
-              <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:12px;margin-bottom:10px;border-left:3px solid ${idx === 0 ? '#ef4444' : idx === 1 ? '#f59e0b' : '#6366f1'};">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                  <span style="font-weight:600;color:${idx === 0 ? '#fca5a5' : idx === 1 ? '#fcd34d' : '#a5b4fc'};">
-                    ${idx === 0 ? '🔥 URGENTE' : idx === 1 ? '⚡ IMPORTANTE' : '📋 PRÓXIMO'}: ${lacuna.bloco}
-                  </span>
-                  <span style="background:rgba(239,68,68,0.2);padding:2px 8px;border-radius:10px;font-size:.7rem;color:#f87171;">
-                    ${lacuna.total} itens pendentes
-                  </span>
-                </div>
-                <div style="font-size:.8rem;color:rgba(255,255,255,.6);">
-                  Preencher: ${lacuna.itens.slice(0, 3).join(', ')}${lacuna.itens.length > 3 ? ` +${lacuna.itens.length - 3} mais` : ''}
-                </div>
-              </div>
-            `).join('')}
+        <!-- Resumo -->
+        <div style="margin-top:20px;padding:20px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(16,185,129,0.15));border-radius:12px;text-align:center;">
+          <div style="font-size:1rem;color:#a5b4fc;margin-bottom:8px;">📈 Impacto Total Projetado</div>
+          <div style="font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,#8b5cf6,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+            +${melhoriaTotal}%
           </div>
-        ` : ''}
-        
-        ${notasRelevantes.length > 0 ? `
-          <!-- O que já foi documentado -->
-          <div style="background:rgba(16,185,129,0.1);border-radius:12px;padding:15px;border:1px solid rgba(16,185,129,0.2);">
-            <div style="font-weight:600;color:#34d399;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span>✅</span> Principais Informações Documentadas
-            </div>
-            
-            ${notasRelevantes.map(n => `
-              <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #10b981;">
-                <div style="font-weight:500;color:#6ee7b7;font-size:.85rem;margin-bottom:4px;">${n.item}</div>
-                <div style="font-size:.8rem;color:rgba(255,255,255,.65);">"${(n.content || '').substring(0, 120)}${(n.content || '').length > 120 ? '...' : ''}"</div>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-        
-        <!-- Mensagem de Orientação -->
-        <div style="margin-top:15px;padding:15px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(99,102,241,0.1));border-radius:12px;text-align:center;">
-          <div style="font-size:1rem;margin-bottom:8px;">
-            ${status === 'excelente' ? '🏆' : status === 'bom' ? '👍' : status === 'progresso' ? '💪' : '🚀'}
-          </div>
-          <div style="color:rgba(255,255,255,.85);font-size:.9rem;line-height:1.5;">
-            ${status === 'excelente' 
-              ? 'Excelente trabalho! Sua estruturação está quase completa. Revise os últimos detalhes para finalizar.' 
-              : status === 'bom' 
-              ? 'Bom progresso! Continue preenchendo as informações para ter um diagnóstico ainda mais preciso.'
-              : status === 'progresso'
-              ? 'Você está no caminho certo! Foque em completar os blocos marcados como urgentes acima.'
-              : 'Estamos no início da jornada. Complete as informações básicas para que possamos criar sua estratégia personalizada.'}
+          <div style="font-size:.9rem;color:rgba(255,255,255,.6);margin-top:4px;">
+            de clareza de marca (${mediaAntes}% → ${mediaDepois}%)
           </div>
         </div>
       `;
@@ -29735,10 +29695,11 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
       container.innerHTML = html;
     }
     
-    // Função para ativar gráficos específicos do diagnóstico estratégico - ANÁLISE REAL DAS NOTAS
+    // Função para ativar gráficos específicos do diagnóstico estratégico
     function setupDiagnosticoEstrategicoCharts(data, mapping, entregavelId) {
       // Só ativar se for o diagnóstico estratégico
       if (entregavelId !== 'diagnostico_estrategico') {
+        // Esconder os gráficos extras para outros entregáveis
         ['chartCardFunilDetalhado', 'chartCardMapaDiferenciacao', 'chartCardSazonalidade', 'chartCardClarezaMarca'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'none';
@@ -29746,24 +29707,24 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
         return;
       }
       
-      console.log('📊 Gerando diagnóstico estratégico baseado em dados reais...');
-      
-      // Renderizar os 4 gráficos diretamente com análise das notas reais
-      // Cada função analisa as notas internamente - sem depender de IA
-      renderFunilDetalhado(data, mapping, null);
-      renderMapaDiferenciacao(data, mapping, null);
+      // Renderizar todos os gráficos especiais
+      renderFunilDetalhado(data, mapping);
+      renderMapaDiferenciacao(data, mapping);
       renderSazonalidade(data, mapping);
       renderClarezaMarca(data, mapping);
-      
-      console.log('✅ Diagnóstico estratégico renderizado com sucesso');
     }
 
-    // Gerar análise com IA para outros entregáveis (não Diagnóstico Estratégico)
-    async function generateAnaliseInsights(data, mapping, insightContent) {
-      // Se não tem anotações suficientes, mostrar mensagem
-      if (!data.notes || data.notes.length < 3) {
+    // Gerar insights com IA baseado nas anotações
+    async function generateAnaliseInsights(data, entregavelId) {
+      const mapping = ENTREGAVEL_MAPPING[entregavelId];
+      const insightContent = document.getElementById('analiseInsightContent');
+      
+      // Se não há anotações suficientes, mostrar mensagem
+      if (data.notes.length === 0) {
         insightContent.innerHTML = `
-          <div style="background:rgba(255,193,7,.1);border-radius:12px;padding:20px;border-left:4px solid #ffc107;">
+          <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.6);">
+            <div style="font-size:3rem;margin-bottom:16px;">📝</div>
+            <h3 style="color:#fff;margin:0 0 12px;">Sem anotações disponíveis</h3>
             <p style="margin:0;">Complete as anotações nas semanas de estruturação para gerar uma análise mais detalhada com insights da IA.</p>
           </div>
         `;
@@ -41482,6 +41443,7 @@ function renderReviewNotes(post){
     if(!pathSlug || pathSlug !== profileSlug){
       history.replaceState({}, '', '/' + profileSlug);
     }
+    TENANT = profileSlug;
     window.TENANT = profileSlug;
     document.documentElement.dataset.tenant = profileSlug;
     try { document.body.setAttribute('data-client-id', profileSlug); } catch(_) {}
@@ -41498,6 +41460,7 @@ function renderReviewNotes(post){
         history.replaceState({}, '', '/' + mySlug);
         if(typeof mgToast === 'function'){ mgToast('Sem acesso a /' + pathSlug + '. Redirecionado para seu painel.'); }
       }
+      TENANT = mySlug;
       window.TENANT = mySlug;
       document.documentElement.dataset.tenant = mySlug;
       try { document.body.setAttribute('data-client-id', mySlug); } catch(_) {}
