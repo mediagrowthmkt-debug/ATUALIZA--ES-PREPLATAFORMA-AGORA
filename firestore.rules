@@ -124,6 +124,54 @@ service cloud.firestore {
           );
       }
 
+      /* ✅ ESTRUTURAÇÃO: Subcoleção para salvar dados da aba Estruturação (evita limite de 1MB) */
+      /* Cada semana é salva como documento separado: /usuarios/{userId}/estruturacao/{weekId} */
+      match /estruturacao/{weekId} {
+        // O dono pode ler e escrever seus próprios dados de estruturação
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
+      /* ✅ ANÁLISES: Subcoleção para salvar análises dos entregáveis (evita limite de 1MB) */
+      /* Cada análise é salva como documento separado: /usuarios/{userId}/analises/{entregavelId} */
+      match /analises/{entregavelId} {
+        // O dono pode ler e escrever suas próprias análises
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
+      /* ✅ METADADOS DE MÍDIAS: Subcoleção para tags/descrições de fotos/vídeos */
+      /* Cada mídia é salva como documento separado: /usuarios/{userId}/midias_metadados/{urlHash} */
+      match /midias_metadados/{urlHash} {
+        // O dono pode ler e escrever seus próprios metadados de mídia
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ TIME (global): /usuarios/{userId}/team/{memberId} */
       match /team/{memberId} {
         allow read: if isOwner(userId)

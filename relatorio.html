@@ -105,6 +105,40 @@
     .carousel-nav:hover{background:#ff6633;color:#fff;transform:scale(1.1)}
     .carousel-nav:active{transform:scale(.95)}
     @media(max-width:768px){ .carousel-nav{width:32px;height:32px;font-size:1.2rem} .relatorio-story-item{min-width:100px;width:100px;height:170px} }
+    
+    /* Estilos para tabelas nos relatórios - bordas verticais */
+    .relatorio-container table{
+      width:100%;
+      border-collapse:collapse;
+      margin:16px 0;
+      font-size:.85rem;
+      background:rgba(15,23,42,.4);
+      border-radius:8px;
+      overflow:hidden;
+    }
+    .relatorio-container table th,
+    .relatorio-container table td{
+      border:1px solid rgba(255,255,255,.15);
+      padding:10px 12px;
+      text-align:left;
+    }
+    .relatorio-container table th{
+      background:rgba(99,102,241,.2);
+      color:#fff;
+      font-weight:700;
+      text-transform:uppercase;
+      font-size:.75rem;
+      letter-spacing:.03em;
+    }
+    .relatorio-container table tr:nth-child(even){
+      background:rgba(255,255,255,.03);
+    }
+    .relatorio-container table tr:hover{
+      background:rgba(99,102,241,.1);
+    }
+    .relatorio-container table td{
+      color:rgba(255,255,255,.85);
+    }
   </style>
 </head>
 <body>

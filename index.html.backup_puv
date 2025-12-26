@@ -29026,16 +29026,6 @@ Estratégia conectada:
       return insights[entregavelId] || '';
     }
 
-    // ===== REGRA GLOBAL ANTI-INVENÇÃO DE DADOS =====
-    const INSTRUCAO_NAO_INVENTAR = `
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-1. ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores")
-2. ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho e contexto
-3. Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-4. Para metas e projeções → pode sugerir valores realistas baseados no contexto
-5. CONSISTÊNCIA: Use MESMOS valores de CPL, CAC, ROAS, Ticket em todos entregáveis
-`;
-
     // ===== GERAR DOC - MAPEAMENTO DE ENTREGÁVEIS PARA SEMANAS/BLOCOS =====
     // Configuração completa com prompts específicos e tipos de gráficos para cada entregável
     const ENTREGAVEL_MAPPING = {
@@ -29058,13 +29048,6 @@ Estratégia conectada:
         promptAnalise: `Você é um consultor sênior de estratégia de Marketing e Vendas da Mediagrowth elaborando um DIAGNÓSTICO ESTRATÉGICO COMPLETO.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -29239,13 +29222,6 @@ Com base nas anotações coletadas, gere um DIAGNÓSTICO ESTRATÉGICO COMPLETO s
         promptAnalise: `Você é um consultor sênior de crescimento e planejamento financeiro da Mediagrowth analisando DIRECIONAMENTO ESTRATÉGICO E METAS.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -29467,13 +29443,6 @@ Com base nas anotações coletadas nas semanas de estruturação (diagnóstico, 
         promptAnalise: `Você é um analista sênior de inteligência competitiva da Mediagrowth realizando uma ANÁLISE DE CONCORRÊNCIA E MERCADO profunda e estratégica.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -29797,13 +29766,6 @@ Oportunidades de diferenciação na comunicação:
         promptAnalise: `Você é um estrategista de comunicação da Mediagrowth criando a MATRIZ CDT (Características, Dores e Transformações).
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Verifique no "📋 Contexto do Negócio" qual moeda usar:
 - "dólar", "USD", "$" → Use $ (dólar americano)
 - "real", "BRL", "R$" → Use R$ (real brasileiro)
@@ -29927,13 +29889,6 @@ Esta é a matriz central do documento. Cada característica da empresa/produto r
         promptAnalise: `Você é um especialista em posicionamento da Mediagrowth desenvolvendo a PUV.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -29979,48 +29934,13 @@ Como provar que a promessa é real:
 - [Prova 3: metodologia/processo]
 
 ### 📢 APLICAÇÃO POR CANAL
-- **Anúncios**: [versão curta - até 10 palavras]
-- **Site**: [versão completa - 2-3 frases]
-- **Vendas**: [pitch verbal - 30 segundos]
-- **Redes Sociais**: [versão bio/headline]
-
----
-
-## 🚀 IDEIAS "FORA DA BOLHA" - ESTRATÉGIAS DE ALTO IMPACTO
-
-**⚠️ ATENÇÃO: As ideias abaixo são SUGESTÕES OUSADAS. Devem ser avaliadas antes de implementar.**
-
-### 💡 IDEIAS DISRUPTIVAS DE POSICIONAMENTO
-
-| # | Ideia Ousada | Por que funciona | Risco | Potencial |
-|---|-------------|------------------|-------|-----------|
-| 1 | [Ideia que NENHUM concorrente faz] | [Razão] | [Risco] | Alto |
-| 2 | [Garantia ousada ou promessa forte] | [Razão] | [Risco] | Alto |
-| 3 | [Formato/canal inovador] | [Razão] | [Risco] | Médio |
-| 4 | [Oferta irrecusável] | [Razão] | [Risco] | Alto |
-| 5 | [Posicionamento contrário ao mercado] | [Razão] | [Risco] | Médio |
-
-### 🎭 ESTRATÉGIAS DE CHOQUE POSITIVO
-1. **[Estratégia 1]**: O que fazer - Por que ninguém faz - Resultado
-2. **[Estratégia 2]**: O que fazer - Por que ninguém faz - Resultado
-3. **[Estratégia 3]**: O que fazer - Por que ninguém faz - Resultado
-
-### 🔥 GARANTIAS OUSADAS
-| Garantia | Como Funciona | Impacto |
-|----------|---------------|---------|
-| [Resultado ou dinheiro + bônus] | [Mecânica] | Alto |
-| [Pagamento após resultado] | [Mecânica] | Alto |
-
-### 🎪 MARKETING DE GUERRILHA
-1. [Ação não convencional 1]
-2. [Ação não convencional 2]
-3. [Ação não convencional 3]
-
-> **NOTA:** Estas são SUGESTÕES para discussão. Valide antes de implementar.
+- **Anúncios**: [versão curta]
+- **Site**: [versão completa]
+- **Vendas**: [pitch verbal]
 
 ### ➡️ PRÓXIMO PASSO
-[Conexão com PAI - definir quem mais valoriza esses diferenciais]`,
-        prompt: `Você é um especialista em posicionamento da Mediagrowth. Gere um documento de PUV com ideias disruptivas.`
+[Conexão com PAI]`,
+        prompt: `Você é um especialista em posicionamento da Mediagrowth. Gere um documento de PUV.`
       },
       pai: {
         title: 'PAI - Público Alvo Ideal',
@@ -30035,13 +29955,6 @@ Como provar que a promessa é real:
         promptAnalise: `Você é um especialista em personas e público-alvo da Mediagrowth desenvolvendo o PAI.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -30187,13 +30100,6 @@ Criar 5 PERSONAS COMPLETAS e detalhadas, cada uma representando um segmento dife
         promptAnalise: `Você é um especialista sênior em mídia paga da Mediagrowth realizando a ESTRUTURAÇÃO ESTRATÉGICA DE ANÚNCIOS PAGOS.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Verifique no "📋 Contexto do Negócio" qual moeda usar (R$ ou $). Use a moeda identificada em TODOS os valores.
 
 **OBJETIVO:** Criar estrutura completa de campanhas para escala previsível de leads e vendas.
@@ -30412,13 +30318,6 @@ Verifique no "📋 Contexto do Negócio" qual moeda usar (R$ ou $). Use a moeda 
         promptAnalise: `Você é um ESTRATEGISTA SÊNIOR DE SEO da Mediagrowth realizando a ESTRUTURAÇÃO COMPLETA DE SITE & SEO para atrair leads organicamente.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Verifique no "📋 Contexto do Negócio" qual moeda usar (R$ ou $). Use a moeda identificada em TODOS os valores.
 
 **OBJETIVO:** Criar estratégia completa de SEO para posicionar o site como autoridade no nicho e gerar leads orgânicos qualificados.
@@ -30731,13 +30630,6 @@ TOPO (Blog/Conteúdo) → MEIO (Páginas de Serviço) → FUNDO (Contato/Orçame
         promptAnalise: `Você é um ESTRATEGISTA SÊNIOR DE REDES SOCIAIS da Mediagrowth criando um PLANO ESTRATÉGICO COMPLETO para gerar leads, engajamento e autoridade.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Verifique no "📋 Contexto do Negócio" qual moeda usar (R$ ou $). Use em TODOS os valores.
 
 **OBJETIVO:** Criar estratégia prática e humanizada para posicionar a marca, gerar leads e construir autoridade nas redes sociais.
@@ -31160,652 +31052,330 @@ Reels Virais ──────► Seguidor ──────► Stories/DM ─
         },
         radarLabels: ['Emoção', 'Lógica', 'Urgência', 'Prova', 'Clareza'],
         maxTokens: 8000,
-        promptAnalise: `Você é um MESTRE EM COPYWRITING da Mediagrowth - especialista na ARTE de escrever textos que vendem, conectam e convertem.
+        promptAnalise: `Você é um DIRETOR DE COPYWRITING SÊNIOR da Mediagrowth com 20+ anos de experiência em persuasão, vendas e comunicação estratégica.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
-- Se não estiver especificado → Use R$ como padrão
+- Se não estiver especificado → Pergunte ou use R$ como padrão
+TODOS os valores monetários do relatório devem seguir a moeda identificada.
 
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
 
----
+**🎯 OBJETIVO:**
+Criar um ARSENAL COMPLETO DE COPYWRITING para TODOS os canais da empresa, pronto para uso imediato. Cada copy deve ser COMPLETA, PRONTA PARA COPIAR E COLAR.
 
-# 📚 MANUAL DE COPYWRITING ESTRATÉGICO
-## A Arte de Escrever Textos que Vendem
-
-Este documento ensina a METODOLOGIA de copywriting - como pensar, estruturar e escrever cada palavra com intenção estratégica.
-
----
-
-## PARTE 1: FUNDAMENTOS DA COMUNICAÇÃO PERSUASIVA
-
-### 🧠 O QUE É COPYWRITING DE VERDADE
-
-Copywriting não é escrever bonito. É escrever com **INTENÇÃO ESTRATÉGICA**.
-
-**A diferença entre texto comum e copy:**
-| Texto Comum | Copy Estratégica |
-|-------------|------------------|
-| Informa | Transforma |
-| Descreve | Provoca |
-| Fala do produto | Fala da transformação |
-| Espera resposta | Conduz à ação |
-
-**O Princípio Fundamental:**
-> "Pessoas não compram produtos. Compram a versão melhor de si mesmas."
-
-### 🎭 DNA DE COMUNICAÇÃO DA MARCA
-
-Com base nas anotações, definir:
-
-**1. ARQUÉTIPO DE MARCA:**
-[Identificar o arquétipo dominante: Herói, Sábio, Explorador, Rebelde, Mago, Cara Comum, Amante, Bobo da Corte, Cuidador, Criador, Governante, Inocente]
-
-**Características do arquétipo:**
-- Tom de voz: [formal/informal/técnico/inspirador/descontraído]
-- Ritmo: [frases curtas/longas/mistas]
-- Nível de proximidade: [você/vocês/senhor(a)]
-
-**2. PERSONA DE ESCRITA:**
-Escreva como se você fosse: [definir persona baseada no negócio]
-- Idade aparente: [X anos]
-- Personalidade: [3 adjetivos]
-- Como fala: [exemplo de frase típica]
-
-**3. VOCABULÁRIO ESTRATÉGICO:**
-
-| ✅ PALAVRAS PARA USAR | ❌ PALAVRAS PARA EVITAR |
-|-----------------------|------------------------|
-| [10 palavras poderosas para o nicho] | [10 palavras genéricas ou negativas] |
+**IMPORTANTE:**
+- NÃO coloque placeholders como "[inserir aqui]" - escreva a copy REAL baseada nas informações
+- Seja ESPECÍFICO para o nicho e público da empresa
+- Use as dores, desejos e transformações identificadas nas anotações
+- Aplique gatilhos mentais de forma estratégica
+- Cada copy deve ser COMPLETA e UTILIZÁVEL
 
 ---
 
-## PARTE 2: ARSENAL DE GATILHOS MENTAIS
+## 📊 FUNDAMENTOS ESTRATÉGICOS DA COPY
 
-### 🧲 OS 10 GATILHOS MAIS PODEROSOS (COM EXEMPLOS PRÁTICOS)
+### 🎯 Tom de Voz da Marca
+[Definir tom: formal/informal, técnico/acessível, sério/descontraído - baseado no contexto]
 
-**1. ESPECIFICIDADE (O mais subestimado)**
-❌ Genérico: "Aumente suas vendas"
-✅ Específico: "Aumente suas vendas em 47% nos primeiros 90 dias"
+### 🧠 Gatilhos Mentais Prioritários
+1. **Autoridade**: [Como aplicar para este cliente]
+2. **Prova Social**: [Evidências a usar]
+3. **Escassez/Urgência**: [Quando aplicar]
+4. **Reciprocidade**: [O que oferecer]
+5. **Especificidade**: [Números e dados a usar]
 
-**Como aplicar para o NICHO do cliente:**
-> [Escrever exemplo específico para o cliente]
-
----
-
-**2. PROVA SOCIAL**
-O cérebro pensa: "Se outros fizeram, deve funcionar"
-
-**3 formas de usar:**
-- Numérica: "[X] clientes já transformaram..."
-- Nominal: "A empresa [Nome] aumentou..."
-- Categórica: "Empresários como você estão..."
-
-**Exemplo prático:**
-> [Escrever exemplo para o cliente]
+### 💡 Fórmula CDT (Core Desire Transform)
+- **C (Conexão)**: [Dor principal que conecta]
+- **D (Desejo)**: [Resultado desejado]
+- **T (Transformação)**: [Mudança prometida]
 
 ---
 
-**3. AUTORIDADE**
-O cérebro pensa: "Ele entende, posso confiar"
+## 📢 COPY PARA ANÚNCIOS PAGOS
 
-**Como construir em 3 níveis:**
-1. **Credenciais:** Anos de experiência, formações, certificações
-2. **Resultados:** Números, casos de sucesso, antes/depois
-3. **Mídia:** Onde foi mencionado, parcerias reconhecidas
+### Facebook/Instagram Ads
 
-**Frase de autoridade para o cliente:**
-> [Escrever frase de autoridade]
+**🔥 Headline Primária (curta - impacto):**
+> [Escrever headline completa]
 
----
+**📌 Headlines Alternativas (para teste A/B):**
+1. > [Headline 2]
+2. > [Headline 3]
+3. > [Headline 4]
+4. > [Headline 5]
 
-**4. ESCASSEZ**
-O cérebro pensa: "Se é limitado, é valioso"
+**📝 Copy Longa (para feed):**
+> [Escrever copy completa de 150-300 palavras com hook, desenvolvimento, prova e CTA]
 
-**Tipos de escassez:**
-- **Tempo:** "Até sexta-feira" / "Últimas 24h"
-- **Quantidade:** "Apenas 10 vagas" / "Últimos 3 em estoque"
-- **Oportunidade:** "Primeira e única vez" / "Não se repetirá"
+**⚡ Copy Curta (para stories/reels):**
+> [Escrever copy de 2-3 linhas impactantes]
 
-**⚠️ REGRA DE OURO:** Só use se for VERDADE. Escassez falsa destrói credibilidade.
+**🎯 CTAs Estratégicos:**
+1. [CTA para topo de funil]
+2. [CTA para meio de funil]
+3. [CTA para fundo de funil]
 
-**Aplicação ética para o cliente:**
-> [Escrever exemplo de escassez real]
+### Google Ads
 
----
+**🔍 Headlines (30 caracteres cada):**
+1. [Headline 1]
+2. [Headline 2]
+3. [Headline 3]
+4. [Headline 4]
+5. [Headline 5]
 
-**5. RECIPROCIDADE**
-O cérebro pensa: "Ele me deu algo, devo retribuir"
-
-**Estratégia de 3 camadas:**
-1. **Gratuito:** [O que pode entregar de valor sem cobrar]
-2. **Conteúdo:** [Educação gratuita que posiciona como especialista]
-3. **Diagnóstico:** [Análise gratuita que revela a necessidade]
-
----
-
-**6. ANTECIPAÇÃO**
-O cérebro pensa: "Preciso saber o que vem a seguir"
-
-**Técnicas:**
-- "Na próxima semana, vou revelar..."
-- "O que você vai descobrir agora muda tudo..."
-- "Prepare-se, porque..."
-
----
-
-**7. PERTENCIMENTO**
-O cérebro pensa: "Quero fazer parte desse grupo"
-
-**Linguagem de comunidade:**
-- "Junte-se a [X] profissionais que..."
-- "Faça parte do grupo de..."
-- "Seja um dos poucos que..."
-
----
-
-**8. CONTRASTE**
-O cérebro pensa: "Agora vejo a diferença"
-
-**Estrutura:**
-- ANTES: [Situação problemática]
-- DEPOIS: [Situação transformada]
-
-**Exemplo para o cliente:**
-> ANTES: [situação do público antes]
-> DEPOIS: [situação após a transformação]
-
----
-
-**9. CURIOSIDADE**
-O cérebro pensa: "Preciso saber mais"
-
-**Técnicas de loop aberto:**
-- "O que você não sabe sobre..."
-- "O segredo por trás de..."
-- "A razão pela qual 90% falham..."
-
----
-
-**10. COMPROMISSO E COERÊNCIA**
-O cérebro pensa: "Já disse sim, preciso continuar"
-
-**Micro-compromissos que funcionam:**
-- "Você concorda que [X]?" (sim implícito)
-- "Se você quer [resultado], continue lendo..."
-- "Para quem busca [Y], a próxima linha é crucial..."
-
----
-
-## PARTE 3: FRAMEWORKS DE COPYWRITING (PASSO A PASSO)
-
-### 🏗️ FRAMEWORK 1: AIDA (O Clássico)
-
-**A** = ATENÇÃO → Capturar em 3 segundos
-**I** = INTERESSE → Manter com relevância
-**D** = DESEJO → Criar vontade emocional
-**A** = AÇÃO → Conduzir ao próximo passo
-
-**EXEMPLO COMPLETO PARA O CLIENTE:**
-
-**[A] ATENÇÃO (Hook):**
-> [Escrever headline impactante específica para o nicho]
-
-**[I] INTERESSE (Desenvolvimento):**
-> [Escrever 2-3 parágrafos desenvolvendo o problema/oportunidade]
-
-**[D] DESEJO (Benefícios + Prova):**
-> [Escrever 2-3 parágrafos com transformação + prova social]
-
-**[A] AÇÃO (CTA):**
-> [Escrever CTA claro e direto]
-
----
-
-### 🏗️ FRAMEWORK 2: PAS (Problema-Agitação-Solução)
-
-**P** = PROBLEMA → Identificar a dor
-**A** = AGITAÇÃO → Amplificar a dor
-**S** = SOLUÇÃO → Apresentar o alívio
-
-**EXEMPLO COMPLETO PARA O CLIENTE:**
-
-**[P] PROBLEMA:**
-> [Descrever o problema principal do público-alvo]
-
-**[A] AGITAÇÃO:**
-> [Amplificar as consequências de não resolver - usar emoção]
-> "Se você continuar assim, em 6 meses..."
-> "Enquanto isso, seus concorrentes estão..."
-> "Cada dia que passa sem resolver isso significa..."
-
-**[S] SOLUÇÃO:**
-> [Apresentar a solução como alívio natural - não forçado]
-
----
-
-### 🏗️ FRAMEWORK 3: BAB (Before-After-Bridge)
-
-**B** = BEFORE → Situação atual (dor)
-**A** = AFTER → Situação desejada (prazer)
-**B** = BRIDGE → Como chegar lá (solução)
-
-**EXEMPLO COMPLETO PARA O CLIENTE:**
-
-**[BEFORE] - Onde seu público está agora:**
-> [Descrever a realidade atual do público com empatia]
-
-**[AFTER] - Onde eles querem chegar:**
-> [Pintar o cenário de sucesso com detalhes sensoriais]
-
-**[BRIDGE] - O caminho:**
-> [Conectar os dois mundos com a solução]
-
----
-
-### 🏗️ FRAMEWORK 4: 4Ps (Promise-Picture-Proof-Push)
-
-**P1** = PROMISE → Promessa central
-**P2** = PICTURE → Imagem mental
-**P3** = PROOF → Prova irrefutável
-**P4** = PUSH → Empurrão para ação
-
-**EXEMPLO COMPLETO PARA O CLIENTE:**
-
-**[PROMISE]:**
-> [Uma promessa clara e crível]
-
-**[PICTURE]:**
-> [Descrição sensorial do resultado - faça o leitor VISUALIZAR]
-> "Imagine acordar amanhã e..."
-> "Visualize o momento em que..."
-
-**[PROOF]:**
-> [Evidência: números, depoimentos, garantias]
-
-**[PUSH]:**
-> [Urgência + CTA + Facilitador]
-
----
-
-### 🏗️ FRAMEWORK 5: QUEST (Qualify-Understand-Educate-Stimulate-Transition)
-
-**Q** = QUALIFY → Qualificar o leitor
-**U** = UNDERSTAND → Mostrar que entende
-**E** = EDUCATE → Educar sobre a solução
-**S** = STIMULATE → Estimular o desejo
-**T** = TRANSITION → Transicionar para ação
-
----
-
-## PARTE 4: TÉCNICAS AVANÇADAS DE ESCRITA
-
-### ✍️ HEADLINES QUE CAPTURAM
-
-**Fórmulas comprovadas:**
-
-1. **Número + Adjetivo + Substantivo + Promessa**
-   > "7 Estratégias Simples Para Dobrar Suas Vendas em 30 Dias"
-
-2. **Como + Resultado Específico**
-   > "Como Transformar Visitantes em Clientes Sem Investir em Anúncios"
-
-3. **Pergunta Provocativa**
-   > "Você Está Cometendo Esses 3 Erros Que Afastam Clientes?"
-
-4. **Segredo/Revelação**
-   > "O Que Top Vendedores Sabem e Nunca Contam"
-
-5. **Antes vs Depois**
-   > "De 0 a 100 Clientes: O Método Que Transformou Meu Negócio"
-
-**5 HEADLINES PRONTAS PARA O CLIENTE:**
-1. > [Headline usando fórmula 1]
-2. > [Headline usando fórmula 2]
-3. > [Headline usando fórmula 3]
-4. > [Headline usando fórmula 4]
-5. > [Headline usando fórmula 5]
-
----
-
-### ✍️ HOOKS PARA PRIMEIRAS LINHAS
-
-O hook tem 3 SEGUNDOS para funcionar. Use:
-
-**1. Contradição:**
-> "Tudo o que você sabe sobre [X] está errado."
-
-**2. Estatística Chocante:**
-> "93% dos negócios falham nos primeiros 5 anos. Este documento mostra como estar nos 7%."
-
-**3. História em 1 Linha:**
-> "Eu tinha R$47 na conta quando descobri isso..."
-
-**4. Pergunta Impossível de Ignorar:**
-> "E se eu te mostrasse exatamente como [resultado] em [tempo]?"
-
-**5. Declaração Ousada:**
-> "Nos próximos 5 minutos, você vai descobrir algo que pode mudar tudo."
-
-**5 HOOKS PRONTOS PARA O CLIENTE:**
-1. > [Hook 1 - específico para o nicho]
-2. > [Hook 2 - específico para o nicho]
-3. > [Hook 3 - específico para o nicho]
-4. > [Hook 4 - específico para o nicho]
-5. > [Hook 5 - específico para o nicho]
-
----
-
-### ✍️ CTAs QUE CONVERTEM
-
-**Princípio:** O CTA não é um botão. É a CONCLUSÃO LÓGICA de tudo que veio antes.
-
-**Estrutura do CTA Perfeito:**
-VERBO DE AÇÃO + BENEFÍCIO + FACILITADOR
-
-**Exemplos por temperatura:**
-
-**CTA para Topo de Funil (Conhecimento):**
-- "Baixe o guia gratuito agora"
-- "Assista à aula de 10 minutos"
-- "Receba as dicas no seu email"
-
-**CTA para Meio de Funil (Consideração):**
-- "Agende uma análise gratuita"
-- "Veja como funciona na prática"
-- "Compare os planos disponíveis"
-
-**CTA para Fundo de Funil (Decisão):**
-- "Comece agora com 30 dias de garantia"
-- "Garanta sua vaga antes que encerre"
-- "Fale com um especialista em 2 minutos"
-
-**5 CTAs PRONTOS PARA O CLIENTE:**
-1. Topo: > [CTA topo de funil]
-2. Meio: > [CTA meio de funil]
-3. Fundo: > [CTA fundo de funil]
-4. Urgência: > [CTA com gatilho de escassez]
-5. WhatsApp: > [CTA para conversa direta]
-
----
-
-### ✍️ TRANSIÇÕES QUE PRENDEM
-
-**O problema:** Perder o leitor entre parágrafos.
-**A solução:** Transições que criam curiosidade.
-
-**Frases de transição poderosas:**
-- "Mas isso é só a ponta do iceberg..."
-- "E aqui é onde fica interessante..."
-- "Agora, preste atenção nisso..."
-- "O que vou revelar agora pode surpreender você..."
-- "Mas espera, tem mais..."
-- "E se eu te dissesse que..."
-
----
-
-## PARTE 5: COPY POR CANAL (ADAPTAÇÃO ESTRATÉGICA)
-
-### 📱 INSTAGRAM
-
-**Bio (150 caracteres):**
-[Fórmula: Quem você ajuda + Resultado + CTA]
-> [Escrever bio completa]
-
-**Caption (Legenda) - Estrutura:**
-1. HOOK (primeira linha - parar o scroll)
-2. CORPO (história ou valor)
-3. CTA (próximo passo)
-4. HASHTAGS (estratégicas)
-
-**Modelo de Post Carrossel:**
-> Slide 1: [título impactante - hook visual]
-> Slide 2: [problema - criar identificação]
-> Slide 3: [agravamento - amplificar]
-> Slide 4: [insight 1 - começar a solução]
-> Slide 5: [insight 2 - aprofundar]
-> Slide 6: [solução - entrega completa]
-> Slide 7: [CTA - próximo passo claro]
-
-**Legenda Completa Pronta:**
-> [Escrever legenda completa pronta para usar - 200-300 palavras]
-
----
-
-### 💬 WHATSAPP
-
-**Regra de Ouro:** Mensagens curtas. Uma ideia por mensagem. Tom conversacional.
-
-**Script de Primeira Abordagem (Lead Frio):**
-> Mensagem 1: [Saudação + Como chegou até o lead - máx 2 linhas]
-> Mensagem 2: [Proposta de valor em 1 linha]
-> Mensagem 3: [Pergunta aberta que engaja]
-
-**Script de Follow-up:**
-> Após 24h: [Mensagem de valor, NÃO cobrança]
-> Após 48h: [Mensagem com novo ângulo]
-> Após 72h: [Última tentativa com escassez real ou "porta aberta"]
-
-**Quebra de Objeção "Está Caro":**
-> [Escrever 2-3 mensagens que reposicionam valor, não preço]
-
-**Quebra de Objeção "Vou Pensar":**
-> [Escrever 2-3 mensagens que criam urgência sem pressão]
-
-**Mensagem de Fechamento:**
-> [Escrever mensagem final com CTA direto]
-
----
-
-### ✉️ EMAIL
-
-**Assunto (40-60 caracteres):**
-[Fórmula: Curiosidade + Benefício OU Urgência + Personalização]
-
-**5 Assuntos Prontos:**
-1. > [Assunto com curiosidade]
-2. > [Assunto com benefício direto]
-3. > [Assunto com urgência]
-4. > [Assunto personalizado]
-5. > [Assunto com número específico]
-
-**Estrutura do Email Persuasivo:**
-- **Linha 1:** Hook (continua a promessa do assunto)
-- **Parágrafo 1:** Empatia/Problema (mostrar que entende)
-- **Parágrafo 2:** Agitação (consequências de não resolver)
-- **Parágrafo 3:** Solução (apresentar como alívio)
-- **Parágrafo 4:** Prova (evidência que funciona)
-- **CTA:** Claro e único
-- **PS:** Gatilho extra ou lembrete de urgência
-
-**Email de Boas-Vindas Completo:**
-> [Escrever email completo - 200-400 palavras]
-
-**Email de Oferta Completo:**
-> [Escrever email completo - 300-500 palavras]
-
----
-
-### 🎬 VÍDEO/REELS/STORIES
-
-**Estrutura de Vídeo 60 segundos:**
-- 0-3s: HOOK (parar o scroll - algo inesperado)
-- 3-15s: PROBLEMA (criar identificação)
-- 15-45s: SOLUÇÃO (entregar valor real)
-- 45-60s: CTA (próximo passo específico)
-
-**5 Hooks de Vídeo Prontos:**
-1. > "[Hook provocativo para o nicho]"
-2. > "[Hook com pergunta]"
-3. > "[Hook com contradição]"
-4. > "[Hook com estatística]"
-5. > "[Hook com história]"
-
-**Texto para Overlay (Legendas):**
-> [3 textos curtos para usar em vídeos]
-
----
-
-### 🔍 ANÚNCIOS PAGOS
-
-**Facebook/Instagram Ads:**
-
-**Headlines (5 opções):**
-1. [Headline com benefício]
-2. [Headline com curiosidade]
-3. [Headline com prova]
-4. [Headline com urgência]
-5. [Headline com pergunta]
-
-**Copy Longa (Feed - 150-300 palavras):**
-> [Escrever copy completa com hook, desenvolvimento, prova e CTA]
-
-**Copy Curta (Stories - 2-3 linhas):**
-> [Escrever copy direta e impactante]
-
-**Google Ads:**
-
-**Headlines (30 caracteres cada):**
-1. [Headline 1 - palavra-chave]
-2. [Headline 2 - benefício]
-3. [Headline 3 - CTA]
-4. [Headline 4 - diferencial]
-5. [Headline 5 - urgência]
-
-**Descrições (90 caracteres cada):**
+**📄 Descrições (90 caracteres cada):**
 1. [Descrição 1]
 2. [Descrição 2]
+3. [Descrição 3]
 
 ---
 
-## PARTE 6: BIBLIOTECA DE COPIES PRONTAS
+## 🌐 COPY PARA SITE/LANDING PAGE
 
-### 📋 COPIES DE CAPTAÇÃO (Topo de Funil)
+### Hero Section
+**Título Principal:**
+> [Headline principal do site]
 
-**Copy 1 - Educativa:**
-> [Copy completa pronta para usar - educar e atrair]
+**Subtítulo:**
+> [Subtítulo explicativo]
 
-**Copy 2 - Curiosidade:**
-> [Copy completa pronta para usar - gerar interesse]
+**CTA Principal:**
+> [Botão de ação]
 
-**Copy 3 - Estatística:**
-> [Copy completa pronta para usar - autoridade via dados]
+### Seção Sobre/Quem Somos
+> [Parágrafo completo sobre a empresa - 100-200 palavras]
 
----
+### Seção de Benefícios
+**Benefício 1:**
+> Título: [Benefício]
+> Descrição: [2-3 linhas explicando]
 
-### 📋 COPIES DE NUTRIÇÃO (Meio de Funil)
+**Benefício 2:**
+> Título: [Benefício]
+> Descrição: [2-3 linhas explicando]
 
-**Copy 1 - Autoridade:**
-> [Copy completa que posiciona como especialista]
+**Benefício 3:**
+> Título: [Benefício]
+> Descrição: [2-3 linhas explicando]
 
-**Copy 2 - Prova Social:**
-> [Copy completa com resultados e depoimentos]
+### Seção de Serviços/Produtos
+> [Copy para cada serviço/produto mencionado nas anotações]
 
-**Copy 3 - Quebra de Objeção:**
-> [Copy completa que antecipa e resolve dúvidas]
+### Seção de Prova Social
+**Título:**
+> [Headline para área de depoimentos]
 
----
+**Template de Depoimento Sugerido:**
+> "[Estrutura de depoimento ideal para coletar]"
 
-### 📋 COPIES DE CONVERSÃO (Fundo de Funil)
+### FAQ - Perguntas Frequentes
+1. **[Pergunta sobre objeção comum]**
+   > [Resposta que quebra objeção]
 
-**Copy 1 - Oferta Direta:**
-> [Copy completa com oferta clara e irresistível]
+2. **[Pergunta sobre processo]**
+   > [Resposta esclarecedora]
 
-**Copy 2 - Escassez:**
-> [Copy completa com gatilho de urgência real]
-
-**Copy 3 - Última Chance:**
-> [Copy completa para fechamento de campanha]
-
----
-
-### 📋 COPIES DE RETENÇÃO (Pós-Venda)
-
-**Copy 1 - Boas-Vindas:**
-> [Copy para novos clientes - onboarding]
-
-**Copy 2 - Reativação:**
-> [Copy para clientes inativos]
-
-**Copy 3 - Indicação:**
-> [Copy para programa de indicação]
+3. **[Pergunta sobre resultados]**
+   > [Resposta com prova]
 
 ---
 
-## PARTE 7: CHECKLIST DO COPYWRITER
+## 🔍 COPY PARA SEO
 
-### ✅ ANTES DE PUBLICAR QUALQUER COPY:
+### Meta Title (60 caracteres)
+> [Title otimizado com palavra-chave]
 
-**CLAREZA:**
-☐ O texto é compreensível por alguém de 12 anos?
-☐ Cada frase tem no máximo 20 palavras?
-☐ Usei palavras simples ao invés de jargões?
-☐ A promessa principal está clara?
+### Meta Description (160 caracteres)
+> [Description persuasiva com CTA]
 
-**EMOÇÃO:**
-☐ O texto faz SENTIR algo? (medo, desejo, esperança, curiosidade)
-☐ Há uma história ou exemplo concreto?
-☐ Usei palavras sensoriais? (ver, ouvir, sentir, tocar, saborear)
-☐ O leitor se vê no texto?
+### H1 - Título Principal
+> [Heading principal otimizado]
 
-**PERSUASÃO:**
-☐ Há pelo menos 2 gatilhos mentais aplicados?
-☐ Os BENEFÍCIOS estão claros (não só características)?
-☐ Há prova social ou autoridade?
-☐ A transformação está evidente?
+### H2 - Subtítulos Estratégicos
+1. [H2 com palavra-chave secundária]
+2. [H2 com benefício]
+3. [H2 com prova social]
 
-**AÇÃO:**
-☐ O CTA é claro e específico?
-☐ Há senso de urgência REAL (não forçada)?
-☐ O próximo passo está óbvio?
-☐ Só há UM CTA por copy?
-
-**TOM:**
-☐ O texto soa como a marca falaria?
-☐ A linguagem é consistente do início ao fim?
-☐ Lendo em voz alta, soa natural?
-☐ Está alinhado com o arquétipo definido?
+### Texto Âncora para Backlinks
+- [Anchor text 1]
+- [Anchor text 2]
+- [Anchor text 3]
 
 ---
 
-## 📊 MÉTRICAS DE COPY PARA ACOMPANHAR
+## 🎬 COPY PARA VÍDEOS
 
-| Canal | Métrica Principal | Meta Sugerida | Como Melhorar |
-|-------|-------------------|---------------|---------------|
-| Email | Taxa de Abertura | >25% | Melhorar assuntos |
-| Email | Taxa de Clique | >3% | Melhorar CTA |
-| Anúncio | CTR | >1.5% | Testar headlines |
-| Landing Page | Conversão | >3% | Revisar copy + oferta |
-| WhatsApp | Taxa de Resposta | >40% | Personalizar abordagem |
-| Instagram | Saves | >2% | Aumentar valor |
+### YouTube - Títulos
+1. [Título clickbait ético 1]
+2. [Título clickbait ético 2]
+3. [Título clickbait ético 3]
+
+### YouTube - Descrições
+> [Descrição completa de 200+ palavras com timestamps, links e CTA]
+
+### Scripts de Abertura (Hook 5 segundos)
+1. > "[Hook provocativo]"
+2. > "[Hook com pergunta]"
+3. > "[Hook com estatística]"
+
+### Script de CTA Final
+> [Script completo para fechamento de vídeo pedindo like, inscrição e ação]
+
+### Reels/TikTok - Textos de Overlay
+1. [Texto curto impactante 1]
+2. [Texto curto impactante 2]
+3. [Texto curto impactante 3]
 
 ---
 
-## 🎯 PLANO DE AÇÃO EM COPYWRITING
+## 📱 COPY PARA REDES SOCIAIS
 
-### PRÓXIMOS PASSOS RECOMENDADOS:
+### Bio do Instagram
+> [Bio completa com emoji, proposta de valor e CTA - 150 caracteres]
 
-1. **HOJE:** [Ação imediata para aplicar - 1 copy específica]
-2. **ESTA SEMANA:** [Ação para os próximos 7 dias - 3 copies para testar]
-3. **ESTE MÊS:** [Ação para os próximos 30 dias - sistema de copy completo]
+### Bio do LinkedIn
+> [Headline profissional + resumo de 2-3 linhas]
+
+### Bio do TikTok
+> [Bio descontraída e direta - 80 caracteres]
+
+### Posts Institucionais
+
+**Post de Apresentação:**
+> [Copy completa apresentando a empresa - pronta para postar]
+
+**Post de Autoridade:**
+> [Copy posicionando como especialista]
+
+**Post de Bastidores:**
+> [Copy humanizando a marca]
+
+### Posts de Engajamento
+
+**Post de Pergunta:**
+> [Copy com pergunta que gera comentários]
+
+**Post de Enquete:**
+> [Copy para stories com enquete]
+
+**Post Carrossel Educativo:**
+Slide 1: [Título impactante]
+Slide 2: [Problema]
+Slide 3: [Agravamento]
+Slide 4: [Solução parte 1]
+Slide 5: [Solução parte 2]
+Slide 6: [Prova]
+Slide 7: [CTA]
+
+### Posts de Conversão
+
+**Post de Oferta:**
+> [Copy completa para anunciar promoção/oferta]
+
+**Post de Urgência:**
+> [Copy com gatilho de escassez]
+
+### Hashtags Estratégicas
+**Hashtags de Nicho:** #[tag1] #[tag2] #[tag3] #[tag4] #[tag5]
+**Hashtags de Alcance:** #[tag1] #[tag2] #[tag3] #[tag4] #[tag5]
+**Hashtags de Marca:** #[tag1] #[tag2]
 
 ---
 
-## 💡 PRINCÍPIOS FINAIS
+## 🏢 COPY INSTITUCIONAL
 
-> "Copy boa não parece copy. Parece uma conversa com um amigo que entende exatamente o que você precisa."
+### Slogan/Tagline
+> [Slogan memorável da marca]
 
-> "Cada palavra tem um trabalho. Se não está trabalhando, está atrapalhando."
+### Missão
+> [Declaração de missão em 1-2 frases]
 
-> "Você não está vendendo um produto. Está vendendo uma versão melhor do seu cliente."
+### Visão
+> [Declaração de visão em 1-2 frases]
 
-**LEMBRE-SE:** Copywriting é ITERAÇÃO. Teste, meça, ajuste, repita. A copy perfeita não existe na primeira versão - ela é construída com dados e testes A/B.`,
+### Valores
+1. **[Valor 1]**: [Descrição breve]
+2. **[Valor 2]**: [Descrição breve]
+3. **[Valor 3]**: [Descrição breve]
+
+### Proposta de Valor (Elevator Pitch)
+> [Pitch de 30 segundos - quem somos, o que fazemos, para quem, qual resultado]
+
+### Texto para Apresentações/Propostas
+> [Parágrafo institucional formal para documentos]
+
+---
+
+## 🎯 COPY DE CONVERSÃO/VENDAS
+
+### WhatsApp - Mensagens Prontas
+
+**Primeira Abordagem (Lead Frio):**
+> [Mensagem completa de boas-vindas]
+
+**Follow-up 1 (após 24h):**
+> [Mensagem de acompanhamento]
+
+**Follow-up 2 (após 48h):**
+> [Mensagem com urgência leve]
+
+**Quebra de Objeção - Preço:**
+> [Resposta para "está caro"]
+
+**Quebra de Objeção - Tempo:**
+> [Resposta para "vou pensar"]
+
+**Fechamento:**
+> [Mensagem de fechamento com CTA direto]
+
+### Email Marketing
+
+**Assunto de Email (5 opções):**
+1. [Assunto curiosidade]
+2. [Assunto benefício]
+3. [Assunto urgência]
+4. [Assunto personalizado]
+5. [Assunto pergunta]
+
+**Email de Boas-Vindas:**
+> [Email completo com saudação, valor entregue e próximo passo]
+
+**Email de Nutrição:**
+> [Email educativo que gera valor]
+
+**Email de Oferta:**
+> [Email de venda com estrutura AIDA]
+
+### Script de Vendas por Telefone
+> [Script completo: abertura, qualificação, apresentação, objeções, fechamento]
+
+---
+
+## 💡 INSIGHTS E ORIENTAÇÕES ESTRATÉGICAS
+
+### 📌 Palavras de Poder para Usar
+[Lista de 10-15 palavras que ressoam com o público]
+
+### ⚠️ Palavras para Evitar
+[Lista de palavras que podem gerar objeção ou desconexão]
+
+### 🎯 Fórmulas de Copy Recomendadas
+1. **AIDA**: [Como aplicar para este cliente]
+2. **PAS**: [Como aplicar para este cliente]
+3. **BAB**: [Como aplicar para este cliente]
+
+### 📊 Métricas de Sucesso
+- CTR esperado: [X%]
+- Conversão esperada: [X%]
+- Engajamento esperado: [X%]
+
+### 🔄 Próximos Passos
+1. [Ação imediata 1]
+2. [Ação imediata 2]
+3. [Ação imediata 3]`,
         prompt: `Você é um copywriter da Mediagrowth. Gere um documento de COPYWRITING.`
       },
       producao_conteudo: {
@@ -31819,543 +31389,375 @@ VERBO DE AÇÃO + BENEFÍCIO + FACILITADOR
         },
         radarLabels: ['Roteiro', 'Produção', 'Edição', 'Distribuição', 'Performance'],
         maxTokens: 8000,
-        promptAnalise: `Você é um DIRETOR CRIATIVO DE CONTEÚDO da Mediagrowth - especialista em criar ideias VIRAIS, cenários INUSITADOS e conteúdos que FURAM A BOLHA.
+        promptAnalise: `Você é um DIRETOR DE CONTEÚDO SÊNIOR da Mediagrowth especializado em criar conteúdo humanizado e autêntico que conecta marcas com pessoas.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
-- Se não estiver especificado → Use R$ como padrão
+- Se não estiver especificado → Pergunte ou use R$ como padrão
+TODOS os valores monetários do relatório devem seguir a moeda identificada.
 
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho e contexto
-- Use informações das anotações E das análises já geradas anteriormente
 
----
+**🎯 OBJETIVO:**
+Criar um GUIA COMPLETO DE PRODUÇÃO DE CONTEÚDO com textos, copies, cenários, roteiros e ideias práticas para ajudar a empresa a criar conteúdo humanizado e genuíno. Tudo baseado nos dados do negócio.
 
-# 🎬 LABORATÓRIO DE IDEIAS CRIATIVAS
-## Conteúdos que Humanizam, Viralizam e Vendem
-
-**FILOSOFIA:** Conteúdo bom não é sobre você. É sobre como você faz SEU PÚBLICO se sentir.
-
----
-
-## PARTE 1: DNA CRIATIVO DA MARCA
-
-### 🧬 ARQUÉTIPO DE CONTEÚDO
-[Baseado nas anotações, definir: Qual "personagem" a marca deve ser nas redes?]
-
-**Características do Arquétipo:**
-- Estilo de humor: [irônico/leve/sem humor/sarcástico/autodepreciativo]
-- Nível de exposição: [muito pessoal/equilibrado/mais institucional]
-- Energia: [calma e reflexiva/energética e animada/séria e profissional]
-
-### 🎭 O PROTAGONISTA
-
-Quem vai aparecer? Como essa pessoa deve se portar?
-
-**Nome/Papel:** [identificar]
-**Personalidade em câmera:**
-- 3 palavras que definem: [ex: autêntico, direto, bem-humorado]
-- Maneirismos únicos: [o que torna essa pessoa memorável?]
-- Bordões potenciais: [frases que podem virar marca registrada]
-
-### 🔥 A FAGULHA CRIATIVA
-
-O que torna ESTA marca diferente de todas as outras do mesmo nicho?
-> [Identificar o diferencial criativo - a "personalidade" única]
+**IMPORTANTE:**
+- Crie textos REAIS e COMPLETOS, prontos para usar
+- Sugira cenários ESPECÍFICOS baseados no tipo de negócio
+- Foque em conteúdo HUMANIZADO (mostrar pessoas, bastidores, processos)
+- Adapte a linguagem ao público-alvo identificado
+- Dê ideias criativas e práticas
 
 ---
 
-## PARTE 2: IDEIAS DE CENÁRIOS CRIATIVOS
+## 🎯 ESTRATÉGIA DE CONTEÚDO HUMANIZADO
 
-### 🎬 CENÁRIO 1: O CLÁSSICO (Escritório/Espaço de Trabalho)
+### 📌 Conceito Central
+[Definir a essência do conteúdo da marca - qual é a "alma" que deve transparecer]
 
-**Setup Visual:**
-- Fundo: [descrever elementos específicos baseados no negócio]
-- Iluminação: [ring light frontal / luz natural lateral / duas luzes 45°]
-- Elementos de marca: [o que colocar que remete ao negócio]
+### 🎭 Persona do Conteúdo
+[Quem vai aparecer nos vídeos? Qual a personalidade a transmitir?]
 
-**Tipos de conteúdo ideais:**
-- Dicas técnicas diretas
-- Respostas a perguntas
-- Conteúdo educativo formal
-
-**IDEIAS INUSITADAS para este cenário:**
-1. [Ideia criativa específica - descrever situação completa]
-2. [Ideia criativa específica]
-3. [Ideia criativa específica]
+### �️ Tom de Voz nos Vídeos
+- **Formal ou Informal:** [definir]
+- **Técnico ou Acessível:** [definir]
+- **Sério ou Descontraído:** [definir]
+- **Palavras-chave que devem aparecer:** [listar 5-10]
+- **Palavras a evitar:** [listar 3-5]
 
 ---
 
-### 🎬 CENÁRIO 2: O BASTIDOR (Processo/Making Of)
+## 🎬 CENÁRIOS DE GRAVAÇÃO
 
-**Setup Visual:**
-- Mostrar: [o que exatamente do processo pode ser filmado]
-- Ângulos: [POV primeira pessoa / câmera fixa no tripé / seguindo ação]
-- Som: [áudio ambiente real ou narração?]
+### 🏢 Cenário 1: No Escritório/Loja
+**Descrição Visual:**
+[Descrever como montar o cenário - iluminação, fundo, elementos visuais]
 
-**Tipos de conteúdo ideais:**
-- "Um dia na vida de..."
-- "Como fazemos X na prática"
-- "O que ninguém vê por trás de..."
+**O que filmar neste cenário:**
+- [Tipo de conteúdo 1]
+- [Tipo de conteúdo 2]
+- [Tipo de conteúdo 3]
 
-**IDEIAS INUSITADAS para este cenário:**
-1. [Ideia criativa específica]
-2. [Ideia criativa específica]
-3. [Ideia criativa específica]
+**Dicas de Produção:**
+- [Dica técnica 1]
+- [Dica técnica 2]
 
----
+### 🏠 Cenário 2: Em Casa/Home Office
+**Descrição Visual:**
+[Descrever como montar um cenário caseiro profissional]
 
-### 🎬 CENÁRIO 3: O INUSITADO (Locais Inesperados)
+**O que filmar neste cenário:**
+- [Tipo de conteúdo 1]
+- [Tipo de conteúdo 2]
 
-**Lugares que ninguém do nicho usa:**
-- [Local 1 com explicação de por que funcionaria]
-- [Local 2 com explicação]
-- [Local 3 com explicação]
+### 🌳 Cenário 3: Externo/Ao Ar Livre
+**Descrição Visual:**
+[Sugerir locações baseadas no tipo de negócio]
 
-**Por que funciona:** Contraste = Atenção. O cérebro para quando vê algo fora do padrão.
+**O que filmar neste cenário:**
+- [Tipo de conteúdo 1]
+- [Tipo de conteúdo 2]
 
-**IDEIAS para gravar nesses locais:**
-1. [Ideia específica: o que falar + onde + como]
-2. [Ideia específica]
-3. [Ideia específica]
+### 🔧 Cenário 4: Bastidores/Processo
+**Descrição Visual:**
+[Como mostrar o processo de trabalho]
 
----
-
-### 🎬 CENÁRIO 4: O CASEIRO (Humanização Máxima)
-
-**O que mostrar em casa:**
-- [Elemento do cotidiano que conecta com o público]
-- [Momento pessoal que gera identificação]
-- [Situação "real" que quebra a barreira profissional]
-
-**CUIDADOS:** Manter limite saudável - mostrar humanidade sem expor demais.
-
-**IDEIAS para conteúdo caseiro:**
-1. [Ideia específica]
-2. [Ideia específica]
-3. [Ideia específica]
+**O que filmar neste cenário:**
+- [Tipo de conteúdo 1]
+- [Tipo de conteúdo 2]
 
 ---
 
-## PARTE 3: BANCO DE IDEIAS VIRAIS (50 IDEIAS)
+## 📝 ROTEIROS PRONTOS PARA VÍDEOS
 
-### 🔥 CATEGORIA 1: POLÊMICAS LEVES (Furar a bolha)
-*Conteúdos que geram debate saudável e comentários*
+### 🎥 Vídeo 1: Apresentação Pessoal (60-90 segundos)
+**Objetivo:** Criar conexão e apresentar quem está por trás da marca
 
-1. **"A mentira que todo [nicho] conta"**
-   > Roteiro: Hook provocativo → revelar verdade incômoda → dar solução real
-   > Copy AIDA: [escrever completo em 4 linhas]
+**ROTEIRO COMPLETO:**
+\`\`\`
+[CENA 1 - Close no rosto, sorrindo]
+"Oi! Eu sou [nome] e talvez você já tenha me visto por aqui..."
 
-2. **"Eu estava errado sobre [crença do nicho]"**
-   > Roteiro: Admitir erro → mostrar aprendizado → nova perspectiva
-   > Copy AIDA: [escrever completo]
+[CENA 2 - Plano médio, gesticulando]
+"Há [X anos/meses] eu decidi [história de origem da empresa]..."
 
-3. **"Por que eu recuso [tipo de cliente/trabalho]"**
-   > Roteiro: Declaração forte → justificativa → posicionamento
-   > Copy AIDA: [escrever completo]
+[CENA 3 - B-roll do trabalho]
+"Hoje, minha missão é [propósito principal]..."
 
-4. **"O conselho ERRADO que todo iniciante recebe"**
-   > Roteiro: Conselho comum → por que é problemático → o certo
-   > Copy AIDA: [escrever completo]
+[CENA 4 - Olhando para câmera]
+"Se você [problema do público], você está no lugar certo."
 
-5. **"Parei de [ação comum] e [resultado]"**
-   > Roteiro: O que fazia → por que parou → resultado surpreendente
-   > Copy AIDA: [escrever completo]
+[CENA 5 - CTA]
+"Me segue aqui para [benefício que vai entregar]!"
+\`\`\`
 
----
+### � Vídeo 2: Bastidores do Dia a Dia (30-45 segundos)
+**Objetivo:** Humanizar a marca mostrando rotina
 
-### 💡 CATEGORIA 2: SITUAÇÕES INUSITADAS (Criatividade)
-*Conteúdos que ninguém espera de alguém do seu nicho*
+**ROTEIRO COMPLETO:**
+\`\`\`
+[CENA 1 - POV chegando no trabalho]
+"Um dia normal aqui na [empresa]..."
 
-6. **"O que [profissão inesperada] me ensinou sobre [seu nicho]"**
-   > Cenário: [descrever]
-   > Roteiro resumido: [descrever em 3 linhas]
-   > Copy AIDA: [escrever]
+[CENA 2 - Montagem de atividades]
+"Primeira coisa: [atividade]. Depois: [atividade]..."
 
-7. **"Resolvi [problema do nicho] usando técnica de [área totalmente diferente]"**
-   > Cenário: [descrever]
-   > Roteiro resumido: [3 linhas]
-   > Copy AIDA: [escrever]
+[CENA 3 - Momento real]
+"E esse é o momento que eu mais gosto: [momento especial]"
 
-8. **"Se eu perdesse tudo e tivesse que começar do zero, faria isso..."**
-   > Cenário: [descrever]
-   > Roteiro: [3 linhas]
-   > Copy AIDA: [escrever]
+[CENA 4 - Olhar para câmera]
+"E você, como é o seu dia? Me conta nos comentários!"
+\`\`\`
 
-9. **"O dia mais [adjetivo] da minha carreira"**
-   > Cenário: [descrever]
-   > Roteiro: [3 linhas]
-   > Copy AIDA: [escrever]
+### 🎥 Vídeo 3: Dica Rápida/Tutorial (15-30 segundos - Reels)
+**Objetivo:** Entregar valor rápido e gerar salvamentos
 
-10. **"Gravando do [local bizarro] porque [razão criativa]"**
-    > Cenário: [descrever local inusitado que faz sentido para o nicho]
-    > Roteiro: [3 linhas]
-    > Copy AIDA: [escrever]
+**ROTEIRO COMPLETO:**
+\`\`\`
+[HOOK - 3 segundos]
+"[Número] dica que ninguém te conta sobre [tema]..."
 
----
+[DESENVOLVIMENTO - 15 segundos]
+"A maioria das pessoas faz [erro comum]..."
+"Mas o certo é [solução]..."
 
-### 🎭 CATEGORIA 3: HUMANIZAÇÃO (Conexão Real)
-*Conteúdos que mostram a pessoa por trás da marca*
+[CTA - 5 segundos]
+"Salva esse vídeo e me segue para mais dicas!"
+\`\`\`
 
-11. **"3 coisas que eu nunca contei aqui..."**
-    > Cenário: Close, íntimo, pessoal
-    > O que revelar: [3 coisas pessoais mas apropriadas]
-    > Copy AIDA: [escrever]
+### 🎥 Vídeo 4: Depoimento/Case de Sucesso (45-60 segundos)
+**Objetivo:** Prova social e quebra de objeções
 
-12. **"Minha rotina das 6h às 22h (versão REAL)"**
-    > Cenário: Vlog estilo dia-a-dia
-    > Roteiro: [momentos chave para mostrar]
-    > Copy AIDA: [escrever]
+**ROTEIRO COMPLETO:**
+\`\`\`
+[CENA 1 - Apresentação do cliente]
+"Essa é a história do/da [nome do cliente]..."
 
-13. **"O fracasso que me fez quem eu sou"**
-    > Cenário: Pessoal, reflexivo
-    > Roteiro: Erro → consequência → aprendizado → quem virou
-    > Copy AIDA: [escrever]
+[CENA 2 - O problema]
+"Quando chegou aqui, [situação inicial]..."
 
-14. **"Resposta honesta: vale a pena [coisa do nicho]?"**
-    > Cenário: Direto para câmera, sem filtro
-    > Roteiro: Verdade nua e crua com nuances
-    > Copy AIDA: [escrever]
+[CENA 3 - O processo]
+"A gente trabalhou junto em [solução aplicada]..."
 
-15. **"O conselho que eu daria pro eu de 5 anos atrás"**
-    > Cenário: Reflexivo
-    > Roteiro: Contexto passado → erro → conselho → aplicação
-    > Copy AIDA: [escrever]
+[CENA 4 - O resultado]
+"E hoje, [resultado conquistado]!"
 
----
+[CENA 5 - CTA]
+"Quer o mesmo resultado? Link na bio!"
+\`\`\`
 
-### 🎯 CATEGORIA 4: VALOR DIRETO (Salvamentos)
-*Conteúdos que as pessoas PRECISAM salvar*
+### 🎥 Vídeo 5: Resposta a Dúvida Frequente (20-30 segundos)
+**Objetivo:** Quebrar objeções e educar
 
-16. **"Tutorial de 30 segundos: [resolver problema específico]"**
-    > Hook: "Você está fazendo errado..."
-    > Passo a passo ultra-rápido
-    > Copy AIDA: [escrever]
+**ROTEIRO COMPLETO:**
+\`\`\`
+[HOOK com pergunta]
+"Muita gente me pergunta: [pergunta frequente]?"
 
-17. **"Checklist de [tema] que eu uso todo dia"**
-    > Mostrar documento/lista real
-    > Copy AIDA: [escrever]
+[RESPOSTA direta]
+"A resposta é: [resposta clara e objetiva]"
 
-18. **"Os 5 erros que [persona] comete sem perceber"**
-    > Um erro por vez, rápido
-    > Copy AIDA: [escrever]
+[COMPLEMENTO]
+"Isso porque [explicação breve]"
 
-19. **"Isso economiza [X horas/reais] por [semana/mês]"**
-    > Dica prática com resultado quantificável
-    > Copy AIDA: [escrever]
-
-20. **"Ferramenta/Método que mudou minha forma de [ação]"**
-    > Demonstração rápida
-    > Copy AIDA: [escrever]
+[CTA]
+"Tem mais alguma dúvida? Comenta aqui!"
+\`\`\`
 
 ---
 
-### 🎪 CATEGORIA 5: ENTRETENIMENTO INTELIGENTE (Viralização)
-*Conteúdos leves que ainda reforçam autoridade*
+## ✍️ TEXTOS E COPIES PARA LEGENDAS
 
-21. **"POV: Você é um [cliente tipo] no meu escritório"**
-    > Humor com verdade
-    > Copy AIDA: [escrever]
+### 📱 Legenda para Post Institucional
+\`\`\`
+[Texto completo pronto para copiar e colar - 150-200 palavras sobre a empresa, missão, propósito. Linguagem humanizada e conectiva.]
+\`\`\`
 
-22. **"Expectativa vs Realidade de ser [profissão]"**
-    > Formato split screen ou transição
-    > Copy AIDA: [escrever]
+### 📱 Legenda para Bastidores
+\`\`\`
+[Texto curto e descontraído mostrando o lado humano - 50-80 palavras]
+\`\`\`
 
-23. **"Se [situação absurda do nicho] fosse sincero"**
-    > Comédia com crítica
-    > Copy AIDA: [escrever]
+### 📱 Legenda para Dica/Tutorial
+\`\`\`
+[Texto educativo que complementa o vídeo - 100-150 palavras com bullet points]
+\`\`\`
 
-24. **"Ranking das [X] piores coisas de [nicho]"**
-    > Humor + verdade + identificação
-    > Copy AIDA: [escrever]
+### 📱 Legenda para Depoimento
+\`\`\`
+[Texto que contextualiza o case e inclui CTA - 80-120 palavras]
+\`\`\`
 
-25. **"Como eu explico [o que você faz] pra minha avó"**
-    > Simplificação cômica
-    > Copy AIDA: [escrever]
-
----
-
-### 💰 CATEGORIA 6: CONVERSÃO SUTIL (Vendas sem vender)
-*Conteúdos que vendem sem parecer propaganda*
-
-26. **"Por que [cliente] escolheu [produto/serviço] e não a concorrência"**
-    > Depoimento com storytelling
-    > Copy AIDA: [escrever]
-
-27. **"O antes e depois que eu mais me orgulho"**
-    > Case real com emoção
-    > Copy AIDA: [escrever]
-
-28. **"Quanto custa NÃO resolver [problema que você resolve]"**
-    > Cálculo de prejuízo da inação
-    > Copy AIDA: [escrever]
-
-29. **"A pergunta que todo cliente me faz (e a resposta)"**
-    > FAQ em formato storytelling
-    > Copy AIDA: [escrever]
-
-30. **"Resultado de [X meses] trabalhando com [cliente/projeto]"**
-    > Timelapse de transformação
-    > Copy AIDA: [escrever]
+### 📱 Legenda para Conteúdo de Valor
+\`\`\`
+[Texto longo com muito valor - 200-300 palavras no estilo carrossel de texto]
+\`\`\`
 
 ---
 
-### 📱 CATEGORIA 7: TRENDS ADAPTADAS (Surfar a onda)
-*Estruturas virais adaptadas ao nicho*
+## 🎙️ SCRIPTS DE FALA NATURAIS
 
-31. **"[Trend do momento] versão [seu nicho]"**
-    > [Identificar trend atual que pode adaptar]
-    > Como adaptar: [explicar]
+### Frases de Abertura (Hooks)
+1. "Você sabia que [fato surpreendente]?"
+2. "Para de fazer [erro comum] agora!"
+3. "Isso aqui mudou meu [área] completamente..."
+4. "3 coisas que eu queria ter aprendido antes..."
+5. "O segredo que [autoridades] não contam..."
+6. "Se você [problema], assiste até o final..."
+7. "Eu errei muito até descobrir isso..."
+8. "Ninguém fala sobre isso, mas..."
+9. "A verdade sobre [tema polêmico]..."
+10. "Eu vou te ensinar em [X segundos]..."
 
-32. **"Respondendo comentário com [ação dramática]"**
-    > Stitch ou resposta com plot twist
+### Frases de Transição
+1. "Mas calma, tem mais..."
+2. "E aqui vem a parte mais importante..."
+3. "Deixa eu te mostrar na prática..."
+4. "Olha só o que acontece quando..."
+5. "Agora presta atenção nisso aqui..."
 
-33. **"Dueto com [conteúdo viral] dando minha perspectiva"**
-    > Opinião profissional sobre conteúdo popular
-
-34. **"[Áudio viral] aplicado a [seu negócio]"**
-    > Lip sync com contexto do nicho
-
-35. **"POV com [trend atual] do meu dia-a-dia"**
-    > Trend + bastidores
-
----
-
-### 🌟 MAIS 15 IDEIAS RÁPIDAS:
-
-36. "O que eu faria se tivesse apenas R$100 para [objetivo]"
-37. "Red flags de [tipo de cliente/fornecedor/situação]"
-38. "Green flags de [tipo de cliente/fornecedor/situação]"
-39. "Mitos vs Verdades sobre [tema do nicho]"
-40. "Gastei [X] em [curso/ferramenta] e aprendi [insight]"
-41. "A maior objeção que ouço e como respondo"
-42. "Isso é o que diferencia [amador] de [profissional]"
-43. "Mostrando minha tela: como eu [ação do dia-a-dia]"
-44. "Unboxing de [material/ferramenta de trabalho]"
-45. "Tour pelo meu espaço de trabalho"
-46. "O que eu NÃO faço mais (e por quê)"
-47. "Pedindo feedback real para [cliente/colega]"
-48. "Colaboração com [outro profissional do nicho]"
-49. "Respondendo haters/críticas com classe"
-50. "Preview do que vem por aí [gerar antecipação]"
+### Frases de CTA (Call to Action)
+1. "Salva esse vídeo pra não esquecer!"
+2. "Comenta aqui se você também passa por isso!"
+3. "Me segue pra mais dicas como essa!"
+4. "Compartilha com alguém que precisa ver isso!"
+5. "Link na bio pra [ação]!"
+6. "Quer saber mais? Me chama no direct!"
+7. "Deixa o like se fez sentido pra você!"
 
 ---
 
-## PARTE 4: FRASES PRONTAS (MÁXIMO 6 LINHAS CADA)
+## � CALENDÁRIO DE CONTEÚDO SEMANAL
 
-### 🪝 HOOKS MATADORES (Primeiros 3 segundos)
+### Segunda-feira: MOTIVACIONAL/INSTITUCIONAL
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
-**Para Polêmicas:**
-1. "Vou falar uma coisa que talvez te incomode..."
-2. "Isso vai irritar muita gente do meu nicho, mas..."
-3. "Ninguém tem coragem de falar isso, então eu vou..."
-4. "Você foi enganado sobre [tema] esse tempo todo."
-5. "O que vou revelar agora pode mudar tudo pra você."
+### Terça-feira: EDUCATIVO/DICA
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
-**Para Curiosidade:**
-6. "Descobri isso por acidente e mudou tudo..."
-7. "O segredo que os [experts] não querem que você saiba..."
-8. "Existe um padrão que 99% das pessoas não percebem..."
-9. "Você nunca vai adivinhar o que aconteceu quando..."
-10. "A resposta não é o que você está esperando..."
+### Quarta-feira: BASTIDORES
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
-**Para Identificação:**
-11. "Se você [situação comum], para tudo e assiste..."
-12. "Você também passa por isso ou sou só eu?"
-13. "Alguém mais se sente assim ou tô ficando louco?"
-14. "Toda vez que [situação], eu penso [pensamento comum]..."
-15. "Cansei de fingir que [verdade inconveniente]..."
+### Quinta-feira: CONTEÚDO DE VALOR
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
-**Para Autoridade:**
-16. "Depois de [X anos/clientes/resultados], percebi que..."
-17. "O erro que custa mais caro no [nicho] é..."
-18. "Se eu pudesse ensinar só UMA coisa, seria..."
-19. "A diferença entre quem [resultado] e quem não [resultado]..."
-20. "Isso aqui é o que separa [amador] de [profissional]..."
+### Sexta-feira: ENTRETENIMENTO/TRENDS
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
----
+### Sábado: PROVA SOCIAL/DEPOIMENTO
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
-### 🎬 FRASES DE TRANSIÇÃO (Manter atenção)
-
-1. "Mas calma, a melhor parte vem agora..."
-2. "E aqui que a mágica acontece..."
-3. "Presta atenção porque isso é crucial..."
-4. "Agora que você entendeu isso, olha o próximo passo..."
-5. "Mas tem um detalhe que muda tudo..."
-6. "E se eu te contar que tem mais?"
-7. "Só que aqui mora o perigo..."
-8. "Parece simples, mas olha o que acontece..."
-9. "E foi aí que eu descobri o verdadeiro segredo..."
-10. "Mas antes de continuar, preciso te avisar..."
+### Domingo: CONEXÃO PESSOAL
+**Ideia:** [Sugestão específica baseada no negócio]
+**Cenário:** [Qual cenário usar]
+**Roteiro base:** [Estrutura]
 
 ---
 
-### 🎯 CTAs CRIATIVOS (Gerar ação)
+## 💡 BANCO DE IDEIAS DE CONTEÚDO
 
-1. "Salva esse vídeo. Sério. Você vai precisar."
-2. "Comenta 'EU' se você se identificou."
-3. "Manda pra aquela pessoa que PRECISA ver isso."
-4. "Me segue antes que eu mude de ideia e apague."
-5. "Deixa o like se eu ganhei sua atenção."
-6. "Comenta qual desses é seu maior desafio."
-7. "Quer a parte 2? Comenta 'QUERO'."
-8. "Link na bio pra quem quer ir além."
-9. "Te vejo no próximo vídeo. Não esquece de seguir."
-10. "Agora me conta: você já passou por isso?"
+### 🔥 10 Ideias de Vídeos para TOPO DE FUNIL (Alcance)
+1. [Ideia específica com descrição]
+2. [Ideia específica com descrição]
+3. [Ideia específica com descrição]
+4. [Ideia específica com descrição]
+5. [Ideia específica com descrição]
+6. [Ideia específica com descrição]
+7. [Ideia específica com descrição]
+8. [Ideia específica com descrição]
+9. [Ideia específica com descrição]
+10. [Ideia específica com descrição]
 
----
+### 🎯 10 Ideias de Vídeos para MEIO DE FUNIL (Engajamento)
+1. [Ideia específica com descrição]
+2. [Ideia específica com descrição]
+3. [Ideia específica com descrição]
+4. [Ideia específica com descrição]
+5. [Ideia específica com descrição]
+6. [Ideia específica com descrição]
+7. [Ideia específica com descrição]
+8. [Ideia específica com descrição]
+9. [Ideia específica com descrição]
+10. [Ideia específica com descrição]
 
-### 💬 FRASES PARA COPY AIDA (Legendas Prontas)
-
-**Modelo 1 - Problema/Solução:**
-> [A] Você está travado em [problema]?
-> [I] A maioria tenta [solução errada] e continua frustrado.
-> [D] Descobri um método que resolve isso em [tempo].
-> [A] Comenta "QUERO" que te explico nos stories.
-
-**Modelo 2 - Revelação:**
-> [A] Ninguém te conta isso sobre [tema]...
-> [I] Eu passei [X tempo] fazendo errado até descobrir.
-> [D] Agora consigo [resultado] em [tempo menor].
-> [A] Salva esse post. Vai precisar.
-
-**Modelo 3 - História:**
-> [A] Há [X tempo], eu estava [situação ruim].
-> [I] Tentei de tudo: [lista de tentativas].
-> [D] Até que [descoberta] mudou tudo.
-> [A] Quer saber o que fiz? Me segue.
-
-**Modelo 4 - Provocação:**
-> [A] Você acha que sabe tudo sobre [tema]?
-> [I] Aposto que nunca pensou em [ângulo diferente].
-> [D] Quem aplica isso [resultado impressionante].
-> [A] Comenta se fez sentido pra você.
-
-**Modelo 5 - Valor:**
-> [A] Gastei [X reais/horas] pra aprender isso.
-> [I] E vou te entregar de graça em [tempo].
-> [D] Quem aplicou teve [resultado específico].
-> [A] Salva e compartilha com quem precisa.
+### 💰 10 Ideias de Vídeos para FUNDO DE FUNIL (Conversão)
+1. [Ideia específica com descrição]
+2. [Ideia específica com descrição]
+3. [Ideia específica com descrição]
+4. [Ideia específica com descrição]
+5. [Ideia específica com descrição]
+6. [Ideia específica com descrição]
+7. [Ideia específica com descrição]
+8. [Ideia específica com descrição]
+9. [Ideia específica com descrição]
+10. [Ideia específica com descrição]
 
 ---
 
-## PARTE 5: CALENDÁRIO CRIATIVO (4 SEMANAS)
+## 🎨 IDENTIDADE VISUAL DO CONTEÚDO
 
-### 📅 SEMANA 1: Humanização
+### Paleta de Cores para Vídeos
+- Cor primária: [sugerir baseado na marca]
+- Cor secundária: [sugerir]
+- Cor de destaque: [sugerir]
 
-| Dia | Tipo | Ideia Específica | Cenário | Hook |
-|-----|------|------------------|---------|------|
-| Seg | Story | [ideia] | [local] | [hook] |
-| Ter | Reels | [ideia] | [local] | [hook] |
-| Qua | Post | [ideia] | [local] | [hook] |
-| Qui | Reels | [ideia] | [local] | [hook] |
-| Sex | Story | [ideia] | [local] | [hook] |
-| Sáb | Reels | [ideia] | [local] | [hook] |
-| Dom | Post | [ideia] | [local] | [hook] |
+### Fontes Recomendadas
+- Títulos: [sugerir fonte]
+- Textos: [sugerir fonte]
 
-### 📅 SEMANA 2: Autoridade
-
-[Mesmo formato - preencher com ideias específicas]
-
-### 📅 SEMANA 3: Engajamento
-
-[Mesmo formato - preencher com ideias específicas]
-
-### 📅 SEMANA 4: Conversão
-
-[Mesmo formato - preencher com ideias específicas]
+### Elementos Visuais
+- [Elemento 1 que deve aparecer]
+- [Elemento 2 que deve aparecer]
+- [Elemento 3 que deve aparecer]
 
 ---
 
-## PARTE 6: FÓRMULAS DE CONTEÚDO VIRAL
+## ✅ CHECKLIST DE PRODUÇÃO
 
-### 🧪 FÓRMULA 1: CONTRASTE INESPERADO
-**Estrutura:** [Expectativa comum] + [Realidade surpreendente]
-**Exemplo aplicado ao cliente:** [escrever]
-**Roteiro em 5 linhas:** [escrever]
+### Antes de Gravar
+- [ ] Roteiro revisado
+- [ ] Cenário organizado
+- [ ] Iluminação verificada
+- [ ] Áudio testado
+- [ ] Roupa adequada
+- [ ] Maquiagem (se necessário)
 
-### 🧪 FÓRMULA 2: HISTÓRIA EM 3 ATOS
-**Estrutura:** [Problema/Conflito] → [Virada/Descoberta] → [Resolução/Aprendizado]
-**Exemplo aplicado ao cliente:** [escrever]
-**Roteiro em 5 linhas:** [escrever]
+### Durante a Gravação
+- [ ] Olhar para câmera
+- [ ] Falar com energia
+- [ ] Gesticular naturalmente
+- [ ] Gravar takes extras
+- [ ] Fazer B-roll
 
-### 🧪 FÓRMULA 3: O IMPOSSÍVEL
-**Estrutura:** "Como [resultado difícil] em [tempo curto/condição adversa]"
-**Exemplo aplicado ao cliente:** [escrever]
-**Roteiro em 5 linhas:** [escrever]
-
-### 🧪 FÓRMULA 4: A REVELAÇÃO
-**Estrutura:** "O que [autoridades/maioria] não quer que você saiba sobre [tema]"
-**Exemplo aplicado ao cliente:** [escrever]
-**Roteiro em 5 linhas:** [escrever]
-
-### 🧪 FÓRMULA 5: O EXPERIMENTO
-**Estrutura:** "Testei [coisa] por [tempo] e o resultado foi [inesperado]"
-**Exemplo aplicado ao cliente:** [escrever]
-**Roteiro em 5 linhas:** [escrever]
+### Depois de Gravar
+- [ ] Edição alinhada com identidade
+- [ ] Legendas adicionadas
+- [ ] Música de fundo
+- [ ] CTA incluído
+- [ ] Preview antes de postar
 
 ---
 
-## PARTE 7: CHECKLIST DE CONTEÚDO CRIATIVO
+## 🚀 PRÓXIMOS PASSOS
 
-### ✅ ANTES DE CRIAR:
-
-☐ A ideia é específica pro MEU público?
-☐ Resolve um problema ou gera uma emoção?
-☐ Tem um hook nos primeiros 3 segundos?
-☐ É diferente do que TODOS do meu nicho fazem?
-☐ Eu assistiria/leria até o final?
-☐ Gera vontade de comentar/compartilhar?
-
-### ✅ DURANTE A GRAVAÇÃO:
-
-☐ Estou falando COM a pessoa (não para ela)?
-☐ Minha energia está compatível com o conteúdo?
-☐ O cenário reforça a mensagem?
-☐ Frases curtas (máximo 6 linhas faladas)?
-☐ Olho na câmera nos momentos importantes?
-
-### ✅ ANTES DE POSTAR:
-
-☐ O hook prende em 1 segundo?
-☐ Tem CTA claro?
-☐ A legenda complementa (não repete)?
-☐ Hashtags estratégicas?
-☐ Horário ideal de postagem?
-
----
-
-## 🎯 PLANO DE AÇÃO IMEDIATO
-
-### ESTA SEMANA:
-1. **HOJE:** [1 conteúdo específico para gravar com roteiro pronto]
-2. **AMANHÃ:** [1 conteúdo de cenário diferente]
-3. **PRÓXIMOS 3 DIAS:** [3 ideias do banco para testar]
-
-### EXPERIMENTOS PARA TESTAR:
-- [ ] [Experimento 1 com hipótese]
-- [ ] [Experimento 2 com hipótese]
-- [ ] [Experimento 3 com hipótese]
-
-### MÉTRICAS PARA ACOMPANHAR:
-- Qual tipo de conteúdo gera mais SALVAMENTOS?
-- Qual cenário gera mais COMENTÁRIOS?
-- Qual hook gera melhor RETENÇÃO?
-
----
-
-## 💡 LEMBRE-SE:
-
-> "O algoritmo recompensa quem faz as pessoas PARAREM de rolar."
-
-> "Conteúdo perfeito não existe. Conteúdo postado, sim."
-
-> "Sua personalidade é seu diferencial. Ninguém pode copiar VOCÊ."
-
-> "Viralizar é consequência de resolver problemas reais de forma memorável."`,
+1. [Ação imediata 1 - específica para este cliente]
+2. [Ação imediata 2]
+3. [Ação imediata 3]
+4. [Ação imediata 4]
+5. [Ação imediata 5]`,
         prompt: `Você é um diretor de conteúdo da Mediagrowth. Gere um documento de PRODUÇÃO DE CONTEÚDO.`
       },
       criativos_anuncios: {
@@ -32372,13 +31774,6 @@ O que torna ESTA marca diferente de todas as outras do mesmo nicho?
         promptAnalise: `Você é um DIRETOR CRIATIVO SÊNIOR da Mediagrowth especializado em criar anúncios de alta performance para redes sociais.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -32759,13 +32154,6 @@ Gerar um BANCO COMPLETO DE IDEIAS DE CRIATIVOS para anúncios patrocinados, base
         promptAnalise: `Você é um ESPECIALISTA SÊNIOR EM CRM E AUTOMAÇÃO COMERCIAL da Mediagrowth com vasta experiência em implementação de sistemas de vendas de alta performance.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -33195,13 +32583,6 @@ Abraços,
         promptAnalise: `Você é um CONSULTOR SÊNIOR DE VENDAS E PROCESSOS COMERCIAIS da Mediagrowth com 20+ anos de experiência em estruturação de times comerciais de alta performance.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -33675,13 +33056,6 @@ Para dúvidas: [CONTATO]
         promptAnalise: `Você é um ESPECIALISTA SÊNIOR EM CONVERSÃO E LANDING PAGES da Mediagrowth com vasta experiência em criar páginas de alta performance para Google Ads e Meta Ads.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -34188,13 +33562,6 @@ Recebi sua solicitação sobre [INTERESSE].
         promptAnalise: `Você é um ARQUITETO DE INFORMAÇÃO E ESPECIALISTA EM WEBSITES CORPORATIVOS da Mediagrowth com ampla experiência em criar sites de alta conversão.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -34433,13 +33800,6 @@ Visitante → Home → Serviços → Contato → Lead
         promptAnalise: `Você é um BRAND STRATEGIST SÊNIOR da Mediagrowth especializado em criar GUIAS DE PADRONIZAÇÃO completos e práticos.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -34798,13 +34158,6 @@ Entre em contato com a Mediagrowth para esclarecimentos.`,
         promptAnalise: `Você é o DIRETOR DE ESTRATÉGIA da Mediagrowth responsável por criar o PLANO MESTRE ANUAL de marketing e vendas.
 
 **⚠️ REGRA OBRIGATÓRIA DE MOEDA:**
-
-**🚨 REGRA SOBRE DADOS E PROJEÇÕES:**
-- ❌ PROIBIDO afirmar SITUAÇÃO ATUAL sem dados reais (ex: "Você tem X seguidores" sem ter essa info)
-- ✅ PERMITIDO fazer PROJEÇÕES e METAS baseadas no nicho, contexto e anotações
-- Para dados atuais desconhecidos → use "A coletar" ou "Diagnóstico necessário"
-- Para metas e projeções → pode sugerir valores realistas baseados no contexto do negócio
-
 Antes de gerar qualquer valor monetário, VERIFIQUE no bloco "📋 Contexto do Negócio" das anotações qual moeda o cliente utiliza (R$ Real ou $ Dólar/USD). 
 - Se encontrar "dólar", "USD", "dollar" ou "$" no contexto → Use $ (dólar americano)
 - Se encontrar "real", "reais", "BRL" ou "R$" no contexto → Use R$ (real brasileiro)  
@@ -38361,7 +37714,7 @@ ${window.regenerateExtraInstructions}
 Baseie toda sua análise nas anotações acima. Seja ESPECÍFICO e cite informações reais. Use formatação Markdown profissional.`;
 
       // Para Plataforma Mediagrowth, adicionar resumo dos relatórios já gerados
-      let promptFinal = prompt + "\n\n" + (INSTRUCAO_NAO_INVENTAR || "");
+      let promptFinal = prompt;
       const entregavelAtual = window.currentEntregavelId || '';
       if (entregavelAtual === 'plataforma_mediagrowth' && window.USER_DATA && window.USER_DATA.analises) {
         const analises = window.USER_DATA.analises;
@@ -38917,7 +38270,6 @@ Gere conteúdo em formato de texto normal com parágrafos, listas e formatação
       
       // Obter TODAS as notas preenchidas nas semanas de estruturação
       const allNotesContext = typeof getAllFilledNotesContext === 'function' ? getAllFilledNotesContext() : '';
-      const instrucaoNaoInventar = INSTRUCAO_NAO_INVENTAR || "";
       
       // Definir instruções de modo
       const modoInstrucao = modo === 'adicionar' 
@@ -39453,23 +38805,10 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         return;
       }
       
-      // Para landing_pages e website: verificar se já existe análise salva ANTES de pedir info
+      // Se é landing_pages ou website E não tem info coletada E não está pulando o modal
       if (entregaveisComInfoExtra.includes(entregavelId) && !skipInfoModal && !window.landingPagesInfo) {
-        // Verificar se existe análise salva no Firebase
-        const analiseSalvaExistente = !forceRegenerate ? await carregarAnaliseFirebase(entregavelId) : null;
-        
-        if (analiseSalvaExistente && analiseSalvaExistente.insightHtml) {
-          // Existe análise salva! Recuperar landingPagesInfo se houver e continuar
-          console.log('📋 Análise salva encontrada para', entregavelId, '- carregando sem pedir info');
-          if (analiseSalvaExistente.landingPagesInfo) {
-            window.landingPagesInfo = analiseSalvaExistente.landingPagesInfo;
-          }
-          // NÃO retornar aqui - deixar continuar para mostrar a análise
-        } else {
-          // Não existe análise salva - precisa pedir informações
-          abrirModalLandingInfo(entregavelId, forceRegenerate);
-          return;
-        }
+        abrirModalLandingInfo(entregavelId, forceRegenerate);
+        return;
       }
 
       // Salvar ID do entregável e usuário atual (para edição)
@@ -39713,12 +39052,6 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         notesCount: data.notes?.length || 0,
         progressPct: progressPct
       };
-      
-      // Salvar landingPagesInfo junto com a análise para poder recuperar depois
-      if (entregaveisComInfoExtra.includes(entregavelId) && window.landingPagesInfo) {
-        analiseData.landingPagesInfo = window.landingPagesInfo;
-        console.log('💾 Salvando landingPagesInfo junto com análise');
-      }
       
       const saved = await salvarAnaliseFirebase(entregavelId, analiseData);
       
