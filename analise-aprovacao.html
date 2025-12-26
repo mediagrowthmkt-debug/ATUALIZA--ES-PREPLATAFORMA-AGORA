@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Aprovação de Análise • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(16,185,129,0.14), transparent 55%), #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+    }
+    main.container {
+      width: min(1100px, 94vw);
+      padding: 48px 0 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .hidden { display: none !important; }
+    body.modal-open { overflow: hidden; }
+    .loading, .error {
+      margin-top: 120px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #cbd5f5;
+    }
+    .loading .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,.1);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error h2 { margin-bottom: 12px; font-size: 1.6rem; color: #fca5a5; }
+    header.page-header { display: flex; flex-direction: column; gap: 14px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.35);
+      color: #6ee7b7;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      color: #e0f2fe;
+      line-height: 1.2;
+    }
+    .client-info {
+      font-size: 1rem;
+      color: #cbd5f5;
+      margin: 0;
+    }
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 800;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(148,163,184,0.18);
+      color: #e2e8f0;
+    }
+    .status-badge.status-aprovado {
+      background: rgba(22,163,74,0.25);
+      border-color: rgba(74,222,128,0.35);
+      color: #bbf7d0;
+    }
+    .status-badge.status-pendente {
+      background: rgba(148,163,184,0.2);
+      border-color: rgba(148,163,184,0.35);
+      color: #e2e8f0;
+    }
+    .status-message {
+      font-size: .95rem;
+      color: #93c5fd;
+      min-height: 1.2rem;
+    }
+    .status-message.error { color: #fca5a5; }
+    .analise-card {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 28px 60px rgba(15,23,42,0.45);
+    }
+    .analise-card h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .analise-content {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+    }
+    .analise-content h1, .analise-content h2, .analise-content h3, .analise-content h4 {
+      color: #10b981;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    .analise-content h1 { font-size: 1.5rem; }
+    .analise-content h2 { font-size: 1.3rem; }
+    .analise-content h3 { font-size: 1.15rem; }
+    .analise-content h4 { font-size: 1rem; }
+    .analise-content ul, .analise-content ol {
+      padding-left: 1.5em;
+      margin: 0.8em 0;
+    }
+    .analise-content li {
+      margin: 0.4em 0;
+    }
+    .analise-content p {
+      margin: 0.8em 0;
+    }
+    .analise-content strong {
+      color: #6ee7b7;
+    }
+    .analise-content em {
+      color: #a5b4fc;
+    }
+    .analise-content blockquote {
+      border-left: 4px solid #10b981;
+      padding-left: 16px;
+      margin: 1em 0;
+      color: #cbd5f5;
+      font-style: italic;
+    }
+    .analise-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0;
+    }
+    .analise-content th, .analise-content td {
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .analise-content th {
+      background: rgba(16,185,129,0.15);
+      color: #6ee7b7;
+      font-weight: 700;
+    }
+    .analise-content tr:nth-child(even) td {
+      background: rgba(255,255,255,0.02);
+    }
+    .analise-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(148,163,184,0.15);
+      font-size: .85rem;
+      color: #94a3b8;
+    }
+    .analise-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    section.actions {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    section.actions h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #e2e8f0;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn {
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-weight: 700;
+      font-size: 1rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 180px;
+    }
+    .btn:disabled {
+      opacity: .5;
+      cursor: default;
+      transform: none;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+    }
+    .btn.primary:not(:disabled):hover { 
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16,185,129,0.4);
+    }
+    .approved-state {
+      background: rgba(22,163,74,0.15);
+      border: 2px solid rgba(74,222,128,0.5);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .approved-state .icon {
+      font-size: 3rem;
+    }
+    .approved-state h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #6ee7b7;
+    }
+    .approved-state p {
+      margin: 0;
+      font-size: 1rem;
+      color: #cbd5f5;
+    }
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+    .modal-root.hidden { display: none !important; }
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(1.5px);
+    }
+    .modal-content {
+      position: relative;
+      max-width: min(90vw, 400px);
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(16,185,129,0.35);
+      border-radius: 18px;
+      padding: 28px 26px 24px;
+      box-shadow: 0 28px 60px rgba(15,23,42,0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+    .modal-content h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #6ee7b7;
+    }
+    .modal-content p {
+      margin: 0;
+      font-size: .98rem;
+      color: #cbd5f5;
+      line-height: 1.5;
+    }
+    .modal-close-btn {
+      margin-top: 10px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(16,185,129,0.45);
+      background: rgba(16,185,129,0.18);
+      color: #6ee7b7;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter .2s ease;
+    }
+    .modal-close-btn:hover { filter: brightness(1.15); }
+    @media (max-width: 640px) {
+      main.container { padding: 36px 0 60px; gap: 26px; }
+      .action-buttons { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      Carregando análise...
+    </div>
+    <section id="content" class="hidden">
+      <header class="page-header">
+        <span class="badge">📊 Aprovação de Análise</span>
+        <h1 id="analiseTitle">Análise do Entregável</h1>
+        <p id="clientInfo" class="client-info"></p>
+        <div class="status-row">
+          <div id="statusBadge" class="status-badge status-pendente">Pendente Aprovação</div>
+          <span id="statusMessage" class="status-message"></span>
+        </div>
+      </header>
+      
+      <div class="analise-card">
+        <h2>📋 Análise Estratégica</h2>
+        <div id="analiseContent" class="analise-content">
+          <!-- Conteúdo da análise será inserido aqui -->
+        </div>
+        <div class="analise-meta">
+          <span id="analiseDate">📅 Gerado em: --</span>
+          <span id="analiseEntregavel">📦 Entregável: --</span>
+        </div>
+      </div>
+      
+      <section class="actions" id="actionsSection">
+        <h2>Aprovação</h2>
+        <p style="color:#cbd5f5;margin:0 0 12px;font-size:.95rem;">
+          Após revisar a análise acima, clique no botão abaixo para aprovar. Esta ação não pode ser desfeita.
+        </p>
+        <div class="action-buttons">
+          <button id="approveButton" class="btn primary" type="button">✅ Aprovar Análise</button>
+        </div>
+      </section>
+      
+      <div id="approvedState" class="approved-state hidden">
+        <span class="icon">✅</span>
+        <h3>Análise Aprovada!</h3>
+        <p>Obrigado pela aprovação. O time MediaGrowth foi notificado.</p>
+        <p id="approvedDate" style="font-size:.85rem;color:#94a3b8;margin-top:8px;"></p>
+      </div>
+    </section>
+    <section id="error" class="error hidden">
+      <h2>Link indisponível</h2>
+      <p id="errorMessage">Não foi possível carregar este link de aprovação.</p>
+    </section>
+  </main>
+
+  <div id="successModal" class="modal-root hidden" aria-hidden="true">
+    <div class="modal-overlay" data-modal-overlay></div>
+    <div class="modal-content" role="alertdialog" aria-modal="true">
+      <h3>🎉 Aprovado com Sucesso!</h3>
+      <p>Sua aprovação foi registrada. O time MediaGrowth dará continuidade ao processo.</p>
+      <button id="successModalClose" type="button" class="modal-close-btn">Fechar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const token = qs.get('token');
+
+    const loadingEl = document.getElementById('loading');
+    const contentEl = document.getElementById('content');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const analiseTitleEl = document.getElementById('analiseTitle');
+    const clientInfoEl = document.getElementById('clientInfo');
+    const statusBadgeEl = document.getElementById('statusBadge');
+    const statusMessageEl = document.getElementById('statusMessage');
+    const analiseContentEl = document.getElementById('analiseContent');
+    const analiseDateEl = document.getElementById('analiseDate');
+    const analiseEntregavelEl = document.getElementById('analiseEntregavel');
+    const approveBtn = document.getElementById('approveButton');
+    const actionsSection = document.getElementById('actionsSection');
+    const approvedState = document.getElementById('approvedState');
+    const approvedDateEl = document.getElementById('approvedDate');
+    const successModalEl = document.getElementById('successModal');
+    const successModalCloseBtn = document.getElementById('successModalClose');
+    const successModalOverlay = successModalEl?.querySelector('[data-modal-overlay]');
+
+    function showError(msg) {
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = msg;
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return '--';
+      const date = new Date(isoString);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const ano = date.getFullYear();
+      const hora = date.getHours().toString().padStart(2, '0');
+      const min = date.getMinutes().toString().padStart(2, '0');
+      return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+    }
+
+    const ENTREGAVEL_TITLES = {
+      diagnostico_estrategico: 'Diagnóstico Estratégico Completo',
+      direcionamento_metas: 'Direcionamento Estratégico e Metas',
+      analise_concorrencia: 'Análise de Concorrência e Mercado',
+      matriz_cdt: 'Matriz CDT',
+      puv: 'PUV - Proposta Única de Valor',
+      pai: 'PAI - Público Alvo Ideal',
+      anuncios_pagos: 'Estruturação de Anúncios Pagos',
+      site_seo: 'Estruturação Site & SEO',
+      redes_sociais: 'Estratégias para Redes Sociais',
+      copywriting: 'Copywriting Estratégico',
+      producao_conteudo: 'Produção de Conteúdo',
+      criativos_anuncios: 'Criativos de Anúncios',
+      crm_automacoes: 'CRM e Automações',
+      processo_comercial: 'Processo Comercial',
+      landing_pages: 'Landing Pages',
+      website: 'Website',
+      padronizacao_visual: 'Padronização Visual',
+      plataforma_mediagrowth: 'Plataforma MediaGrowth'
+    };
+
+    if (!token) {
+      showError('O link informado é inválido ou expirou. Solicite um novo link ao time da MediaGrowth.');
+      throw new Error('Token ausente');
+    }
+
+    const app = getApps().find(a => a.name === 'analise-approval') || initializeApp(firebaseConfig, 'analise-approval');
+    const db = getFirestore(app);
+    const approvalRef = doc(db, 'analiseApprovals', token);
+
+    let state = {
+      approvalData: null,
+      busy: false
+    };
+
+    async function init() {
+      try {
+        const snap = await getDoc(approvalRef);
+        if (!snap.exists()) {
+          showError('Este link de aprovação não existe ou foi removido.');
+          return;
+        }
+
+        state.approvalData = snap.data();
+        const data = state.approvalData;
+
+        // Preencher título
+        const entregavelTitle = ENTREGAVEL_TITLES[data.entregavelId] || data.entregavelId || 'Entregável';
+        analiseTitleEl.textContent = `📊 Análise: ${entregavelTitle}`;
+        document.title = `Aprovação: ${entregavelTitle} • MediaGrowth`;
+
+        // Preencher info do cliente
+        if (data.clientName) {
+          clientInfoEl.textContent = `Cliente: ${data.clientName}`;
+        }
+
+        // Preencher conteúdo da análise
+        if (data.insightHtml) {
+          analiseContentEl.innerHTML = data.insightHtml;
+        } else {
+          analiseContentEl.innerHTML = '<p style="color:#94a3b8;font-style:italic;">Conteúdo da análise não disponível.</p>';
+        }
+
+        // Preencher meta
+        analiseDateEl.textContent = `📅 Gerado em: ${formatDate(data.generatedAt)}`;
+        analiseEntregavelEl.textContent = `📦 Entregável: ${entregavelTitle}`;
+
+        // Verificar se já foi aprovado
+        if (data.approved) {
+          showApprovedState(data.approvedAt);
+        }
+
+        // Mostrar conteúdo
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+
+      } catch (err) {
+        console.error('Erro ao carregar aprovação:', err);
+        showError('Ocorreu um erro ao carregar a análise. Tente novamente mais tarde.');
+      }
+    }
+
+    function showApprovedState(approvedAt) {
+      actionsSection.classList.add('hidden');
+      approvedState.classList.remove('hidden');
+      statusBadgeEl.textContent = '✅ Aprovado';
+      statusBadgeEl.classList.remove('status-pendente');
+      statusBadgeEl.classList.add('status-aprovado');
+      if (approvedAt) {
+        approvedDateEl.textContent = `Aprovado em: ${formatDate(approvedAt)}`;
+      }
+    }
+
+    function showSuccessModal() {
+      successModalEl.classList.remove('hidden');
+      successModalEl.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+    }
+
+    function hideSuccessModal() {
+      successModalEl.classList.add('hidden');
+      successModalEl.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    async function handleApprove() {
+      if (state.busy) return;
+      state.busy = true;
+      approveBtn.disabled = true;
+      approveBtn.textContent = 'Aprovando...';
+
+      try {
+        const now = new Date().toISOString();
+        
+        // Atualizar documento de aprovação
+        await updateDoc(approvalRef, {
+          approved: true,
+          approvedAt: now,
+          approvedTimestamp: serverTimestamp()
+        });
+
+        // Atualizar a análise no documento do usuário (se tiver userId)
+        if (state.approvalData.userId && state.approvalData.entregavelId) {
+          try {
+            const analiseRef = doc(db, 'usuarios', state.approvalData.userId, 'analises', state.approvalData.entregavelId);
+            await updateDoc(analiseRef, {
+              clientApproved: true,
+              clientApprovedAt: now
+            });
+          } catch (e) {
+            console.warn('Não foi possível atualizar análise do usuário:', e);
+          }
+        }
+
+        showApprovedState(now);
+        showSuccessModal();
+
+      } catch (err) {
+        console.error('Erro ao aprovar:', err);
+        statusMessageEl.textContent = 'Erro ao aprovar. Tente novamente.';
+        statusMessageEl.classList.add('error');
+        approveBtn.disabled = false;
+        approveBtn.textContent = '✅ Aprovar Análise';
+      }
+
+      state.busy = false;
+    }
+
+    // Event listeners
+    approveBtn?.addEventListener('click', handleApprove);
+    successModalCloseBtn?.addEventListener('click', hideSuccessModal);
+    successModalOverlay?.addEventListener('click', hideSuccessModal);
+
+    // Inicializar
+    init();
+  </script>
+</body>
+</html>

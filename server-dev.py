@@ -18,10 +18,16 @@ class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     
     def do_GET(self):
         """Override GET para redirecionar raiz e evitar 404"""
+        # Remover query string para verificar se o arquivo existe
+        path_without_query = self.path.split('?')[0]
+        
         # Se tentar acessar /mediagrowthmkt ou qualquer path que não existe, redireciona para index.html
         if self.path in ['/', '/index.html', '/index']:
             self.path = '/index.html'
-        elif not os.path.exists('.' + unquote(self.path)):
+        elif os.path.exists('.' + unquote(path_without_query)):
+            # Arquivo existe, serve normalmente (mantém query string para o JS processar)
+            pass
+        elif not os.path.exists('.' + unquote(path_without_query)):
             # Se o arquivo não existe, redireciona para index.html (SPA behavior)
             self.path = '/index.html'
         

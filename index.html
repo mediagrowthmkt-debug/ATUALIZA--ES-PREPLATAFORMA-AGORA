@@ -2682,6 +2682,64 @@ html, body{ -webkit-text-size-adjust: 100%; }
       padding:8px 10px;
     }
 
+    /* Botão Copiar Link Aprovação */
+    .entregavel-copiar-link-btn{
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      border:none;
+      color:#fff;
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:.75rem;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .3s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      flex:1;
+    }
+    .entregavel-copiar-link-btn:hover{
+      background:linear-gradient(135deg,#8b5cf6,#a855f7);
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(99,102,241,.4);
+    }
+    .entregavel-copiar-link-btn:active{
+      transform:translateY(0);
+    }
+    .entregavel-copiar-link-btn.loading{
+      pointer-events:none;
+      opacity:.7;
+    }
+    .entregavel-copiar-link-btn.copied{
+      background:linear-gradient(135deg,#10b981,#059669);
+    }
+
+    /* Indicador de Aprovado do Cliente */
+    .entregavel-card.cliente-aprovado{
+      border:2px solid #22c55e !important;
+      box-shadow:0 0 20px rgba(34,197,94,.3), inset 0 0 0 1px rgba(34,197,94,.2);
+    }
+    .entregavel-card.cliente-aprovado::before{
+      content:'✅ Aprovado pelo Cliente';
+      position:absolute;
+      top:-12px;
+      left:50%;
+      transform:translateX(-50%);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#fff;
+      font-size:.7rem;
+      font-weight:800;
+      padding:4px 12px;
+      border-radius:999px;
+      white-space:nowrap;
+      z-index:10;
+      box-shadow:0 4px 12px rgba(34,197,94,.3);
+    }
+    .entregavel-card{
+      position:relative;
+    }
+
     /* Modal Análise Gráficos */
     .analise-modal{
       position:fixed;
@@ -8214,6 +8272,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('diagnostico_estrategico')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('diagnostico_estrategico', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8234,6 +8293,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('direcionamento_metas')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('direcionamento_metas', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8254,6 +8314,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('analise_concorrencia')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('analise_concorrencia', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8274,6 +8335,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('matriz_cdt')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('matriz_cdt', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8293,6 +8355,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('puv')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('puv', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8313,6 +8376,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('pai')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('pai', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8333,6 +8397,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('anuncios_pagos')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('anuncios_pagos', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8354,6 +8419,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('site_seo')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('site_seo', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8374,6 +8440,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('redes_sociais')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('redes_sociais', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8394,6 +8461,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('copywriting')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('copywriting', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8413,6 +8481,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('producao_conteudo')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('producao_conteudo', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8433,6 +8502,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('criativos_anuncios')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('criativos_anuncios', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8454,6 +8524,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('crm_automacoes')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('crm_automacoes', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8474,6 +8545,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('processo_comercial')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('processo_comercial', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8493,6 +8565,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('landing_pages')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('landing_pages', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8513,6 +8586,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('website')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('website', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8532,6 +8606,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('padronizacao_visual')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('padronizacao_visual', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -8558,6 +8633,7 @@ function renderReviewNotes(post){
               <div class="entregavel-buttons-row">
                 
                 <button class="entregavel-analise-btn" onclick="abrirAnaliseEntregavel('plataforma_mediagrowth')">📊 Análise</button>
+                <button class="entregavel-copiar-link-btn" onclick="copiarLinkAprovacao('plataforma_mediagrowth', this)">🔗 Copiar Link</button>
               </div>
             </div>
           </div>
@@ -39939,6 +40015,183 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
     window.abrirAnaliseEntregavel = abrirAnaliseEntregavel;
     window.regenerarAnalise = regenerarAnalise;
     window.executarRegeneracao = executarRegeneracao;
+
+    // ===== FUNÇÃO COPIAR LINK DE APROVAÇÃO DE ANÁLISE =====
+    const ENTREGAVEL_TITLES_COPY = {
+      diagnostico_estrategico: 'Diagnóstico Estratégico Completo',
+      direcionamento_metas: 'Direcionamento Estratégico e Metas',
+      analise_concorrencia: 'Análise de Concorrência e Mercado',
+      matriz_cdt: 'Matriz CDT',
+      puv: 'PUV - Proposta Única de Valor',
+      pai: 'PAI - Público Alvo Ideal',
+      anuncios_pagos: 'Estruturação de Anúncios Pagos',
+      site_seo: 'Estruturação Site & SEO',
+      redes_sociais: 'Estratégias para Redes Sociais',
+      copywriting: 'Copywriting Estratégico',
+      producao_conteudo: 'Produção de Conteúdo',
+      criativos_anuncios: 'Criativos de Anúncios',
+      crm_automacoes: 'CRM e Automações',
+      processo_comercial: 'Processo Comercial',
+      landing_pages: 'Landing Pages',
+      website: 'Website',
+      padronizacao_visual: 'Padronização Visual',
+      plataforma_mediagrowth: 'Plataforma MediaGrowth'
+    };
+
+    async function copiarLinkAprovacao(entregavelId, btnElement) {
+      if (!entregavelId) {
+        alert('Entregável não especificado.');
+        return;
+      }
+
+      // Verificar se existe análise salva para este entregável
+      const userData = USER_DATA || window.USER_DATA || {};
+      const analises = userData?.analises || {};
+      const analise = analises[entregavelId];
+
+      if (!analise || !analise.insightHtml) {
+        alert('Nenhuma análise encontrada para este entregável. Gere a análise primeiro clicando no botão "Análise".');
+        return;
+      }
+
+      // Mudar visual do botão para loading
+      if (btnElement) {
+        btnElement.classList.add('loading');
+        btnElement.innerHTML = '⏳ Gerando...';
+      }
+
+      try {
+        // Determinar o UID do cliente (para atualizar a análise dele)
+        let clientUid;
+        if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+          clientUid = clientDocPathParts[1];
+        } else {
+          clientUid = auth.currentUser?.uid;
+        }
+
+        // O UID para as regras do Firebase deve ser o do usuário autenticado atual
+        const authUid = auth.currentUser?.uid;
+
+        if (!authUid) {
+          throw new Error('Usuário não autenticado');
+        }
+
+        // Gerar token único para o link de aprovação
+        const token = 'aa_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+
+        // Obter nome do cliente se disponível
+        const clientName = userData?.nome || userData?.empresa || userData?.displayName || '';
+
+        // Criar documento de aprovação no Firebase
+        // IMPORTANTE: 'uid' deve ser o auth.currentUser.uid para satisfazer as regras
+        const approvalData = {
+          token: token,
+          uid: authUid,
+          entregavelId: entregavelId,
+          entregavelTitle: ENTREGAVEL_TITLES_COPY[entregavelId] || entregavelId,
+          insightHtml: analise.insightHtml,
+          generatedAt: analise.generatedAt || new Date().toISOString(),
+          userId: clientUid,
+          clientName: clientName,
+          approved: false,
+          approvedAt: null,
+          createdAt: new Date().toISOString()
+        };
+
+        // Salvar no Firebase
+        const approvalRef = doc(db, 'analiseApprovals', token);
+        await setDoc(approvalRef, approvalData);
+
+        // Construir URL de aprovação
+        const baseUrl = window.location.origin;
+        const approvalUrl = baseUrl + '/analise-aprovacao.html?token=' + token;
+
+        // Copiar para área de transferência
+        await navigator.clipboard.writeText(approvalUrl);
+
+        // Feedback visual de sucesso
+        if (btnElement) {
+          btnElement.classList.remove('loading');
+          btnElement.classList.add('copied');
+          btnElement.innerHTML = '✅ Copiado!';
+          
+          setTimeout(() => {
+            btnElement.classList.remove('copied');
+            btnElement.innerHTML = '🔗 Copiar Link';
+          }, 2500);
+        }
+
+        // Toast de confirmação
+        mostrarToast('Link de aprovação copiado! 📋');
+
+      } catch (error) {
+        console.error('Erro ao gerar link de aprovação:', error);
+        
+        if (btnElement) {
+          btnElement.classList.remove('loading');
+          btnElement.innerHTML = '❌ Erro';
+          
+          setTimeout(() => {
+            btnElement.innerHTML = '🔗 Copiar Link';
+          }, 2000);
+        }
+
+        alert('Erro ao gerar link de aprovação: ' + error.message);
+      }
+    }
+
+    // Função auxiliar para mostrar toast
+    function mostrarToast(msg) {
+      let toast = document.querySelector('.mg-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'mg-toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    // Exportar função globalmente
+    window.copiarLinkAprovacao = copiarLinkAprovacao;
+
+    // ===== VERIFICAR E MARCAR ENTREGÁVEIS APROVADOS PELO CLIENTE =====
+    async function verificarEntregaveisAprovados() {
+      try {
+        const userData = USER_DATA || window.USER_DATA || {};
+        const analises = userData?.analises || {};
+
+        // Iterar sobre todos os entregáveis e verificar aprovações
+        for (const entregavelId in analises) {
+          const analise = analises[entregavelId];
+          if (analise && analise.clientApproved) {
+            marcarEntregavelAprovado(entregavelId);
+          }
+        }
+      } catch (error) {
+        console.warn('Erro ao verificar entregáveis aprovados:', error);
+      }
+    }
+
+    function marcarEntregavelAprovado(entregavelId) {
+      const card = document.querySelector(`.entregavel-card[data-entregavel="${entregavelId}"]`);
+      if (card && !card.classList.contains('cliente-aprovado')) {
+        card.classList.add('cliente-aprovado');
+        console.log(`✅ Entregável "${entregavelId}" marcado como aprovado pelo cliente`);
+      }
+    }
+
+    // Exportar funções
+    window.verificarEntregaveisAprovados = verificarEntregaveisAprovados;
+    window.marcarEntregavelAprovado = marcarEntregavelAprovado;
+
+    // Verificar entregáveis aprovados após carregar dados do usuário
+    setTimeout(() => {
+      verificarEntregaveisAprovados();
+    }, 3000);
 
     // Event listeners do modal de análise
     document.addEventListener('DOMContentLoaded', function() {

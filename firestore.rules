@@ -391,5 +391,35 @@ service cloud.firestore {
       // Dono pode apagar
       allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
+
+    /* ✅ Links públicos de aprovação de ANÁLISE de entregáveis */
+    match /analiseApprovals/{token} {
+      // Qualquer pessoa com o link pode visualizar
+      allow get: if true;
+      allow list: if false;
+      // Somente usuário autenticado pode criar (com uid próprio ou como admin para cliente)
+      allow create: if isSignedIn()
+                    && request.resource.data.token == token
+                    && request.resource.data.entregavelId is string
+                    && (
+                      request.resource.data.uid == request.auth.uid
+                      || isAdmin()
+                    );
+      // Atualização: usuário autenticado (dono ou admin) ou anônimo (para aprovar)
+      allow update: if
+        (isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin()))
+        ||
+        (
+          request.auth == null
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.entregavelId == resource.data.entregavelId
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly([
+            'approved','approvedAt','approvedTimestamp','updatedAt'
+          ])
+        );
+      // Dono ou admin pode apagar
+      allow delete: if isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin());
+    }
   }
 }
