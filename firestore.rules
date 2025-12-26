@@ -392,6 +392,25 @@ service cloud.firestore {
       allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
 
+    /* ✅ Links públicos de RELATÓRIO COMPLETO compartilhado - v2 26/12/2025 */
+    match /relatoriosCompartilhados/{token} {
+      // Qualquer pessoa com o link pode visualizar (público)
+      allow get: if true;
+      allow list: if false;
+      // Somente usuário autenticado pode criar
+      allow create: if isSignedIn()
+                    && request.resource.data.token == token
+                    && request.resource.data.analises is map
+                    && (
+                      request.resource.data.uid == request.auth.uid
+                      || isAdmin()
+                    );
+      // Usuário autenticado (dono ou admin) pode atualizar
+      allow update: if isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin());
+      // Dono ou admin pode apagar
+      allow delete: if isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin());
+    }
+
     /* ✅ Links públicos de aprovação de ANÁLISE de entregáveis */
     match /analiseApprovals/{token} {
       // Qualquer pessoa com o link pode visualizar

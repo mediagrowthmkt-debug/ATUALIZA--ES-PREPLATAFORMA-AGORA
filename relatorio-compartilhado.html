@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Relatório de Análises • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --sidebar-width: 280px;
+      --header-height: 70px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(16,185,129,0.14), transparent 55%), #0f172a;
+      color: #f8fafc;
+    }
+    .hidden { display: none !important; }
+    
+    /* Loading e Erro */
+    .loading, .error {
+      margin-top: 120px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #cbd5f5;
+    }
+    .loading .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,.1);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error h2 { margin-bottom: 12px; font-size: 1.6rem; color: #fca5a5; }
+
+    /* Header Fixo */
+    .main-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #e2e8f0;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .client-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+    .report-date {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-header {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-pdf {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    .btn-pdf:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Layout Principal */
+    .main-container {
+      display: flex;
+      padding-top: var(--header-height);
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - var(--header-height));
+      background: rgba(15, 23, 42, 0.98);
+      border-right: 1px solid rgba(148, 163, 184, 0.15);
+      overflow-y: auto;
+      z-index: 900;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .sidebar-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin: 0;
+    }
+    .sidebar-nav {
+      padding: 12px 0;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      text-decoration: none;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover {
+      background: rgba(148, 163, 184, 0.08);
+      color: #f1f5f9;
+    }
+    .nav-item.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border-left-color: #10b981;
+    }
+    .nav-item-icon {
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+    }
+    .nav-item-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-item-number {
+      font-size: 0.7rem;
+      background: rgba(100, 116, 139, 0.3);
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: #94a3b8;
+    }
+    .nav-item.active .nav-item-number {
+      background: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    /* Conteúdo Principal */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 40px;
+      max-width: 100%;
+    }
+
+    /* Seções do Relatório */
+    .report-section {
+      margin-bottom: 60px;
+      scroll-margin-top: calc(var(--header-height) + 20px);
+    }
+    .section-header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      margin-right: 14px;
+    }
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+    .section-meta {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    /* Conteúdo da Análise */
+    .analysis-content {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 16px;
+      padding: 32px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .analysis-content h1,
+    .analysis-content h2,
+    .analysis-content h3,
+    .analysis-content h4 {
+      color: #f1f5f9;
+      margin-top: 1.5em;
+      margin-bottom: 0.8em;
+      font-weight: 700;
+    }
+    .analysis-content h1:first-child,
+    .analysis-content h2:first-child,
+    .analysis-content h3:first-child {
+      margin-top: 0;
+    }
+    .analysis-content h1 { font-size: 1.5rem; }
+    .analysis-content h2 { font-size: 1.3rem; color: #6ee7b7; }
+    .analysis-content h3 { font-size: 1.15rem; color: #a5b4fc; }
+    .analysis-content h4 { font-size: 1rem; color: #94a3b8; }
+    .analysis-content p {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 1em;
+    }
+    .analysis-content ul, .analysis-content ol {
+      color: #cbd5e1;
+      padding-left: 1.5em;
+      margin-bottom: 1em;
+    }
+    .analysis-content li {
+      margin-bottom: 0.5em;
+      line-height: 1.65;
+    }
+    .analysis-content strong {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    .analysis-content em {
+      color: #6ee7b7;
+      font-style: italic;
+    }
+    .analysis-content blockquote {
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.08);
+      padding: 16px 20px;
+      margin: 1.5em 0;
+      border-radius: 0 12px 12px 0;
+    }
+    .analysis-content code {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .analysis-content pre {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    .analysis-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5em 0;
+    }
+    .analysis-content th,
+    .analysis-content td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .analysis-content th {
+      background: rgba(99, 102, 241, 0.1);
+      color: #a5b4fc;
+      font-weight: 600;
+    }
+
+    /* Capa Inicial */
+    .cover-section {
+      text-align: center;
+      padding: 60px 40px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
+      border-radius: 24px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      margin-bottom: 60px;
+    }
+    .cover-logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 24px;
+    }
+    .cover-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      margin: 0 0 12px;
+    }
+    .cover-subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin: 0 0 24px;
+    }
+    .cover-client {
+      display: inline-block;
+      padding: 10px 24px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 999px;
+      color: #6ee7b7;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .cover-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #10b981;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Responsivo */
+    @media (max-width: 1024px) {
+      :root {
+        --sidebar-width: 260px;
+      }
+      .main-content {
+        padding: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+      }
+      .header-info {
+        display: none;
+      }
+      .cover-title {
+        font-size: 1.6rem;
+      }
+      .cover-stats {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .section-title {
+        font-size: 1.3rem;
+      }
+      .analysis-content {
+        padding: 20px;
+      }
+      .nav-item {
+        padding: 12px 16px;
+      }
+    }
+
+    /* Overlay para mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 850;
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
+
+    /* Imagens de Entregáveis */
+    .entregavel-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 16px 16px 0 0;
+      margin-bottom: -16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div>Carregando relatório...</div>
+  </div>
+
+  <!-- Erro -->
+  <div id="error" class="error hidden">
+    <h2>❌ Erro</h2>
+    <p id="errorMessage">Não foi possível carregar o relatório.</p>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div id="content" class="hidden">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+        <div class="logo">
+          <div class="logo-icon">📊</div>
+          <span class="logo-text">MediaGrowth</span>
+        </div>
+        <div class="header-info">
+          <span class="client-name" id="headerClientName">Cliente</span>
+          <span class="report-date" id="headerDate">Relatório de Análises</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-header btn-pdf" onclick="window.print()">
+          📥 Baixar PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Container Principal -->
+    <div class="main-container">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">📑 Sumário</h2>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav">
+          <!-- Navegação dinâmica -->
+        </nav>
+      </aside>
+
+      <!-- Conteúdo -->
+      <main class="main-content" id="mainContent">
+        <!-- Capa -->
+        <section class="cover-section" id="coverSection">
+          <div class="cover-logo">📊</div>
+          <h1 class="cover-title">Relatório Completo de Análises</h1>
+          <p class="cover-subtitle">Análise estratégica personalizada para seu negócio</p>
+          <div class="cover-client" id="coverClient">Cliente</div>
+          <div class="cover-stats">
+            <div class="stat-item">
+              <div class="stat-value" id="statAnalises">0</div>
+              <div class="stat-label">Análises</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statDate">--</div>
+              <div class="stat-label">Data</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seções de Análise (dinâmicas) -->
+        <div id="analysisContainer">
+          <!-- Conteúdo dinâmico -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBT2TWGHcNWD5iuQe7_nSAhBuhDN3srdlY",
+      authDomain: "mediagrowth-6e862.firebaseapp.com",
+      projectId: "mediagrowth-6e862",
+      storageBucket: "mediagrowth-6e862.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const token = qs.get('token');
+
+    const loadingEl = document.getElementById('loading');
+    const contentEl = document.getElementById('content');
+    const errorEl = document.getElementById('error');
+    const errorMessageEl = document.getElementById('errorMessage');
+
+    // Imagens dos entregáveis
+    const ENTREGAVEL_IMAGES = {
+      diagnostico_estrategico: 'images/entregaveis/diagnostico_estrategico.png',
+      direcionamento_metas: 'images/entregaveis/direcionamento_metas.png',
+      analise_concorrencia: 'images/entregaveis/analise_concorrencia.png',
+      matriz_cdt: 'images/entregaveis/matriz_cdt.png',
+      puv: 'images/entregaveis/puv.png',
+      pai: 'images/entregaveis/pai.png',
+      anuncios_pagos: 'images/entregaveis/anuncios_pagos.png',
+      site_seo: 'images/entregaveis/site_seo.png',
+      redes_sociais: 'images/entregaveis/redes_sociais.png',
+      copywriting: 'images/entregaveis/copywriting.png',
+      producao_conteudo: 'images/entregaveis/producao_conteudo.png',
+      criativos_anuncios: 'images/entregaveis/criativos_anuncios.png',
+      crm_automacoes: 'images/entregaveis/crm_automacoes.png',
+      processo_comercial: 'images/entregaveis/processo_comercial.png',
+      landing_pages: 'images/entregaveis/landing_pages.png',
+      website: 'images/entregaveis/website.png',
+      padronizacao_visual: 'images/entregaveis/padronizacao_visual.png',
+      plataforma_mediagrowth: 'images/entregaveis/plataforma_mediagrowth.png'
+    };
+
+    // Ícones dos entregáveis
+    const ENTREGAVEL_ICONS = {
+      diagnostico_estrategico: '🎯',
+      direcionamento_metas: '🧭',
+      analise_concorrencia: '🔍',
+      matriz_cdt: '📊',
+      puv: '💎',
+      pai: '👥',
+      anuncios_pagos: '📢',
+      site_seo: '🌐',
+      redes_sociais: '📱',
+      copywriting: '✍️',
+      producao_conteudo: '🎬',
+      criativos_anuncios: '🎨',
+      crm_automacoes: '⚙️',
+      processo_comercial: '💼',
+      landing_pages: '📄',
+      website: '🖥️',
+      padronizacao_visual: '🎭',
+      plataforma_mediagrowth: '🚀'
+    };
+
+    function showError(msg) {
+      loadingEl.classList.add('hidden');
+      contentEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorMessageEl.textContent = msg;
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return '--';
+      const date = new Date(isoString);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const ano = date.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return '--';
+      const date = new Date(isoString);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const ano = date.getFullYear();
+      const hora = date.getHours().toString().padStart(2, '0');
+      const min = date.getMinutes().toString().padStart(2, '0');
+      return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+    }
+
+    if (!token) {
+      showError('O link informado é inválido ou expirou. Solicite um novo link.');
+      throw new Error('Token ausente');
+    }
+
+    const app = getApps().find(a => a.name === 'relatorio-compartilhado') || initializeApp(firebaseConfig, 'relatorio-compartilhado');
+    const db = getFirestore(app);
+    const relatorioRef = doc(db, 'relatoriosCompartilhados', token);
+
+    async function init() {
+      try {
+        const snap = await getDoc(relatorioRef);
+        if (!snap.exists()) {
+          showError('Este link de relatório não existe ou foi removido.');
+          return;
+        }
+
+        const data = snap.data();
+        const analises = data.analises || {};
+        const clientName = data.clientName || 'Cliente';
+        const createdAt = data.createdAt;
+
+        // Atualizar header
+        document.getElementById('headerClientName').textContent = clientName;
+        document.getElementById('headerDate').textContent = `Gerado em ${formatDate(createdAt)}`;
+
+        // Atualizar capa
+        document.getElementById('coverClient').textContent = clientName;
+        document.getElementById('statAnalises').textContent = Object.keys(analises).length;
+        document.getElementById('statDate').textContent = formatDate(createdAt);
+
+        // Ordenar entregáveis pela ordem definida
+        const ORDER = [
+          'diagnostico_estrategico',
+          'direcionamento_metas',
+          'analise_concorrencia',
+          'matriz_cdt',
+          'puv',
+          'pai',
+          'anuncios_pagos',
+          'site_seo',
+          'redes_sociais',
+          'copywriting',
+          'producao_conteudo',
+          'criativos_anuncios',
+          'crm_automacoes',
+          'processo_comercial',
+          'landing_pages',
+          'website',
+          'padronizacao_visual',
+          'plataforma_mediagrowth'
+        ];
+
+        const sortedKeys = Object.keys(analises).sort((a, b) => {
+          const indexA = ORDER.indexOf(a);
+          const indexB = ORDER.indexOf(b);
+          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+        });
+
+        // Construir sidebar
+        const sidebarNav = document.getElementById('sidebarNav');
+        let sidebarHtml = `
+          <a class="nav-item active" href="#coverSection" data-section="coverSection">
+            <span class="nav-item-icon">📋</span>
+            <span class="nav-item-text">Capa</span>
+          </a>
+        `;
+
+        sortedKeys.forEach((entregavelId, index) => {
+          const analise = analises[entregavelId];
+          const icon = ENTREGAVEL_ICONS[entregavelId] || '📄';
+          const title = analise.title || entregavelId;
+          const sectionId = `section-${entregavelId}`;
+          sidebarHtml += `
+            <a class="nav-item" href="#${sectionId}" data-section="${sectionId}">
+              <span class="nav-item-icon">${icon}</span>
+              <span class="nav-item-text">${title}</span>
+              <span class="nav-item-number">${index + 1}</span>
+            </a>
+          `;
+        });
+        sidebarNav.innerHTML = sidebarHtml;
+
+        // Construir seções de análise
+        const container = document.getElementById('analysisContainer');
+        let sectionsHtml = '';
+
+        sortedKeys.forEach((entregavelId, index) => {
+          const analise = analises[entregavelId];
+          const icon = ENTREGAVEL_ICONS[entregavelId] || '📄';
+          const title = analise.title || entregavelId;
+          const imagePath = ENTREGAVEL_IMAGES[entregavelId];
+          const sectionId = `section-${entregavelId}`;
+
+          sectionsHtml += `
+            <section class="report-section" id="${sectionId}">
+              ${imagePath ? `<img src="${imagePath}" alt="${title}" class="entregavel-image" onerror="this.style.display='none'">` : ''}
+              <div class="section-header">
+                <h2 class="section-title">
+                  <span class="section-number">${index + 1}</span>
+                  ${icon} ${title}
+                </h2>
+                <div class="section-meta">
+                  📅 Gerado em: ${formatDateTime(analise.generatedAt)}
+                </div>
+              </div>
+              <div class="analysis-content">
+                ${analise.insightHtml || '<p>Conteúdo não disponível.</p>'}
+              </div>
+            </section>
+          `;
+        });
+        container.innerHTML = sectionsHtml;
+
+        // Navegação da sidebar
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+          item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = item.dataset.section;
+            const section = document.getElementById(sectionId);
+            if (section) {
+              section.scrollIntoView({ behavior: 'smooth' });
+              // Fechar sidebar no mobile
+              closeSidebar();
+            }
+            // Atualizar item ativo
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+          });
+        });
+
+        // Highlight section on scroll
+        const sections = document.querySelectorAll('.report-section, .cover-section');
+        const observerOptions = {
+          root: null,
+          rootMargin: '-100px 0px -50% 0px',
+          threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const sectionId = entry.target.id;
+              navItems.forEach(n => {
+                n.classList.toggle('active', n.dataset.section === sectionId);
+              });
+            }
+          });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        // Mostrar conteúdo
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+
+      } catch (err) {
+        console.error('Erro ao carregar relatório:', err);
+        showError('Ocorreu um erro ao carregar o relatório. Tente novamente mais tarde.');
+      }
+    }
+
+    // Toggle sidebar mobile
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.classList.add('open');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+
+    menuToggle?.addEventListener('click', () => {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+
+    sidebarOverlay?.addEventListener('click', closeSidebar);
+
+    // Inicializar
+    init();
+  </script>
+
+  <!-- Print Styles -->
+  <style>
+    @media print {
+      .main-header,
+      .sidebar,
+      .sidebar-overlay,
+      .menu-toggle {
+        display: none !important;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 20px !important;
+      }
+      .main-container {
+        padding-top: 0 !important;
+      }
+      .report-section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .cover-section {
+        page-break-after: always;
+      }
+      body {
+        background: white !important;
+        color: #1e293b !important;
+      }
+      .cover-section {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+      .analysis-content {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+      .analysis-content h1,
+      .analysis-content h2,
+      .analysis-content h3,
+      .analysis-content h4,
+      .section-title,
+      .cover-title {
+        color: #1e293b !important;
+      }
+      .analysis-content p,
+      .analysis-content li {
+        color: #475569 !important;
+      }
+    }
+  </style>
+</body>
+</html>

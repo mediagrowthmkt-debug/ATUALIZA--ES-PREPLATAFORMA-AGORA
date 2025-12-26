@@ -2740,6 +2740,697 @@ html, body{ -webkit-text-size-adjust: 100%; }
       position:relative;
     }
 
+    /* Botão Relatório Completo */
+    .relatorio-completo-section{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      margin-bottom:24px;
+      padding:20px;
+      background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(16,185,129,.05));
+      border-radius:16px;
+      border:1px solid rgba(34,197,94,.2);
+    }
+    .relatorio-completo-info{
+      text-align:center;
+    }
+    .relatorio-completo-info h4{
+      color:#22c55e;
+      font-size:1rem;
+      margin-bottom:4px;
+    }
+    .relatorio-completo-info p{
+      color:#a0a0a0;
+      font-size:.85rem;
+    }
+    .relatorio-completo-btns{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .btn-relatorio-completo{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:12px 24px;
+      border-radius:12px;
+      font-size:.9rem;
+      font-weight:700;
+      border:none;
+      cursor:pointer;
+      transition:all .3s ease;
+    }
+    .btn-relatorio-visualizar{
+      background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+      color:#fff;
+    }
+    .btn-relatorio-visualizar:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px rgba(59,130,246,.4);
+    }
+    .btn-relatorio-pdf{
+      background:linear-gradient(135deg,#ef4444,#dc2626);
+      color:#fff;
+    }
+    .btn-relatorio-pdf:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px rgba(239,68,68,.4);
+    }
+    .btn-relatorio-completo:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      transform:none !important;
+    }
+    .btn-relatorio-completo .spinner{
+      width:16px;
+      height:16px;
+      border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    }
+
+    /* Modal Relatório Completo */
+    .relatorio-modal{
+      position:fixed;
+      inset:0;
+      z-index:999999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.9);
+      backdrop-filter:blur(8px);
+    }
+    .relatorio-modal.active{
+      display:flex;
+    }
+    .relatorio-modal-content{
+      width:95%;
+      max-width:900px;
+      max-height:90vh;
+      background:linear-gradient(145deg,#1a1a2e,#16162a);
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.1);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .relatorio-modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:20px 24px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+      background:linear-gradient(135deg,rgba(34,197,94,.1),transparent);
+    }
+    .relatorio-modal-header h3{
+      color:#22c55e;
+      font-size:1.2rem;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .relatorio-modal-actions{
+      display:flex;
+      gap:10px;
+    }
+    .relatorio-modal-close{
+      background:rgba(255,255,255,.1);
+      border:none;
+      color:#fff;
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      cursor:pointer;
+      font-size:1.2rem;
+      transition:all .2s;
+    }
+    .relatorio-modal-close:hover{
+      background:rgba(239,68,68,.3);
+    }
+    .relatorio-modal-body{
+      flex:1;
+      overflow-y:auto;
+      padding:28px 32px;
+    }
+    /* Espaçamento de texto no relatório */
+    .relatorio-modal-body h2{
+      font-size:1.1rem !important;
+      font-weight:700 !important;
+      color:#10b981 !important;
+      margin:28px 0 14px !important;
+      padding-bottom:8px !important;
+      border-bottom:1px solid rgba(16,185,129,.3) !important;
+    }
+    .relatorio-modal-body h3{
+      font-size:1rem !important;
+      font-weight:700 !important;
+      color:#fff !important;
+      margin:24px 0 12px !important;
+    }
+    .relatorio-modal-body h4{
+      font-size:.95rem !important;
+      font-weight:600 !important;
+      color:#a5b4fc !important;
+      margin:20px 0 10px !important;
+    }
+    .relatorio-modal-body p{
+      margin:12px 0 !important;
+      line-height:1.9 !important;
+    }
+    .relatorio-modal-body ul,
+    .relatorio-modal-body ol{
+      margin:14px 0 !important;
+      padding-left:28px !important;
+    }
+    .relatorio-modal-body li{
+      margin-bottom:10px !important;
+      line-height:1.8 !important;
+      padding-left:4px !important;
+    }
+    .relatorio-modal-body strong{
+      color:#10b981 !important;
+    }
+    /* Tabelas dentro do relatório modal */
+    .relatorio-modal-body table{
+      width:100% !important;
+      border-collapse:collapse !important;
+      margin:20px 0 !important;
+      font-size:.85rem !important;
+      background:rgba(15,23,42,.6) !important;
+      border-radius:8px !important;
+      overflow:hidden !important;
+      border:1px solid rgba(255,255,255,.25) !important;
+      display:table !important;
+    }
+    .relatorio-modal-body table th,
+    .relatorio-modal-body table td{
+      border:1px solid rgba(255,255,255,.25) !important;
+      padding:12px 14px !important;
+      text-align:left !important;
+      display:table-cell !important;
+    }
+    .relatorio-modal-body table th{
+      background:rgba(99,102,241,.35) !important;
+      color:#fff !important;
+      font-weight:700 !important;
+      text-transform:uppercase !important;
+      font-size:.75rem !important;
+      letter-spacing:.03em !important;
+    }
+    .relatorio-modal-body table tr{
+      display:table-row !important;
+    }
+    .relatorio-modal-body table tr:nth-child(even){
+      background:rgba(255,255,255,.05) !important;
+    }
+    .relatorio-modal-body table tr:hover{
+      background:rgba(99,102,241,.15) !important;
+    }
+    .relatorio-modal-body table td{
+      color:rgba(255,255,255,.9) !important;
+    }
+    .relatorio-modal-body table thead,
+    .relatorio-modal-body table tbody{
+      display:table-row-group !important;
+    }
+    .relatorio-section{
+      margin-bottom:40px;
+      padding-bottom:32px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .relatorio-section:last-child{
+      border-bottom:none;
+      margin-bottom:0;
+    }
+    .relatorio-section-header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .relatorio-section-number{
+      width:32px;
+      height:32px;
+      background:linear-gradient(135deg,#f97316,#ea580c);
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:800;
+      font-size:.9rem;
+    }
+    .relatorio-section-title{
+      color:#fff;
+      font-size:1.1rem;
+      font-weight:700;
+    }
+    /* Relatorio content - IDÊNTICO ao analise-insight-content */
+    .relatorio-section-content{
+      background:rgba(15,23,42,.4);
+      border-radius:8px;
+      padding:20px;
+      color:rgba(255,255,255,.9);
+      font-size:.9rem;
+      line-height:1.7;
+    }
+    .relatorio-section-content h3{
+      font-size:.95rem;
+      font-weight:700;
+      color:#fff;
+      margin:16px 0 8px;
+    }
+    .relatorio-section-content h3:first-child{
+      margin-top:0;
+    }
+    .relatorio-section-content h1,
+    .relatorio-section-content h2{
+      font-size:1rem;
+      font-weight:700;
+      color:#fff;
+      margin:16px 0 8px;
+    }
+    .relatorio-section-content h4{
+      font-size:.9rem;
+      font-weight:600;
+      color:#fff;
+      margin:12px 0 6px;
+    }
+    .relatorio-section-content p{
+      margin:8px 0;
+    }
+    .relatorio-section-content ul,
+    .relatorio-section-content ol{
+      margin:8px 0;
+      padding-left:20px;
+    }
+    .relatorio-section-content li{
+      margin-bottom:6px;
+    }
+    .relatorio-section-content strong{
+      color:#10b981;
+    }
+    /* Tabelas - EXATAMENTE igual ao original */
+    .relatorio-section-content table{
+      width:100%;
+      border-collapse:collapse;
+      margin:16px 0;
+      font-size:.85rem;
+      background:rgba(15,23,42,.4);
+      border-radius:8px;
+      overflow:hidden;
+    }
+    .relatorio-section-content table th,
+    .relatorio-section-content table td{
+      border:1px solid rgba(255,255,255,.15);
+      padding:10px 12px;
+      text-align:left;
+    }
+    .relatorio-section-content table th{
+      background:rgba(99,102,241,.2);
+      color:#fff;
+      font-weight:700;
+      text-transform:uppercase;
+      font-size:.75rem;
+      letter-spacing:.03em;
+    }
+    .relatorio-section-content table tr:nth-child(even){
+      background:rgba(255,255,255,.03);
+    }
+    .relatorio-section-content table tr:hover{
+      background:rgba(99,102,241,.1);
+    }
+    .relatorio-section-content table td{
+      color:rgba(255,255,255,.85);
+    }
+    /* Imagens */
+    .relatorio-section-content img{
+      max-width:100%;
+      height:auto;
+      border-radius:8px;
+      margin:8px 0;
+    }
+    .relatorio-section-content video{
+      max-width:100%;
+      border-radius:8px;
+    }
+    /* Grid de mídias */
+    .relatorio-section-content .midias-referencia-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+      gap:12px;
+      margin:16px 0;
+    }
+    .relatorio-section-content .midias-referencia-grid img,
+    .relatorio-section-content .midias-referencia-grid video{
+      width:100%;
+      height:150px;
+      object-fit:cover;
+      border-radius:8px;
+    }
+    .relatorio-empty{
+      text-align:center;
+      padding:40px;
+      color:#666;
+    }
+    .relatorio-empty-icon{
+      font-size:3rem;
+      margin-bottom:12px;
+    }
+    .relatorio-stats{
+      display:flex;
+      gap:16px;
+      justify-content:center;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+    .relatorio-stat{
+      background:rgba(255,255,255,.05);
+      padding:12px 20px;
+      border-radius:12px;
+      text-align:center;
+    }
+    .relatorio-stat-value{
+      font-size:1.5rem;
+      font-weight:800;
+      color:#22c55e;
+    }
+    .relatorio-stat-label{
+      font-size:.75rem;
+      color:#888;
+    }
+    /* === Capa do Relatório === */
+    .relatorio-capa{
+      text-align:center;
+      padding:60px 40px;
+      margin-bottom:40px;
+      background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(99,102,241,.1));
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.15);
+    }
+    .relatorio-capa-logo{
+      margin-bottom:32px;
+    }
+    .relatorio-capa-logo img{
+      height:60px;
+      width:auto;
+      margin-bottom:12px;
+    }
+    .relatorio-capa-brand{
+      display:block;
+      font-size:1.4rem;
+      font-weight:700;
+      color:#22c55e;
+      letter-spacing:.1em;
+    }
+    .relatorio-capa-title{
+      font-size:1.6rem;
+      font-weight:800;
+      color:#22c55e;
+      margin-bottom:16px;
+      text-shadow:0 2px 8px rgba(34,197,94,.3);
+    }
+    .relatorio-capa-client{
+      font-size:1.3rem;
+      color:#fff;
+      font-weight:600;
+      margin-bottom:8px;
+    }
+    .relatorio-capa-date{
+      font-size:.9rem;
+      color:rgba(255,255,255,.6);
+      margin-bottom:32px;
+    }
+    .relatorio-capa-stats{
+      display:flex;
+      justify-content:center;
+      gap:24px;
+      flex-wrap:wrap;
+      margin-top:24px;
+    }
+    .relatorio-capa-stat{
+      background:rgba(255,255,255,.08);
+      padding:16px 28px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.1);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+    .relatorio-capa-stat .stat-value{
+      font-size:1.8rem;
+      font-weight:800;
+      color:#22c55e;
+    }
+    .relatorio-capa-stat .stat-label{
+      font-size:.75rem;
+      color:#888;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+    /* === Sumário === */
+    .relatorio-sumario{
+      background:rgba(15,23,42,.6);
+      border-radius:16px;
+      padding:32px;
+      margin-bottom:40px;
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .relatorio-sumario-title{
+      font-size:1.2rem;
+      font-weight:700;
+      color:#22c55e;
+      margin-bottom:20px;
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .relatorio-sumario-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .relatorio-sumario-item{
+      display:flex;
+      align-items:center;
+      padding:12px 16px;
+      background:rgba(255,255,255,.03);
+      border-radius:10px;
+      transition:all .2s;
+      text-decoration:none;
+      color:rgba(255,255,255,.9);
+      gap:12px;
+    }
+    .relatorio-sumario-item:hover{
+      background:rgba(99,102,241,.15);
+      transform:translateX(6px);
+    }
+    .sumario-numero{
+      width:28px;
+      height:28px;
+      background:linear-gradient(135deg,#f97316,#ea580c);
+      border-radius:6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:700;
+      font-size:.8rem;
+      flex-shrink:0;
+    }
+    .sumario-titulo{
+      flex:1;
+      font-size:.9rem;
+    }
+    .sumario-dots{
+      flex:1;
+      border-bottom:2px dotted rgba(255,255,255,.15);
+      margin:0 12px;
+    }
+    .sumario-pagina{
+      color:rgba(255,255,255,.4);
+      font-size:.8rem;
+      flex-shrink:0;
+    }
+    /* === Página do Relatório === */
+    .relatorio-page{
+      position:relative;
+      page-break-before:always;
+    }
+    .relatorio-page:first-of-type{
+      page-break-before:auto;
+    }
+    .relatorio-page-number{
+      position:absolute;
+      top:12px;
+      right:16px;
+      font-size:.75rem;
+      color:rgba(255,255,255,.35);
+      background:rgba(0,0,0,.2);
+      padding:4px 10px;
+      border-radius:6px;
+      z-index:10;
+    }
+    /* === CAPA DO CAPÍTULO - IMAGEM TELA CHEIA === */
+    .relatorio-chapter-cover{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:70vh;
+      background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.9));
+      border-radius:20px;
+      padding:48px 32px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,.1);
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .relatorio-chapter-cover::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(99,102,241,.08));
+      pointer-events:none;
+    }
+    .relatorio-chapter-image{
+      max-width:90%;
+      width:auto;
+      max-height:55vh;
+      object-fit:contain;
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
+      margin-bottom:32px;
+      position:relative;
+      z-index:1;
+    }
+    .relatorio-chapter-info{
+      position:relative;
+      z-index:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+    .relatorio-chapter-number{
+      width:56px;
+      height:56px;
+      background:linear-gradient(135deg,#f97316,#ea580c);
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:800;
+      font-size:1.6rem;
+      box-shadow:0 8px 24px rgba(249,115,22,.4);
+    }
+    .relatorio-chapter-title{
+      font-size:1.5rem;
+      font-weight:700;
+      color:#fff;
+      margin:8px 0;
+      text-shadow:0 2px 8px rgba(0,0,0,.3);
+    }
+    .relatorio-chapter-date{
+      font-size:.85rem;
+      color:rgba(255,255,255,.5);
+    }
+    .relatorio-chapter-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(34,197,94,.25);
+      color:#22c55e;
+      padding:8px 16px;
+      border-radius:24px;
+      font-size:.85rem;
+      font-weight:600;
+      margin-top:8px;
+    }
+    /* === Cover antigo (fallback) === */
+    .relatorio-section-cover{
+      display:flex;
+      gap:24px;
+      align-items:center;
+      background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(99,102,241,.08));
+      border-radius:16px;
+      padding:24px;
+      border:1px solid rgba(255,255,255,.1);
+      margin-bottom:20px;
+    }
+    .relatorio-section-image{
+      width:180px;
+      height:auto;
+      max-height:200px;
+      object-fit:contain;
+      border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);
+      flex-shrink:0;
+    }
+    .relatorio-section-cover-info{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .relatorio-section-number-big{
+      width:48px;
+      height:48px;
+      background:linear-gradient(135deg,#f97316,#ea580c);
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:800;
+      font-size:1.4rem;
+    }
+    .relatorio-section-title-big{
+      font-size:1.3rem;
+      font-weight:700;
+      color:#fff;
+      margin:8px 0;
+    }
+    .relatorio-badge-aprovado{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(34,197,94,.2);
+      color:#22c55e;
+      padding:6px 12px;
+      border-radius:20px;
+      font-size:.8rem;
+      font-weight:600;
+      width:fit-content;
+    }
+    .relatorio-section-date{
+      font-size:.8rem;
+      color:rgba(255,255,255,.5);
+    }
+    /* === Responsivo === */
+    @media(max-width:600px){
+      .relatorio-section-cover{
+        flex-direction:column;
+        text-align:center;
+      }
+      .relatorio-section-image{
+        width:100%;
+        max-width:200px;
+      }
+      .relatorio-section-cover-info{
+        align-items:center;
+      }
+      .relatorio-capa-stats{
+        flex-direction:column;
+        align-items:center;
+      }
+    }
+
     /* Modal Análise Gráficos */
     .analise-modal{
       position:fixed;
@@ -3416,7 +4107,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .analise-insight-content{
       color:rgba(255,255,255,.9);
       font-size:.9rem;
-      line-height:1.7;
+      line-height:1.9;
       transition: all 0.2s ease;
     }
     .analise-insight-content[contenteditable="true"]{
@@ -3430,50 +4121,76 @@ html, body{ -webkit-text-size-adjust: 100%; }
       box-shadow:0 0 0 4px rgba(99,102,241,0.2);
     }
     .analise-insight-content h3{
-      font-size:.95rem;
+      font-size:1rem;
       font-weight:700;
       color:#fff;
-      margin:16px 0 8px;
+      margin:24px 0 12px;
     }
     .analise-insight-content h3:first-child{
       margin-top:0;
     }
+    .analise-insight-content h2{
+      font-size:1.1rem;
+      font-weight:700;
+      color:#10b981;
+      margin:28px 0 14px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(16,185,129,.3);
+    }
+    .analise-insight-content h2:first-child{
+      margin-top:0;
+    }
+    .analise-insight-content h4{
+      font-size:.95rem;
+      font-weight:600;
+      color:#a5b4fc;
+      margin:20px 0 10px;
+    }
+    .analise-insight-content p{
+      margin:12px 0;
+    }
     .analise-insight-content ul{
-      margin:8px 0;
-      padding-left:20px;
+      margin:14px 0;
+      padding-left:24px;
+    }
+    .analise-insight-content ol{
+      margin:14px 0;
+      padding-left:24px;
     }
     .analise-insight-content li{
-      margin-bottom:6px;
+      margin-bottom:10px;
+      padding-left:4px;
     }
     .analise-insight-content strong{
       color:#10b981;
     }
     /* Estilos para tabelas nos relatórios - bordas verticais */
     .analise-insight-content table{
-      width:100%;
-      border-collapse:collapse;
-      margin:16px 0;
-      font-size:.85rem;
-      background:rgba(15,23,42,.4);
-      border-radius:8px;
-      overflow:hidden;
+      width:100% !important;
+      border-collapse:collapse !important;
+      margin:20px 0 !important;
+      font-size:.85rem !important;
+      background:rgba(15,23,42,.6) !important;
+      border-radius:8px !important;
+      overflow:hidden !important;
+      border:1px solid rgba(255,255,255,.2) !important;
     }
     .analise-insight-content table th,
     .analise-insight-content table td{
-      border:1px solid rgba(255,255,255,.15);
-      padding:10px 12px;
-      text-align:left;
+      border:1px solid rgba(255,255,255,.2) !important;
+      padding:12px 14px !important;
+      text-align:left !important;
     }
     .analise-insight-content table th{
-      background:rgba(99,102,241,.2);
-      color:#fff;
-      font-weight:700;
-      text-transform:uppercase;
-      font-size:.75rem;
-      letter-spacing:.03em;
+      background:rgba(99,102,241,.3) !important;
+      color:#fff !important;
+      font-weight:700 !important;
+      text-transform:uppercase !important;
+      font-size:.75rem !important;
+      letter-spacing:.03em !important;
     }
     .analise-insight-content table tr:nth-child(even){
-      background:rgba(255,255,255,.03);
+      background:rgba(255,255,255,.05) !important;
     }
     .analise-insight-content table tr:hover{
       background:rgba(99,102,241,.1);
@@ -8251,6 +8968,22 @@ function renderReviewNotes(post){
       <div class="estruturacao-week-content">
         <div class="entregaveis-intro">
           <p>Durante as semanas de estruturação, você receberá todos estes materiais e serviços profissionais para transformar seu marketing e comercial.</p>
+        </div>
+
+        <!-- Botão Relatório Completo -->
+        <div class="relatorio-completo-section">
+          <div class="relatorio-completo-info">
+            <h4>📋 Relatório Unificado de Análises</h4>
+            <p>Visualize ou baixe todas as análises geradas em um único documento</p>
+          </div>
+          <div class="relatorio-completo-btns">
+            <button class="btn-relatorio-completo btn-relatorio-visualizar" onclick="abrirRelatorioCompleto()">
+              <span>👁️</span> Visualizar Relatório
+            </button>
+            <button class="btn-relatorio-completo btn-relatorio-pdf" onclick="baixarRelatorioPDF()">
+              <span>📥</span> Baixar PDF
+            </button>
+          </div>
         </div>
 
         <!-- Galeria de Entregáveis -->
@@ -40140,6 +40873,123 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
       }
     }
 
+    // ===== FUNÇÃO PARA COPIAR LINK DO RELATÓRIO COMPLETO =====
+    async function copiarLinkRelatorioCompleto(btnElement) {
+      // Verificar se existem análises salvas
+      const userData = USER_DATA || window.USER_DATA || {};
+      const analises = userData?.analises || {};
+      
+      // Verificar se há pelo menos uma análise
+      const analisesArray = Object.keys(analises).filter(key => analises[key]?.insightHtml);
+      
+      if (analisesArray.length === 0) {
+        alert('Nenhuma análise encontrada. Gere pelo menos uma análise antes de criar o link de compartilhamento.');
+        return;
+      }
+
+      // Mudar visual do botão para loading
+      if (btnElement) {
+        btnElement.classList.add('loading');
+        btnElement.innerHTML = '⏳ Gerando...';
+      }
+
+      try {
+        // Determinar o UID do cliente (para atualizar a análise dele)
+        let clientUid;
+        if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+          clientUid = clientDocPathParts[1];
+        } else {
+          clientUid = auth.currentUser?.uid;
+        }
+
+        // O UID para as regras do Firebase deve ser o do usuário autenticado atual
+        const authUid = auth.currentUser?.uid;
+
+        if (!authUid) {
+          throw new Error('Usuário não autenticado');
+        }
+
+        // Gerar token único para o link de relatório
+        const token = 'rel_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+
+        // Obter dados do cliente
+        const clientName = userData?.nome || userData?.empresa || userData?.displayName || 'Cliente';
+        const businessData = {
+          nome: userData?.nome || '',
+          empresa: userData?.empresa || '',
+          nicho: userData?.nicho || '',
+          publicoAlvo: userData?.publicoAlvo || ''
+        };
+
+        // Preparar dados de todas as análises
+        const analisesData = {};
+        analisesArray.forEach(entregavelId => {
+          const analise = analises[entregavelId];
+          analisesData[entregavelId] = {
+            insightHtml: analise.insightHtml,
+            generatedAt: analise.generatedAt || new Date().toISOString(),
+            title: ENTREGAVEL_TITLES_RELATORIO[entregavelId] || ENTREGAVEL_TITLES_COPY[entregavelId] || entregavelId
+          };
+        });
+
+        // Criar documento de relatório compartilhado no Firebase
+        const relatorioData = {
+          token: token,
+          uid: authUid,
+          userId: clientUid,
+          clientName: clientName,
+          businessData: businessData,
+          analises: analisesData,
+          totalAnalises: analisesArray.length,
+          createdAt: new Date().toISOString()
+        };
+
+        // Salvar no Firebase
+        const relatorioRef = doc(db, 'relatoriosCompartilhados', token);
+        await setDoc(relatorioRef, relatorioData);
+
+        // Construir URL do relatório compartilhado
+        const baseUrl = window.location.origin;
+        const relatorioUrl = baseUrl + '/relatorio-compartilhado.html?token=' + token;
+
+        // Copiar para área de transferência
+        await navigator.clipboard.writeText(relatorioUrl);
+
+        // Feedback visual de sucesso
+        if (btnElement) {
+          btnElement.classList.remove('loading');
+          btnElement.classList.add('copied');
+          btnElement.innerHTML = '✅ Copiado!';
+          
+          setTimeout(() => {
+            btnElement.classList.remove('copied');
+            btnElement.innerHTML = '🔗 Copiar Link';
+          }, 2500);
+        }
+
+        // Toast de confirmação
+        mostrarToast('Link do relatório copiado! 📋');
+        console.log('📋 Link do relatório compartilhado:', relatorioUrl);
+
+      } catch (error) {
+        console.error('Erro ao gerar link do relatório:', error);
+        
+        if (btnElement) {
+          btnElement.classList.remove('loading');
+          btnElement.innerHTML = '❌ Erro';
+          
+          setTimeout(() => {
+            btnElement.innerHTML = '🔗 Copiar Link';
+          }, 2000);
+        }
+
+        alert('Erro ao gerar link do relatório: ' + error.message);
+      }
+    }
+
+    // Exportar função globalmente
+    window.copiarLinkRelatorioCompleto = copiarLinkRelatorioCompleto;
+
     // Função auxiliar para mostrar toast
     function mostrarToast(msg) {
       let toast = document.querySelector('.mg-toast');
@@ -40192,6 +41042,482 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
     setTimeout(() => {
       verificarEntregaveisAprovados();
     }, 3000);
+
+    // ===== RELATÓRIO COMPLETO UNIFICADO =====
+    
+    // Mapeamento de IDs para títulos dos entregáveis
+    const ENTREGAVEL_TITLES_RELATORIO = {
+      'diagnostico_estrategico': 'Diagnóstico Estratégico Completo',
+      'direcionamento_metas': 'Direcionamento Estratégico e Metas',
+      'analise_concorrencia': 'Análise de Concorrência',
+      'matriz_cdt': 'Matriz CDT',
+      'puv': 'Proposta Única de Valor (PUV)',
+      'pai': 'Plano de Ação Inicial (PAI)',
+      'anuncios_pagos': 'Estratégia de Anúncios Pagos',
+      'site_seo': 'Site e SEO Otimizado',
+      'redes_sociais': 'Estratégia de Redes Sociais',
+      'copywriting': 'Copywriting Estratégico',
+      'producao_conteudo': 'Produção de Conteúdo',
+      'criativos_anuncios': 'Criativos para Anúncios',
+      'crm_automacoes': 'CRM e Automações',
+      'processo_comercial': 'Processo Comercial',
+      'landing_pages': 'Landing Pages',
+      'website': 'Website Profissional',
+      'padronizacao_visual': 'Padronização Visual',
+      'plataforma_mediagrowth': 'Plataforma Mediagrowth'
+    };
+
+    // Ordem dos entregáveis no relatório
+    const ORDEM_ENTREGAVEIS = [
+      'diagnostico_estrategico',
+      'direcionamento_metas',
+      'analise_concorrencia',
+      'matriz_cdt',
+      'puv',
+      'pai',
+      'anuncios_pagos',
+      'site_seo',
+      'redes_sociais',
+      'copywriting',
+      'producao_conteudo',
+      'criativos_anuncios',
+      'crm_automacoes',
+      'processo_comercial',
+      'landing_pages',
+      'website',
+      'padronizacao_visual',
+      'plataforma_mediagrowth'
+    ];
+
+    // Mapeamento de imagens dos entregáveis
+    const ENTREGAVEL_IMAGES = {
+      'diagnostico_estrategico': 'assets/entregaveis mediagrwoth/Diagnóstico Estratégico Completo.png',
+      'direcionamento_metas': 'assets/entregaveis mediagrwoth/Direcionamento Estratégico e Metas.png',
+      'analise_concorrencia': 'assets/entregaveis mediagrwoth/Análise de Concorrência e Mercado.png',
+      'matriz_cdt': 'assets/entregaveis mediagrwoth/matriz cdt.png',
+      'puv': 'assets/entregaveis mediagrwoth/puv Proposta única de valor.png',
+      'pai': 'assets/entregaveis mediagrwoth/p.a.i público alvo ideal.png',
+      'anuncios_pagos': 'assets/entregaveis mediagrwoth/estruturação  anúncios pagos.png',
+      'site_seo': 'assets/entregaveis mediagrwoth/Estruturação  Site & SEO.png',
+      'redes_sociais': 'assets/entregaveis mediagrwoth/Estratégias para as  Redes Sociais.png',
+      'copywriting': 'assets/entregaveis mediagrwoth/Copywriting Estratégico.png',
+      'producao_conteudo': 'assets/entregaveis mediagrwoth/Produção de Conteúdo Guiada.png',
+      'criativos_anuncios': 'assets/entregaveis mediagrwoth/Criativos para  anúncios patrocinados.png',
+      'crm_automacoes': 'assets/entregaveis mediagrwoth/acesso CRM e Automações.png',
+      'processo_comercial': 'assets/entregaveis mediagrwoth/Estruturação do Processo Comercial.png',
+      'landing_pages': 'assets/entregaveis mediagrwoth/Landing pages estratégicas.png',
+      'website': 'assets/entregaveis mediagrwoth/Construção ou atualização de website.png',
+      'padronizacao_visual': 'assets/entregaveis mediagrwoth/Padronização visual  e de comunicação.png',
+      'plataforma_mediagrowth': 'assets/entregaveis mediagrwoth/_plataforma mediagrowth.png'
+    };
+
+    async function abrirRelatorioCompleto() {
+      const modal = document.getElementById('relatorioModal');
+      const body = document.getElementById('relatorioModalBody');
+
+      // Mostrar loading enquanto carrega
+      body.innerHTML = `
+        <div class="relatorio-empty">
+          <div class="relatorio-empty-icon">⏳</div>
+          <h4>Carregando análises...</h4>
+          <p>Aguarde enquanto buscamos todas as análises salvas.</p>
+        </div>
+      `;
+      modal.classList.add('active');
+
+      try {
+        // Carregar análises do Firebase se necessário
+        let userData = USER_DATA || window.USER_DATA || {};
+        let analises = userData?.analises || {};
+
+        // Se não tiver análises no cache, buscar do Firebase
+        if (Object.keys(analises).length === 0) {
+          // Determinar o UID correto
+          let targetUid;
+          if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+            targetUid = clientDocPathParts[1]; // Admin vendo cliente
+          } else if (auth?.currentUser?.uid) {
+            targetUid = auth.currentUser.uid;
+          }
+
+          if (targetUid && typeof carregarTodasAnalisesFirebase === 'function') {
+            console.log('📥 Relatório: Carregando análises do Firebase...');
+            analises = await carregarTodasAnalisesFirebase(targetUid);
+            // Atualizar referência local
+            userData = USER_DATA || window.USER_DATA || {};
+            analises = userData?.analises || analises || {};
+          }
+        }
+
+        const clientName = userData?.nome || userData?.empresa || 'Cliente';
+      
+        // Filtrar apenas análises com conteúdo
+        const analisesDisponiveis = ORDEM_ENTREGAVEIS.filter(id => {
+          const analise = analises[id];
+          return analise && analise.insightHtml && analise.insightHtml.trim().length > 0;
+        });
+
+        if (analisesDisponiveis.length === 0) {
+          body.innerHTML = `
+            <div class="relatorio-empty">
+              <div class="relatorio-empty-icon">📭</div>
+              <h4>Nenhuma análise encontrada</h4>
+              <p>Gere análises nos entregáveis clicando no botão "📊 Análise" em cada card.</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Calcular estatísticas
+        const totalEntregaveis = ORDEM_ENTREGAVEIS.length;
+        const analisesGeradas = analisesDisponiveis.length;
+        const aprovados = analisesDisponiveis.filter(id => analises[id]?.clientApproved).length;
+        const dataAtual = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        // Montar HTML do relatório com capa, sumário e páginas
+        let html = `
+          <!-- CAPA DO RELATÓRIO -->
+          <div class="relatorio-capa">
+            <div class="relatorio-capa-logo">
+              <img src="assets/mediagrowth-logo.svg" alt="Mediagrowth" onerror="this.style.display='none'">
+              <span class="relatorio-capa-brand">📊 mediagrowth</span>
+            </div>
+            <h1 class="relatorio-capa-title">Relatório Completo de Análises</h1>
+            <h2 class="relatorio-capa-client">${clientName}</h2>
+            <div class="relatorio-capa-date">${dataAtual}</div>
+            <div class="relatorio-capa-stats">
+              <div class="relatorio-capa-stat">
+                <span class="stat-value">${analisesGeradas}</span>
+                <span class="stat-label">Análises</span>
+              </div>
+              <div class="relatorio-capa-stat">
+                <span class="stat-value">${aprovados}</span>
+                <span class="stat-label">Aprovadas</span>
+              </div>
+              <div class="relatorio-capa-stat">
+                <span class="stat-value">${Math.round((analisesGeradas/totalEntregaveis)*100)}%</span>
+                <span class="stat-label">Cobertura</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUMÁRIO -->
+          <div class="relatorio-sumario">
+            <h2 class="relatorio-sumario-title">📑 Sumário</h2>
+            <div class="relatorio-sumario-list">
+        `;
+
+        // Adicionar itens do sumário
+        analisesDisponiveis.forEach((entregavelId, index) => {
+          const titulo = ENTREGAVEL_TITLES_RELATORIO[entregavelId] || entregavelId;
+          const aprovadoBadge = analises[entregavelId]?.clientApproved ? ' ✅' : '';
+          html += `
+              <a href="#relatorio-secao-${entregavelId}" class="relatorio-sumario-item">
+                <span class="sumario-numero">${index + 1}</span>
+                <span class="sumario-titulo">${titulo}${aprovadoBadge}</span>
+                <span class="sumario-dots"></span>
+                <span class="sumario-pagina">Pág. ${index + 1}</span>
+              </a>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+
+        // Adicionar cada análise com imagem em TELA CHEIA
+        analisesDisponiveis.forEach((entregavelId, index) => {
+          const analise = analises[entregavelId];
+          const titulo = ENTREGAVEL_TITLES_RELATORIO[entregavelId] || entregavelId;
+          const imagem = ENTREGAVEL_IMAGES[entregavelId] || '';
+          const dataGeracao = analise.generatedAt ? new Date(analise.generatedAt).toLocaleDateString('pt-BR') : '';
+          const aprovadoCliente = analise.clientApproved ? `<div class="relatorio-chapter-badge">✅ Aprovado pelo Cliente</div>` : '';
+
+          html += `
+            <div class="relatorio-section relatorio-page" id="relatorio-secao-${entregavelId}">
+              <div class="relatorio-page-number">Página ${index + 1} de ${analisesGeradas}</div>
+              
+              <!-- CAPA DO CAPÍTULO - IMAGEM TELA CHEIA -->
+              <div class="relatorio-chapter-cover">
+                ${imagem ? `<img src="${imagem}" alt="${titulo}" class="relatorio-chapter-image">` : ''}
+                <div class="relatorio-chapter-info">
+                  <div class="relatorio-chapter-number">${index + 1}</div>
+                  <h2 class="relatorio-chapter-title">${titulo}</h2>
+                  ${dataGeracao ? `<span class="relatorio-chapter-date">Gerado em ${dataGeracao}</span>` : ''}
+                  ${aprovadoCliente}
+                </div>
+              </div>
+              
+              <!-- Conteúdo da análise -->
+              <div class="analise-insight-content" style="background:rgba(15,23,42,.4);border-radius:12px;padding:24px;margin-top:20px;">
+                ${analise.insightHtml}
+              </div>
+            </div>
+          `;
+        });
+
+        body.innerHTML = html;
+
+      } catch (error) {
+        console.error('Erro ao carregar relatório:', error);
+        body.innerHTML = `
+          <div class="relatorio-empty">
+            <div class="relatorio-empty-icon">❌</div>
+            <h4>Erro ao carregar análises</h4>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function fecharRelatorioModal() {
+      const modal = document.getElementById('relatorioModal');
+      modal.classList.remove('active');
+    }
+
+    // Carregar html2pdf se não existir
+    function carregarHtml2Pdf() {
+      return new Promise((resolve, reject) => {
+        if (window.html2pdf) {
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function baixarRelatorioPDF() {
+      // Referência robusta aos botões
+      const btns = Array.from(document.querySelectorAll('.btn-relatorio-pdf'));
+      const originalHTML = '<span>📥</span> Baixar PDF';
+      
+      // Função para restaurar botões
+      const restaurarBotoes = () => {
+        btns.forEach(btn => {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+        });
+      };
+      
+      // Mostrar loading nos botões
+      btns.forEach(btn => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Gerando...';
+      });
+
+      try {
+        // Carregar análises do Firebase se necessário
+        let userData = USER_DATA || window.USER_DATA || {};
+        let analises = userData?.analises || {};
+
+        // Se não tiver análises no cache, buscar do Firebase
+        if (Object.keys(analises).length === 0) {
+          let targetUid;
+          if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+            targetUid = clientDocPathParts[1];
+          } else if (auth?.currentUser?.uid) {
+            targetUid = auth.currentUser.uid;
+          }
+
+          if (targetUid && typeof carregarTodasAnalisesFirebase === 'function') {
+            analises = await carregarTodasAnalisesFirebase(targetUid);
+            userData = USER_DATA || window.USER_DATA || {};
+            analises = userData?.analises || analises || {};
+          }
+        }
+
+        const clientName = userData?.nome || userData?.empresa || 'Cliente';
+      
+        // Filtrar apenas análises com conteúdo
+        const analisesDisponiveis = ORDEM_ENTREGAVEIS.filter(id => {
+          const analise = analises[id];
+          return analise && analise.insightHtml && analise.insightHtml.trim().length > 0;
+        });
+
+        if (analisesDisponiveis.length === 0) {
+          alert('Nenhuma análise encontrada para gerar o PDF. Gere análises nos entregáveis primeiro.');
+          restaurarBotoes();
+          return;
+        }
+
+        // Estatísticas
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+        const aprovados = analisesDisponiveis.filter(id => analises[id]?.clientApproved).length;
+        const totalEntregaveis = ORDEM_ENTREGAVEIS.length;
+
+        // Gerar sumário
+        let sumarioHtml = '';
+        analisesDisponiveis.forEach((entregavelId, index) => {
+          const titulo = ENTREGAVEL_TITLES_RELATORIO[entregavelId] || entregavelId;
+          const aprovadoBadge = analises[entregavelId]?.clientApproved ? ' ✓' : '';
+          sumarioHtml += `<div style="padding:8px 0;border-bottom:1px dotted #ddd;display:flex;justify-content:space-between;"><span>${index + 1}. ${titulo}${aprovadoBadge}</span><span>Pág. ${index + 2}</span></div>`;
+        });
+
+        // Gerar conteúdo das análises
+        let analisesHtml = '';
+        analisesDisponiveis.forEach((entregavelId, index) => {
+          const analise = analises[entregavelId];
+          const titulo = ENTREGAVEL_TITLES_RELATORIO[entregavelId] || entregavelId;
+          const imagem = ENTREGAVEL_IMAGES[entregavelId] || '';
+          const dataGeracao = analise.generatedAt ? new Date(analise.generatedAt).toLocaleDateString('pt-BR') : '';
+          const aprovadoBadge = analise.clientApproved ? '<span style="background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px;font-size:10pt;margin-left:10px;">✓ Aprovado</span>' : '';
+
+          analisesHtml += `
+            <div style="page-break-before:always;padding-top:30px;">
+              <!-- Capa do Capítulo -->
+              <div style="text-align:center;padding:40px 20px;margin-bottom:30px;background:linear-gradient(135deg,#f0fdf4,#e0f2fe);border-radius:16px;border:1px solid #d1fae5;">
+                ${imagem ? `<img src="${imagem}" style="max-width:300px;max-height:300px;margin-bottom:24px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);">` : ''}
+                <div style="background:#f97316;color:#fff;width:50px;height:50px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:22pt;font-weight:800;margin-bottom:16px;">${index + 1}</div>
+                <h2 style="font-size:20pt;color:#1e3a5f;margin:0 0 8px 0;">${titulo}${aprovadoBadge}</h2>
+                ${dataGeracao ? `<div style="font-size:10pt;color:#666;">Gerado em ${dataGeracao}</div>` : ''}
+              </div>
+              
+              <!-- Conteúdo da Análise -->
+              <div style="background:#fafafa;border:1px solid #e5e5e5;border-radius:12px;padding:24px;line-height:1.8;">
+                ${analise.insightHtml}
+              </div>
+            </div>
+          `;
+        });
+
+        // Montar HTML completo do PDF
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html lang="pt-BR">
+          <head>
+            <meta charset="UTF-8">
+            <title>Relatório de Análises - ${clientName}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 11pt;
+                line-height: 1.6;
+                color: #1f2937;
+                padding: 40px;
+                max-width: 210mm;
+                margin: 0 auto;
+              }
+              h1, h2, h3, h4 { color: #1f2937; margin-top: 20px; margin-bottom: 10px; page-break-after: avoid; }
+              h1 { font-size: 18pt; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+              h2 { font-size: 16pt; color: #374151; }
+              h3 { font-size: 14pt; color: #4b5563; }
+              h4 { font-size: 12pt; color: #6b7280; }
+              p { margin-bottom: 10px; text-align: justify; }
+              ul, ol { margin: 10px 0 10px 24px; }
+              li { margin-bottom: 5px; }
+              strong { color: #059669; }
+              table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 10pt; }
+              table th, table td { border: 1px solid #d1d5db; padding: 8px 10px; text-align: left; }
+              table th { background: #6366f1; color: #fff; font-weight: 600; }
+              table tr:nth-child(even) { background: #f9fafb; }
+              blockquote { border-left: 4px solid #f97316; padding-left: 16px; margin: 16px 0; color: #4b5563; font-style: italic; }
+              img { max-width: 100%; height: auto; border-radius: 8px; }
+              @media print {
+                body { padding: 20px; }
+                h1, h2, h3 { page-break-after: avoid; }
+                table, pre, blockquote { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <!-- CAPA -->
+            <div style="text-align:center;min-height:85vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;">
+              <div style="font-size:24pt;font-weight:700;color:#f97316;margin-bottom:20px;">📊 MEDIAGROWTH</div>
+              <h1 style="font-size:26pt;color:#1e3a5f;margin-bottom:16px;border:none;">Relatório Completo de Análises</h1>
+              <div style="font-size:18pt;color:#374151;margin-bottom:8px;">${clientName}</div>
+              <div style="font-size:12pt;color:#6b7280;margin-bottom:40px;">Gerado em ${dataAtual}</div>
+              <div style="display:flex;gap:30px;justify-content:center;margin-top:20px;">
+                <div style="text-align:center;padding:20px 30px;background:#f0fdf4;border-radius:12px;border:1px solid #d1fae5;">
+                  <div style="font-size:28pt;font-weight:800;color:#22c55e;">${analisesDisponiveis.length}</div>
+                  <div style="font-size:10pt;color:#666;text-transform:uppercase;">Análises</div>
+                </div>
+                <div style="text-align:center;padding:20px 30px;background:#f0fdf4;border-radius:12px;border:1px solid #d1fae5;">
+                  <div style="font-size:28pt;font-weight:800;color:#22c55e;">${aprovados}</div>
+                  <div style="font-size:10pt;color:#666;text-transform:uppercase;">Aprovadas</div>
+                </div>
+                <div style="text-align:center;padding:20px 30px;background:#f0fdf4;border-radius:12px;border:1px solid #d1fae5;">
+                  <div style="font-size:28pt;font-weight:800;color:#22c55e;">${Math.round((analisesDisponiveis.length/totalEntregaveis)*100)}%</div>
+                  <div style="font-size:10pt;color:#666;text-transform:uppercase;">Cobertura</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SUMÁRIO -->
+            <div style="page-break-before:always;padding:40px 0;">
+              <h2 style="font-size:18pt;color:#22c55e;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #22c55e;">📑 Sumário</h2>
+              ${sumarioHtml}
+            </div>
+
+            <!-- ANÁLISES -->
+            ${analisesHtml}
+
+            <!-- FOOTER -->
+            <div style="page-break-before:always;text-align:center;padding:60px 40px;">
+              <div style="font-size:16pt;color:#f97316;margin-bottom:16px;">📊 MEDIAGROWTH</div>
+              <p style="color:#666;">Relatório gerado automaticamente pela plataforma Mediagrowth</p>
+              <p style="color:#22c55e;font-weight:600;">www.mediagrowth.com.br</p>
+              <p style="color:#999;font-size:10pt;margin-top:20px;">${dataAtual} • Este documento é confidencial</p>
+            </div>
+          </body>
+          </html>
+        `;
+
+        // Abrir janela de impressão para salvar como PDF (mesmo método que funciona nos entregáveis)
+        const nomeArquivo = `Relatorio_Analises_${clientName.replace(/\s+/g, '_')}_${dataAtual.replace(/\//g, '-')}`;
+        
+        const printWindow = window.open('', '_blank', 'width=900,height=700');
+        if (printWindow) {
+          printWindow.document.write(htmlContent);
+          printWindow.document.close();
+          printWindow.document.title = `Relatório de Análises - ${clientName}`;
+          
+          // Aguardar carregar e abrir diálogo de impressão
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.print();
+            }, 500);
+          };
+          
+          mostrarToast('📄 Use "Salvar como PDF" na janela de impressão!');
+        } else {
+          // Fallback: Download como HTML
+          const blob = new Blob([htmlContent], { type: 'text/html' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${nomeArquivo}.html`;
+          a.click();
+          URL.revokeObjectURL(url);
+          mostrarToast('📄 Arquivo baixado como HTML. Abra e salve como PDF.');
+        }
+
+        restaurarBotoes();
+
+      } catch (error) {
+        console.error('❌ Erro ao gerar PDF:', error);
+        alert('Erro ao gerar PDF: ' + error.message);
+        restaurarBotoes();
+      }
+    }
+
+    // Fechar modal ao clicar fora
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('relatorioModal');
+      if (e.target === modal) {
+        fecharRelatorioModal();
+      }
+    });
+
+    // Exportar funções globalmente
+    window.abrirRelatorioCompleto = abrirRelatorioCompleto;
+    window.fecharRelatorioModal = fecharRelatorioModal;
+    window.baixarRelatorioPDF = baixarRelatorioPDF;
 
     // Event listeners do modal de análise
     document.addEventListener('DOMContentLoaded', function() {
@@ -48649,10 +49975,8 @@ FORMATO PADRÃO:
           await loadRefSocial();
           renderRefSocial();
           await refreshStorageUsage();
-          // Carregar análises da subcoleção (se usar subcoleção)
-          if (USER_DATA?.analisesUsesSubcollection) {
-            await carregarTodasAnalisesFirebase(user.uid);
-          }
+          // Carregar análises da subcoleção SEMPRE
+          await carregarTodasAnalisesFirebase(user.uid);
           renderDemandas();
           renderImpediments();
           renderMetas();
@@ -48849,10 +50173,8 @@ FORMATO PADRÃO:
             await loadRefSocial();
             renderRefSocial();
             await refreshStorageUsage();
-            // Carregar análises da subcoleção (se usar subcoleção) - Admin
-            if (USER_DATA?.analisesUsesSubcollection) {
-              await carregarTodasAnalisesFirebase(clientUid);
-            }
+            // Carregar análises da subcoleção SEMPRE - Admin
+            await carregarTodasAnalisesFirebase(clientUid);
             renderDemandas();
             renderImpediments();
             renderMetas();
@@ -51491,6 +52813,27 @@ function renderReviewNotes(post){
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Relatório Completo Unificado -->
+<div class="relatorio-modal" id="relatorioModal">
+  <div class="relatorio-modal-content">
+    <div class="relatorio-modal-header">
+      <h3>📋 Relatório Completo de Análises</h3>
+      <div class="relatorio-modal-actions">
+        <button class="btn-relatorio-completo btn-relatorio-link" id="btnCopiarLinkRelatorio" onclick="copiarLinkRelatorioCompleto(this)" style="padding:8px 16px;font-size:.8rem;background:#6c63ff;">
+          🔗 Copiar Link
+        </button>
+        <button class="btn-relatorio-completo btn-relatorio-pdf" onclick="baixarRelatorioPDF()" style="padding:8px 16px;font-size:.8rem;">
+          📥 PDF
+        </button>
+        <button class="relatorio-modal-close" onclick="fecharRelatorioModal()">✕</button>
+      </div>
+    </div>
+    <div class="relatorio-modal-body" id="relatorioModalBody">
+      <!-- Conteúdo dinâmico -->
     </div>
   </div>
 </div>
