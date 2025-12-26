@@ -459,7 +459,7 @@
       letter-spacing: 0.05em;
     }
 
-    /* Responsivo */
+    /* Responsivo - Tablet */
     @media (max-width: 1024px) {
       :root {
         --sidebar-width: 240px;
@@ -473,38 +473,217 @@
       }
     }
 
+    /* Responsivo - Mobile */
     @media (max-width: 768px) {
+      :root {
+        --header-height: 60px;
+      }
+      
+      /* Header Mobile */
+      .main-header {
+        padding: 0 12px;
+      }
       .menu-toggle {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
       }
-      .sidebar {
-        transform: translateX(-100%);
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        border-radius: 8px;
       }
-      .sidebar.open {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-        padding: 24px 16px;
+      .logo-text {
+        font-size: 1rem;
       }
       .header-info {
         display: none;
       }
+      .header-actions {
+        gap: 8px;
+      }
+      .btn-header {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+      }
+      .btn-pdf {
+        padding: 8px 14px;
+      }
+      
+      /* Sidebar Mobile */
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      /* Conteúdo Mobile */
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+        max-width: 100%;
+      }
+      
+      /* Capa Mobile */
+      .cover-section {
+        padding: 30px 20px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+      }
+      .cover-logo {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 14px;
+      }
       .cover-title {
-        font-size: 1.6rem;
+        font-size: 1.3rem;
+        line-height: 1.3;
+      }
+      .cover-subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 14px;
+      }
+      .cover-client {
+        font-size: 0.85rem;
+        padding: 6px 16px;
       }
       .cover-stats {
-        flex-direction: column;
-        gap: 16px;
+        flex-direction: row;
+        gap: 24px;
+        margin-top: 20px;
       }
-      .section-title {
+      .stat-value {
         font-size: 1.3rem;
       }
-      .analysis-content {
-        padding: 20px;
+      .stat-label {
+        font-size: 0.65rem;
       }
+      
+      /* Seções Mobile */
+      .report-section {
+        margin-bottom: 30px;
+      }
+      .section-header {
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+      }
+      .section-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+      }
+      .section-title {
+        font-size: 1rem;
+      }
+      .section-meta {
+        font-size: 0.7rem;
+      }
+      
+      /* Imagem do Entregável Mobile */
+      .entregavel-image {
+        border-radius: 10px;
+        margin-bottom: 12px;
+      }
+      
+      /* Conteúdo da Análise Mobile */
+      .analysis-content {
+        padding: 16px;
+        border-radius: 10px;
+      }
+      .analysis-content h1 { font-size: 1.1rem; }
+      .analysis-content h2 { font-size: 1rem; }
+      .analysis-content h3 { font-size: 0.9rem; }
+      .analysis-content h4 { font-size: 0.85rem; }
+      .analysis-content p,
+      .analysis-content ul,
+      .analysis-content ol,
+      .analysis-content li {
+        font-size: 0.82rem;
+        line-height: 1.55;
+      }
+      
+      /* Tabelas Mobile */
+      .analysis-content table {
+        font-size: 0.7rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .analysis-content th {
+        padding: 6px 8px;
+        font-size: 0.65rem;
+      }
+      .analysis-content td {
+        padding: 5px 8px;
+        font-size: 0.7rem;
+      }
+      
+      /* Mídias Tagueadas Mobile */
+      .analysis-content .midias-tagueadas-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+      .analysis-content .midias-tagueadas-grid img,
+      .analysis-content .midias-tagueadas-grid video {
+        height: 80px !important;
+      }
+      
+      /* Navegação Mobile */
       .nav-item {
         padding: 12px 16px;
+        font-size: 0.85rem;
+      }
+      .nav-item-icon {
+        font-size: 1rem;
+        width: 24px;
+      }
+      .nav-item-number {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+      }
+    }
+    
+    /* Responsivo - Mobile Pequeno */
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 12px;
+      }
+      .cover-section {
+        padding: 24px 16px;
+      }
+      .cover-title {
+        font-size: 1.15rem;
+      }
+      .cover-stats {
+        gap: 20px;
+      }
+      .stat-value {
+        font-size: 1.2rem;
+      }
+      .section-title {
+        font-size: 0.95rem;
+      }
+      .analysis-content {
+        padding: 14px;
+      }
+      .analysis-content p,
+      .analysis-content li {
+        font-size: 0.8rem;
+      }
+      .analysis-content .midias-tagueadas-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .analysis-content .midias-tagueadas-grid img,
+      .analysis-content .midias-tagueadas-grid video {
+        height: 70px !important;
       }
     }
 
@@ -526,8 +705,7 @@
     /* Imagens de Entregáveis nas capas dos capítulos */
     .entregavel-image {
       width: 100%;
-      max-height: 200px;
-      object-fit: cover;
+      height: auto;
       border-radius: 12px;
       margin-bottom: 16px;
       border: 1px solid rgba(148, 163, 184, 0.15);
@@ -603,6 +781,66 @@
     }
     .analysis-content a:hover {
       color: #a5b4fc;
+    }
+    
+    /* Estilos de Impressão / PDF */
+    @media print {
+      body {
+        background: white !important;
+        color: #1e293b !important;
+      }
+      .main-header,
+      .sidebar,
+      .sidebar-overlay,
+      .menu-toggle,
+      .btn-pdf {
+        display: none !important;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 20px !important;
+        max-width: 100% !important;
+      }
+      .cover-section {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        page-break-after: always;
+      }
+      .cover-title,
+      .section-title {
+        color: #1e293b !important;
+      }
+      .cover-client {
+        background: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #86efac !important;
+      }
+      .stat-value {
+        color: #059669 !important;
+      }
+      .analysis-content {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        page-break-inside: avoid;
+      }
+      .analysis-content h1,
+      .analysis-content h2,
+      .analysis-content h3,
+      .analysis-content h4,
+      .analysis-content p,
+      .analysis-content li {
+        color: #334155 !important;
+      }
+      .analysis-content h2 {
+        color: #059669 !important;
+      }
+      .report-section {
+        page-break-inside: avoid;
+      }
+      .entregavel-image {
+        max-height: 300px;
+        object-fit: contain;
+      }
     }
   </style>
 </head>
