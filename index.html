@@ -40921,16 +40921,33 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
           publicoAlvo: userData?.publicoAlvo || ''
         };
 
-        // Preparar dados de todas as análises
+        // Preparar dados de todas as análises (incluindo mídias tagueadas)
         const analisesData = {};
-        analisesArray.forEach(entregavelId => {
+        
+        // Usar Promise.all para buscar mídias tagueadas em paralelo
+        await Promise.all(analisesArray.map(async (entregavelId) => {
           const analise = analises[entregavelId];
+          
+          // Buscar mídias tagueadas para este entregável
+          let midiasTagueadas = [];
+          try {
+            midiasTagueadas = await buscarMidiasTagueadasPorEntregavel(entregavelId);
+          } catch (e) {
+            console.warn(`Erro ao buscar mídias para ${entregavelId}:`, e);
+          }
+          
+          // Gerar HTML das mídias tagueadas
+          let midiasHtml = '';
+          if (midiasTagueadas && midiasTagueadas.length > 0) {
+            midiasHtml = gerarSecaoMidiasTagueadas(midiasTagueadas, entregavelId);
+          }
+          
           analisesData[entregavelId] = {
-            insightHtml: analise.insightHtml,
+            insightHtml: analise.insightHtml + midiasHtml,
             generatedAt: analise.generatedAt || new Date().toISOString(),
             title: ENTREGAVEL_TITLES_RELATORIO[entregavelId] || ENTREGAVEL_TITLES_COPY[entregavelId] || entregavelId
           };
-        });
+        }));
 
         // Criar documento de relatório compartilhado no Firebase
         const relatorioData = {

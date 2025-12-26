@@ -210,35 +210,37 @@
     .main-content {
       flex: 1;
       margin-left: var(--sidebar-width);
-      padding: 40px;
-      max-width: 100%;
+      padding: 30px 40px;
+      max-width: calc(100% - var(--sidebar-width));
+      overflow-x: hidden;
     }
 
     /* Seções do Relatório */
     .report-section {
-      margin-bottom: 60px;
+      margin-bottom: 50px;
       scroll-margin-top: calc(var(--header-height) + 20px);
+      max-width: 950px;
     }
     .section-header {
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
       border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
     .section-number {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       background: linear-gradient(135deg, #10b981, #059669);
-      border-radius: 10px;
-      font-size: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
       font-weight: 700;
       color: white;
-      margin-right: 14px;
+      margin-right: 12px;
     }
     .section-title {
-      font-size: 1.6rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: #f1f5f9;
       margin: 0;
@@ -246,49 +248,75 @@
       align-items: center;
     }
     .section-meta {
-      margin-top: 10px;
-      font-size: 0.82rem;
+      margin-top: 8px;
+      font-size: 0.78rem;
       color: #64748b;
     }
 
     /* Conteúdo da Análise */
     .analysis-content {
       background: rgba(30, 41, 59, 0.5);
-      border-radius: 16px;
-      padding: 32px;
+      border-radius: 14px;
+      padding: 28px 32px;
       border: 1px solid rgba(148, 163, 184, 0.1);
+      max-width: 900px;
     }
+    
+    /* Esconder botões de IA e lixeira que vêm do conteúdo */
+    .analysis-content .analise-bloco-btns,
+    .analysis-content .analise-bloco-regen-btn,
+    .analysis-content .analise-bloco-delete-btn,
+    .analysis-content .ia-action-bar,
+    .analysis-content .ia-expand-btn,
+    .analysis-content .ia-delete-btn,
+    .analysis-content [class*="regen-btn"],
+    .analysis-content [class*="delete-btn"],
+    .analysis-content [class*="bloco-btns"],
+    .analysis-content button,
+    .analysis-content .btn,
+    .analysis-content [onclick] {
+      display: none !important;
+    }
+    
+    /* Remover wrappers extras */
+    .analysis-content .analise-bloco-wrapper {
+      display: contents;
+    }
+    
     .analysis-content h1,
     .analysis-content h2,
     .analysis-content h3,
     .analysis-content h4 {
       color: #f1f5f9;
-      margin-top: 1.5em;
-      margin-bottom: 0.8em;
+      margin-top: 1.8em;
+      margin-bottom: 0.6em;
       font-weight: 700;
+      line-height: 1.3;
     }
     .analysis-content h1:first-child,
     .analysis-content h2:first-child,
     .analysis-content h3:first-child {
       margin-top: 0;
     }
-    .analysis-content h1 { font-size: 1.5rem; }
-    .analysis-content h2 { font-size: 1.3rem; color: #6ee7b7; }
-    .analysis-content h3 { font-size: 1.15rem; color: #a5b4fc; }
-    .analysis-content h4 { font-size: 1rem; color: #94a3b8; }
+    .analysis-content h1 { font-size: 1.35rem; }
+    .analysis-content h2 { font-size: 1.15rem; color: #6ee7b7; }
+    .analysis-content h3 { font-size: 1rem; color: #a5b4fc; }
+    .analysis-content h4 { font-size: 0.95rem; color: #94a3b8; }
     .analysis-content p {
       color: #cbd5e1;
-      line-height: 1.75;
-      margin-bottom: 1em;
+      line-height: 1.7;
+      margin-bottom: 0.9em;
+      font-size: 0.92rem;
     }
     .analysis-content ul, .analysis-content ol {
       color: #cbd5e1;
       padding-left: 1.5em;
       margin-bottom: 1em;
+      font-size: 0.92rem;
     }
     .analysis-content li {
-      margin-bottom: 0.5em;
-      line-height: 1.65;
+      margin-bottom: 0.4em;
+      line-height: 1.6;
     }
     .analysis-content strong {
       color: #f8fafc;
@@ -298,42 +326,63 @@
       color: #6ee7b7;
       font-style: italic;
     }
+    
+    /* Tabelas - estilo planilha profissional */
+    .analysis-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2em 0;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .analysis-content th {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .analysis-content td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      vertical-align: top;
+    }
+    .analysis-content tr:nth-child(even) {
+      background: rgba(30, 41, 59, 0.3);
+    }
+    .analysis-content tr:hover {
+      background: rgba(99, 102, 241, 0.08);
+    }
+    
     .analysis-content blockquote {
       border-left: 4px solid #10b981;
       background: rgba(16, 185, 129, 0.08);
-      padding: 16px 20px;
-      margin: 1.5em 0;
-      border-radius: 0 12px 12px 0;
+      padding: 14px 18px;
+      margin: 1.2em 0;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.9rem;
     }
     .analysis-content code {
       background: rgba(99, 102, 241, 0.15);
       color: #a5b4fc;
-      padding: 2px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.9em;
+      font-size: 0.85em;
     }
     .analysis-content pre {
       background: rgba(15, 23, 42, 0.8);
       border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 10px;
+      padding: 16px;
       overflow-x: auto;
-    }
-    .analysis-content table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5em 0;
-    }
-    .analysis-content th,
-    .analysis-content td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-    }
-    .analysis-content th {
-      background: rgba(99, 102, 241, 0.1);
-      color: #a5b4fc;
-      font-weight: 600;
+      font-size: 0.85rem;
     }
 
     /* Capa Inicial */
@@ -343,56 +392,56 @@
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
       border-radius: 24px;
       border: 1px solid rgba(16, 185, 129, 0.2);
-      margin-bottom: 60px;
+      margin-bottom: 40px;
     }
     .cover-logo {
-      width: 80px;
-      height: 80px;
+      width: 60px;
+      height: 60px;
       background: linear-gradient(135deg, #10b981, #059669);
-      border-radius: 20px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
-      margin: 0 auto 24px;
+      font-size: 1.8rem;
+      margin: 0 auto 18px;
     }
     .cover-title {
-      font-size: 2.2rem;
+      font-size: 1.7rem;
       font-weight: 800;
       color: #f1f5f9;
-      margin: 0 0 12px;
+      margin: 0 0 10px;
     }
     .cover-subtitle {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: #94a3b8;
-      margin: 0 0 24px;
+      margin: 0 0 18px;
     }
     .cover-client {
       display: inline-block;
-      padding: 10px 24px;
+      padding: 8px 20px;
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.3);
       border-radius: 999px;
       color: #6ee7b7;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
     .cover-stats {
       display: flex;
       justify-content: center;
-      gap: 32px;
-      margin-top: 32px;
+      gap: 28px;
+      margin-top: 24px;
     }
     .stat-item {
       text-align: center;
     }
     .stat-value {
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: #10b981;
     }
     .stat-label {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -401,10 +450,14 @@
     /* Responsivo */
     @media (max-width: 1024px) {
       :root {
-        --sidebar-width: 260px;
+        --sidebar-width: 240px;
       }
       .main-content {
-        padding: 32px;
+        padding: 24px;
+        max-width: calc(100% - 240px);
+      }
+      .analysis-content {
+        padding: 24px;
       }
     }
 
@@ -458,13 +511,86 @@
       display: block;
     }
 
-    /* Imagens de Entregáveis */
+    /* Imagens de Entregáveis nas capas dos capítulos */
     .entregavel-image {
       width: 100%;
-      max-height: 300px;
+      max-height: 200px;
       object-fit: cover;
-      border-radius: 16px 16px 0 0;
-      margin-bottom: -16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    
+    /* Imagens dentro do conteúdo da análise (mídias tagueadas) */
+    .analysis-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 8px 0;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    
+    /* Seção de Mídias Tagueadas */
+    .analysis-content .midias-tagueadas-section {
+      background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(16,185,129,0.1) 100%) !important;
+      border-radius: 12px !important;
+      padding: 20px !important;
+      margin: 20px 0 !important;
+      border: 1px solid rgba(34,197,94,0.3) !important;
+    }
+    
+    .analysis-content .midias-tagueadas-section h3 {
+      color: #86efac !important;
+      margin: 0 0 12px 0 !important;
+      font-size: 1rem !important;
+    }
+    
+    .analysis-content .midias-tagueadas-section p {
+      color: rgba(255,255,255,0.7) !important;
+      font-size: 0.8rem !important;
+      margin: 0 0 12px 0 !important;
+    }
+    
+    /* Grid de mídias tagueadas */
+    .analysis-content .midias-tagueadas-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+      gap: 10px !important;
+      margin: 12px 0 0 0 !important;
+    }
+    
+    .analysis-content .midias-tagueadas-grid img,
+    .analysis-content .midias-tagueadas-grid video {
+      width: 100% !important;
+      height: 100px !important;
+      object-fit: cover !important;
+      border-radius: 8px !important;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(148, 163, 184, 0.2) !important;
+      margin: 0 !important;
+    }
+    
+    .analysis-content .midias-tagueadas-grid img:hover,
+    .analysis-content .midias-tagueadas-grid video:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Limpar elementos que vêm no HTML das análises */
+    .analysis-content > div:first-child:empty,
+    .analysis-content > span:empty,
+    .analysis-content > br:first-child {
+      display: none;
+    }
+    
+    /* Garantir que links são clicáveis */
+    .analysis-content a {
+      color: #6ee7b7;
+      text-decoration: underline;
+    }
+    .analysis-content a:hover {
+      color: #a5b4fc;
     }
   </style>
 </head>
