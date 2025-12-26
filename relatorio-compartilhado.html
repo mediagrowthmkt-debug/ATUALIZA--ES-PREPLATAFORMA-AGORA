@@ -256,10 +256,11 @@
     /* Conteúdo da Análise */
     .analysis-content {
       background: rgba(30, 41, 59, 0.5);
-      border-radius: 14px;
-      padding: 28px 32px;
+      border-radius: 12px;
+      padding: 24px 28px;
       border: 1px solid rgba(148, 163, 184, 0.1);
-      max-width: 900px;
+      max-width: 100%;
+      overflow-x: auto;
     }
     
     /* Esconder botões de IA e lixeira que vêm do conteúdo */
@@ -271,10 +272,7 @@
     .analysis-content .ia-delete-btn,
     .analysis-content [class*="regen-btn"],
     .analysis-content [class*="delete-btn"],
-    .analysis-content [class*="bloco-btns"],
-    .analysis-content button,
-    .analysis-content .btn,
-    .analysis-content [onclick] {
+    .analysis-content [class*="bloco-btns"] {
       display: none !important;
     }
     
@@ -283,40 +281,47 @@
       display: contents;
     }
     
+    /* Esconder qualquer botão restante por fallback CSS */
+    .analysis-content button,
+    .analysis-content [onclick],
+    .analysis-content [class*="btn"] {
+      display: none !important;
+    }
+    
     .analysis-content h1,
     .analysis-content h2,
     .analysis-content h3,
     .analysis-content h4 {
       color: #f1f5f9;
-      margin-top: 1.8em;
-      margin-bottom: 0.6em;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
       font-weight: 700;
-      line-height: 1.3;
+      line-height: 1.35;
     }
     .analysis-content h1:first-child,
     .analysis-content h2:first-child,
     .analysis-content h3:first-child {
       margin-top: 0;
     }
-    .analysis-content h1 { font-size: 1.35rem; }
-    .analysis-content h2 { font-size: 1.15rem; color: #6ee7b7; }
-    .analysis-content h3 { font-size: 1rem; color: #a5b4fc; }
-    .analysis-content h4 { font-size: 0.95rem; color: #94a3b8; }
+    .analysis-content h1 { font-size: 1.25rem; }
+    .analysis-content h2 { font-size: 1.1rem; color: #6ee7b7; }
+    .analysis-content h3 { font-size: 0.95rem; color: #a5b4fc; }
+    .analysis-content h4 { font-size: 0.9rem; color: #94a3b8; }
     .analysis-content p {
       color: #cbd5e1;
-      line-height: 1.7;
-      margin-bottom: 0.9em;
-      font-size: 0.92rem;
+      line-height: 1.65;
+      margin-bottom: 0.75em;
+      font-size: 0.88rem;
     }
     .analysis-content ul, .analysis-content ol {
       color: #cbd5e1;
-      padding-left: 1.5em;
-      margin-bottom: 1em;
-      font-size: 0.92rem;
+      padding-left: 1.4em;
+      margin-bottom: 0.9em;
+      font-size: 0.88rem;
     }
     .analysis-content li {
-      margin-bottom: 0.4em;
-      line-height: 1.6;
+      margin-bottom: 0.35em;
+      line-height: 1.55;
     }
     .analysis-content strong {
       color: #f8fafc;
@@ -327,13 +332,13 @@
       font-style: italic;
     }
     
-    /* Tabelas - estilo planilha profissional */
+    /* Tabelas - estilo planilha profissional e compacta */
     .analysis-content table {
       width: 100%;
       border-collapse: collapse;
-      margin: 1.2em 0;
-      font-size: 0.85rem;
-      border-radius: 8px;
+      margin: 1em 0;
+      font-size: 0.78rem;
+      border-radius: 6px;
       overflow: hidden;
       border: 1px solid rgba(148, 163, 184, 0.2);
     }
@@ -341,18 +346,20 @@
       background: rgba(99, 102, 241, 0.15);
       color: #a5b4fc;
       font-weight: 600;
-      padding: 10px 14px;
+      padding: 8px 10px;
       text-align: left;
       border-bottom: 2px solid rgba(99, 102, 241, 0.3);
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
     .analysis-content td {
-      padding: 10px 14px;
+      padding: 7px 10px;
       text-align: left;
       border-bottom: 1px solid rgba(148, 163, 184, 0.1);
       vertical-align: top;
+      font-size: 0.78rem;
     }
     .analysis-content tr:nth-child(even) {
       background: rgba(30, 41, 59, 0.3);
@@ -361,28 +368,33 @@
       background: rgba(99, 102, 241, 0.08);
     }
     
+    /* Overflow para tabelas largas */
+    .analysis-content > div:has(table) {
+      overflow-x: auto;
+    }
+    
     .analysis-content blockquote {
-      border-left: 4px solid #10b981;
+      border-left: 3px solid #10b981;
       background: rgba(16, 185, 129, 0.08);
-      padding: 14px 18px;
-      margin: 1.2em 0;
-      border-radius: 0 10px 10px 0;
-      font-size: 0.9rem;
+      padding: 12px 16px;
+      margin: 1em 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.85rem;
     }
     .analysis-content code {
       background: rgba(99, 102, 241, 0.15);
       color: #a5b4fc;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.85em;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.82em;
     }
     .analysis-content pre {
       background: rgba(15, 23, 42, 0.8);
       border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 8px;
+      padding: 14px;
       overflow-x: auto;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     /* Capa Inicial */
@@ -698,24 +710,24 @@
 
     // Imagens dos entregáveis
     const ENTREGAVEL_IMAGES = {
-      diagnostico_estrategico: 'images/entregaveis/diagnostico_estrategico.png',
-      direcionamento_metas: 'images/entregaveis/direcionamento_metas.png',
-      analise_concorrencia: 'images/entregaveis/analise_concorrencia.png',
-      matriz_cdt: 'images/entregaveis/matriz_cdt.png',
-      puv: 'images/entregaveis/puv.png',
-      pai: 'images/entregaveis/pai.png',
-      anuncios_pagos: 'images/entregaveis/anuncios_pagos.png',
-      site_seo: 'images/entregaveis/site_seo.png',
-      redes_sociais: 'images/entregaveis/redes_sociais.png',
-      copywriting: 'images/entregaveis/copywriting.png',
-      producao_conteudo: 'images/entregaveis/producao_conteudo.png',
-      criativos_anuncios: 'images/entregaveis/criativos_anuncios.png',
-      crm_automacoes: 'images/entregaveis/crm_automacoes.png',
-      processo_comercial: 'images/entregaveis/processo_comercial.png',
-      landing_pages: 'images/entregaveis/landing_pages.png',
-      website: 'images/entregaveis/website.png',
-      padronizacao_visual: 'images/entregaveis/padronizacao_visual.png',
-      plataforma_mediagrowth: 'images/entregaveis/plataforma_mediagrowth.png'
+      'diagnostico_estrategico': 'assets/entregaveis mediagrwoth/Diagnóstico Estratégico Completo.png',
+      'direcionamento_metas': 'assets/entregaveis mediagrwoth/Direcionamento Estratégico e Metas.png',
+      'analise_concorrencia': 'assets/entregaveis mediagrwoth/Análise de Concorrência e Mercado.png',
+      'matriz_cdt': 'assets/entregaveis mediagrwoth/matriz cdt.png',
+      'puv': 'assets/entregaveis mediagrwoth/puv Proposta única de valor.png',
+      'pai': 'assets/entregaveis mediagrwoth/p.a.i público alvo ideal.png',
+      'anuncios_pagos': 'assets/entregaveis mediagrwoth/estruturação  anúncios pagos.png',
+      'site_seo': 'assets/entregaveis mediagrwoth/Estruturação  Site & SEO.png',
+      'redes_sociais': 'assets/entregaveis mediagrwoth/Estratégias para as  Redes Sociais.png',
+      'copywriting': 'assets/entregaveis mediagrwoth/Copywriting Estratégico.png',
+      'producao_conteudo': 'assets/entregaveis mediagrwoth/Produção de Conteúdo Guiada.png',
+      'criativos_anuncios': 'assets/entregaveis mediagrwoth/Criativos para  anúncios patrocinados.png',
+      'crm_automacoes': 'assets/entregaveis mediagrwoth/acesso CRM e Automações.png',
+      'processo_comercial': 'assets/entregaveis mediagrwoth/Estruturação do Processo Comercial.png',
+      'landing_pages': 'assets/entregaveis mediagrwoth/Landing pages estratégicas.png',
+      'website': 'assets/entregaveis mediagrwoth/Construção ou atualização de website.png',
+      'padronizacao_visual': 'assets/entregaveis mediagrwoth/Padronização visual  e de comunicação.png',
+      'plataforma_mediagrowth': 'assets/entregaveis mediagrwoth/_plataforma mediagrowth.png'
     };
 
     // Ícones dos entregáveis
@@ -765,6 +777,46 @@
       const hora = date.getHours().toString().padStart(2, '0');
       const min = date.getMinutes().toString().padStart(2, '0');
       return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+    }
+
+    // Função para limpar HTML das análises (remover botões, elementos interativos)
+    function limparHtmlAnalise(html) {
+      if (!html) return '';
+      
+      // Criar um elemento temporário para manipular o DOM
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      
+      // Remover botões de IA+ e lixeira
+      const botoesParaRemover = temp.querySelectorAll([
+        '.analise-bloco-btns',
+        '.analise-bloco-regen-btn',
+        '.analise-bloco-delete-btn',
+        'button',
+        '[onclick]',
+        '[class*="regen"]',
+        '[class*="delete-btn"]',
+        '[class*="bloco-btns"]'
+      ].join(','));
+      
+      botoesParaRemover.forEach(el => el.remove());
+      
+      // Remover divs vazias de wrapper
+      const wrappers = temp.querySelectorAll('.analise-bloco-wrapper');
+      wrappers.forEach(wrapper => {
+        // Mover conteúdo para fora do wrapper
+        while (wrapper.firstChild) {
+          wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+        }
+        wrapper.remove();
+      });
+      
+      // Remover textos de placeholder
+      let cleanHtml = temp.innerHTML;
+      cleanHtml = cleanHtml.replace(/💡\s*Clique nas mídias para ampliar[^<]*/gi, '');
+      cleanHtml = cleanHtml.replace(/As descrições são usadas pela IA na geração da análise/gi, '');
+      
+      return cleanHtml;
     }
 
     if (!token) {
@@ -860,6 +912,9 @@
           const title = analise.title || entregavelId;
           const imagePath = ENTREGAVEL_IMAGES[entregavelId];
           const sectionId = `section-${entregavelId}`;
+          
+          // Limpar HTML removendo botões e elementos indesejados
+          let cleanHtml = limparHtmlAnalise(analise.insightHtml || '');
 
           sectionsHtml += `
             <section class="report-section" id="${sectionId}">
@@ -874,7 +929,7 @@
                 </div>
               </div>
               <div class="analysis-content">
-                ${analise.insightHtml || '<p>Conteúdo não disponível.</p>'}
+                ${cleanHtml || '<p>Conteúdo não disponível.</p>'}
               </div>
             </section>
           `;
