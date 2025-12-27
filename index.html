@@ -49932,7 +49932,8 @@ FORMATO PADRÃO:
         await signOut(auth);
         clearAuthTraces();
         statusBox.textContent = "Você saiu da conta.";
-        location.reload();
+        // Redireciona para a raiz sem pathname para evitar conflito de TENANT
+        window.location.href = window.location.origin + '/';
       }catch(e){
         alert(e.message||String(e));
         btn.textContent = "Sair";
@@ -49949,6 +49950,15 @@ FORMATO PADRÃO:
         if(user){
           const tenantFromEmail = (user.email||'').split('@')[0].toLowerCase();
           if(tenantFromEmail){
+            // Verifica se a URL atual tem um pathname diferente do tenant do usuário
+            const currentPathTenant = window.getTenantFromHostOrPath();
+            if(currentPathTenant && currentPathTenant !== tenantFromEmail){
+              // Redireciona para a URL correta com o tenant do usuário
+              console.log(`Redirecionando de /${currentPathTenant} para /${tenantFromEmail}`);
+              window.location.href = window.location.origin + '/' + tenantFromEmail;
+              return; // Interrompe a execução
+            }
+            
             TENANT = tenantFromEmail;
             window.TENANT = tenantFromEmail;
             try{ document.documentElement.dataset.tenant = tenantFromEmail; document.body.setAttribute('data-client-id', tenantFromEmail); }catch(_){}
