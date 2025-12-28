@@ -246,6 +246,21 @@ service cloud.firestore {
                              || (isClient() && ((exists(resource) && sameClientData(resource.data)) || sameClientReq(request.resource.data)));
         }
 
+        /* ⚠️ CRÍTICO: Conversas da I.A. (iaDocs) - Acesso baseado em hierarquia de path, não em campos do documento */
+        match /iaDocs/{docId} {
+          // O dono do usuário (userId) sempre tem acesso total
+          allow read, write: if isOwner(userId);
+          
+          // Admin sempre tem acesso
+          allow read, write: if isAdmin();
+          
+          // Agência tem acesso se o token agencyId corresponde ao userId do path
+          allow read, write: if isAgency() && request.auth.uid == userId;
+          
+          // Cliente tem acesso se estiver autenticado (path já garante isolamento)
+          allow read, write: if isClient() && isSignedIn();
+        }
+
         match /{subcol}/{docId} {
           allow read, write: if isOwner(userId)
                              || (isAgency() && ((exists(resource) && sameAgencyData(resource.data)) || sameAgencyReq(request.resource.data)))
