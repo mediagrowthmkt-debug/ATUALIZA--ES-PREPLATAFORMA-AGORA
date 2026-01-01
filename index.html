@@ -13669,9 +13669,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       
       try {
         const settingsRef = doc(db, 'usuarios', auth.currentUser.uid, 'clients', clientKey);
-        await updateDoc(settingsRef, {
+        await setDoc(settingsRef, {
           emailNotifications: emailSettings
-        });
+        }, { merge: true });
         
         showNotificationStatus('✅ Configuração salva com sucesso!', 'success');
         loadEmailNotificationSettings(); // Reload to update display
