@@ -7573,7 +7573,9 @@ function renderReviewNotes(post){
 </style>
 <style id="metas-css">
   .metas-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:8px;overflow-x:auto;padding-bottom:16px}
-  .metas-toolbar{display:flex;gap:6px;align-items:center;background:var(--title-bg);border:1px solid var(--shell-border);padding:8px;border-radius:10px}
+  .metas-toolbar{display:flex;gap:6px;align-items:center;background:var(--title-bg);border:1px solid var(--shell-border);padding:8px;border-radius:10px;flex-wrap:wrap}
+  .metas-year-selector{display:flex;align-items:center;gap:8px;margin-right:auto;padding:4px 8px;background:rgba(59,130,246,.1);border-radius:8px;border:1px solid rgba(59,130,246,.3)}
+  .metas-year-selector label{margin:0;white-space:nowrap}
   .metas-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:8px}
   .metas-summary .meta-panel{background:var(--title-bg);border:1px solid var(--shell-border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px}
   .metas-summary .meta-panel select{margin-bottom:8px;font-size:.9rem}
@@ -9406,6 +9408,12 @@ function renderReviewNotes(post){
 <!-- METAS -->
 <div aria-hidden="true" class="metas-wrap" id="metasWrap" style="display:none">
   <div class="metas-toolbar">
+    <div class="metas-year-selector" style="display: flex; align-items: center; gap: 8px; margin-right: auto;">
+      <label for="metasYearSelect" style="font-weight: 600; color: #cbd5e1; font-size: 0.9rem;">📅 Ano:</label>
+      <select id="metasYearSelect" style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; padding: 6px 12px; font-size: 0.9rem; font-weight: 600; min-width: 100px;">
+        <!-- Anos serão adicionados dinamicamente -->
+      </select>
+    </div>
     <button class="btn small" id="addMeta" type="button">Adicionar meta</button>
     <button class="btn small" id="sendMetasLink" type="button">Enviar link para cliente</button>
     <button class="btn small danger" id="clearMetas" type="button">Limpar tudo</button>
@@ -11348,6 +11356,37 @@ document.addEventListener('DOMContentLoaded', function(){
     import { getFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, arrayUnion, Timestamp, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
 
+    /* ========= SERVICE WORKER - Notificações em Background ========= */
+    let serviceWorkerRegistration = null;
+    
+    async function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) {
+        console.log('⚠️ Service Worker não suportado neste navegador');
+        return;
+      }
+      
+      try {
+        serviceWorkerRegistration = await navigator.serviceWorker.register('/service-worker.js');
+        console.log('✅ Service Worker registrado:', serviceWorkerRegistration);
+        
+        // Solicitar permissão de notificação
+        if ('Notification' in window && Notification.permission === 'default') {
+          const permission = await Notification.requestPermission();
+          console.log('🔔 Permissão de notificação:', permission);
+        }
+        
+        // Esperar o Service Worker estar ativo
+        await navigator.serviceWorker.ready;
+        console.log('🚀 Service Worker ativo e pronto!');
+        
+      } catch (error) {
+        console.error('❌ Erro ao registrar Service Worker:', error);
+      }
+    }
+    
+    // Registrar Service Worker imediatamente
+    registerServiceWorker();
+    
     /* ========= helpers ========= */
     function mountEmbed(shell, html){
       if(!shell) return;
@@ -13673,6 +13712,11 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           emailNotifications: emailSettings
         }, { merge: true });
         
+        // ============================================
+        // SINCRONIZAR COM SERVICE WORKER
+        // ============================================
+        await syncConfigWithServiceWorker(clientKey, emailSettings);
+        
         showNotificationStatus('✅ Configuração salva com sucesso!', 'success');
         loadEmailNotificationSettings(); // Reload to update display
       } catch(err) {
@@ -13779,6 +13823,11 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           emailNotifications: deleteField()
         });
         
+        // ============================================
+        // REMOVER DO SERVICE WORKER
+        // ============================================
+        await removeConfigFromServiceWorker(clientKey);
+        
         // Clear form
         const emailsInput = document.getElementById('notificationEmails');
         const frequencySelect = document.getElementById('notificationFrequency');
@@ -13841,26 +13890,21 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         
         console.log('⏰ Hora atual: ' + currentTime + ', Hora configurada: ' + time);
         
-        const isCorrectTime = currentHour === configHour && Math.abs(currentMinute - configMinute) <= 1;
-        
-        if(!isCorrectTime) {
-          console.log('⏳ Ainda não é hora de enviar. Aguardando ' + time + '...');
-          return;
-        }
-        
+        // Verificar dia da semana/mês ANTES de verificar horário
         const dayOfWeek = now.getDay();
         const dayOfMonth = now.getDate();
         
         if(frequency === 'weekly' && dayOfWeek !== 1) {
-          console.log('📅 Envio semanal configurado para segundas-feiras');
+          console.log('📅 Envio semanal configurado para segundas-feiras (dia atual: ' + dayOfWeek + ')');
           return;
         }
         
         if(frequency === 'monthly' && dayOfMonth !== 1) {
-          console.log('📅 Envio mensal configurado para o dia 1');
+          console.log('📅 Envio mensal configurado para o dia 1 (dia atual: ' + dayOfMonth + ')');
           return;
         }
         
+        // Verificar se já enviou hoje/esta semana/este mês
         const lastSentKey = 'mediagrowth_last_email_sent_' + clientKey + '_' + time;
         const lastSent = localStorage.getItem(lastSentKey);
         if(lastSent) {
@@ -13885,7 +13929,16 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           }
         }
         
-        console.log('🚀 Hora correta! Enviando email ' + frequency + '...');
+        // Verificar se já passou do horário configurado (e ainda não enviou)
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        const configTimeInMinutes = configHour * 60 + configMinute;
+        
+        if(currentTimeInMinutes < configTimeInMinutes) {
+          console.log('⏳ Ainda não é hora de enviar. Aguardando ' + time + '...');
+          return;
+        }
+        
+        console.log('🚀 Horário atingido! (' + currentTime + ' >= ' + time + ') Enviando email ' + frequency + '...');
         
         const widgetNotifications = window.getNotificationItems ? window.getNotificationItems() : notificationItems || [];
         console.log('📋 ' + widgetNotifications.length + ' notificações para enviar');
@@ -13915,12 +13968,13 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           
           if(response.ok) {
             const result = await response.json();
-            console.log('✅ Emails agendados enviados com sucesso:', result);
+            console.log('✅ Emails agendados enviados com sucesso às ' + currentTime + ':', result);
             localStorage.setItem(lastSentKey, now.toISOString());
+            console.log('💾 Marcado como enviado em:', lastSentKey, '=', now.toISOString());
             
             if(window.showNotificationStatus) {
               const freqLabel = frequency === 'daily' ? 'diário' : frequency === 'weekly' ? 'semanal' : 'mensal';
-              window.showNotificationStatus('✅ Email ' + freqLabel + ' enviado!', 'success');
+              window.showNotificationStatus('✅ Email ' + freqLabel + ' enviado às ' + currentTime + '!', 'success');
             }
           } else {
             const errorText = await response.text();
@@ -13932,6 +13986,75 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
 
       } catch(err) {
         console.error('❌ Erro ao enviar notificações agendadas:', err);
+      }
+    }
+
+    // ============================================
+    // SINCRONIZAÇÃO COM SERVICE WORKER
+    // ============================================
+    async function syncConfigWithServiceWorker(clientKey, emailSettings) {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        console.log('⚠️ Service Worker não disponível para sincronizar');
+        return;
+      }
+      
+      try {
+        const config = {
+          clientKey: clientKey,
+          userId: auth.currentUser.uid,
+          emails: emailSettings.emails,
+          frequency: emailSettings.frequency,
+          time: emailSettings.time,
+          lastSent: localStorage.getItem(`mediagrowth_last_email_sent_${clientKey}_${emailSettings.time}`)
+        };
+        
+        console.log('📤 Sincronizando configuração com Service Worker:', config);
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SAVE_CONFIG',
+          config: config
+        });
+        
+        // Também sincronizar notificações do widget
+        await syncNotificationsWithServiceWorker(clientKey);
+        
+      } catch (error) {
+        console.error('❌ Erro ao sincronizar com Service Worker:', error);
+      }
+    }
+    
+    async function syncNotificationsWithServiceWorker(clientKey) {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        return;
+      }
+      
+      try {
+        const notifications = window.getNotificationItems ? window.getNotificationItems() : notificationItems || [];
+        
+        console.log('📤 Sincronizando notificações com Service Worker:', notifications.length);
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SAVE_NOTIFICATIONS',
+          clientKey: clientKey,
+          notifications: notifications
+        });
+        
+      } catch (error) {
+        console.error('❌ Erro ao sincronizar notificações:', error);
+      }
+    }
+    
+    async function removeConfigFromServiceWorker(clientKey) {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        return;
+      }
+      
+      try {
+        console.log('📤 Removendo configuração do Service Worker:', clientKey);
+        navigator.serviceWorker.controller.postMessage({
+          type: 'DELETE_CONFIG',
+          clientKey: clientKey
+        });
+      } catch (error) {
+        console.error('❌ Erro ao remover config do Service Worker:', error);
       }
     }
 
@@ -46857,36 +46980,57 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         return;
       }
       
-      // 📊 DIRECIONAMENTO_METAS: SEMPRE pedir métricas do primeiro mês ANTES de gerar/regenerar
+      // 📊 DIRECIONAMENTO_METAS: pedir métricas do primeiro mês ANTES de gerar/regenerar
       if (entregavelId === 'direcionamento_metas' && !skipInfoModal) {
         console.log('📊 Entregável direcionamento_metas detectado');
         
-        // ⚡ CRITICAL FIX: Se já tem métricas em memória, NÃO abrir modal de novo (evitar loop)
-        if (window.metricasPrimeiroMes) {
-          console.log('✅ Métricas já em memória, continuando com geração');
-          console.log('   📊 Métricas:', {
-            mes: window.metricasPrimeiroMes.mesReferencia,
-            investimento: window.metricasPrimeiroMes.investimento,
-            leads: (window.metricasPrimeiroMes.leadsOrganicos || 0) + (window.metricasPrimeiroMes.leadsTrafegoPago || 0),
-            vendas: window.metricasPrimeiroMes.vendasEsperadas
-          });
-          // Continuar com a geração (não retornar aqui)
-        } else {
-          // Não tem métricas em memória - precisa abrir modal
-          console.log('❌ Métricas não encontradas em memória - abrindo modal');
-          
-          // Tentar carregar métricas salvas do Firebase primeiro
+        // ⚡ CRITICAL FIX: Se NÃO está regenerando, verificar se já existe análise completa salva
+        if (!forceRegenerate) {
+          console.log('📋 Verificando se já existe análise salva...');
           const analiseSalvaExistente = await carregarAnaliseFirebase(entregavelId);
           
-          if (analiseSalvaExistente && analiseSalvaExistente.metricasPrimeiroMes) {
-            console.log('📥 Métricas recuperadas do Firebase:', analiseSalvaExistente.metricasPrimeiroMes);
-            window.metricasPrimeiroMes = analiseSalvaExistente.metricasPrimeiroMes;
+          if (analiseSalvaExistente && analiseSalvaExistente.insightHtml) {
+            console.log('✅ Análise completa encontrada no Firebase - carregando sem pedir métricas');
+            
+            // Recuperar métricas salvas para uso futuro
+            if (analiseSalvaExistente.metricasPrimeiroMes) {
+              window.metricasPrimeiroMes = analiseSalvaExistente.metricasPrimeiroMes;
+            }
+            
+            // Continuar para exibir a análise salva (não retornar aqui)
+          } else {
+            // Não existe análise completa - precisa coletar métricas
+            console.log('❌ Análise completa não encontrada - precisa coletar métricas');
+            
+            // Se já tem métricas em memória, continuar; senão abrir modal
+            if (!window.metricasPrimeiroMes) {
+              console.log('📝 Abrindo modal de métricas para gerar nova análise');
+              abrirModalMetricasMes(entregavelId, forceRegenerate);
+              return; // Parar aqui - aguardar usuário preencher modal
+            } else {
+              console.log('✅ Métricas já em memória, continuando com geração');
+            }
           }
+        } else {
+          // Modo regeneração - precisa das métricas
+          console.log('🔄 Modo regeneração - verificando métricas');
           
-          // Abrir modal para coletar/confirmar métricas
-          console.log('📝 Abrindo modal de métricas');
-          abrirModalMetricasMes(entregavelId, forceRegenerate);
-          return; // Parar aqui - aguardar usuário preencher modal
+          if (window.metricasPrimeiroMes) {
+            console.log('✅ Métricas já em memória, continuando com regeneração');
+          } else {
+            // Tentar carregar métricas salvas do Firebase
+            const analiseSalvaExistente = await carregarAnaliseFirebase(entregavelId);
+            
+            if (analiseSalvaExistente && analiseSalvaExistente.metricasPrimeiroMes) {
+              console.log('📥 Métricas recuperadas do Firebase:', analiseSalvaExistente.metricasPrimeiroMes);
+              window.metricasPrimeiroMes = analiseSalvaExistente.metricasPrimeiroMes;
+            } else {
+              // Não tem métricas - abrir modal
+              console.log('📝 Abrindo modal de métricas para regeneração');
+              abrirModalMetricasMes(entregavelId, forceRegenerate);
+              return; // Parar aqui - aguardar usuário preencher modal
+            }
+          }
         }
       }
       
@@ -52942,6 +53086,7 @@ FORMATO PADRÃO:
 
     /* ========= metas ========= */
     let METAS = [];
+    let CURRENT_METAS_YEAR = new Date().getFullYear(); // Ano atual selecionado
     let META_PANELS = Array(6).fill(null);
     const META_MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
     const META_MONTH_LABELS = { jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' };
@@ -53020,15 +53165,19 @@ FORMATO PADRÃO:
     }
 
     function loadMetasFromUserData(){
-      if(!Array.isArray(USER_DATA.metas)){
+      // Carregar metas do ano selecionado
+      const yearKey = `metas_${CURRENT_METAS_YEAR}`;
+      
+      if(!USER_DATA[yearKey] || !Array.isArray(USER_DATA[yearKey])){
         try{
-          const cached = JSON.parse(localStorage.getItem(METAS_LS_KEY) || '[]');
+          const cached = JSON.parse(localStorage.getItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`) || '[]');
           if(Array.isArray(cached) && cached.length){
-            USER_DATA.metas = cached;
+            USER_DATA[yearKey] = cached;
           }
         }catch(_){ /* ignore */ }
       }
-      METAS = Array.isArray(USER_DATA.metas) ? USER_DATA.metas : [];
+      
+      METAS = Array.isArray(USER_DATA[yearKey]) ? USER_DATA[yearKey] : [];
       let changed = false;
       let maxPos = METAS.reduce((max,m)=>Math.max(max, m.pos||0),0);
       METAS = METAS.map(m => {
@@ -53051,7 +53200,7 @@ FORMATO PADRÃO:
         return m;
       });
       calcRoasMeta();
-      try{ localStorage.setItem(METAS_LS_KEY, JSON.stringify(METAS)); }catch(_){ }
+      try{ localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); }catch(_){ }
       if(changed){
         persistMetas();
       }
@@ -53060,12 +53209,13 @@ FORMATO PADRÃO:
 
     async function persistMetas(){
       calcRoasMeta();
-      USER_DATA.metas = METAS;
-      try{ localStorage.setItem(METAS_LS_KEY, JSON.stringify(METAS)); }catch(_){ }
+      const yearKey = `metas_${CURRENT_METAS_YEAR}`;
+      USER_DATA[yearKey] = METAS;
+      try{ localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); }catch(_){ }
       const uid = auth.currentUser?.uid;
       if(uid){
         try{
-          await setDoc(doc(db,'usuarios',uid), { metas: METAS }, { merge:true });
+          await setDoc(doc(db,'usuarios',uid), { [yearKey]: METAS }, { merge:true });
         }catch(e){ console.error('persistMetas setDoc', e); }
       }
       if (typeof renderCAC === 'function' && renderCAC.refresh) {
@@ -53652,9 +53802,63 @@ FORMATO PADRÃO:
       if(typeof mgToast === 'function'){ mgToast('Metas redefinidas com sucesso para o padrão inicial.'); }
     }
 
+    function initMetasYearSelector(){
+      const select = $('metasYearSelect');
+      if(!select) return;
+      
+      // Limpar opções existentes
+      select.innerHTML = '';
+      
+      // Ano atual
+      const currentYear = new Date().getFullYear();
+      
+      // Gerar anos: 2 anos atrás até 3 anos à frente
+      const years = [];
+      for(let i = -2; i <= 3; i++){
+        years.push(currentYear + i);
+      }
+      
+      // Adicionar opções
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if(year === CURRENT_METAS_YEAR){
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+      
+      // Adicionar evento de mudança
+      select.onchange = async () => {
+        const newYear = parseInt(select.value);
+        if(newYear === CURRENT_METAS_YEAR) return;
+        
+        // Salvar ano anterior antes de trocar
+        await persistMetas();
+        
+        // Trocar ano
+        CURRENT_METAS_YEAR = newYear;
+        
+        // Carregar metas do novo ano
+        loadMetasFromUserData();
+        
+        // Re-renderizar
+        renderMetas();
+        
+        if(typeof mgToast === 'function'){ 
+          mgToast(`📅 Ano alterado para ${CURRENT_METAS_YEAR}`); 
+        }
+      };
+    }
+
     function renderMetas(){
       const container = $('metasContainer');
       if(!container) return;
+      
+      // Inicializar seletor de ano (se ainda não foi)
+      initMetasYearSelector();
+      
       hideMetaBulkMenu();
       renderMetaSummary();
       container.innerHTML = '';
@@ -55338,6 +55542,16 @@ FORMATO PADRÃO:
       notificationLatestSnapshot = data.countersSnapshot || notificationLatestSnapshot || {};
       renderNotifications();
       updateNotificationBadge();
+      
+      // ============================================
+      // SINCRONIZAR COM SERVICE WORKER
+      // ============================================
+      const clientKey = getClientKey();
+      if(clientKey && notificationItems.length > 0) {
+        syncNotificationsWithServiceWorker(clientKey).catch(err => {
+          console.warn('⚠️ Erro ao sincronizar notificações com Service Worker:', err);
+        });
+      }
     }
 
     function markNotificationsSeen(){
