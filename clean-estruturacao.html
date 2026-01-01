@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limpar Estruturação - MediaGrowth</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ff6600, #ffaa00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: #ff6600;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ff6600, #ff8800);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.3);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.show {
+      display: block;
+    }
+    .status.success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+    .status.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .status.info {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+    }
+    .warning {
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      color: #fbbf24;
+      font-size: 0.9rem;
+    }
+    .log {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .log.show {
+      display: block;
+    }
+    .log-item {
+      margin-bottom: 4px;
+    }
+    .log-item.success { color: #4ade80; }
+    .log-item.error { color: #f87171; }
+    .log-item.info { color: #60a5fa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧹 Limpar Estruturação</h1>
+    <p class="subtitle">Ferramenta para resetar dados da aba Estruturação</p>
+
+    <div class="warning">
+      ⚠️ <strong>Atenção:</strong> Esta ação irá apagar TODOS os dados da aba Estruturação (Contexto do Negócio + Cronograma Semanal) da conta especificada. Esta ação não pode ser desfeita!
+    </div>
+
+    <div class="input-group">
+      <label>Email da conta para limpar</label>
+      <input type="email" id="emailInput" placeholder="exemplo@dominio.com" value="lprotecgranite@gmail.com">
+    </div>
+
+    <button class="btn" id="cleanBtn">🧹 Limpar Estruturação</button>
+    <button class="btn btn-secondary" id="backBtn" onclick="window.location.href='admin-selector.html'">← Voltar ao Admin</button>
+
+    <div class="status" id="status"></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      deleteDoc, 
+      doc, 
+      getDoc,
+      query,
+      where,
+      updateDoc,
+      deleteField
+    } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const emailInput = document.getElementById('emailInput');
+    const cleanBtn = document.getElementById('cleanBtn');
+    const statusEl = document.getElementById('status');
+    const logEl = document.getElementById('log');
+
+    function showStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = `status show ${type}`;
+    }
+
+    function addLog(message, type = 'info') {
+      const item = document.createElement('div');
+      item.className = `log-item ${type}`;
+      item.textContent = message;
+      logEl.appendChild(item);
+      logEl.scrollTop = logEl.scrollHeight;
+      logEl.classList.add('show');
+    }
+
+    async function findUserByEmail(email) {
+      try {
+        addLog(`🔍 Buscando UID para: ${email}`, 'info');
+        
+        const usersRef = collection(db, 'usuarios');
+        const q = query(usersRef, where('email', '==', email));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          throw new Error('Usuário não encontrado no Firestore');
+        }
+
+        const userDoc = snapshot.docs[0];
+        const uid = userDoc.id;
+        
+        addLog(`✅ UID encontrado: ${uid}`, 'success');
+        return uid;
+      } catch (error) {
+        addLog(`❌ Erro ao buscar usuário: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    async function cleanEstruturacao(uid) {
+      let deletedCount = 0;
+      let errors = 0;
+
+      try {
+        addLog('📂 Limpando subcoleção /estruturacao...', 'info');
+        
+        const estruturacaoRef = collection(db, 'usuarios', uid, 'estruturacao');
+        const snapshot = await getDocs(estruturacaoRef);
+
+        addLog(`📊 Encontrados ${snapshot.size} documentos na subcoleção`, 'info');
+
+        for (const docSnap of snapshot.docs) {
+          try {
+            await deleteDoc(doc(db, 'usuarios', uid, 'estruturacao', docSnap.id));
+            deletedCount++;
+            addLog(`  ✓ Deletado: ${docSnap.id}`, 'success');
+          } catch (err) {
+            errors++;
+            addLog(`  ✗ Erro ao deletar ${docSnap.id}: ${err.message}`, 'error');
+          }
+        }
+
+        addLog('🧹 Limpando campo estruturacao do documento principal...', 'info');
+        
+        const userDocRef = doc(db, 'usuarios', uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          const updates = {};
+          
+          if (data.estruturacao) {
+            updates.estruturacao = deleteField();
+            addLog('  ✓ Campo estruturacao marcado para remoção', 'success');
+          }
+          
+          if (data.estruturacaoUsesSubcollection) {
+            updates.estruturacaoUsesSubcollection = deleteField();
+            addLog('  ✓ Flag estruturacaoUsesSubcollection marcada para remoção', 'success');
+          }
+          
+          if (data.estruturacaoLastUpdate) {
+            updates.estruturacaoLastUpdate = deleteField();
+            addLog('  ✓ Campo estruturacaoLastUpdate marcado para remoção', 'success');
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(userDocRef, updates);
+            addLog('✅ Documento principal atualizado', 'success');
+          } else {
+            addLog('ℹ️ Nenhum campo de estruturação encontrado no documento principal', 'info');
+          }
+        }
+
+        return { deletedCount, errors };
+      } catch (error) {
+        addLog(`❌ Erro na limpeza: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    cleanBtn.onclick = async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      
+      if (!email) {
+        showStatus('❌ Digite um email válido', 'error');
+        return;
+      }
+
+      if (!confirm(`⚠️ TEM CERTEZA que deseja APAGAR TODOS OS DADOS de Estruturação da conta ${email}?\n\nEsta ação NÃO pode ser desfeita!`)) {
+        return;
+      }
+
+      cleanBtn.disabled = true;
+      cleanBtn.textContent = '⏳ Limpando...';
+      logEl.innerHTML = '';
+      statusEl.className = 'status';
+
+      try {
+        addLog('🚀 Iniciando limpeza...', 'info');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        
+        const uid = await findUserByEmail(email);
+        
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        
+        const { deletedCount, errors } = await cleanEstruturacao(uid);
+        
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        addLog(`📊 Resumo:`, 'info');
+        addLog(`  • Documentos deletados: ${deletedCount}`, 'success');
+        if (errors > 0) {
+          addLog(`  • Erros encontrados: ${errors}`, 'error');
+        }
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        
+        showStatus(`✅ Estruturação limpa com sucesso! ${deletedCount} itens removidos.`, 'success');
+        
+        addLog('', 'info');
+        addLog('🎉 Limpeza concluída! A conta agora está com a aba Estruturação zerada.', 'success');
+        addLog('💡 Faça login na conta para verificar.', 'info');
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        showStatus(`❌ Erro: ${error.message}`, 'error');
+        addLog(`❌ FALHA: ${error.message}`, 'error');
+      } finally {
+        cleanBtn.disabled = false;
+        cleanBtn.textContent = '🧹 Limpar Estruturação';
+      }
+    };
+
+    // Auto-focus no input
+    emailInput.focus();
+    
+    // Enter para executar
+    emailInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !cleanBtn.disabled) {
+        cleanBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limpeza Automática - lprotecgranite@gmail.com</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      color: #4ade80;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .terminal {
+      background: #1a1a2e;
+      border: 2px solid #4ade80;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+    }
+    .header {
+      border-bottom: 2px solid #4ade80;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #4ade80;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      color: #60a5fa;
+      font-size: 0.9rem;
+    }
+    .log {
+      background: #0a0e27;
+      border: 1px solid #4ade80;
+      border-radius: 4px;
+      padding: 20px;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    .log-line {
+      margin-bottom: 8px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .log-line.success { color: #4ade80; }
+    .log-line.error { color: #f87171; }
+    .log-line.info { color: #60a5fa; }
+    .log-line.warning { color: #fbbf24; }
+    .log-line.separator { color: #4ade80; }
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 16px;
+      background: #4ade80;
+      animation: blink 1s infinite;
+      margin-left: 4px;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+    .status.show { display: block; }
+    .status.success { 
+      background: rgba(74, 222, 128, 0.2); 
+      border: 1px solid #4ade80;
+      color: #4ade80;
+    }
+    .status.error { 
+      background: rgba(248, 113, 113, 0.2); 
+      border: 1px solid #f87171;
+      color: #f87171;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: transparent;
+      border: 2px solid #4ade80;
+      border-radius: 4px;
+      color: #4ade80;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .btn:hover {
+      background: #4ade80;
+      color: #0a0e27;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="header">
+      <h1>🧹 LIMPEZA AUTOMÁTICA DE ESTRUTURAÇÃO</h1>
+      <p class="subtitle">Conta: lprotecgranite@gmail.com</p>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <div class="status" id="status"></div>
+    
+    <button class="btn" id="reloadBtn" style="display:none;" onclick="window.location.href='index.html'">
+      → Ir para Dashboard
+    </button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      deleteDoc, 
+      doc, 
+      getDoc,
+      query,
+      where,
+      updateDoc,
+      deleteField
+    } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "568656972714",
+      appId: "1:568656972714:web:cd20fa37e6a962f38ac0d5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const reloadBtn = document.getElementById('reloadBtn');
+
+    function addLog(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `log-line ${type}`;
+      line.textContent = message;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function showStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `status show ${type}`;
+      if (type === 'success') {
+        reloadBtn.style.display = 'block';
+      }
+    }
+
+    async function executeClean() {
+      const email = 'lprotecgranite@gmail.com';
+      
+      addLog('🚀 Iniciando limpeza automática...', 'success');
+      addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator');
+      addLog(`📧 Conta alvo: ${email}`, 'info');
+      addLog('', 'info');
+
+      try {
+        // Buscar UID
+        addLog('🔍 [1/3] Buscando UID no Firebase...', 'warning');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const usersRef = collection(db, 'usuarios');
+        const q = query(usersRef, where('email', '==', email));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          throw new Error('❌ Usuário não encontrado no Firestore');
+        }
+
+        const userDoc = snapshot.docs[0];
+        const uid = userDoc.id;
+        
+        addLog(`   ✅ UID encontrado: ${uid}`, 'success');
+        addLog('', 'info');
+        
+        // Limpar subcoleções
+        addLog('🗑️  [2/3] Limpando subcoleção /estruturacao...', 'warning');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const estruturacaoRef = collection(db, 'usuarios', uid, 'estruturacao');
+        const estrutSnapshot = await getDocs(estruturacaoRef);
+
+        addLog(`   📊 Encontrados ${estrutSnapshot.size} documentos`, 'info');
+
+        let deletedCount = 0;
+        for (const docSnap of estrutSnapshot.docs) {
+          await deleteDoc(doc(db, 'usuarios', uid, 'estruturacao', docSnap.id));
+          deletedCount++;
+          addLog(`   ✓ Deletado: ${docSnap.id}`, 'success');
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        if (deletedCount === 0) {
+          addLog('   ℹ️  Nenhum documento encontrado na subcoleção', 'info');
+        }
+
+        addLog('', 'info');
+        
+        // Limpar documento principal
+        addLog('🧹 [3/3] Limpando campos do documento principal...', 'warning');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const userDocRef = doc(db, 'usuarios', uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          const updates = {};
+          
+          if (data.estruturacao) {
+            updates.estruturacao = deleteField();
+            addLog('   ✓ Campo "estruturacao" removido', 'success');
+          }
+          
+          if (data.estruturacaoUsesSubcollection) {
+            updates.estruturacaoUsesSubcollection = deleteField();
+            addLog('   ✓ Flag "estruturacaoUsesSubcollection" removida', 'success');
+          }
+          
+          if (data.estruturacaoLastUpdate) {
+            updates.estruturacaoLastUpdate = deleteField();
+            addLog('   ✓ Campo "estruturacaoLastUpdate" removido', 'success');
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(userDocRef, updates);
+            addLog('   ✅ Documento principal atualizado', 'success');
+          } else {
+            addLog('   ℹ️  Nenhum campo encontrado no documento principal', 'info');
+          }
+        }
+
+        addLog('', 'info');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator');
+        addLog('📊 RESUMO DA OPERAÇÃO:', 'info');
+        addLog(`   • Subcoleções limpas: ${deletedCount} documento(s)`, 'success');
+        addLog(`   • Campos removidos: ${Object.keys(updates || {}).length}`, 'success');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator');
+        addLog('', 'info');
+        addLog('🎉 LIMPEZA CONCLUÍDA COM SUCESSO!', 'success');
+        addLog('', 'info');
+        addLog('💡 A conta lprotecgranite@gmail.com agora está com a aba', 'info');
+        addLog('   Estruturação completamente zerada.', 'info');
+        addLog('', 'info');
+        addLog('✅ Faça login na conta para confirmar.', 'success');
+        
+        showStatus('✅ LIMPEZA CONCLUÍDA! Conta resetada com sucesso.', 'success');
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        addLog('', 'info');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator');
+        addLog('❌ ERRO NA EXECUÇÃO:', 'error');
+        addLog(`   ${error.message}`, 'error');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator');
+        
+        showStatus('❌ ERRO: ' + error.message, 'error');
+      }
+    }
+
+    // Executar automaticamente ao carregar a página
+    window.addEventListener('load', () => {
+      setTimeout(executeClean, 500);
+    });
+  </script>
+</body>
+</html>

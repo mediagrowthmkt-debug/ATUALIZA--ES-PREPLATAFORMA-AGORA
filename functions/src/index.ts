@@ -2,6 +2,10 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 admin.initializeApp();
 
+// Importar funções de envio de email do arquivo separado
+// Funções de email habilitadas
+export * from './sendEmailNotifications';
+
 // 👉 Função para transformar a conta em AGENCIA
 export const becomeAgency = functions.https.onCall(async (data: any, context: any) => {
   // Verifica se o usuário está logado
@@ -102,3 +106,11 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
     return res.status(500).json({ ok: false, error: err?.message || 'Internal error' });
   }
 });
+
+// ============================================
+// 📧 EMAIL NOTIFICATIONS
+// ============================================
+// NOTA: Implementação movida para sendEmailNotifications.ts
+// As funções sendDailyNotifications, sendWeeklyNotifications, sendMonthlyNotifications
+// e sendTestEmail agora são importadas via export * from './sendEmailNotifications'
+// (veja linha 6 deste arquivo)
