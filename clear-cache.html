@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Limpar Cache e Service Workers</title>
+  <style>
+    body {
+      font-family: system-ui;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    button {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background: #cc0000;
+    }
+    #log {
+      background: #000;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <h1>🧹 Limpeza Total de Cache</h1>
+  <p>Esta página vai desregistrar todos os Service Workers e limpar o cache completamente.</p>
+  
+  <button onclick="clearEverything()">🗑️ LIMPAR TUDO E REINICIAR</button>
+  
+  <div id="log"></div>
+
+  <script>
+    const log = document.getElementById('log');
+    
+    function addLog(msg, type = 'info') {
+      const span = document.createElement('div');
+      span.className = type;
+      span.textContent = msg;
+      log.appendChild(span);
+      console.log(msg);
+    }
+    
+    async function clearEverything() {
+      log.innerHTML = '';
+      addLog('🔄 Iniciando limpeza completa...', 'info');
+      
+      try {
+        // 1. Desregistrar Service Workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          addLog(`📝 Encontrados ${registrations.length} service workers`, 'info');
+          
+          for (let registration of registrations) {
+            await registration.unregister();
+            addLog('✅ Service Worker desregistrado!', 'success');
+          }
+        }
+        
+        // 2. Limpar todos os caches
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          addLog(`📦 Encontrados ${cacheNames.length} caches`, 'info');
+          
+          for (let cacheName of cacheNames) {
+            await caches.delete(cacheName);
+            addLog(`✅ Cache "${cacheName}" deletado!`, 'success');
+          }
+        }
+        
+        // 3. Limpar localStorage
+        localStorage.clear();
+        addLog('✅ localStorage limpo!', 'success');
+        
+        // 4. Limpar sessionStorage
+        sessionStorage.clear();
+        addLog('✅ sessionStorage limpo!', 'success');
+        
+        addLog('', 'info');
+        addLog('🎉 LIMPEZA COMPLETA!', 'success');
+        addLog('🔄 Redirecionando em 2 segundos...', 'info');
+        
+        setTimeout(() => {
+          window.location.href = 'http://localhost:8000/';
+        }, 2000);
+        
+      } catch (error) {
+        addLog('❌ Erro: ' + error.message, 'error');
+      }
+    }
+    
+    // Auto-executar ao carregar
+    setTimeout(() => {
+      addLog('⏳ Clique no botão para começar a limpeza!', 'info');
+    }, 100);
+  </script>
+</body>
+</html>

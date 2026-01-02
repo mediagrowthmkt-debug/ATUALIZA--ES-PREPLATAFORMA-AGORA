@@ -5714,14 +5714,6 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .ia-input{flex:1;resize:none;min-height:48px;max-height:180px;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff}
     .ia-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.25)}
     .ia-source-note{margin:4px 0 0;width:100%;font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.01em;opacity:.85}
-    .ia-image-preview-wrapper{width:100%;margin-bottom:8px;display:none}
-    .ia-image-preview-container{position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center}
-    .ia-image-preview-img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
-    .ia-image-preview-info{flex:1;display:flex;flex-direction:column;gap:4px}
-    .ia-image-preview-name{font-size:.85rem;font-weight:700;color:#fff}
-    .ia-image-preview-size{font-size:.75rem;color:rgba(255,255,255,.6)}
-    .ia-image-preview-remove{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.75rem;font-weight:700;transition:all .2s ease}
-    .ia-image-preview-remove:hover{background:rgba(239,68,68,.3);transform:translateY(-1px)}
     .ia-typing{display:inline-flex;gap:6px;align-items:center}
     .ia-typing span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.85);animation:iaTyping 1s ease-in-out infinite}
     .ia-typing span:nth-child(2){animation-delay:.15s}
@@ -8760,17 +8752,7 @@ function renderReviewNotes(post){
             </div>
           </div>
         </div>
-        <div class="ia-image-preview-wrapper" id="iaImagePreviewWrapper">
-          <div class="ia-image-preview-container">
-            <img class="ia-image-preview-img" id="iaImagePreviewImg" src="" alt="Preview">
-            <div class="ia-image-preview-info">
-              <div class="ia-image-preview-name" id="iaImagePreviewName">imagem.png</div>
-              <div class="ia-image-preview-size" id="iaImagePreviewSize">0 KB</div>
-            </div>
-            <button type="button" class="ia-image-preview-remove" id="iaImagePreviewRemove">🗑️ Remover</button>
-          </div>
-        </div>
-        <textarea id="iaQuestion" class="input ia-input" rows="1" placeholder="Digite uma mensagem ou cole uma imagem (Ctrl+V)" autocomplete="off"></textarea>
+        <textarea id="iaQuestion" class="input ia-input" rows="1" placeholder="Digite uma mensagem" autocomplete="off"></textarea>
         <button class="btn" id="iaSend" type="submit">Enviar</button>
         <p class="ia-source-note" id="iaSourceNote" aria-live="polite"></p>
       </form>
@@ -14527,17 +14509,6 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           iaDocsStatus = $("iaDocsStatus"), iaDocsList = $("iaDocsList"),
           iaKnowledge = $("iaKnowledge"), iaDocsCount = $("iaDocsCount"),
           iaSourceNote = $("iaSourceNote");
-    
-    // Elementos do preview de imagem na aba IA
-    const iaImagePreviewWrapper = $("iaImagePreviewWrapper"),
-          iaImagePreviewImg = $("iaImagePreviewImg"),
-          iaImagePreviewName = $("iaImagePreviewName"),
-          iaImagePreviewSize = $("iaImagePreviewSize"),
-          iaImagePreviewRemove = $("iaImagePreviewRemove");
-    
-    // Variável global para armazenar a imagem atual na aba IA
-    let IA_CURRENT_IMAGE = null;
-    
     // Modal de planejamento
     const iaPlanningModal = $("iaPlanningModal"),
           iaPlanningModalClose = $("iaPlanningModalClose"),
@@ -16359,18 +16330,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         const meta = formatTimestamp(msg.ts);
         const isAssistant = msg.role === 'assistant';
         const isLoading = !!msg.loading;
-        
-        // Preparar conteúdo com imagem se houver
-        let imageHtml = '';
-        if(msg.image){
-          imageHtml = `<div style="margin-bottom: 10px;">
-            <img src="${msg.image}" alt="Imagem anexada" style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-          </div>`;
-        }
-        
         const content = isLoading
           ? '<div class="ia-typing"><span></span><span></span><span></span></div>'
-          : `${imageHtml}<div class="ia-msg-content markdown-view">${renderMessageContent(msg.content)}</div>`;
+          : `<div class="ia-msg-content markdown-view">${renderMessageContent(msg.content)}</div>`;
         const actions = (!isLoading && isAssistant)
           ? `<div class="ia-msg-actions">
               <button type="button" class="ia-edit-btn" data-msg-index="${idx}">✏️ Editar</button>
@@ -18143,56 +18105,21 @@ async function sendIAQuestion(){
   console.log('💬 [sendIAQuestion] Iniciando envio de mensagem...');
   if(!iaQuestion) return;
   const question = iaQuestion.value.trim();
-  if(!question && !IA_CURRENT_IMAGE) return; // Permitir envio só com imagem
+  if(!question) return;
   if(!auth.currentUser){ alert('Faça login.'); return; }
   if(!CURRENT_CHAT) newIAChat();
   const chat = CURRENT_CHAT;
   console.log(`💬 [sendIAQuestion] Chat atual: "${chat.title}" (${chat.messages.length} mensagens antes)`);
   const sendBtn = iaSend;
   if(sendBtn) sendBtn.disabled = true;
-  
-  // Processar imagem se houver
-  let imageData = null;
-  if(IA_CURRENT_IMAGE){
-    console.log('🖼️ Processando imagem anexada...');
-    try{
-      // Converter imagem para base64
-      const reader = new FileReader();
-      imageData = await new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(IA_CURRENT_IMAGE);
-      });
-      console.log('✅ Imagem convertida para base64');
-    }catch(err){
-      console.error('❌ Erro ao processar imagem:', err);
-      alert('Erro ao processar imagem. Tente novamente.');
-      if(sendBtn) sendBtn.disabled = false;
-      return;
-    }
-  }
-  
-  const userMsg = { 
-    role:'user', 
-    content: question || '🖼️ [Imagem anexada]', 
-    ts: Date.now(),
-    image: imageData // Armazenar base64 da imagem
-  };
+  const userMsg = { role:'user', content: question, ts: Date.now() };
   chat.messages.push(userMsg);
   console.log(`💬 [sendIAQuestion] Mensagem do usuário adicionada (${chat.messages.length} mensagens agora)`);
   if(!chat.title || chat.title === 'Nova conversa'){
-    chat.title = deriveTitleFromText(question || 'Análise de imagem');
+    chat.title = deriveTitleFromText(question);
   }
   iaQuestion.value = '';
   autoResizeComposer();
-  
-  // Limpar preview da imagem
-  if(IA_CURRENT_IMAGE){
-    IA_CURRENT_IMAGE = null;
-    if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'none';
-    if(iaImagePreviewImg) iaImagePreviewImg.src = '';
-  }
-  
   touchChat(chat);
   renderIAHistory();
   renderIAChatList();
@@ -18296,28 +18223,7 @@ async function sendIAQuestion(){
 
   try{
     // Preparar mensagens finais
-    const chatMessages = chat.messages.filter(m=>m !== loadingMsg).map(m=>{
-      // Se a mensagem tem imagem, usar formato vision
-      if(m.image){
-        return {
-          role: m.role,
-          content: [
-            {
-              type: 'text',
-              text: m.content || 'Analise esta imagem e descreva o que você vê. Se houver texto na imagem, transcreva-o completamente.'
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: m.image
-              }
-            }
-          ]
-        };
-      }
-      // Mensagem normal (só texto)
-      return { role: m.role, content: m.content };
-    });
+    const chatMessages = chat.messages.filter(m=>m !== loadingMsg).map(m=>({ role: m.role, content: m.content }));
     const allMessages = [...contextMessages, ...chatMessages];
     
     // Log de análise de consumo ANTES de enviar
@@ -18408,60 +18314,6 @@ async function sendIAQuestion(){
     });
     iaQuestion?.addEventListener('input', autoResizeComposer);
     iaChatSearch?.addEventListener('input', ()=>{ renderIAChatList(); });
-    
-    // Event listener para colar imagem (Ctrl+V ou Cmd+V)
-    iaQuestion?.addEventListener('paste', async (e) => {
-      const items = e.clipboardData?.items;
-      if(!items || items.length === 0) return;
-      
-      // Procurar por imagem nos itens colados
-      let imageItem = null;
-      for(let i = 0; i < items.length; i++){
-        if(items[i].type.startsWith('image/')){
-          imageItem = items[i];
-          break;
-        }
-      }
-      
-      if(!imageItem) return; // Não é imagem, deixar comportamento padrão
-      
-      e.preventDefault(); // Prevenir colagem de texto quando for imagem
-      
-      const file = imageItem.getAsFile();
-      if(!file){
-        console.error('❌ Erro ao obter imagem da área de transferência');
-        return;
-      }
-      
-      // Validar tamanho (10MB)
-      if(file.size > 10 * 1024 * 1024){
-        alert('⚠️ A imagem é muito grande. Tamanho máximo: 10MB');
-        return;
-      }
-      
-      console.log('🖼️ Imagem colada na aba IA:', file.name || 'clipboard-image', `(${(file.size / 1024).toFixed(2)} KB)`);
-      
-      // Armazenar imagem
-      IA_CURRENT_IMAGE = file;
-      
-      // Mostrar preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if(iaImagePreviewImg) iaImagePreviewImg.src = e.target.result;
-        if(iaImagePreviewName) iaImagePreviewName.textContent = file.name || 'Imagem colada';
-        if(iaImagePreviewSize) iaImagePreviewSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-        if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    });
-    
-    // Event listener para remover imagem
-    iaImagePreviewRemove?.addEventListener('click', () => {
-      IA_CURRENT_IMAGE = null;
-      if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'none';
-      if(iaImagePreviewImg) iaImagePreviewImg.src = '';
-      console.log('🗑️ Imagem removida');
-    });
     
     // Event listeners para botões de tamanho de resposta
     document.querySelectorAll('.ia-size-btn').forEach(btn => {
@@ -21293,214 +21145,6 @@ async function sendIAQuestion(){
       });
       updateMacroSocialFromHeader();
       try{ refreshMacroInsights(); }catch(_err){}
-    }
-
-    /* ========= impedimentos ========= */
-    const IMPEDIMENT_STATUS_OPTIONS = [
-      { value: 'pending', label: 'Ainda não resolvido' },
-      { value: 'resolved', label: 'Resolvido' }
-    ];
-    const IMPEDIMENT_STATUS_VALUES = new Set(IMPEDIMENT_STATUS_OPTIONS.map(opt => opt.value));
-    let IMPEDIMENT_ALERTS = [];
-    const IMPEDIMENTS_SAVE_DEBOUNCE_MS = 800;
-    let impedimentsSaveTimer = null;
-    let impedimentsSavePending = false;
-    let impedimentsSaveInFlight = false;
-    let impedimentsSaveQueued = false;
-    let lastImpedimentsSignature = '';
-    let lastRemoteImpedimentsSignature = '';
-    
-    function computeImpedimentsSignature(list){
-      if(!Array.isArray(list) || list.length === 0) return '[]';
-      return list.map(item => {
-        const id = item && typeof item.id === 'string' ? item.id : '';
-        const text = item && typeof item.descricao === 'string' ? item.descricao.trim() : '';
-        const status = item && typeof item.status === 'string' ? item.status : 'pending';
-        return `${id}|${text}|${status}`;
-      }).join('||');
-    }
-    
-    function fallbackUUID(){
-      return `imp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-    }
-    
-    function createImpediment(data={}){
-      const baseId = typeof data.id === 'string' && data.id ? data.id : (typeof uuid === 'function' ? uuid() : fallbackUUID());
-      const statusValue = typeof data.status === 'string' && IMPEDIMENT_STATUS_VALUES.has(data.status) ? data.status : 'pending';
-      return {
-        id: baseId,
-        descricao: typeof data.descricao === 'string' ? data.descricao : '',
-        status: statusValue
-      };
-    }
-    
-    function applyImpedimentsFromSource(source, { fromRemote=false }={}){
-      const list = Array.isArray(source) ? source : [];
-      IMPEDIMENT_ALERTS = list.map(item => createImpediment(item));
-      if(!IMPEDIMENT_ALERTS.length){
-        IMPEDIMENT_ALERTS.push(createImpediment());
-      }
-      const signature = computeImpedimentsSignature(IMPEDIMENT_ALERTS);
-      lastImpedimentsSignature = signature;
-      if(fromRemote){
-        lastRemoteImpedimentsSignature = signature;
-        if(impedimentsSaveTimer){
-          clearTimeout(impedimentsSaveTimer);
-          impedimentsSaveTimer = null;
-        }
-        impedimentsSavePending = false;
-        impedimentsSaveQueued = false;
-      }
-    }
-    
-    function loadImpedimentsFromUserData(){
-      const source = USER_DATA && Array.isArray(USER_DATA.impediments) ? USER_DATA.impediments : [];
-      applyImpedimentsFromSource(source, { fromRemote:true });
-    }
-    
-    function updateImpedimentsSignature(){
-      lastImpedimentsSignature = computeImpedimentsSignature(IMPEDIMENT_ALERTS);
-    }
-    
-    function renderImpediments(){
-      const section = $('impedimentosSection');
-      const tbody = $('impedimentosBody');
-      const empty = $('impedimentosEmpty');
-      if(!tbody){ return; }
-      if(!Array.isArray(IMPEDIMENT_ALERTS) || !IMPEDIMENT_ALERTS.length){
-        IMPEDIMENT_ALERTS = [createImpediment()];
-      }
-      tbody.innerHTML = '';
-      IMPEDIMENT_ALERTS.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.dataset.id = item.id;
-        tr.dataset.status = item.status;
-        const iconTd = document.createElement('td');
-        iconTd.className = 'icon-cell';
-        const iconSpan = document.createElement('span');
-        iconSpan.setAttribute('role','img');
-        iconSpan.setAttribute('aria-label','Alerta de atenção');
-        iconSpan.textContent = '⚠️';
-        iconTd.appendChild(iconSpan);
-        const descTd = document.createElement('td');
-        const textarea = document.createElement('textarea');
-        textarea.placeholder = 'Descreva o impedimento identificado (ex.: atraso no fornecedor, falta de orçamento, cliente sem aprovação).';
-        textarea.value = item.descricao || '';
-        textarea.addEventListener('input', ()=>{
-          item.descricao = textarea.value;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist();
-        });
-        textarea.addEventListener('blur', ()=>{
-          item.descricao = textarea.value;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist({ immediate:true });
-        });
-        descTd.appendChild(textarea);
-        const statusTd = document.createElement('td');
-        const statusWrap = document.createElement('div');
-        statusWrap.className = 'impedimentos-status-wrap';
-        const select = document.createElement('select');
-        IMPEDIMENT_STATUS_OPTIONS.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt.value;
-          option.textContent = opt.label;
-          if(item.status === opt.value){ option.selected = true; }
-          select.appendChild(option);
-        });
-        select.addEventListener('change', ()=>{
-          item.status = select.value;
-          tr.dataset.status = item.status;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist();
-        });
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'impedimentos-remove';
-        removeBtn.setAttribute('aria-label','Remover impedimento');
-        removeBtn.textContent = 'Remover';
-        removeBtn.addEventListener('click', ()=>{
-          IMPEDIMENT_ALERTS = IMPEDIMENT_ALERTS.filter(entry => entry.id !== item.id);
-          if(!IMPEDIMENT_ALERTS.length){
-            IMPEDIMENT_ALERTS.push(createImpediment());
-          }
-          updateImpedimentsSignature();
-          renderImpediments();
-          scheduleImpedimentsPersist({ immediate:true });
-        });
-        statusWrap.appendChild(select);
-        statusWrap.appendChild(removeBtn);
-        statusTd.appendChild(statusWrap);
-        tr.appendChild(iconTd);
-        tr.appendChild(descTd);
-        tr.appendChild(statusTd);
-        tbody.appendChild(tr);
-      });
-      if(section){
-        section.classList.toggle('empty', !IMPEDIMENT_ALERTS.length);
-      }
-      if(empty){
-        empty.style.display = IMPEDIMENT_ALERTS.length ? 'none' : 'block';
-      }
-    }
-    
-    function sanitizeImpedimentsPayload(){
-      return (Array.isArray(IMPEDIMENT_ALERTS) ? IMPEDIMENT_ALERTS : []).map(item => ({
-        id: item.id,
-        descricao: typeof item.descricao === 'string' ? item.descricao : '',
-        status: IMPEDIMENT_STATUS_VALUES.has(item.status) ? item.status : 'pending'
-      }));
-    }
-    
-    async function persistImpediments(){
-      const uid = auth?.currentUser?.uid;
-      const payload = sanitizeImpedimentsPayload();
-      USER_DATA.impediments = payload;
-      if(!uid) return;
-      try{
-        await setDoc(doc(db,'usuarios',uid), { impediments: payload }, { merge:true });
-      }catch(err){
-        console.error('Erro ao salvar impedimentos', err);
-        throw err;
-      }
-    }
-    
-    async function flushImpedimentsPersist(){
-      if(impedimentsSaveTimer){
-        clearTimeout(impedimentsSaveTimer);
-        impedimentsSaveTimer = null;
-      }
-      if(impedimentsSaveInFlight){
-        impedimentsSaveQueued = true;
-        return;
-      }
-      if(!impedimentsSavePending){
-        return;
-      }
-      impedimentsSavePending = false;
-      impedimentsSaveInFlight = true;
-      try{
-        await persistImpediments();
-      }finally{
-        impedimentsSaveInFlight = false;
-        if(impedimentsSaveQueued){
-          impedimentsSaveQueued = false;
-          scheduleImpedimentsPersist({ immediate:true });
-        }
-      }
-    }
-    
-    function scheduleImpedimentsPersist({ immediate=false }={}){
-      impedimentsSavePending = true;
-      if(impedimentsSaveTimer){
-        clearTimeout(impedimentsSaveTimer);
-        impedimentsSaveTimer = null;
-      }
-      if(immediate){
-        flushImpedimentsPersist();
-        return;
-      }
-      impedimentsSaveTimer = setTimeout(()=>{ flushImpedimentsPersist(); }, IMPEDIMENTS_SAVE_DEBOUNCE_MS);
     }
 
     const MAX_PROFILE_LOGO_SIZE = 5 * 1024 * 1024;
@@ -59225,14 +58869,431 @@ FORMATO PADRÃO:
       if(!container) return; // Container não existe mais, retorna silenciosamente
       // Código original comentado para evitar processamento desnecessário
     }
-
+      const groups={};
+      const monthKeysSet=new Set();
+      DEMANDAS.forEach(d=>{
+        normalizeDemanda(d);
+        const months=getDemandMonthKeys(d);
+        if(!months.length) return;
+        months.forEach(key=>{
+          if(!groups[key]) groups[key]=[];
+          groups[key].push(d);
+          monthKeysSet.add(key);
+          normalizeMonthPlan(key);
+        });
+      });
+      Object.keys(DEMANDA_MONTH_PLANS||{}).forEach(monthKey=>{
+        if(typeof monthKey==='string' && monthKey){
+          monthKeysSet.add(monthKey);
+          normalizeMonthPlan(monthKey);
+        }
+      });
+      if(selectedDemandaMonth){
+        monthKeysSet.add(selectedDemandaMonth);
+        normalizeMonthPlan(selectedDemandaMonth);
+      }
+      let months=Array.from(monthKeysSet).sort();
+      if(selectedDemandaMonth){
+        months=months.filter(monthKey=>monthKey===selectedDemandaMonth);
+      }
+      container.innerHTML='';
+      if(!months.length){
+        container.innerHTML='<div class="demanda-plan-empty">Defina um período para gerar os planos das demandas.</div>';
+        return;
+      }
+      months.forEach(monthKey=>{
+        const monthDate=new Date(`${monthKey}-01T00:00:00`);
+        const monthLabelRaw=monthDate.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+        const monthLabel=monthLabelRaw.charAt(0).toUpperCase()+monthLabelRaw.slice(1);
+        const monthSection=document.createElement('section');
+        monthSection.className='demanda-plan-month';
+        const title=document.createElement('h3');
+        title.className='demanda-plan-month-title';
+        title.textContent=monthLabel;
+        monthSection.appendChild(title);
+        const monthContent=document.createElement('div');
+        monthContent.className='demanda-plan-month-content';
+        const plansBox=document.createElement('div');
+        plansBox.className='demanda-plan-month-plans';
+        const tabs=document.createElement('div');
+        tabs.className='demanda-plan-tabs';
+        const notesWrap=document.createElement('div');
+        notesWrap.className='demanda-plan-notes';
+        const monthPlan=normalizeMonthPlan(monthKey);
+        const monthDemands=sortDemandasForMonth(groups[monthKey]||[]);
+        PLAN_TYPES.forEach(({key,label},index)=>{
+          const btn=document.createElement('button');
+          btn.type='button';
+          btn.className='demanda-plan-tab'+(index===0?' active':'');
+          btn.textContent=label;
+          const note=document.createElement('div');
+          note.className='demanda-plan-note'+(index===0?' active':'');
+          const editor=document.createElement('div');
+          editor.className='demanda-plan-note-editor';
+          const toolbar=document.createElement('div');
+          toolbar.className='markdown-toolbar';
+          const actions=document.createElement('div');
+          actions.className='demanda-plan-note-actions';
+          const iaBtn=document.createElement('button');
+          iaBtn.type='button';
+          iaBtn.className='btn small ghost demanda-plan-ia-btn';
+          iaBtn.textContent=`Gerar planejamento ${label.toLowerCase()}`;
+          iaBtn.addEventListener('click',()=>{
+            handlePlanIAGeneration({
+              monthLabel,
+              monthKey,
+              planLabel:label,
+              planKey:key,
+              editable,
+              monthDemands
+            });
+          });
+          actions.appendChild(iaBtn);
+          const editable=document.createElement('div');
+          editable.className='demanda-plan-note-editor-area markdown-view';
+          editable.setAttribute('contenteditable','true');
+          editable.setAttribute('spellcheck','false');
+          const toolbarButtons=[
+            { action:'bold', label:'Negrito', shortLabel:'B' },
+            { action:'italic', label:'Itálico', shortLabel:'I' },
+            { action:'h1', label:'Título H1', shortLabel:'H1' },
+            { action:'h2', label:'Título H2', shortLabel:'H2' },
+            { action:'h3', label:'Título H3', shortLabel:'H3' }
+          ];
+          toolbarButtons.forEach(cfg=>{
+            const btn=document.createElement('button');
+            btn.type='button';
+            btn.textContent=cfg.shortLabel;
+            btn.setAttribute('title', cfg.label);
+            btn.addEventListener('click',()=>applyMarkdownFormatting(editable,cfg.action));
+            toolbar.appendChild(btn);
+          });
+          editable.dataset.placeholder=`Anotações do ${label.toLowerCase()}`;
+          const initialValue=monthPlan?.[key]||'';
+          const initialHtml=parseMarkdownToHtml(initialValue);
+          if(initialHtml){
+            editable.innerHTML=initialHtml;
+            if(!editable.textContent.trim()) editable.innerHTML='';
+          }else if(initialValue){
+            editable.innerText=initialValue;
+          }
+          const syncPlanNote=()=>{
+            const plan=normalizeMonthPlan(monthKey);
+            if(!plan) return;
+            const isActive=document.activeElement===editable;
+            const selectionState=isActive?getEditableSelection(editable):null;
+            const rawHtml=editable.innerHTML;
+            const sanitizedCurrent=sanitizeMarkdownHtml(rawHtml);
+            const markdownSource=htmlToMarkdown(sanitizedCurrent);
+            const parsedHtml=markdownSource?parseMarkdownToHtml(markdownSource):sanitizedCurrent;
+            const nextHtml=sanitizeMarkdownHtml(parsedHtml||'');
+            if(nextHtml!==editable.innerHTML){
+              editable.innerHTML=nextHtml;
+            }
+            if(isActive && selectionState){
+              restoreEditableSelection(editable, selectionState);
+            }
+            if(!editable.textContent.trim() && !editable.querySelector('img,video,iframe,embed,hr')){
+              editable.innerHTML='';
+              if(isActive){
+                restoreEditableSelection(editable, { start:0, end:0 });
+              }
+            }
+            const cleanHtml=sanitizeMarkdownHtml((editable.innerHTML||'').trim());
+            if((plan[key]||'')===cleanHtml){
+              return;
+            }
+            plan[key]=cleanHtml;
+            scheduleDemandasPersist();
+            renderDemandaMonthButtons();
+          };
+          const scheduleSyncPlanNote=debounce(syncPlanNote,300);
+          editable.addEventListener('input',()=>{ scheduleSyncPlanNote(); });
+          editable.addEventListener('blur',()=>{ syncPlanNote(); flushDemandasPersist(); });
+          editable.addEventListener('paste',event=>{
+            const clipboard=event?.clipboardData || window.clipboardData;
+            if(!clipboard){
+              setTimeout(syncPlanNote,0);
+              return;
+            }
+            let htmlData='';
+            let textData='';
+            try{
+              htmlData=clipboard.getData('text/html')||'';
+            }catch(_err){ htmlData=''; }
+            if(!htmlData){
+              try{ htmlData=clipboard.getData('HTML')||''; }
+              catch(_err){ htmlData=''; }
+            }
+            try{
+              textData=clipboard.getData('text/plain')||'';
+            }catch(_err){
+              try{ textData=clipboard.getData('Text')||clipboard.getData('text')||''; }
+              catch(__err){ textData=''; }
+            }
+            if(!htmlData && !textData){
+              setTimeout(syncPlanNote,0);
+              return;
+            }
+            event.preventDefault();
+            let finalHtml='';
+            if(htmlData){
+              const sanitizedHtml=sanitizeMarkdownHtml(htmlData);
+              const markdown=htmlToMarkdown(sanitizedHtml);
+              finalHtml=parseMarkdownToHtml(markdown)||sanitizedHtml;
+            }else if(textData){
+              finalHtml=parseMarkdownToHtml(textData);
+              if(!finalHtml){
+                finalHtml=sanitizeMarkdownHtml(escapeHtml(textData).replace(/\r?\n/g,'<br>'));
+              }
+            }
+            finalHtml=sanitizeMarkdownHtml(finalHtml||'');
+            if(finalHtml){
+              let insertWithExecCommand=false;
+              try{
+                insertWithExecCommand=typeof document.execCommand==='function' && (!document.queryCommandSupported || document.queryCommandSupported('insertHTML'));
+              }catch(_err){
+                insertWithExecCommand=typeof document.execCommand==='function';
+              }
+              if(insertWithExecCommand){
+                document.execCommand('insertHTML',false,finalHtml);
+              }else{
+                const selection=window.getSelection();
+                if(selection && selection.rangeCount){
+                  selection.deleteContents();
+                  const temp=document.createElement('div');
+                  temp.innerHTML=finalHtml;
+                  const frag=document.createDocumentFragment();
+                  let node;
+                  while((node=temp.firstChild)){
+                    frag.appendChild(node);
+                  }
+                  const range=selection.getRangeAt(0);
+                  range.insertNode(frag);
+                  range.collapse(false);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }
+              }
+            }
+            scheduleSyncPlanNote();
+          });
+          editor.appendChild(toolbar);
+          editor.appendChild(actions);
+          editor.appendChild(editable);
+          note.appendChild(editor);
+          btn.addEventListener('click',()=>{
+            tabs.querySelectorAll('.demanda-plan-tab').forEach(b=>b.classList.remove('active'));
+            notesWrap.querySelectorAll('.demanda-plan-note').forEach(n=>n.classList.remove('active'));
+            btn.classList.add('active');
+            note.classList.add('active');
+          });
+          if(!editable.innerHTML.trim() && initialValue){
+            const parsed=parseMarkdownToHtml(initialValue);
+            editable.innerHTML=parsed || '';
+            if(!editable.textContent.trim()) editable.innerHTML='';
+          }
+          tabs.appendChild(btn);
+          notesWrap.appendChild(note);
+        });
+        plansBox.appendChild(tabs);
+        plansBox.appendChild(notesWrap);
+        const itemsWrap=document.createElement('div');
+        itemsWrap.className='demanda-plan-demand-list';
+        if(monthDemands.length){
+          monthDemands.forEach(d=>{
+            normalizeDemanda(d);
+            const item=document.createElement('div');
+            item.className='demanda-plan-item';
+            const header=document.createElement('div');
+            header.className='demanda-plan-header';
+            const titleEl=document.createElement('div');
+            titleEl.className='demanda-plan-title';
+            titleEl.textContent=d.demanda?.trim()?d.demanda:'(Sem título)';
+            const dateEl=document.createElement('div');
+            dateEl.className='demanda-plan-date';
+            dateEl.textContent=formatPrazoLabel(d);
+            header.appendChild(titleEl);
+            header.appendChild(dateEl);
+            item.appendChild(header);
+            const metaParts=[];
+            const statusLabel=STATUS_OPTIONS.find(o=>o.value===d.status)?.label;
+            if(statusLabel) metaParts.push(statusLabel);
+            if(d.responsavel) metaParts.push(`Resp.: ${d.responsavel}`);
+            if(metaParts.length){
+              const meta=document.createElement('div');
+              meta.className='demanda-plan-demand-meta';
+              meta.textContent=metaParts.join(' • ');
+              item.appendChild(meta);
+            }
+            const actionWrap=document.createElement('div');
+            actionWrap.className='demanda-plan-action';
+            const actionLabel=document.createElement('div');
+            actionLabel.className='demanda-plan-action-label';
+            actionLabel.textContent='Plano de Ação';
+            const actionEditable=document.createElement('div');
+            actionEditable.className='demanda-plan-action-editor markdown-view';
+            actionEditable.setAttribute('contenteditable','true');
+            actionEditable.setAttribute('spellcheck','false');
+            actionEditable.setAttribute('aria-label',`Plano de ação para ${titleEl.textContent}`);
+            actionEditable.dataset.placeholder='Detalhe as próximas ações ou anotações para este objetivo';
+            const demandKey=typeof d.id==='string'&&d.id?d.id:'';
+            const existingNote=demandKey&&monthPlan?.objectiveNotes?monthPlan.objectiveNotes[demandKey]:'';
+            const initialNote=sanitizeMarkdownHtml(existingNote||'');
+            if(initialNote){
+              actionEditable.innerHTML=initialNote;
+              if(!actionEditable.textContent.trim()&&!actionEditable.querySelector('img,video,iframe,embed,hr')){
+                actionEditable.innerHTML='';
+              }
+            }
+            if(demandKey){
+              const syncActionPlan=()=>{
+                const plan=normalizeMonthPlan(monthKey);
+                if(!plan) return;
+                if(!plan.objectiveNotes||typeof plan.objectiveNotes!=='object'){
+                  plan.objectiveNotes={};
+                }
+                const isActive=document.activeElement===actionEditable;
+                const selectionState=isActive?getEditableSelection(actionEditable):null;
+                const rawHtml=actionEditable.innerHTML||'';
+                const sanitizedCurrent=sanitizeMarkdownHtml(rawHtml);
+                if(sanitizedCurrent!==rawHtml){
+                  actionEditable.innerHTML=sanitizedCurrent;
+                  if(isActive&&selectionState){
+                    restoreEditableSelection(actionEditable,selectionState);
+                  }
+                }
+                if(!actionEditable.textContent.trim()&&!actionEditable.querySelector('img,video,iframe,embed,hr')){
+                  actionEditable.innerHTML='';
+                  if(isActive){
+                    restoreEditableSelection(actionEditable,{start:0,end:0});
+                  }
+                }
+                const cleanHtml=sanitizeMarkdownHtml((actionEditable.innerHTML||'').trim());
+                const prev=typeof plan.objectiveNotes[demandKey]==='string'?plan.objectiveNotes[demandKey]:'';
+                if(prev===cleanHtml){
+                  return;
+                }
+                if(cleanHtml){
+                  plan.objectiveNotes[demandKey]=cleanHtml;
+                }else{
+                  delete plan.objectiveNotes[demandKey];
+                }
+                scheduleDemandasPersist();
+              };
+              const scheduleSyncActionPlan=debounce(syncActionPlan,300);
+              actionEditable.addEventListener('input',()=>{ scheduleSyncActionPlan(); });
+              actionEditable.addEventListener('blur',()=>{ syncActionPlan(); flushDemandasPersist(); });
+              actionEditable.addEventListener('paste',event=>{
+                const clipboard=event?.clipboardData||window.clipboardData;
+                if(!clipboard){
+                  setTimeout(syncActionPlan,0);
+                  return;
+                }
+                let htmlData='';
+                let textData='';
+                try{ htmlData=clipboard.getData('text/html')||''; }
+                catch(_err){ htmlData=''; }
+                if(!htmlData){
+                  try{ htmlData=clipboard.getData('HTML')||''; }
+                  catch(__err){ htmlData=''; }
+                }
+                try{ textData=clipboard.getData('text/plain')||''; }
+                catch(_err){
+                  try{ textData=clipboard.getData('Text')||clipboard.getData('text')||''; }
+                  catch(__err){ textData=''; }
+                }
+                if(!htmlData&&!textData){
+                  setTimeout(syncActionPlan,0);
+                  return;
+                }
+                event.preventDefault();
+                let finalHtml='';
+                if(htmlData){
+                  finalHtml=sanitizeMarkdownHtml(htmlData);
+                }else if(textData){
+                  finalHtml=sanitizeMarkdownHtml(escapeHtml(textData).replace(/\r?\n/g,'<br>'));
+                }
+                finalHtml=sanitizeMarkdownHtml(finalHtml||'');
+                if(finalHtml){
+                  let insertWithExecCommand=false;
+                  try{
+                    insertWithExecCommand=typeof document.execCommand==='function'&&(!document.queryCommandSupported||document.queryCommandSupported('insertHTML'));
+                  }catch(_err){
+                    insertWithExecCommand=typeof document.execCommand==='function';
+                  }
+                  if(insertWithExecCommand){
+                    document.execCommand('insertHTML',false,finalHtml);
+                  }else{
+                    const selection=window.getSelection();
+                    if(selection&&selection.rangeCount){
+                      selection.deleteContents();
+                      const temp=document.createElement('div');
+                      temp.innerHTML=finalHtml;
+                      const frag=document.createDocumentFragment();
+                      let node;
+                      while((node=temp.firstChild)){
+                        frag.appendChild(node);
+                      }
+                      const range=selection.getRangeAt(0);
+                      range.insertNode(frag);
+                      range.collapse(false);
+                      selection.removeAllRanges();
+                      selection.addRange(range);
+                    }else{
+                      actionEditable.insertAdjacentHTML('beforeend',finalHtml);
+                    }
+                  }
+                }
+                scheduleSyncActionPlan();
+              });
+            }else{
+              actionEditable.setAttribute('contenteditable','false');
+              actionEditable.dataset.placeholder='Salve o objetivo para habilitar o plano de ação';
+            }
+            actionWrap.appendChild(actionLabel);
+            actionWrap.appendChild(actionEditable);
+            item.appendChild(actionWrap);
+            itemsWrap.appendChild(item);
+          });
+        }else{
+          const empty=document.createElement('div');
+          empty.className='demanda-plan-empty-demands';
+          empty.textContent='Nenhuma demanda com período definido para este mês.';
+          itemsWrap.appendChild(empty);
+        }
+        monthContent.appendChild(itemsWrap);
+        monthContent.appendChild(plansBox);
+        monthSection.appendChild(monthContent);
+        container.appendChild(monthSection);
+      });
+    }
+    const DEMANDAS_AUTO_RENDER_DELAY = 600;
     const DEMANDAS_TYPING_GRACE_MS = 1200;
     const DEMANDAS_MAX_BLOCK_MS = 8000;
     let demandasRenderTimer = null;
-    let performDemandasRenderRequested = false;
+    let demandasRenderPending = false;
     let lastDemandaInputTs = 0;
     let lastDemandaFocusTs = 0;
     let lastDemandaFocusTarget = null;
+
+    function noteDemandaFocus(target){
+      if(target){
+        lastDemandaFocusTarget = target;
+        lastDemandaFocusTs = Date.now();
+      }else{
+        lastDemandaFocusTarget = null;
+        lastDemandaFocusTs = 0;
+        maybeApplyPendingDemandasSnapshot();
+      }
+    }
+
+    function noteDemandaActivity(target){
+      lastDemandaInputTs = Date.now();
+      if(target){
+        noteDemandaFocus(target);
+      }
+    }
 
     function isDemandasEditing(){
       const active = document.activeElement;
@@ -59257,17 +59318,17 @@ FORMATO PADRÃO:
         demandasRenderTimer = null;
       }
       if(immediate){
-        performDemandasRender();
-      }else{
-        performDemandasRenderRequested = true;
-        demandasRenderTimer = setTimeout(()=>{
-          demandasRenderTimer = null;
-          if(performDemandasRenderRequested){
-            performDemandasRenderRequested = false;
-            performDemandasRender();
-          }
-        }, 300);
+        if(!force && isDemandasEditing()){
+          demandasRenderPending = true;
+          demandasRenderTimer = setTimeout(()=> requestRenderDemandas({ immediate:true, force }), DEMANDAS_AUTO_RENDER_DELAY);
+          return;
+        }
+        demandasRenderPending = false;
+        renderDemandas({ force:true });
+        return;
       }
+      demandasRenderPending = true;
+      demandasRenderTimer = setTimeout(()=> requestRenderDemandas({ immediate:true, force }), DEMANDAS_AUTO_RENDER_DELAY);
     }
 
     function performDemandasRender(){
@@ -60057,7 +60118,6 @@ FORMATO PADRÃO:
           loadMetasFromUserData();
           loadMetaPanelsFromUserData();
           loadSocialLinksFromUserData();
-          loadImpedimentsFromUserData();
           loadIAChatsFromUserData();
           await loadIADocs();
           await loadRefSocial();
@@ -60255,7 +60315,6 @@ FORMATO PADRÃO:
             loadMetasFromUserData();
             loadMetaPanelsFromUserData();
             loadSocialLinksFromUserData();
-            loadImpedimentsFromUserData();
             loadIAChatsFromUserData();
             await loadIADocs();
             await loadRefSocial();

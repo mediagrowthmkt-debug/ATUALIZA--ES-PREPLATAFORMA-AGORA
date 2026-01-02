@@ -156,6 +156,22 @@ service cloud.firestore {
         );
       }
 
+      /* ✅ CONVERSAS I.A.: Subcoleção para arquivar conversas antigas (evita limite de 1MB) */
+      /* Cada conversa arquivada é salva como documento separado: /usuarios/{userId}/iaChats/{chatId} */
+      match /iaChats/{chatId} {
+        // O dono pode ler e escrever suas próprias conversas I.A.
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ METADADOS DE MÍDIAS: Subcoleção para tags/descrições de fotos/vídeos */
       /* Cada mídia é salva como documento separado: /usuarios/{userId}/midias_metadados/{urlHash} */
       match /midias_metadados/{urlHash} {

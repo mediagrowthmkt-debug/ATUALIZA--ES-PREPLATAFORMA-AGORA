@@ -5714,14 +5714,6 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .ia-input{flex:1;resize:none;min-height:48px;max-height:180px;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff}
     .ia-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.25)}
     .ia-source-note{margin:4px 0 0;width:100%;font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.01em;opacity:.85}
-    .ia-image-preview-wrapper{width:100%;margin-bottom:8px;display:none}
-    .ia-image-preview-container{position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center}
-    .ia-image-preview-img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
-    .ia-image-preview-info{flex:1;display:flex;flex-direction:column;gap:4px}
-    .ia-image-preview-name{font-size:.85rem;font-weight:700;color:#fff}
-    .ia-image-preview-size{font-size:.75rem;color:rgba(255,255,255,.6)}
-    .ia-image-preview-remove{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.75rem;font-weight:700;transition:all .2s ease}
-    .ia-image-preview-remove:hover{background:rgba(239,68,68,.3);transform:translateY(-1px)}
     .ia-typing{display:inline-flex;gap:6px;align-items:center}
     .ia-typing span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.85);animation:iaTyping 1s ease-in-out infinite}
     .ia-typing span:nth-child(2){animation-delay:.15s}
@@ -7271,66 +7263,6 @@ function renderReviewNotes(post){
   .demandas-table .filter-clear-btn:hover{background:#111827;border-color:#4b5563}
   .demandas-table th{background:var(--title-bg)}
   
-  /* Seleção múltipla de demandas */
-  .demandas-table .col-checkbox{width:40px;text-align:center}
-  .demandas-table .col-checkbox input[type="checkbox"]{width:auto;margin:0;cursor:pointer}
-  .demandas-table .col-plano{width:80px;text-align:center}
-  .demandas-table .col-plano button{background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:6px;padding:6px 12px;font-size:.8rem;cursor:pointer;transition:all .2s ease;white-space:nowrap}
-  .demandas-table .col-plano button:hover{background:#334155;color:#fff;border-color:#475569}
-  .demandas-table .col-plano button.has-plan{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa}
-  .demandas-table .col-plano button.has-plan:hover{background:#1e40af;color:#93c5fd}
-  .demandas-bulk-actions{display:none;margin:10px 0;padding:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:8px;gap:10px;align-items:center;flex-wrap:wrap}
-  .demandas-bulk-actions.active{display:flex}
-  .demandas-bulk-actions .bulk-count{font-size:.9rem;color:#60a5fa;font-weight:600}
-  .demandas-bulk-actions button{background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:.85rem;cursor:pointer;transition:background .2s ease}
-  .demandas-bulk-actions button:hover{background:#2563eb}
-  .demandas-bulk-actions button.btn-secondary{background:#6b7280}
-  .demandas-bulk-actions button.btn-secondary:hover{background:#4b5563}
-  
-  /* Modal de edição em massa */
-  #bulkEditModal,
-  #bulkEditStatusModal,
-  #bulkEditResponsavelModal,
-  #demandaPlanModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10000;align-items:center;justify-content:center}
-  #bulkEditModal.active,
-  #bulkEditStatusModal.active,
-  #bulkEditResponsavelModal.active,
-  #demandaPlanModal.active{display:flex}
-  .bulk-edit-content,
-  .demanda-plan-modal-content{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  .demanda-plan-modal-content{max-width:700px}
-  .demanda-plan-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-  .demanda-plan-modal-header h3{margin:0;font-size:1.3rem;color:#fff}
-  .demanda-plan-modal-close{background:transparent;border:none;color:#999;font-size:1.5rem;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:all .2s ease}
-  .demanda-plan-modal-close:hover{background:#333;color:#fff}
-  .demanda-plan-modal-body{margin-bottom:20px}
-  .demanda-plan-modal-footer{display:flex;gap:10px;justify-content:flex-end}
-  .bulk-edit-content h3{margin:0 0 20px 0;font-size:1.3rem;color:#fff}
-  .bulk-edit-content .form-group,
-  .demanda-plan-modal-body .form-group{margin-bottom:16px}
-  .bulk-edit-content label,
-  .demanda-plan-modal-body label{display:block;margin-bottom:6px;font-size:.9rem;color:#aaa}
-  .bulk-edit-content input[type="datetime-local"],
-  .bulk-edit-content input[type="date"],
-  .bulk-edit-content input[type="time"],
-  .bulk-edit-content select,
-  .demanda-plan-modal-body input[type="text"],
-  .demanda-plan-modal-body textarea{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f8fafc;padding:10px;font-size:.9rem}
-  .demanda-plan-modal-body textarea{resize:vertical;min-height:200px;font-family:inherit;line-height:1.5}
-  .bulk-edit-content .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
-  .bulk-edit-content .btn,
-  .demanda-plan-modal-footer .btn{padding:10px 20px;border:none;border-radius:8px;font-size:.9rem;cursor:pointer;transition:all .2s ease}
-  .bulk-edit-content .btn-primary,
-  .demanda-plan-modal-footer .btn-primary{background:#3b82f6;color:#fff}
-  .bulk-edit-content .btn-primary:hover,
-  .demanda-plan-modal-footer .btn-primary:hover{background:#2563eb}
-  .bulk-edit-content .btn-cancel,
-  .demanda-plan-modal-footer .btn-cancel{background:#374151;color:#fff}
-  .bulk-edit-content .btn-cancel:hover,
-  .demanda-plan-modal-footer .btn-cancel:hover{background:#4b5563}
-  .bulk-edit-content .help-text,
-  .demanda-plan-modal-body .help-text{font-size:.8rem;color:#6b7280;margin-top:4px}
-  
   /* Destaque para demandas atrasadas */
   .demandas-table tr.demanda-atrasada{
     animation: pulseOverdue 2s ease-in-out infinite;
@@ -8760,17 +8692,7 @@ function renderReviewNotes(post){
             </div>
           </div>
         </div>
-        <div class="ia-image-preview-wrapper" id="iaImagePreviewWrapper">
-          <div class="ia-image-preview-container">
-            <img class="ia-image-preview-img" id="iaImagePreviewImg" src="" alt="Preview">
-            <div class="ia-image-preview-info">
-              <div class="ia-image-preview-name" id="iaImagePreviewName">imagem.png</div>
-              <div class="ia-image-preview-size" id="iaImagePreviewSize">0 KB</div>
-            </div>
-            <button type="button" class="ia-image-preview-remove" id="iaImagePreviewRemove">🗑️ Remover</button>
-          </div>
-        </div>
-        <textarea id="iaQuestion" class="input ia-input" rows="1" placeholder="Digite uma mensagem ou cole uma imagem (Ctrl+V)" autocomplete="off"></textarea>
+        <textarea id="iaQuestion" class="input ia-input" rows="1" placeholder="Digite uma mensagem" autocomplete="off"></textarea>
         <button class="btn" id="iaSend" type="submit">Enviar</button>
         <p class="ia-source-note" id="iaSourceNote" aria-live="polite"></p>
       </form>
@@ -9551,30 +9473,17 @@ function renderReviewNotes(post){
     <input type="url" id="demandasWebhook" placeholder="Webhook URL">
   </div>
   <div id="prazoAlert" class="prazo-alert" style="display:none">Há demandas com período vencido!</div>
-  
-  <!-- Barra de ações em massa -->
-  <div class="demandas-bulk-actions" id="demandaBulkActions">
-    <span class="bulk-count"><span id="bulkSelectedCount">0</span> selecionada(s)</span>
-    <button type="button" id="btnBulkEditDate">📅 Alterar Data</button>
-    <button type="button" id="btnBulkEditStatus">🔄 Alterar Status</button>
-    <button type="button" id="btnBulkEditResponsavel">👤 Alterar Responsável</button>
-    <button type="button" class="btn-secondary" id="btnBulkClearSelection">Desselecionar Todas</button>
-  </div>
-  
   <div class="table-wrap">
     <table class="demandas-table" id="demandasTable">
       <thead>
         <tr>
-          <th class="col-checkbox"><input type="checkbox" id="demandaSelectAll" aria-label="Selecionar todas"></th>
           <th class="col-status">STATUS</th>
           <th class="col-demanda">OBJETIVO</th>
           <th class="col-resp">RESPONSÁVEL</th>
           <th class="col-prazo">PERÍODO</th>
-          <th class="col-plano">PLANO</th>
           <th class="del-cell"></th>
         </tr>
         <tr class="filter-row">
-          <th class="col-checkbox"></th>
           <th class="col-status">
             <select id="demandaStatusColumnFilter">
               <option value="">Status</option>
@@ -9609,7 +9518,6 @@ function renderReviewNotes(post){
               <input type="date" id="demandaPeriodoFimFilter" aria-label="Filtrar período final">
             </div>
           </th>
-          <th class="col-plano"></th>
           <th class="del-cell">
             <button type="button" id="demandaFilterClear" class="filter-clear-btn">Limpar</button>
           </th>
@@ -9622,111 +9530,8 @@ function renderReviewNotes(post){
     <button class="btn small secondary" id="demandaObjectiveAIButton" type="button">Gerar Planejamento</button>
     <button class="btn small secondary" id="btnCopyPlanningLink" type="button">Copiar link do planejamento</button>
   </div>
+  <div class="demanda-plans" id="demandaPlans"></div>
 </div>
-
-<!-- Modal de Ver/Editar Plano da Demanda -->
-<div id="demandaPlanModal">
-  <div class="demanda-plan-modal-content">
-    <div class="demanda-plan-modal-header">
-      <h3>📝 Plano da Demanda</h3>
-      <button type="button" class="demanda-plan-modal-close" id="btnCloseDemandaPlan">✕</button>
-    </div>
-    <div class="demanda-plan-modal-body">
-      <div class="form-group">
-        <label for="demandaPlanTitle">Objetivo</label>
-        <input type="text" id="demandaPlanTitle" readonly style="background:#0a0a0a;border:1px solid #222;color:#999;cursor:default;">
-      </div>
-      <div class="form-group">
-        <label for="demandaPlanText">Plano / Anotações</label>
-        <textarea id="demandaPlanText" rows="12" placeholder="Descreva o plano, passos necessários, observações..."></textarea>
-        <p class="help-text">Use este espaço para documentar o plano de ação, requisitos, links úteis, etc.</p>
-      </div>
-    </div>
-    <div class="demanda-plan-modal-footer">
-      <button type="button" class="btn btn-cancel" id="btnCancelDemandaPlan">Cancelar</button>
-      <button type="button" class="btn btn-primary" id="btnSaveDemandaPlan">Salvar Plano</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Edição em Massa - Data -->
-<div id="bulkEditModal">
-  <div class="bulk-edit-content">
-    <h3>📅 Alterar Data em Massa</h3>
-    <div class="form-group">
-      <label for="bulkEditDateType">Tipo de Data</label>
-      <select id="bulkEditDateType" style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f8fafc;padding:10px;font-size:.9rem;">
-        <option value="inicio">Data de Início</option>
-        <option value="fim">Data de Fim</option>
-        <option value="ambas">Ambas (Início e Fim)</option>
-      </select>
-      <p class="help-text">Escolha qual data deseja alterar nas demandas selecionadas</p>
-    </div>
-    <div class="form-group" id="bulkEditInicioGroup">
-      <label for="bulkEditInicio">Data de Início</label>
-      <input type="datetime-local" id="bulkEditInicio">
-      <p class="help-text">Nova data de início para as demandas selecionadas</p>
-    </div>
-    <div class="form-group" id="bulkEditFimGroup" style="display:none;">
-      <label for="bulkEditFim">Data de Fim</label>
-      <input type="datetime-local" id="bulkEditFim">
-      <p class="help-text">Nova data de fim para as demandas selecionadas</p>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-cancel" id="btnBulkEditCancel">Cancelar</button>
-      <button type="button" class="btn btn-primary" id="btnBulkEditSave">Aplicar Alterações</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Edição em Massa - Status -->
-<div id="bulkEditStatusModal">
-  <div class="bulk-edit-content">
-    <h3>🔄 Alterar Status em Massa</h3>
-    <div class="form-group">
-      <label for="bulkEditStatus">Novo Status</label>
-      <select id="bulkEditStatus" style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f8fafc;padding:10px;font-size:.9rem;">
-        <option value="">Selecione um status...</option>
-        <option value="nao-iniciado">⚪ Não iniciado</option>
-        <option value="em-andamento">🔵 Em andamento</option>
-        <option value="bloqueado">🟡 Bloqueado</option>
-        <option value="concluido">🟢 Concluído</option>
-        <option value="prioridade">🔴 Prioridade</option>
-      </select>
-      <p class="help-text">Este status será aplicado a todas as demandas selecionadas</p>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-cancel" id="btnBulkEditStatusCancel">Cancelar</button>
-      <button type="button" class="btn btn-primary" id="btnBulkEditStatusSave">Aplicar Alterações</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Edição em Massa - Responsável -->
-<div id="bulkEditResponsavelModal">
-  <div class="bulk-edit-content">
-    <h3>👤 Alterar Responsável em Massa</h3>
-    <div class="form-group">
-      <label for="bulkEditResponsavel">Novo Responsável</label>
-      <select id="bulkEditResponsavel" style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f8fafc;padding:10px;font-size:.9rem;">
-        <option value="">Selecione um responsável...</option>
-        <option value="Bruno">Bruno</option>
-        <option value="Camilla">Camilla</option>
-        <option value="Clailton">Clailton</option>
-        <option value="Guilherme">Guilherme</option>
-        <option value="Mediagrowth">Mediagrowth</option>
-        <option value="Cliente">Cliente</option>
-        <option value="Theo">Theo</option>
-      </select>
-      <p class="help-text">Este responsável será atribuído a todas as demandas selecionadas</p>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-cancel" id="btnBulkEditResponsavelCancel">Cancelar</button>
-      <button type="button" class="btn btn-primary" id="btnBulkEditResponsavelSave">Aplicar Alterações</button>
-    </div>
-  </div>
-</div>
-
 <!-- TRÁFEGO -->
 <style id="trafego-css">
   .trafego-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:16px}
@@ -14527,17 +14332,6 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           iaDocsStatus = $("iaDocsStatus"), iaDocsList = $("iaDocsList"),
           iaKnowledge = $("iaKnowledge"), iaDocsCount = $("iaDocsCount"),
           iaSourceNote = $("iaSourceNote");
-    
-    // Elementos do preview de imagem na aba IA
-    const iaImagePreviewWrapper = $("iaImagePreviewWrapper"),
-          iaImagePreviewImg = $("iaImagePreviewImg"),
-          iaImagePreviewName = $("iaImagePreviewName"),
-          iaImagePreviewSize = $("iaImagePreviewSize"),
-          iaImagePreviewRemove = $("iaImagePreviewRemove");
-    
-    // Variável global para armazenar a imagem atual na aba IA
-    let IA_CURRENT_IMAGE = null;
-    
     // Modal de planejamento
     const iaPlanningModal = $("iaPlanningModal"),
           iaPlanningModalClose = $("iaPlanningModalClose"),
@@ -16359,18 +16153,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         const meta = formatTimestamp(msg.ts);
         const isAssistant = msg.role === 'assistant';
         const isLoading = !!msg.loading;
-        
-        // Preparar conteúdo com imagem se houver
-        let imageHtml = '';
-        if(msg.image){
-          imageHtml = `<div style="margin-bottom: 10px;">
-            <img src="${msg.image}" alt="Imagem anexada" style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-          </div>`;
-        }
-        
         const content = isLoading
           ? '<div class="ia-typing"><span></span><span></span><span></span></div>'
-          : `${imageHtml}<div class="ia-msg-content markdown-view">${renderMessageContent(msg.content)}</div>`;
+          : `<div class="ia-msg-content markdown-view">${renderMessageContent(msg.content)}</div>`;
         const actions = (!isLoading && isAssistant)
           ? `<div class="ia-msg-actions">
               <button type="button" class="ia-edit-btn" data-msg-index="${idx}">✏️ Editar</button>
@@ -18143,56 +17928,21 @@ async function sendIAQuestion(){
   console.log('💬 [sendIAQuestion] Iniciando envio de mensagem...');
   if(!iaQuestion) return;
   const question = iaQuestion.value.trim();
-  if(!question && !IA_CURRENT_IMAGE) return; // Permitir envio só com imagem
+  if(!question) return;
   if(!auth.currentUser){ alert('Faça login.'); return; }
   if(!CURRENT_CHAT) newIAChat();
   const chat = CURRENT_CHAT;
   console.log(`💬 [sendIAQuestion] Chat atual: "${chat.title}" (${chat.messages.length} mensagens antes)`);
   const sendBtn = iaSend;
   if(sendBtn) sendBtn.disabled = true;
-  
-  // Processar imagem se houver
-  let imageData = null;
-  if(IA_CURRENT_IMAGE){
-    console.log('🖼️ Processando imagem anexada...');
-    try{
-      // Converter imagem para base64
-      const reader = new FileReader();
-      imageData = await new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(IA_CURRENT_IMAGE);
-      });
-      console.log('✅ Imagem convertida para base64');
-    }catch(err){
-      console.error('❌ Erro ao processar imagem:', err);
-      alert('Erro ao processar imagem. Tente novamente.');
-      if(sendBtn) sendBtn.disabled = false;
-      return;
-    }
-  }
-  
-  const userMsg = { 
-    role:'user', 
-    content: question || '🖼️ [Imagem anexada]', 
-    ts: Date.now(),
-    image: imageData // Armazenar base64 da imagem
-  };
+  const userMsg = { role:'user', content: question, ts: Date.now() };
   chat.messages.push(userMsg);
   console.log(`💬 [sendIAQuestion] Mensagem do usuário adicionada (${chat.messages.length} mensagens agora)`);
   if(!chat.title || chat.title === 'Nova conversa'){
-    chat.title = deriveTitleFromText(question || 'Análise de imagem');
+    chat.title = deriveTitleFromText(question);
   }
   iaQuestion.value = '';
   autoResizeComposer();
-  
-  // Limpar preview da imagem
-  if(IA_CURRENT_IMAGE){
-    IA_CURRENT_IMAGE = null;
-    if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'none';
-    if(iaImagePreviewImg) iaImagePreviewImg.src = '';
-  }
-  
   touchChat(chat);
   renderIAHistory();
   renderIAChatList();
@@ -18296,28 +18046,7 @@ async function sendIAQuestion(){
 
   try{
     // Preparar mensagens finais
-    const chatMessages = chat.messages.filter(m=>m !== loadingMsg).map(m=>{
-      // Se a mensagem tem imagem, usar formato vision
-      if(m.image){
-        return {
-          role: m.role,
-          content: [
-            {
-              type: 'text',
-              text: m.content || 'Analise esta imagem e descreva o que você vê. Se houver texto na imagem, transcreva-o completamente.'
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: m.image
-              }
-            }
-          ]
-        };
-      }
-      // Mensagem normal (só texto)
-      return { role: m.role, content: m.content };
-    });
+    const chatMessages = chat.messages.filter(m=>m !== loadingMsg).map(m=>({ role: m.role, content: m.content }));
     const allMessages = [...contextMessages, ...chatMessages];
     
     // Log de análise de consumo ANTES de enviar
@@ -18408,60 +18137,6 @@ async function sendIAQuestion(){
     });
     iaQuestion?.addEventListener('input', autoResizeComposer);
     iaChatSearch?.addEventListener('input', ()=>{ renderIAChatList(); });
-    
-    // Event listener para colar imagem (Ctrl+V ou Cmd+V)
-    iaQuestion?.addEventListener('paste', async (e) => {
-      const items = e.clipboardData?.items;
-      if(!items || items.length === 0) return;
-      
-      // Procurar por imagem nos itens colados
-      let imageItem = null;
-      for(let i = 0; i < items.length; i++){
-        if(items[i].type.startsWith('image/')){
-          imageItem = items[i];
-          break;
-        }
-      }
-      
-      if(!imageItem) return; // Não é imagem, deixar comportamento padrão
-      
-      e.preventDefault(); // Prevenir colagem de texto quando for imagem
-      
-      const file = imageItem.getAsFile();
-      if(!file){
-        console.error('❌ Erro ao obter imagem da área de transferência');
-        return;
-      }
-      
-      // Validar tamanho (10MB)
-      if(file.size > 10 * 1024 * 1024){
-        alert('⚠️ A imagem é muito grande. Tamanho máximo: 10MB');
-        return;
-      }
-      
-      console.log('🖼️ Imagem colada na aba IA:', file.name || 'clipboard-image', `(${(file.size / 1024).toFixed(2)} KB)`);
-      
-      // Armazenar imagem
-      IA_CURRENT_IMAGE = file;
-      
-      // Mostrar preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if(iaImagePreviewImg) iaImagePreviewImg.src = e.target.result;
-        if(iaImagePreviewName) iaImagePreviewName.textContent = file.name || 'Imagem colada';
-        if(iaImagePreviewSize) iaImagePreviewSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-        if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    });
-    
-    // Event listener para remover imagem
-    iaImagePreviewRemove?.addEventListener('click', () => {
-      IA_CURRENT_IMAGE = null;
-      if(iaImagePreviewWrapper) iaImagePreviewWrapper.style.display = 'none';
-      if(iaImagePreviewImg) iaImagePreviewImg.src = '';
-      console.log('🗑️ Imagem removida');
-    });
     
     // Event listeners para botões de tamanho de resposta
     document.querySelectorAll('.ia-size-btn').forEach(btn => {
@@ -21293,214 +20968,6 @@ async function sendIAQuestion(){
       });
       updateMacroSocialFromHeader();
       try{ refreshMacroInsights(); }catch(_err){}
-    }
-
-    /* ========= impedimentos ========= */
-    const IMPEDIMENT_STATUS_OPTIONS = [
-      { value: 'pending', label: 'Ainda não resolvido' },
-      { value: 'resolved', label: 'Resolvido' }
-    ];
-    const IMPEDIMENT_STATUS_VALUES = new Set(IMPEDIMENT_STATUS_OPTIONS.map(opt => opt.value));
-    let IMPEDIMENT_ALERTS = [];
-    const IMPEDIMENTS_SAVE_DEBOUNCE_MS = 800;
-    let impedimentsSaveTimer = null;
-    let impedimentsSavePending = false;
-    let impedimentsSaveInFlight = false;
-    let impedimentsSaveQueued = false;
-    let lastImpedimentsSignature = '';
-    let lastRemoteImpedimentsSignature = '';
-    
-    function computeImpedimentsSignature(list){
-      if(!Array.isArray(list) || list.length === 0) return '[]';
-      return list.map(item => {
-        const id = item && typeof item.id === 'string' ? item.id : '';
-        const text = item && typeof item.descricao === 'string' ? item.descricao.trim() : '';
-        const status = item && typeof item.status === 'string' ? item.status : 'pending';
-        return `${id}|${text}|${status}`;
-      }).join('||');
-    }
-    
-    function fallbackUUID(){
-      return `imp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-    }
-    
-    function createImpediment(data={}){
-      const baseId = typeof data.id === 'string' && data.id ? data.id : (typeof uuid === 'function' ? uuid() : fallbackUUID());
-      const statusValue = typeof data.status === 'string' && IMPEDIMENT_STATUS_VALUES.has(data.status) ? data.status : 'pending';
-      return {
-        id: baseId,
-        descricao: typeof data.descricao === 'string' ? data.descricao : '',
-        status: statusValue
-      };
-    }
-    
-    function applyImpedimentsFromSource(source, { fromRemote=false }={}){
-      const list = Array.isArray(source) ? source : [];
-      IMPEDIMENT_ALERTS = list.map(item => createImpediment(item));
-      if(!IMPEDIMENT_ALERTS.length){
-        IMPEDIMENT_ALERTS.push(createImpediment());
-      }
-      const signature = computeImpedimentsSignature(IMPEDIMENT_ALERTS);
-      lastImpedimentsSignature = signature;
-      if(fromRemote){
-        lastRemoteImpedimentsSignature = signature;
-        if(impedimentsSaveTimer){
-          clearTimeout(impedimentsSaveTimer);
-          impedimentsSaveTimer = null;
-        }
-        impedimentsSavePending = false;
-        impedimentsSaveQueued = false;
-      }
-    }
-    
-    function loadImpedimentsFromUserData(){
-      const source = USER_DATA && Array.isArray(USER_DATA.impediments) ? USER_DATA.impediments : [];
-      applyImpedimentsFromSource(source, { fromRemote:true });
-    }
-    
-    function updateImpedimentsSignature(){
-      lastImpedimentsSignature = computeImpedimentsSignature(IMPEDIMENT_ALERTS);
-    }
-    
-    function renderImpediments(){
-      const section = $('impedimentosSection');
-      const tbody = $('impedimentosBody');
-      const empty = $('impedimentosEmpty');
-      if(!tbody){ return; }
-      if(!Array.isArray(IMPEDIMENT_ALERTS) || !IMPEDIMENT_ALERTS.length){
-        IMPEDIMENT_ALERTS = [createImpediment()];
-      }
-      tbody.innerHTML = '';
-      IMPEDIMENT_ALERTS.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.dataset.id = item.id;
-        tr.dataset.status = item.status;
-        const iconTd = document.createElement('td');
-        iconTd.className = 'icon-cell';
-        const iconSpan = document.createElement('span');
-        iconSpan.setAttribute('role','img');
-        iconSpan.setAttribute('aria-label','Alerta de atenção');
-        iconSpan.textContent = '⚠️';
-        iconTd.appendChild(iconSpan);
-        const descTd = document.createElement('td');
-        const textarea = document.createElement('textarea');
-        textarea.placeholder = 'Descreva o impedimento identificado (ex.: atraso no fornecedor, falta de orçamento, cliente sem aprovação).';
-        textarea.value = item.descricao || '';
-        textarea.addEventListener('input', ()=>{
-          item.descricao = textarea.value;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist();
-        });
-        textarea.addEventListener('blur', ()=>{
-          item.descricao = textarea.value;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist({ immediate:true });
-        });
-        descTd.appendChild(textarea);
-        const statusTd = document.createElement('td');
-        const statusWrap = document.createElement('div');
-        statusWrap.className = 'impedimentos-status-wrap';
-        const select = document.createElement('select');
-        IMPEDIMENT_STATUS_OPTIONS.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt.value;
-          option.textContent = opt.label;
-          if(item.status === opt.value){ option.selected = true; }
-          select.appendChild(option);
-        });
-        select.addEventListener('change', ()=>{
-          item.status = select.value;
-          tr.dataset.status = item.status;
-          updateImpedimentsSignature();
-          scheduleImpedimentsPersist();
-        });
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'impedimentos-remove';
-        removeBtn.setAttribute('aria-label','Remover impedimento');
-        removeBtn.textContent = 'Remover';
-        removeBtn.addEventListener('click', ()=>{
-          IMPEDIMENT_ALERTS = IMPEDIMENT_ALERTS.filter(entry => entry.id !== item.id);
-          if(!IMPEDIMENT_ALERTS.length){
-            IMPEDIMENT_ALERTS.push(createImpediment());
-          }
-          updateImpedimentsSignature();
-          renderImpediments();
-          scheduleImpedimentsPersist({ immediate:true });
-        });
-        statusWrap.appendChild(select);
-        statusWrap.appendChild(removeBtn);
-        statusTd.appendChild(statusWrap);
-        tr.appendChild(iconTd);
-        tr.appendChild(descTd);
-        tr.appendChild(statusTd);
-        tbody.appendChild(tr);
-      });
-      if(section){
-        section.classList.toggle('empty', !IMPEDIMENT_ALERTS.length);
-      }
-      if(empty){
-        empty.style.display = IMPEDIMENT_ALERTS.length ? 'none' : 'block';
-      }
-    }
-    
-    function sanitizeImpedimentsPayload(){
-      return (Array.isArray(IMPEDIMENT_ALERTS) ? IMPEDIMENT_ALERTS : []).map(item => ({
-        id: item.id,
-        descricao: typeof item.descricao === 'string' ? item.descricao : '',
-        status: IMPEDIMENT_STATUS_VALUES.has(item.status) ? item.status : 'pending'
-      }));
-    }
-    
-    async function persistImpediments(){
-      const uid = auth?.currentUser?.uid;
-      const payload = sanitizeImpedimentsPayload();
-      USER_DATA.impediments = payload;
-      if(!uid) return;
-      try{
-        await setDoc(doc(db,'usuarios',uid), { impediments: payload }, { merge:true });
-      }catch(err){
-        console.error('Erro ao salvar impedimentos', err);
-        throw err;
-      }
-    }
-    
-    async function flushImpedimentsPersist(){
-      if(impedimentsSaveTimer){
-        clearTimeout(impedimentsSaveTimer);
-        impedimentsSaveTimer = null;
-      }
-      if(impedimentsSaveInFlight){
-        impedimentsSaveQueued = true;
-        return;
-      }
-      if(!impedimentsSavePending){
-        return;
-      }
-      impedimentsSavePending = false;
-      impedimentsSaveInFlight = true;
-      try{
-        await persistImpediments();
-      }finally{
-        impedimentsSaveInFlight = false;
-        if(impedimentsSaveQueued){
-          impedimentsSaveQueued = false;
-          scheduleImpedimentsPersist({ immediate:true });
-        }
-      }
-    }
-    
-    function scheduleImpedimentsPersist({ immediate=false }={}){
-      impedimentsSavePending = true;
-      if(impedimentsSaveTimer){
-        clearTimeout(impedimentsSaveTimer);
-        impedimentsSaveTimer = null;
-      }
-      if(immediate){
-        flushImpedimentsPersist();
-        return;
-      }
-      impedimentsSaveTimer = setTimeout(()=>{ flushImpedimentsPersist(); }, IMPEDIMENTS_SAVE_DEBOUNCE_MS);
     }
 
     const MAX_PROFILE_LOGO_SIZE = 5 * 1024 * 1024;
@@ -55978,6 +55445,120 @@ FORMATO PADRÃO:
         }
         
         // Se não encontrou em tabelas, tentar regex no texto
+            
+            // Concatenar TODAS as células da linha para buscar
+            const allCellsText = Array.from(cells).map(c => c.textContent.trim()).join(' | ');
+            const allCellsNormalized = normalizeName(allCellsText);
+            
+            // Primeira célula especificamente (geralmente o nome da meta)
+            const firstCellText = cells[0].textContent.trim();
+            const firstCellNormalized = normalizeName(firstCellText);
+            
+            console.log('  🔍 Verificando linha:', allCellsText.substring(0, 100) + (allCellsText.length > 100 ? '...' : ''));
+            if(isHeaderRow) console.log('  � (linha de cabeçalho - será ignorada para matching)');
+            
+            // Pular cabeçalho
+            if(isHeaderRow) continue;
+            
+            // Verificar se é a linha da nossa meta (sistema de prioridades)
+            let isMatch = false;
+            let matchReason = '';
+            let matchScore = 0;
+            
+            // PRIORIDADE 1: Match EXATO nos column names do alias (maior prioridade)
+            if(matchedAlias && priorityColumnNames.length > 0){
+              for(const colName of priorityColumnNames){
+                // Verificar se o nome da coluna aparece EXATAMENTE na primeira célula
+                if(firstCellNormalized === colName){
+                  isMatch = true;
+                  matchReason = `✅ Match EXATO no column name: "${colName}"`;
+                  matchScore = 100;
+                  break;
+                }
+                // Ou se a coluna está contida na primeira célula (ex: "Inv. Tráfego" contém "inv trafego")
+                if(firstCellNormalized.includes(colName) || colName.includes(firstCellNormalized)){
+                  // Verificar exclusões
+                  let hasExclusion = false;
+                  for(const exclude of matchedAlias.data.excludeIfContains){
+                    if(firstCellNormalized.includes(normalizeName(exclude))){
+                      console.log(`  ⚠️ Ignorando match - célula contém exclusão: "${exclude}"`);
+                      hasExclusion = true;
+                      break;
+                    }
+                  }
+                  if(!hasExclusion && matchScore < 90){
+                    isMatch = true;
+                    matchReason = `🎯 Match no column name prioritário: "${colName}"`;
+                    matchScore = 90;
+                  }
+                }
+              }
+            }
+            
+            // PRIORIDADE 2: Match exato normalizado na primeira célula
+            if(!isMatch && firstCellNormalized === metaNameNormalized){
+              isMatch = true;
+              matchReason = 'Match exato na primeira célula';
+              matchScore = 80;
+            }
+            
+            // PRIORIDADE 3: Match por inclusão do nome da meta
+            if(!isMatch){
+              if(firstCellNormalized.includes(metaNameNormalized) || 
+                 metaNameNormalized.includes(firstCellNormalized)){
+                isMatch = true;
+                matchReason = 'Match por inclusão de texto';
+                matchScore = 60;
+              }
+            }
+            
+            // PRIORIDADE 4: Match por palavras-chave (somente se não tem alias ou score baixo)
+            if((!isMatch || matchScore < 50) && metaKeywords.length > 0){
+              const cellWords = firstCellNormalized.split(' ').filter(w => w.length > 2);
+              const matchingWords = metaKeywords.filter(keyword => 
+                cellWords.some(cellWord => 
+                  cellWord.includes(keyword) || keyword.includes(cellWord)
+                )
+              );
+              const keywordMatchScore = matchingWords.length / Math.max(metaKeywords.length, 1);
+              if(matchingWords.length > 0){
+                console.log('  📊 Score de matching por keywords:', keywordMatchScore.toFixed(2), '- Palavras:', matchingWords);
+              }
+              // Só usar keywords se não tiver match melhor OU se o score for muito alto
+              if(keywordMatchScore >= 0.5 && (!isMatch || matchScore < 40)){
+                isMatch = true;
+                matchReason = `Match por keywords (${(keywordMatchScore*100).toFixed(0)}%)`;
+                matchScore = 40;
+              }
+            }
+            
+            if(isMatch){
+              console.log(`✅ LINHA ENCONTRADA! Score: ${matchScore} - ${matchReason}`);
+              console.log('   📄 Primeira célula:', firstCellText);
+              console.log('   📄 Linha completa:', allCellsText);
+              
+              // Extrair valores das células seguintes (devem ser os meses)
+              for(let i = 1; i < cells.length && i <= 12; i++){
+                const cellText = cells[i].textContent.trim();
+                const cleanValue = cellText.replace(/[^\d]/g, '');
+                if(cleanValue){
+                  const monthIndex = i - 1; // Janeiro = 0, Fev = 1, etc
+                  if(monthIndex < META_MONTHS.length){
+                    monthsValues[META_MONTHS[monthIndex]] = parseInt(cleanValue, 10);
+                    console.log(`  📅 ${META_MONTHS[monthIndex]}: ${cleanValue}`);
+                  }
+                }
+              }
+              
+              found = true;
+              break;
+            }
+          }
+          
+          if(found) break;
+        }
+        
+        // Se não encontrou em tabelas, tentar regex no texto
         if(!found){
           console.log('🔍 Tentando extrair valores por regex no texto...');
           
@@ -57861,9 +57442,6 @@ FORMATO PADRÃO:
       if(typeof d.prazoFim !== 'string'){
         d.prazoFim = '';
       }
-      if(typeof d.plano !== 'string'){
-        d.plano = '';
-      }
       return d;
     }
     function normalizeMonthPlan(monthKey){
@@ -58001,7 +57579,7 @@ FORMATO PADRÃO:
         setTimeout(()=>{ try{ scheduleDemandasPersist({ immediate:true }); }catch(_e){} }, 0);
       }
     }
-    function createDemanda(){ const now=Date.now(); return normalizeDemanda({id:uuid(),status:'',tag:'',demanda:'',responsavel:'',prazo:'',plano:'',edited:now,created:now}); }
+    function createDemanda(){ const now=Date.now(); return normalizeDemanda({id:uuid(),status:'',tag:'',demanda:'',responsavel:'',prazo:'',edited:now,created:now}); }
     function loadDemandasFromUserData(){
       DEMANDAS = Array.isArray(USER_DATA.demandas) ? USER_DATA.demandas.map(normalizeDemanda) : [];
       DEMANDA_MONTH_PLANS = cloneMonthPlans(USER_DATA.demandaMonthPlans);
@@ -59219,20 +58797,433 @@ FORMATO PADRÃO:
       }
     }
     function renderDemandaPlans(){
-      // DEPRECATED: Função obsoleta após refatoração para modal minimalista
-      // A seção .demanda-plans foi removida, planos agora são editados via modal
       const container=$('demandaPlans');
-      if(!container) return; // Container não existe mais, retorna silenciosamente
-      // Código original comentado para evitar processamento desnecessário
+      if(!container) return;
+      const groups={};
+      const monthKeysSet=new Set();
+      DEMANDAS.forEach(d=>{
+        normalizeDemanda(d);
+        const months=getDemandMonthKeys(d);
+        if(!months.length) return;
+        months.forEach(key=>{
+          if(!groups[key]) groups[key]=[];
+          groups[key].push(d);
+          monthKeysSet.add(key);
+          normalizeMonthPlan(key);
+        });
+      });
+      Object.keys(DEMANDA_MONTH_PLANS||{}).forEach(monthKey=>{
+        if(typeof monthKey==='string' && monthKey){
+          monthKeysSet.add(monthKey);
+          normalizeMonthPlan(monthKey);
+        }
+      });
+      if(selectedDemandaMonth){
+        monthKeysSet.add(selectedDemandaMonth);
+        normalizeMonthPlan(selectedDemandaMonth);
+      }
+      let months=Array.from(monthKeysSet).sort();
+      if(selectedDemandaMonth){
+        months=months.filter(monthKey=>monthKey===selectedDemandaMonth);
+      }
+      container.innerHTML='';
+      if(!months.length){
+        container.innerHTML='<div class="demanda-plan-empty">Defina um período para gerar os planos das demandas.</div>';
+        return;
+      }
+      months.forEach(monthKey=>{
+        const monthDate=new Date(`${monthKey}-01T00:00:00`);
+        const monthLabelRaw=monthDate.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+        const monthLabel=monthLabelRaw.charAt(0).toUpperCase()+monthLabelRaw.slice(1);
+        const monthSection=document.createElement('section');
+        monthSection.className='demanda-plan-month';
+        const title=document.createElement('h3');
+        title.className='demanda-plan-month-title';
+        title.textContent=monthLabel;
+        monthSection.appendChild(title);
+        const monthContent=document.createElement('div');
+        monthContent.className='demanda-plan-month-content';
+        const plansBox=document.createElement('div');
+        plansBox.className='demanda-plan-month-plans';
+        const tabs=document.createElement('div');
+        tabs.className='demanda-plan-tabs';
+        const notesWrap=document.createElement('div');
+        notesWrap.className='demanda-plan-notes';
+        const monthPlan=normalizeMonthPlan(monthKey);
+        const monthDemands=sortDemandasForMonth(groups[monthKey]||[]);
+        PLAN_TYPES.forEach(({key,label},index)=>{
+          const btn=document.createElement('button');
+          btn.type='button';
+          btn.className='demanda-plan-tab'+(index===0?' active':'');
+          btn.textContent=label;
+          const note=document.createElement('div');
+          note.className='demanda-plan-note'+(index===0?' active':'');
+          const editor=document.createElement('div');
+          editor.className='demanda-plan-note-editor';
+          const toolbar=document.createElement('div');
+          toolbar.className='markdown-toolbar';
+          const actions=document.createElement('div');
+          actions.className='demanda-plan-note-actions';
+          const iaBtn=document.createElement('button');
+          iaBtn.type='button';
+          iaBtn.className='btn small ghost demanda-plan-ia-btn';
+          iaBtn.textContent=`Gerar planejamento ${label.toLowerCase()}`;
+          iaBtn.addEventListener('click',()=>{
+            handlePlanIAGeneration({
+              monthLabel,
+              monthKey,
+              planLabel:label,
+              planKey:key,
+              editable,
+              monthDemands
+            });
+          });
+          actions.appendChild(iaBtn);
+          const editable=document.createElement('div');
+          editable.className='demanda-plan-note-editor-area markdown-view';
+          editable.setAttribute('contenteditable','true');
+          editable.setAttribute('spellcheck','false');
+          const toolbarButtons=[
+            { action:'bold', label:'Negrito', shortLabel:'B' },
+            { action:'italic', label:'Itálico', shortLabel:'I' },
+            { action:'h1', label:'Título H1', shortLabel:'H1' },
+            { action:'h2', label:'Título H2', shortLabel:'H2' },
+            { action:'h3', label:'Título H3', shortLabel:'H3' }
+          ];
+          toolbarButtons.forEach(cfg=>{
+            const btn=document.createElement('button');
+            btn.type='button';
+            btn.textContent=cfg.shortLabel;
+            btn.setAttribute('title', cfg.label);
+            btn.addEventListener('click',()=>applyMarkdownFormatting(editable,cfg.action));
+            toolbar.appendChild(btn);
+          });
+          editable.dataset.placeholder=`Anotações do ${label.toLowerCase()}`;
+          const initialValue=monthPlan?.[key]||'';
+          const initialHtml=parseMarkdownToHtml(initialValue);
+          if(initialHtml){
+            editable.innerHTML=initialHtml;
+            if(!editable.textContent.trim()) editable.innerHTML='';
+          }else if(initialValue){
+            editable.innerText=initialValue;
+          }
+          const syncPlanNote=()=>{
+            const plan=normalizeMonthPlan(monthKey);
+            if(!plan) return;
+            const isActive=document.activeElement===editable;
+            const selectionState=isActive?getEditableSelection(editable):null;
+            const rawHtml=editable.innerHTML;
+            const sanitizedCurrent=sanitizeMarkdownHtml(rawHtml);
+            const markdownSource=htmlToMarkdown(sanitizedCurrent);
+            const parsedHtml=markdownSource?parseMarkdownToHtml(markdownSource):sanitizedCurrent;
+            const nextHtml=sanitizeMarkdownHtml(parsedHtml||'');
+            if(nextHtml!==editable.innerHTML){
+              editable.innerHTML=nextHtml;
+            }
+            if(isActive && selectionState){
+              restoreEditableSelection(editable, selectionState);
+            }
+            if(!editable.textContent.trim() && !editable.querySelector('img,video,iframe,embed,hr')){
+              editable.innerHTML='';
+              if(isActive){
+                restoreEditableSelection(editable, { start:0, end:0 });
+              }
+            }
+            const cleanHtml=sanitizeMarkdownHtml((editable.innerHTML||'').trim());
+            if((plan[key]||'')===cleanHtml){
+              return;
+            }
+            plan[key]=cleanHtml;
+            scheduleDemandasPersist();
+            renderDemandaMonthButtons();
+          };
+          const scheduleSyncPlanNote=debounce(syncPlanNote,300);
+          editable.addEventListener('input',()=>{ scheduleSyncPlanNote(); });
+          editable.addEventListener('blur',()=>{ syncPlanNote(); flushDemandasPersist(); });
+          editable.addEventListener('paste',event=>{
+            const clipboard=event?.clipboardData || window.clipboardData;
+            if(!clipboard){
+              setTimeout(syncPlanNote,0);
+              return;
+            }
+            let htmlData='';
+            let textData='';
+            try{
+              htmlData=clipboard.getData('text/html')||'';
+            }catch(_err){ htmlData=''; }
+            if(!htmlData){
+              try{ htmlData=clipboard.getData('HTML')||''; }
+              catch(_err){ htmlData=''; }
+            }
+            try{
+              textData=clipboard.getData('text/plain')||'';
+            }catch(_err){
+              try{ textData=clipboard.getData('Text')||clipboard.getData('text')||''; }
+              catch(__err){ textData=''; }
+            }
+            if(!htmlData && !textData){
+              setTimeout(syncPlanNote,0);
+              return;
+            }
+            event.preventDefault();
+            let finalHtml='';
+            if(htmlData){
+              const sanitizedHtml=sanitizeMarkdownHtml(htmlData);
+              const markdown=htmlToMarkdown(sanitizedHtml);
+              finalHtml=parseMarkdownToHtml(markdown)||sanitizedHtml;
+            }else if(textData){
+              finalHtml=parseMarkdownToHtml(textData);
+              if(!finalHtml){
+                finalHtml=sanitizeMarkdownHtml(escapeHtml(textData).replace(/\r?\n/g,'<br>'));
+              }
+            }
+            finalHtml=sanitizeMarkdownHtml(finalHtml||'');
+            if(finalHtml){
+              let insertWithExecCommand=false;
+              try{
+                insertWithExecCommand=typeof document.execCommand==='function' && (!document.queryCommandSupported || document.queryCommandSupported('insertHTML'));
+              }catch(_err){
+                insertWithExecCommand=typeof document.execCommand==='function';
+              }
+              if(insertWithExecCommand){
+                document.execCommand('insertHTML',false,finalHtml);
+              }else{
+                const selection=window.getSelection();
+                if(selection && selection.rangeCount){
+                  selection.deleteContents();
+                  const temp=document.createElement('div');
+                  temp.innerHTML=finalHtml;
+                  const frag=document.createDocumentFragment();
+                  let node;
+                  while((node=temp.firstChild)){
+                    frag.appendChild(node);
+                  }
+                  const range=selection.getRangeAt(0);
+                  range.insertNode(frag);
+                  range.collapse(false);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }
+              }
+            }
+            scheduleSyncPlanNote();
+          });
+          editor.appendChild(toolbar);
+          editor.appendChild(actions);
+          editor.appendChild(editable);
+          note.appendChild(editor);
+          btn.addEventListener('click',()=>{
+            tabs.querySelectorAll('.demanda-plan-tab').forEach(b=>b.classList.remove('active'));
+            notesWrap.querySelectorAll('.demanda-plan-note').forEach(n=>n.classList.remove('active'));
+            btn.classList.add('active');
+            note.classList.add('active');
+          });
+          if(!editable.innerHTML.trim() && initialValue){
+            const parsed=parseMarkdownToHtml(initialValue);
+            editable.innerHTML=parsed || '';
+            if(!editable.textContent.trim()) editable.innerHTML='';
+          }
+          tabs.appendChild(btn);
+          notesWrap.appendChild(note);
+        });
+        plansBox.appendChild(tabs);
+        plansBox.appendChild(notesWrap);
+        const itemsWrap=document.createElement('div');
+        itemsWrap.className='demanda-plan-demand-list';
+        if(monthDemands.length){
+          monthDemands.forEach(d=>{
+            normalizeDemanda(d);
+            const item=document.createElement('div');
+            item.className='demanda-plan-item';
+            const header=document.createElement('div');
+            header.className='demanda-plan-header';
+            const titleEl=document.createElement('div');
+            titleEl.className='demanda-plan-title';
+            titleEl.textContent=d.demanda?.trim()?d.demanda:'(Sem título)';
+            const dateEl=document.createElement('div');
+            dateEl.className='demanda-plan-date';
+            dateEl.textContent=formatPrazoLabel(d);
+            header.appendChild(titleEl);
+            header.appendChild(dateEl);
+            item.appendChild(header);
+            const metaParts=[];
+            const statusLabel=STATUS_OPTIONS.find(o=>o.value===d.status)?.label;
+            if(statusLabel) metaParts.push(statusLabel);
+            if(d.responsavel) metaParts.push(`Resp.: ${d.responsavel}`);
+            if(metaParts.length){
+              const meta=document.createElement('div');
+              meta.className='demanda-plan-demand-meta';
+              meta.textContent=metaParts.join(' • ');
+              item.appendChild(meta);
+            }
+            const actionWrap=document.createElement('div');
+            actionWrap.className='demanda-plan-action';
+            const actionLabel=document.createElement('div');
+            actionLabel.className='demanda-plan-action-label';
+            actionLabel.textContent='Plano de Ação';
+            const actionEditable=document.createElement('div');
+            actionEditable.className='demanda-plan-action-editor markdown-view';
+            actionEditable.setAttribute('contenteditable','true');
+            actionEditable.setAttribute('spellcheck','false');
+            actionEditable.setAttribute('aria-label',`Plano de ação para ${titleEl.textContent}`);
+            actionEditable.dataset.placeholder='Detalhe as próximas ações ou anotações para este objetivo';
+            const demandKey=typeof d.id==='string'&&d.id?d.id:'';
+            const existingNote=demandKey&&monthPlan?.objectiveNotes?monthPlan.objectiveNotes[demandKey]:'';
+            const initialNote=sanitizeMarkdownHtml(existingNote||'');
+            if(initialNote){
+              actionEditable.innerHTML=initialNote;
+              if(!actionEditable.textContent.trim()&&!actionEditable.querySelector('img,video,iframe,embed,hr')){
+                actionEditable.innerHTML='';
+              }
+            }
+            if(demandKey){
+              const syncActionPlan=()=>{
+                const plan=normalizeMonthPlan(monthKey);
+                if(!plan) return;
+                if(!plan.objectiveNotes||typeof plan.objectiveNotes!=='object'){
+                  plan.objectiveNotes={};
+                }
+                const isActive=document.activeElement===actionEditable;
+                const selectionState=isActive?getEditableSelection(actionEditable):null;
+                const rawHtml=actionEditable.innerHTML||'';
+                const sanitizedCurrent=sanitizeMarkdownHtml(rawHtml);
+                if(sanitizedCurrent!==rawHtml){
+                  actionEditable.innerHTML=sanitizedCurrent;
+                  if(isActive&&selectionState){
+                    restoreEditableSelection(actionEditable,selectionState);
+                  }
+                }
+                if(!actionEditable.textContent.trim()&&!actionEditable.querySelector('img,video,iframe,embed,hr')){
+                  actionEditable.innerHTML='';
+                  if(isActive){
+                    restoreEditableSelection(actionEditable,{start:0,end:0});
+                  }
+                }
+                const cleanHtml=sanitizeMarkdownHtml((actionEditable.innerHTML||'').trim());
+                const prev=typeof plan.objectiveNotes[demandKey]==='string'?plan.objectiveNotes[demandKey]:'';
+                if(prev===cleanHtml){
+                  return;
+                }
+                if(cleanHtml){
+                  plan.objectiveNotes[demandKey]=cleanHtml;
+                }else{
+                  delete plan.objectiveNotes[demandKey];
+                }
+                scheduleDemandasPersist();
+              };
+              const scheduleSyncActionPlan=debounce(syncActionPlan,300);
+              actionEditable.addEventListener('input',()=>{ scheduleSyncActionPlan(); });
+              actionEditable.addEventListener('blur',()=>{ syncActionPlan(); flushDemandasPersist(); });
+              actionEditable.addEventListener('paste',event=>{
+                const clipboard=event?.clipboardData||window.clipboardData;
+                if(!clipboard){
+                  setTimeout(syncActionPlan,0);
+                  return;
+                }
+                let htmlData='';
+                let textData='';
+                try{ htmlData=clipboard.getData('text/html')||''; }
+                catch(_err){ htmlData=''; }
+                if(!htmlData){
+                  try{ htmlData=clipboard.getData('HTML')||''; }
+                  catch(__err){ htmlData=''; }
+                }
+                try{ textData=clipboard.getData('text/plain')||''; }
+                catch(_err){
+                  try{ textData=clipboard.getData('Text')||clipboard.getData('text')||''; }
+                  catch(__err){ textData=''; }
+                }
+                if(!htmlData&&!textData){
+                  setTimeout(syncActionPlan,0);
+                  return;
+                }
+                event.preventDefault();
+                let finalHtml='';
+                if(htmlData){
+                  finalHtml=sanitizeMarkdownHtml(htmlData);
+                }else if(textData){
+                  finalHtml=sanitizeMarkdownHtml(escapeHtml(textData).replace(/\r?\n/g,'<br>'));
+                }
+                finalHtml=sanitizeMarkdownHtml(finalHtml||'');
+                if(finalHtml){
+                  let insertWithExecCommand=false;
+                  try{
+                    insertWithExecCommand=typeof document.execCommand==='function'&&(!document.queryCommandSupported||document.queryCommandSupported('insertHTML'));
+                  }catch(_err){
+                    insertWithExecCommand=typeof document.execCommand==='function';
+                  }
+                  if(insertWithExecCommand){
+                    document.execCommand('insertHTML',false,finalHtml);
+                  }else{
+                    const selection=window.getSelection();
+                    if(selection&&selection.rangeCount){
+                      selection.deleteContents();
+                      const temp=document.createElement('div');
+                      temp.innerHTML=finalHtml;
+                      const frag=document.createDocumentFragment();
+                      let node;
+                      while((node=temp.firstChild)){
+                        frag.appendChild(node);
+                      }
+                      const range=selection.getRangeAt(0);
+                      range.insertNode(frag);
+                      range.collapse(false);
+                      selection.removeAllRanges();
+                      selection.addRange(range);
+                    }else{
+                      actionEditable.insertAdjacentHTML('beforeend',finalHtml);
+                    }
+                  }
+                }
+                scheduleSyncActionPlan();
+              });
+            }else{
+              actionEditable.setAttribute('contenteditable','false');
+              actionEditable.dataset.placeholder='Salve o objetivo para habilitar o plano de ação';
+            }
+            actionWrap.appendChild(actionLabel);
+            actionWrap.appendChild(actionEditable);
+            item.appendChild(actionWrap);
+            itemsWrap.appendChild(item);
+          });
+        }else{
+          const empty=document.createElement('div');
+          empty.className='demanda-plan-empty-demands';
+          empty.textContent='Nenhuma demanda com período definido para este mês.';
+          itemsWrap.appendChild(empty);
+        }
+        monthContent.appendChild(itemsWrap);
+        monthContent.appendChild(plansBox);
+        monthSection.appendChild(monthContent);
+        container.appendChild(monthSection);
+      });
     }
-
+    const DEMANDAS_AUTO_RENDER_DELAY = 600;
     const DEMANDAS_TYPING_GRACE_MS = 1200;
     const DEMANDAS_MAX_BLOCK_MS = 8000;
     let demandasRenderTimer = null;
-    let performDemandasRenderRequested = false;
+    let demandasRenderPending = false;
     let lastDemandaInputTs = 0;
     let lastDemandaFocusTs = 0;
     let lastDemandaFocusTarget = null;
+
+    function noteDemandaFocus(target){
+      if(target){
+        lastDemandaFocusTarget = target;
+        lastDemandaFocusTs = Date.now();
+      }else{
+        lastDemandaFocusTarget = null;
+        lastDemandaFocusTs = 0;
+        maybeApplyPendingDemandasSnapshot();
+      }
+    }
+
+    function noteDemandaActivity(target){
+      lastDemandaInputTs = Date.now();
+      if(target){
+        noteDemandaFocus(target);
+      }
+    }
 
     function isDemandasEditing(){
       const active = document.activeElement;
@@ -59257,17 +59248,17 @@ FORMATO PADRÃO:
         demandasRenderTimer = null;
       }
       if(immediate){
-        performDemandasRender();
-      }else{
-        performDemandasRenderRequested = true;
-        demandasRenderTimer = setTimeout(()=>{
-          demandasRenderTimer = null;
-          if(performDemandasRenderRequested){
-            performDemandasRenderRequested = false;
-            performDemandasRender();
-          }
-        }, 300);
+        if(!force && isDemandasEditing()){
+          demandasRenderPending = true;
+          demandasRenderTimer = setTimeout(()=> requestRenderDemandas({ immediate:true, force }), DEMANDAS_AUTO_RENDER_DELAY);
+          return;
+        }
+        demandasRenderPending = false;
+        renderDemandas({ force:true });
+        return;
       }
+      demandasRenderPending = true;
+      demandasRenderTimer = setTimeout(()=> requestRenderDemandas({ immediate:true, force }), DEMANDAS_AUTO_RENDER_DELAY);
     }
 
     function performDemandasRender(){
@@ -59340,7 +59331,6 @@ FORMATO PADRÃO:
     }
     
     function createDemandaRow(d){ normalizeDemanda(d); const tr=document.createElement('tr'); tr.dataset.id=d.id; tr.innerHTML=`
-        <td class="col-checkbox" data-label="Selecionar"><input type="checkbox" class="demanda-select-checkbox" data-id="${d.id}"></td>
         <td class="col-status" data-label="Status"><select><option value=""></option>${STATUS_OPTIONS.map(o=>`<option value="${o.value}" ${d.status===o.value?"selected":""}>${o.label}</option>`).join('')}</select></td>
         <td class="col-demanda" data-label="Demanda"><input type="text" value="${d.demanda||''}"></td>
         <td class="col-resp" data-label="Responsável"><select><option value=""></option>${RESP_OPTIONS.map(r=>`<option value="${r}" ${d.responsavel===r?"selected":""}>${r}</option>`).join('')}</select></td>
@@ -59352,14 +59342,11 @@ FORMATO PADRÃO:
             <button type="button" class="periodo-toggle">${d.prazoFim?'Remover intervalo':'Adicionar intervalo'}</button>
           </div>
         </td>
-        <td class="col-plano" data-label="Plano"><button class="plan-btn${d.plano?' has-plan':''}" data-id="${d.id}">📝 Ver Plano</button></td>
         <td class="del-cell" data-label="Remover"><button>✕</button></td>`;
-      const checkboxEl=tr.children[0].querySelector('input[type="checkbox"]');
-      const statusSel=tr.children[1].querySelector('select');
-      const demandaInput=tr.children[2].querySelector('input');
-      const respSel=tr.children[3].querySelector('select');
-      const periodoWrap=tr.children[4].querySelector('.periodo-field');
-      const planBtn=tr.children[5].querySelector('.plan-btn');
+      const statusSel=tr.children[0].querySelector('select');
+      const demandaInput=tr.children[1].querySelector('input');
+      const respSel=tr.children[2].querySelector('select');
+      const periodoWrap=tr.children[3].querySelector('.periodo-field');
       const inicioInput=periodoWrap.querySelector('.periodo-inicio');
       const fimInput=periodoWrap.querySelector('.periodo-fim');
       const toggleBtn=periodoWrap.querySelector('.periodo-toggle');
@@ -59423,7 +59410,6 @@ FORMATO PADRÃO:
         }
         syncRangeUI();
       };
-      planBtn.onclick=()=>{ openDemandaPlanModal(d); };
       tr.querySelector('.del-cell button').onclick=()=>{ if(confirm('Remover linha?')){ DEMANDAS=DEMANDAS.filter(x=>x.id!==d.id); scheduleDemandasPersist({ immediate:true }); renderDemandas(); } };
       applyStatusColor(tr, d.status, d);
       return tr; }
@@ -59506,426 +59492,6 @@ FORMATO PADRÃO:
     if(addDemandaBtn){
       addDemandaBtn.addEventListener('click', ()=>{ DEMANDAS.push(createDemanda()); scheduleDemandasPersist({ immediate:true }); renderDemandas(); });
     }
-    
-    /* ========= SELEÇÃO MÚLTIPLA E EDIÇÃO EM MASSA ========= */
-    const demandaSelectAllEl = $('demandaSelectAll');
-    const demandaBulkActionsEl = $('demandaBulkActions');
-    const bulkSelectedCountEl = $('bulkSelectedCount');
-    const btnBulkEditDateEl = $('btnBulkEditDate');
-    const btnBulkClearSelectionEl = $('btnBulkClearSelection');
-    const bulkEditModalEl = $('bulkEditModal');
-    const bulkEditDateTypeEl = $('bulkEditDateType');
-    const bulkEditInicioEl = $('bulkEditInicio');
-    const bulkEditFimEl = $('bulkEditFim');
-    const bulkEditInicioGroupEl = $('bulkEditInicioGroup');
-    const bulkEditFimGroupEl = $('bulkEditFimGroup');
-    const btnBulkEditCancelEl = $('btnBulkEditCancel');
-    const btnBulkEditSaveEl = $('btnBulkEditSave');
-    
-    let selectedDemandas = new Set();
-    
-    // Função para atualizar contador e visibilidade da barra de ações
-    function updateBulkActionsUI(){
-      const count = selectedDemandas.size;
-      if(bulkSelectedCountEl) bulkSelectedCountEl.textContent = count;
-      if(demandaBulkActionsEl){
-        if(count > 0){
-          demandaBulkActionsEl.classList.add('active');
-        } else {
-          demandaBulkActionsEl.classList.remove('active');
-        }
-      }
-      
-      // Atualizar estado do checkbox "selecionar todas"
-      if(demandaSelectAllEl){
-        const visibleCheckboxes = document.querySelectorAll('.demanda-select-checkbox');
-        const checkedCount = Array.from(visibleCheckboxes).filter(cb => cb.checked).length;
-        demandaSelectAllEl.checked = visibleCheckboxes.length > 0 && checkedCount === visibleCheckboxes.length;
-        demandaSelectAllEl.indeterminate = checkedCount > 0 && checkedCount < visibleCheckboxes.length;
-      }
-    }
-    
-    // Selecionar/Desselecionar todas
-    if(demandaSelectAllEl){
-      demandaSelectAllEl.addEventListener('change', (e) => {
-        const checked = e.target.checked;
-        const checkboxes = document.querySelectorAll('.demanda-select-checkbox');
-        checkboxes.forEach(cb => {
-          cb.checked = checked;
-          const demandaId = cb.dataset.id;
-          if(checked){
-            selectedDemandas.add(demandaId);
-          } else {
-            selectedDemandas.delete(demandaId);
-          }
-        });
-        updateBulkActionsUI();
-      });
-    }
-    
-    // Delegação de eventos para checkboxes de linha
-    document.addEventListener('change', (e) => {
-      if(e.target && e.target.classList.contains('demanda-select-checkbox')){
-        const demandaId = e.target.dataset.id;
-        if(e.target.checked){
-          selectedDemandas.add(demandaId);
-        } else {
-          selectedDemandas.delete(demandaId);
-        }
-        updateBulkActionsUI();
-      }
-    });
-    
-    // Botão para desselecionar todas
-    if(btnBulkClearSelectionEl){
-      btnBulkClearSelectionEl.addEventListener('click', () => {
-        selectedDemandas.clear();
-        document.querySelectorAll('.demanda-select-checkbox').forEach(cb => cb.checked = false);
-        if(demandaSelectAllEl) demandaSelectAllEl.checked = false;
-        updateBulkActionsUI();
-      });
-    }
-    
-    // Botão para abrir modal de edição de data
-    if(btnBulkEditDateEl){
-      btnBulkEditDateEl.addEventListener('click', () => {
-        if(selectedDemandas.size === 0){
-          showToast('Selecione pelo menos uma demanda para editar', 'warning');
-          return;
-        }
-        
-        // Resetar campos
-        if(bulkEditDateTypeEl) bulkEditDateTypeEl.value = 'inicio';
-        if(bulkEditInicioEl) bulkEditInicioEl.value = '';
-        if(bulkEditFimEl) bulkEditFimEl.value = '';
-        if(bulkEditInicioGroupEl) bulkEditInicioGroupEl.style.display = 'block';
-        if(bulkEditFimGroupEl) bulkEditFimGroupEl.style.display = 'none';
-        
-        // Abrir modal
-        if(bulkEditModalEl) bulkEditModalEl.classList.add('active');
-      });
-    }
-    
-    // Controlar visibilidade dos campos de data baseado no tipo selecionado
-    if(bulkEditDateTypeEl){
-      bulkEditDateTypeEl.addEventListener('change', (e) => {
-        const tipo = e.target.value;
-        if(bulkEditInicioGroupEl && bulkEditFimGroupEl){
-          if(tipo === 'inicio'){
-            bulkEditInicioGroupEl.style.display = 'block';
-            bulkEditFimGroupEl.style.display = 'none';
-          } else if(tipo === 'fim'){
-            bulkEditInicioGroupEl.style.display = 'none';
-            bulkEditFimGroupEl.style.display = 'block';
-          } else if(tipo === 'ambas'){
-            bulkEditInicioGroupEl.style.display = 'block';
-            bulkEditFimGroupEl.style.display = 'block';
-          }
-        }
-      });
-    }
-    
-    // Cancelar edição
-    if(btnBulkEditCancelEl){
-      btnBulkEditCancelEl.addEventListener('click', () => {
-        if(bulkEditModalEl) bulkEditModalEl.classList.remove('active');
-      });
-    }
-    
-    // Salvar edição em massa
-    if(btnBulkEditSaveEl){
-      btnBulkEditSaveEl.addEventListener('click', () => {
-        const tipo = bulkEditDateTypeEl ? bulkEditDateTypeEl.value : 'inicio';
-        const dataInicio = bulkEditInicioEl ? bulkEditInicioEl.value : '';
-        const dataFim = bulkEditFimEl ? bulkEditFimEl.value : '';
-        
-        // Validar campos
-        if(tipo === 'inicio' && !dataInicio){
-          showToast('Informe a data de início', 'warning');
-          return;
-        }
-        if(tipo === 'fim' && !dataFim){
-          showToast('Informe a data de fim', 'warning');
-          return;
-        }
-        if(tipo === 'ambas' && (!dataInicio || !dataFim)){
-          showToast('Informe ambas as datas (início e fim)', 'warning');
-          return;
-        }
-        
-        // Aplicar alterações
-        let updatedCount = 0;
-        selectedDemandas.forEach(demandaId => {
-          const demanda = DEMANDAS.find(d => d.id === demandaId);
-          if(demanda){
-            if(tipo === 'inicio' || tipo === 'ambas'){
-              demanda.prazo = dataInicio;
-            }
-            if(tipo === 'fim' || tipo === 'ambas'){
-              demanda.prazoFim = dataFim;
-            }
-            updatedCount++;
-          }
-        });
-        
-        // Salvar e renderizar
-        if(updatedCount > 0){
-          scheduleDemandasPersist({ immediate: true });
-          renderDemandas({ force: true });
-          showToast(`${updatedCount} demanda(s) atualizada(s) com sucesso!`, 'success');
-          
-          // Limpar seleção
-          selectedDemandas.clear();
-          document.querySelectorAll('.demanda-select-checkbox').forEach(cb => cb.checked = false);
-          if(demandaSelectAllEl) demandaSelectAllEl.checked = false;
-          updateBulkActionsUI();
-        }
-        
-        // Fechar modal
-        if(bulkEditModalEl) bulkEditModalEl.classList.remove('active');
-      });
-    }
-    
-    // Fechar modal clicando fora
-    if(bulkEditModalEl){
-      bulkEditModalEl.addEventListener('click', (e) => {
-        if(e.target === bulkEditModalEl){
-          bulkEditModalEl.classList.remove('active');
-        }
-      });
-    }
-    
-    /* ========= EDIÇÃO EM MASSA - STATUS ========= */
-    const btnBulkEditStatusEl = $('btnBulkEditStatus');
-    const bulkEditStatusModalEl = $('bulkEditStatusModal');
-    const bulkEditStatusEl = $('bulkEditStatus');
-    const btnBulkEditStatusCancelEl = $('btnBulkEditStatusCancel');
-    const btnBulkEditStatusSaveEl = $('btnBulkEditStatusSave');
-    
-    // Abrir modal de status
-    if(btnBulkEditStatusEl){
-      btnBulkEditStatusEl.addEventListener('click', () => {
-        if(selectedDemandas.size === 0){
-          showToast('Selecione pelo menos uma demanda para editar', 'warning');
-          return;
-        }
-        
-        // Resetar campo
-        if(bulkEditStatusEl) bulkEditStatusEl.value = '';
-        
-        // Abrir modal
-        if(bulkEditStatusModalEl) bulkEditStatusModalEl.classList.add('active');
-      });
-    }
-    
-    // Cancelar edição de status
-    if(btnBulkEditStatusCancelEl){
-      btnBulkEditStatusCancelEl.addEventListener('click', () => {
-        if(bulkEditStatusModalEl) bulkEditStatusModalEl.classList.remove('active');
-      });
-    }
-    
-    // Salvar status em massa
-    if(btnBulkEditStatusSaveEl){
-      btnBulkEditStatusSaveEl.addEventListener('click', () => {
-        const novoStatus = bulkEditStatusEl ? bulkEditStatusEl.value : '';
-        
-        // Validar campo
-        if(!novoStatus){
-          showToast('Selecione um status', 'warning');
-          return;
-        }
-        
-        // Aplicar alterações
-        let updatedCount = 0;
-        selectedDemandas.forEach(demandaId => {
-          const demanda = DEMANDAS.find(d => d.id === demandaId);
-          if(demanda){
-            demanda.status = novoStatus;
-            updatedCount++;
-          }
-        });
-        
-        // Salvar e renderizar
-        if(updatedCount > 0){
-          scheduleDemandasPersist({ immediate: true });
-          renderDemandas({ force: true });
-          showToast(`Status alterado em ${updatedCount} demanda(s)!`, 'success');
-          
-          // Limpar seleção
-          selectedDemandas.clear();
-          document.querySelectorAll('.demanda-select-checkbox').forEach(cb => cb.checked = false);
-          if(demandaSelectAllEl) demandaSelectAllEl.checked = false;
-          updateBulkActionsUI();
-        }
-        
-        // Fechar modal
-        if(bulkEditStatusModalEl) bulkEditStatusModalEl.classList.remove('active');
-      });
-    }
-    
-    // Fechar modal de status clicando fora
-    if(bulkEditStatusModalEl){
-      bulkEditStatusModalEl.addEventListener('click', (e) => {
-        if(e.target === bulkEditStatusModalEl){
-          bulkEditStatusModalEl.classList.remove('active');
-        }
-      });
-    }
-    
-    /* ========= EDIÇÃO EM MASSA - RESPONSÁVEL ========= */
-    const btnBulkEditResponsavelEl = $('btnBulkEditResponsavel');
-    const bulkEditResponsavelModalEl = $('bulkEditResponsavelModal');
-    const bulkEditResponsavelEl = $('bulkEditResponsavel');
-    const btnBulkEditResponsavelCancelEl = $('btnBulkEditResponsavelCancel');
-    const btnBulkEditResponsavelSaveEl = $('btnBulkEditResponsavelSave');
-    
-    // Abrir modal de responsável
-    if(btnBulkEditResponsavelEl){
-      btnBulkEditResponsavelEl.addEventListener('click', () => {
-        if(selectedDemandas.size === 0){
-          showToast('Selecione pelo menos uma demanda para editar', 'warning');
-          return;
-        }
-        
-        // Resetar campo
-        if(bulkEditResponsavelEl) bulkEditResponsavelEl.value = '';
-        
-        // Abrir modal
-        if(bulkEditResponsavelModalEl) bulkEditResponsavelModalEl.classList.add('active');
-      });
-    }
-    
-    // Cancelar edição de responsável
-    if(btnBulkEditResponsavelCancelEl){
-      btnBulkEditResponsavelCancelEl.addEventListener('click', () => {
-        if(bulkEditResponsavelModalEl) bulkEditResponsavelModalEl.classList.remove('active');
-      });
-    }
-    
-    // Salvar responsável em massa
-    if(btnBulkEditResponsavelSaveEl){
-      btnBulkEditResponsavelSaveEl.addEventListener('click', () => {
-        const novoResponsavel = bulkEditResponsavelEl ? bulkEditResponsavelEl.value : '';
-        
-        // Validar campo
-        if(!novoResponsavel){
-          showToast('Selecione um responsável', 'warning');
-          return;
-        }
-        
-        // Aplicar alterações
-        let updatedCount = 0;
-        selectedDemandas.forEach(demandaId => {
-          const demanda = DEMANDAS.find(d => d.id === demandaId);
-          if(demanda){
-            demanda.responsavel = novoResponsavel;
-            updatedCount++;
-          }
-        });
-        
-        // Salvar e renderizar
-        if(updatedCount > 0){
-          scheduleDemandasPersist({ immediate: true });
-          renderDemandas({ force: true });
-          showToast(`Responsável alterado em ${updatedCount} demanda(s)!`, 'success');
-          
-          // Limpar seleção
-          selectedDemandas.clear();
-          document.querySelectorAll('.demanda-select-checkbox').forEach(cb => cb.checked = false);
-          if(demandaSelectAllEl) demandaSelectAllEl.checked = false;
-          updateBulkActionsUI();
-        }
-        
-        // Fechar modal
-        if(bulkEditResponsavelModalEl) bulkEditResponsavelModalEl.classList.remove('active');
-      });
-    }
-    
-    // Fechar modal de responsável clicando fora
-    if(bulkEditResponsavelModalEl){
-      bulkEditResponsavelModalEl.addEventListener('click', (e) => {
-        if(e.target === bulkEditResponsavelModalEl){
-          bulkEditResponsavelModalEl.classList.remove('active');
-        }
-      });
-    }
-    
-    /* ========= PLANO DA DEMANDA - MODAL ========= */
-    const demandaPlanModalEl = $('demandaPlanModal');
-    const demandaPlanTitleEl = $('demandaPlanTitle');
-    const demandaPlanTextEl = $('demandaPlanText');
-    const btnCloseDemandaPlanEl = $('btnCloseDemandaPlan');
-    const btnCancelDemandaPlanEl = $('btnCancelDemandaPlan');
-    const btnSaveDemandaPlanEl = $('btnSaveDemandaPlan');
-    
-    let currentPlanDemanda = null;
-    
-    // Função para abrir modal de plano
-    function openDemandaPlanModal(demanda){
-      if(!demandaPlanModalEl) return;
-      
-      currentPlanDemanda = demanda;
-      
-      // Preencher campos
-      if(demandaPlanTitleEl) demandaPlanTitleEl.value = demanda.demanda || '';
-      if(demandaPlanTextEl) demandaPlanTextEl.value = demanda.plano || '';
-      
-      // Abrir modal
-      demandaPlanModalEl.classList.add('active');
-      
-      // Focar no textarea
-      if(demandaPlanTextEl) demandaPlanTextEl.focus();
-    }
-    
-    // Função para fechar modal
-    function closeDemandaPlanModal(){
-      if(demandaPlanModalEl) demandaPlanModalEl.classList.remove('active');
-      currentPlanDemanda = null;
-    }
-    
-    // Botão fechar (X)
-    if(btnCloseDemandaPlanEl){
-      btnCloseDemandaPlanEl.addEventListener('click', closeDemandaPlanModal);
-    }
-    
-    // Botão cancelar
-    if(btnCancelDemandaPlanEl){
-      btnCancelDemandaPlanEl.addEventListener('click', closeDemandaPlanModal);
-    }
-    
-    // Botão salvar plano
-    if(btnSaveDemandaPlanEl){
-      btnSaveDemandaPlanEl.addEventListener('click', () => {
-        if(!currentPlanDemanda) return;
-        
-        const planoTexto = demandaPlanTextEl ? demandaPlanTextEl.value.trim() : '';
-        
-        // Atualizar demanda
-        currentPlanDemanda.plano = planoTexto;
-        
-        // Salvar e renderizar
-        scheduleDemandasPersist({ immediate: true });
-        renderDemandas({ force: true });
-        
-        // Mensagem de sucesso
-        const msg = planoTexto ? 'Plano salvo com sucesso!' : 'Plano removido com sucesso!';
-        showToast(msg, 'success');
-        
-        // Fechar modal
-        closeDemandaPlanModal();
-      });
-    }
-    
-    // Fechar modal clicando fora
-    if(demandaPlanModalEl){
-      demandaPlanModalEl.addEventListener('click', (e) => {
-        if(e.target === demandaPlanModalEl){
-          closeDemandaPlanModal();
-        }
-      });
-    }
-    
     /* ========= auth & boot ========= */
     function clearAuthTraces(){
       try{
@@ -60057,7 +59623,6 @@ FORMATO PADRÃO:
           loadMetasFromUserData();
           loadMetaPanelsFromUserData();
           loadSocialLinksFromUserData();
-          loadImpedimentsFromUserData();
           loadIAChatsFromUserData();
           await loadIADocs();
           await loadRefSocial();
@@ -60255,7 +59820,6 @@ FORMATO PADRÃO:
             loadMetasFromUserData();
             loadMetaPanelsFromUserData();
             loadSocialLinksFromUserData();
-            loadImpedimentsFromUserData();
             loadIAChatsFromUserData();
             await loadIADocs();
             await loadRefSocial();
