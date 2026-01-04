@@ -6485,6 +6485,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         if(window.googleCalendarIntegration){
           window.googleCalendarIntegration.notifyPostsLoaded(POSTS);
         }
+        try{ scheduleNotificationRefresh({ immediate: true }); }catch(_err){}
       }, err=> console.error("onSnapshot posts", err));
     }
 
@@ -7426,11 +7427,14 @@ function renderReviewNotes(post){
   .notification-list{display:flex;flex-direction:column;gap:10px}
   .notification-item{display:flex;gap:10px;padding:10px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18);color:#cbd5f5;font-size:.85rem;line-height:1.35}
   .notification-item.unseen{border-color:rgba(96,165,250,.4);box-shadow:0 0 0 1px rgba(37,99,235,.45)}
+  .notification-item.critical{background:rgba(153,27,27,.45);border-color:rgba(239,68,68,.85);color:#fee2e2;box-shadow:0 0 8px rgba(239,68,68,.4);animation:pulseNotification 2s ease-in-out infinite}
   .notification-item.alert{background:rgba(127,29,29,.32);border-color:rgba(248,113,113,.65);color:#fee2e2}
   .notification-item.warn{background:rgba(120,53,15,.32);border-color:rgba(251,191,36,.55);color:#fef3c7}
   .notification-icon-wrap{flex:0 0 34px;height:34px;border-radius:50%;background:rgba(59,130,246,.18);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .notification-item.critical .notification-icon-wrap{background:rgba(239,68,68,.35);color:#fca5a5}
   .notification-item.alert .notification-icon-wrap{background:rgba(248,113,113,.25)}
   .notification-item.warn .notification-icon-wrap{background:rgba(251,191,36,.25);color:#fde68a}
+  @keyframes pulseNotification{0%,100%{opacity:1}50%{opacity:.85}}
   .notification-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
   .notification-item-title{font-weight:700;color:#f8fafc;font-size:.9rem}
   .notification-item-meta{font-size:.75rem;color:rgba(226,232,240,.7)}
@@ -14075,6 +14079,114 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       }
     }
 
+    async function sendTestEmailViaBackend() {
+      console.log('🧪 Iniciando envio de email de teste via Cloud Function');
+      
+      const clientKey = getClientKey();
+      if(!auth.currentUser || !clientKey) {
+        showNotificationStatus('❌ Erro: Usuário não autenticado ou cliente não selecionado', 'error');
+        return;
+      }
+
+      const emailsInput = document.getElementById('notificationEmails');
+      if(!emailsInput || !emailsInput.value.trim()) {
+        showNotificationStatus('❌ Por favor, adicione pelo menos um email antes de testar', 'error');
+        return;
+      }
+
+      const emails = emailsInput.value.split(',').map(e => e.trim()).filter(e => e.length > 0);
+      
+      showNotificationStatus('📨 Enviando email de teste...', 'info');
+      
+      try {
+        const widgetNotifications = window.getNotificationItems ? window.getNotificationItems() : notificationItems || [];
+        
+        console.log('📧 Preparando email de teste com', widgetNotifications.length, 'notificações');
+        console.log('🔍 Notificações críticas:', widgetNotifications.filter(n => n.severity === 'critical').length);
+        console.log('📧 Detalhes das notificações críticas:', 
+          widgetNotifications.filter(n => n.severity === 'critical').map(n => ({ 
+            titulo: n.title, 
+            mensagem: n.message,
+            severidade: n.severity 
+          }))
+        );
+        
+        // Mapa de estilos para cada severidade (usado pela Cloud Function)
+        const severityStyles = {
+          critical: { bg: '#FEE2E2', border: '#DC2626', text: '#991B1B', label: 'Crítica' },
+          alert:    { bg: '#FFF3E0', border: '#F97316', text: '#C2410C', label: 'Alerta' },
+          warn:     { bg: '#FFFBEB', border: '#F59E0B', text: '#92400E', label: 'Aviso' },
+          info:     { bg: '#DBEAFE', border: '#3B82F6', text: '#1E40AF', label: 'Info' }
+        };
+        
+        // Adiciona estilos explícitos a cada notificação para a Cloud Function usar
+        const notificationsWithStyles = widgetNotifications.map(n => ({
+          ...n,
+          style: severityStyles[n.severity] || severityStyles.info
+        }));
+        
+        // Contagem de severidades para o resumo do email
+        const severityCounts = {
+          critical: widgetNotifications.filter(n => n.severity === 'critical').length,
+          alert: widgetNotifications.filter(n => n.severity === 'alert').length,
+          warn: widgetNotifications.filter(n => n.severity === 'warn').length,
+          info: widgetNotifications.filter(n => n.severity === 'info').length
+        };
+        
+        const functionUrl = 'https://us-central1-mediagrowth-a5349.cloudfunctions.net/sendDailyNotifications';
+        
+        const payload = {
+          test: true,
+          testEmails: emails,
+          clientKey: clientKey,
+          userId: auth.currentUser.uid,
+          notifications: notificationsWithStyles,
+          severityCounts: severityCounts, // Contagem para o resumo
+          severityStyles: severityStyles   // Estilos para aplicar no template
+        };
+        
+        console.log('📦 [EMAIL TESTE] Payload completo:', JSON.stringify(payload, null, 2));
+        console.log('📦 [EMAIL TESTE] Total de notificações no payload:', payload.notifications.length);
+        console.log('📦 [EMAIL TESTE] Notificações por severidade:', {
+          critical: payload.notifications.filter(n => n.severity === 'critical').length,
+          alert: payload.notifications.filter(n => n.severity === 'alert').length,
+          warn: payload.notifications.filter(n => n.severity === 'warn').length,
+          info: payload.notifications.filter(n => n.severity === 'info').length
+        });
+        console.log('📦 [EMAIL TESTE] Enviando para:', functionUrl);
+        
+        const response = await fetch(functionUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        console.log('📡 [EMAIL TESTE] Status da resposta:', response.status, response.statusText);
+        
+        if(response.ok) {
+          const result = await response.json();
+          console.log('✅ [EMAIL TESTE] Resposta completa da Cloud Function:', result);
+          console.log('✅ [EMAIL TESTE] Emails enviados para:', result.emailsSent || emails);
+          console.log('✅ [EMAIL TESTE] Total de notificações processadas:', result.notificationsCount || payload.notifications.length);
+          console.log('✅ Email de teste enviado com sucesso:', result);
+          showNotificationStatus('✅ Email de teste enviado com sucesso para: ' + emails.join(', '), 'success');
+        } else {
+          const errorText = await response.text();
+          console.error('❌ [EMAIL TESTE] Status HTTP:', response.status);
+          console.error('❌ [EMAIL TESTE] Headers:', Object.fromEntries(response.headers.entries()));
+          console.error('❌ [EMAIL TESTE] Corpo da resposta:', errorText);
+          console.error('❌ Erro ao enviar email de teste:', errorText);
+          showNotificationStatus('❌ Erro ao enviar email (HTTP ' + response.status + '): ' + errorText, 'error');
+        }
+      } catch(err) {
+        console.error('❌ [EMAIL TESTE] Erro completo:', err);
+        console.error('❌ [EMAIL TESTE] Stack trace:', err.stack);
+        console.error('❌ [EMAIL TESTE] Tipo de erro:', err.name);
+        console.error('❌ Erro ao enviar email de teste:', err);
+        showNotificationStatus('❌ Erro ao enviar email: ' + err.message, 'error');
+      }
+    }
+
     async function handleTestEmailClick() {
       // Usar SendGrid Backend
       await sendTestEmailViaBackend();
@@ -14204,11 +14316,14 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     // FUNÇÃO AUTOMÁTICA DE ENVIO DE NOTIFICAÇÕES
     // ============================================
     async function sendScheduledNotifications() {
-      console.log('🔔 Verificando notificações agendadas...');
+      const timestamp = new Date().toLocaleString('pt-BR');
+      console.log('🔔 [' + timestamp + '] Verificando notificações agendadas...');
       
       const clientKey = getClientKey();
       if(!auth.currentUser || !clientKey) {
-        console.log('❌ Usuário não autenticado ou cliente não selecionado');
+        console.log('❌ [' + timestamp + '] Usuário não autenticado ou cliente não selecionado');
+        console.log('   └─ auth.currentUser:', !!auth.currentUser);
+        console.log('   └─ clientKey:', clientKey);
         return;
       }
 
@@ -14216,16 +14331,28 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         const settingsRef = doc(db, 'usuarios', auth.currentUser.uid, 'clients', clientKey);
         const settingsDoc = await getDoc(settingsRef);
         
+        console.log('📄 Documento de configuração existe?', settingsDoc.exists());
+        
         if(!settingsDoc.exists() || !settingsDoc.data().emailNotifications) {
           console.log('⚠️ Nenhuma configuração de email encontrada');
+          console.log('   └─ settingsDoc.exists():', settingsDoc.exists());
+          console.log('   └─ emailNotifications:', settingsDoc.exists() ? settingsDoc.data().emailNotifications : 'N/A');
           return;
         }
 
         const emailConfig = settingsDoc.data().emailNotifications;
         const { emails, frequency, time } = emailConfig;
+        
+        console.log('⚙️ Configuração de email encontrada:', {
+          emails: emails,
+          frequency: frequency,
+          time: time,
+          configCompleta: emailConfig
+        });
 
         if(!emails || emails.length === 0) {
           console.log('⚠️ Nenhum email configurado');
+          console.log('   └─ emails:', emails);
           return;
         }
 
@@ -14292,6 +14419,36 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         
         const widgetNotifications = window.getNotificationItems ? window.getNotificationItems() : notificationItems || [];
         console.log('📋 ' + widgetNotifications.length + ' notificações para enviar');
+        console.log('🔍 Notificações críticas (atrasadas):', widgetNotifications.filter(n => n.severity === 'critical').length);
+        console.log('📧 Detalhes das notificações críticas:', 
+          widgetNotifications.filter(n => n.severity === 'critical').map(n => ({ 
+            titulo: n.title, 
+            mensagem: n.message,
+            severidade: n.severity 
+          }))
+        );
+        
+        // Mapa de estilos para cada severidade (usado pela Cloud Function)
+        const severityStyles = {
+          critical: { bg: '#FEE2E2', border: '#DC2626', text: '#991B1B', label: 'Crítica' },
+          alert:    { bg: '#FFF3E0', border: '#F97316', text: '#C2410C', label: 'Alerta' },
+          warn:     { bg: '#FFFBEB', border: '#F59E0B', text: '#92400E', label: 'Aviso' },
+          info:     { bg: '#DBEAFE', border: '#3B82F6', text: '#1E40AF', label: 'Info' }
+        };
+        
+        // Adiciona estilos explícitos a cada notificação para a Cloud Function usar
+        const notificationsWithStyles = widgetNotifications.map(n => ({
+          ...n,
+          style: severityStyles[n.severity] || severityStyles.info
+        }));
+        
+        // Contagem de severidades para o resumo do email
+        const severityCounts = {
+          critical: widgetNotifications.filter(n => n.severity === 'critical').length,
+          alert: widgetNotifications.filter(n => n.severity === 'alert').length,
+          warn: widgetNotifications.filter(n => n.severity === 'warn').length,
+          info: widgetNotifications.filter(n => n.severity === 'info').length
+        };
         
         let functionName = 'sendDailyNotifications';
         if(frequency === 'weekly') functionName = 'sendWeeklyNotifications';
@@ -14304,10 +14461,21 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           testEmails: emails,
           clientKey: clientKey,
           userId: auth.currentUser.uid,
-          notifications: widgetNotifications
+          notifications: notificationsWithStyles,
+          severityCounts: severityCounts, // Contagem para o resumo
+          severityStyles: severityStyles   // Estilos para aplicar no template
         };
         
-        console.log('📦 Enviando para Cloud Function:', functionUrl);
+        console.log('📦 [EMAIL AUTOMÁTICO] Payload completo:', JSON.stringify(payload, null, 2));
+        console.log('📦 [EMAIL AUTOMÁTICO] Total de notificações no payload:', payload.notifications.length);
+        console.log('📦 [EMAIL AUTOMÁTICO] Notificações críticas no payload:', 
+          payload.notifications.filter(n => n.severity === 'critical').length
+        );
+        console.log('📦 [EMAIL AUTOMÁTICO] Lista de severidades:', 
+          payload.notifications.map(n => n.severity)
+        );
+        
+        console.log('📤 Enviando para Cloud Function:', functionUrl);
         
         try {
           const response = await fetch(functionUrl, {
@@ -14318,6 +14486,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           
           if(response.ok) {
             const result = await response.json();
+            console.log('✅ [EMAIL AUTOMÁTICO] Resposta da Cloud Function:', result);
+            console.log('✅ [EMAIL AUTOMÁTICO] Emails enviados:', result.sent || 'não especificado');
+            console.log('✅ [EMAIL AUTOMÁTICO] Notificações processadas:', result.notificationsCount || 'não especificado');
             console.log('✅ Emails agendados enviados com sucesso às ' + currentTime + ':', result);
             localStorage.setItem(lastSentKey, now.toISOString());
             console.log('💾 Marcado como enviado em:', lastSentKey, '=', now.toISOString());
@@ -14328,9 +14499,17 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
             }
           } else {
             const errorText = await response.text();
+            console.error('❌ [EMAIL AUTOMÁTICO] Status HTTP:', response.status);
+            console.error('❌ [EMAIL AUTOMÁTICO] Resposta de erro:', errorText);
             console.error('❌ Erro ao enviar emails agendados:', errorText);
+            
+            if(window.showNotificationStatus) {
+              window.showNotificationStatus('❌ Erro ao enviar email: HTTP ' + response.status, 'error');
+            }
           }
         } catch(fetchErr) {
+          console.error('❌ [EMAIL AUTOMÁTICO] Erro de rede completo:', fetchErr);
+          console.error('❌ [EMAIL AUTOMÁTICO] Stack trace:', fetchErr.stack);
           console.error('❌ Erro de rede ao enviar emails:', fetchErr);
         }
 
@@ -57189,7 +57368,17 @@ FORMATO PADRÃO:
       if(!d) return null;
       const start = getDemandaStartDate(d);
       const end = parseDemandaDate(d.prazoFim);
+      
+      console.log('📅 [getDemandaEndDate]', {
+        demanda: d.demanda,
+        prazoInicio: d.prazo,
+        prazoFim: d.prazoFim,
+        startDate: start ? start.toISOString() : null,
+        endDate: end ? end.toISOString() : null
+      });
+      
       if(end && start && end.getTime() < start.getTime()){
+        console.log('⚠️ [getDemandaEndDate] Data final anterior à inicial, usando data inicial');
         return new Date(start);
       }
       if(end) return new Date(end);
@@ -57507,34 +57696,95 @@ FORMATO PADRÃO:
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const msPerDay = 24 * 60 * 60 * 1000;
 
+      console.log('🔔 [NOTIFICATIONS] Iniciando buildNotificationItems');
+      console.log('🔔 [NOTIFICATIONS] Data atual:', now.toISOString());
+      console.log('🔔 [NOTIFICATIONS] Total de demandas:', DEMANDAS?.length || 0);
+
       const demandasList = Array.isArray(DEMANDAS) ? DEMANDAS : [];
-      demandasList.forEach(d=>{
+      demandasList.forEach((d, index)=>{
         if(!d) return;
+        
+        // 🔍 LOG: Mostrar status RAW e prazo RAW antes de processar
+        console.log(`🔍 [DEMANDA ${index + 1}] DADOS RAW:`, {
+          status: d.status,
+          statusTipo: typeof d.status,
+          prazo: d.prazo,
+          prazoTipo: typeof d.prazo,
+          prazoFim: d.prazoFim,
+          prazoFimTipo: typeof d.prazoFim
+        });
+        
         const status = (d.status || '').toLowerCase();
         const done = status === 'concluido' || status === 'concluido-grupo';
         const due = getDemandaDueDate(d);
-        if(!due) return;
-        const diffDays = Math.ceil((due.getTime() - todayStart.getTime()) / msPerDay);
+        
+        console.log(`🔔 [DEMANDA ${index + 1}] Título: "${d.demanda}"`, {
+          status: status,
+          done: done,
+          prazo: d.prazo,
+          dueDate: due ? due.toISOString() : 'null',
+          hasDate: !!due
+        });
+        
+        if(!due) {
+          console.log(`⚠️ [DEMANDA ${index + 1}] IGNORADA: Sem data de prazo válida`);
+          return;
+        }
+        
+        // ⏰ CORREÇÃO: Usar 'now' (momento atual) em vez de 'todayStart' (meia-noite)
+        // E usar Math.floor() em vez de Math.ceil() para que -0.4 dias = -1 (atrasado)
+        // Math.ceil(-0.4) = 0 ❌ | Math.floor(-0.4) = -1 ✅
+        const diffDays = Math.floor((due.getTime() - now.getTime()) / msPerDay);
         const title = (d.demanda || '').trim() || 'Demanda sem título';
         const responsavel = (d.responsavel || '').trim();
         const dueLabel = due.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
         const metaText = responsavel ? `Prazo: ${dueLabel} • Responsável: ${responsavel}` : `Prazo: ${dueLabel}`;
+        
+        console.log(`📅 [DEMANDA ${index + 1}] Diferença de dias: ${diffDays}`, {
+          atrasada: diffDays < 0,
+          concluida: done,
+          mostrarComoAtrasada: diffDays < 0 && !done,
+          horaAtual: now.toLocaleTimeString('pt-BR'),
+          horaPrazo: due.toLocaleTimeString('pt-BR')
+        });
+        
+        // 🚨 LOG ESPECIAL: Se estiver atrasada mas não aparecer, mostrar motivo
+        if(diffDays < 0) {
+          if(done) {
+            console.log(`❌ [DEMANDA ${index + 1}] NÃO MOSTRARÁ: Atrasada mas marcada como concluída`);
+            console.log(`   └─ Status encontrado: "${status}"`);
+          } else {
+            console.log(`✅ [DEMANDA ${index + 1}] DEVE MOSTRAR: Atrasada e NÃO concluída`);
+          }
+        }
+        
+        // Captura a data de criação da demanda
+        const demandaCreated = d.created || Date.now();
+        
         if(diffDays < 0 && !done){
           const overdueDays = Math.abs(diffDays);
           const overdueLabel = overdueDays === 1 ? '1 dia' : `${overdueDays} dias`;
+          console.log(`🚨 [DEMANDA ${index + 1}] ATRASADA! Adicionando notificação crítica`, {
+            titulo: title,
+            diasAtrasado: overdueDays
+          });
           items.push({
             id: `demanda-${d.id || title}-overdue`,
             category: 'demand',
-            severity: 'alert',
-            icon: NOTIFICATION_CATEGORY_ICONS.demand,
-            title: 'Demanda atrasada',
-            message: `${title} está atrasada há ${overdueLabel}.`,
+            severity: 'critical',
+            icon: '🚨',
+            title: '🚨 URGENTE: Demanda Atrasada 🚨',
+            message: `⚠️ ${title} está atrasada há ${overdueLabel}. AÇÃO NECESSÁRIA!`,
             meta: metaText,
-            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' }
+            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' },
+            demandaCreated: demandaCreated
           });
           return;
         }
-        if(done) return;
+        if(done) {
+          console.log(`✅ [DEMANDA ${index + 1}] IGNORADA: Já está concluída`);
+          return;
+        }
         if(NOTIFICATION_THRESHOLD_DAYS.includes(diffDays)){
           const label = diffDays === 30 ? '1 mês'
             : diffDays === 15 ? '15 dias'
@@ -57551,7 +57801,8 @@ FORMATO PADRÃO:
             title: 'Prazo de demanda',
             message: `${title} vence em ${label}.`,
             meta: metaText,
-            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' }
+            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' },
+            demandaCreated: demandaCreated
           });
         } else if(diffDays === 0){
           items.push({
@@ -57562,7 +57813,8 @@ FORMATO PADRÃO:
             title: 'Prazo de demanda',
             message: `${title} vence hoje.`,
             meta: metaText,
-            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' }
+            action: { label: 'Ver demanda', section: 'demandas', demandaId: d.id || '' },
+            demandaCreated: demandaCreated
           });
         }
       });
@@ -57682,9 +57934,36 @@ FORMATO PADRÃO:
         }
       });
 
-      // ====== LEADS: Notificações de novos leads (hoje) ======
+      // ====== POSTS: Notificação de posts pendentes de aprovação ======
+      const postsAguardandoAprovacao = monthPosts.filter(post=> (post.status || '').toLowerCase() === 'revisar');
+      if(postsAguardandoAprovacao.length > 0){
+        // Usa a data do post mais antigo pendente como referência
+        const oldestPostDate = postsAguardandoAprovacao.reduce((oldest, post) => {
+          const postDate = getPostDateForNotifications(post);
+          if(!postDate) return oldest;
+          const postTime = postDate.getTime();
+          return postTime < oldest ? postTime : oldest;
+        }, Date.now());
+        
+        items.push({
+          id: `posts-pending-approval-${monthKey}`,
+          category: 'posts',
+          severity: 'alert',
+          icon: '📝',
+          title: postsAguardandoAprovacao.length === 1 ? 'Post pendente de aprovação' : `${postsAguardandoAprovacao.length} posts pendentes de aprovação`,
+          message: `${formatNotificationNumber(postsAguardandoAprovacao.length)} post(s) aguardando revisão no mês atual.`,
+          meta: 'Aguardando aprovação para publicação',
+          action: { label: 'Ver posts', section: 'calendar' },
+          postCreated: oldestPostDate
+        });
+      }
+
+      // ====== LEADS: Notificações de novos leads (hoje, mês atual e mês passado) ======
       const leadsList = Array.isArray(LEADS) ? LEADS : [];
       const todayLeads = [];
+      const thisMonthLeads = [];
+      const lastMonthLeads = [];
+      
       leadsList.forEach(lead=>{
         if(!lead || !lead.createdAt) return;
         let leadDate = null;
@@ -57698,26 +57977,96 @@ FORMATO PADRÃO:
         if(!leadDate) return;
         
         const diffDays = Math.ceil((leadDate.getTime() - todayStart.getTime()) / msPerDay);
+        
+        // Leads de hoje
         if(diffDays === 0){
           todayLeads.push(lead);
         }
+        
+        // Leads do mês atual
+        if(leadDate >= monthStart && leadDate < nextMonthStart){
+          thisMonthLeads.push(lead);
+        }
+        
+        // Leads do mês passado
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+        if(leadDate >= lastMonthStart && leadDate < lastMonthEnd){
+          lastMonthLeads.push(lead);
+        }
       });
       
+      // Notificação: Leads de hoje (prioridade alta)
       if(todayLeads.length > 0){
         const leadNames = todayLeads.slice(0, 3).map(l=> (l.name || 'Lead sem nome').trim()).join(', ');
         const extra = todayLeads.length > 3 ? ` + ${todayLeads.length - 3} mais` : '';
         const leadSources = [...new Set(todayLeads.map(l=> l.source || l.plataforma || 'origem desconhecida').filter(Boolean))];
         const sourceLabel = leadSources.length > 0 ? ` • Fontes: ${leadSources.slice(0,2).join(', ')}${leadSources.length > 2 ? '...' : ''}` : '';
         
+        // Usa o primeiro lead como referência de data de criação
+        const firstLeadCreated = todayLeads[0].createdAt ? 
+          (typeof todayLeads[0].createdAt.toDate === 'function' ? todayLeads[0].createdAt.toDate().getTime() :
+           todayLeads[0].createdAt.seconds ? todayLeads[0].createdAt.seconds * 1000 :
+           todayLeads[0].createdAt instanceof Date ? todayLeads[0].createdAt.getTime() : Date.now()) 
+          : Date.now();
+        
         items.push({
-          id: `new-leads-today-${now.toISOString().split('T')[0]}`, // ID único por dia
+          id: `new-leads-today-${now.toISOString().split('T')[0]}`,
           category: 'leads',
           severity: 'info',
           icon: '🎯',
           title: todayLeads.length === 1 ? 'Novo lead hoje' : `${todayLeads.length} novos leads hoje`,
           message: `${leadNames}${extra}`,
           meta: sourceLabel,
-          action: { label: 'Ver leads', section: 'leads' }
+          action: { label: 'Ver leads', section: 'leads' },
+          leadCreated: firstLeadCreated
+        });
+      }
+      
+      // Notificação: Leads do mês atual
+      if(thisMonthLeads.length > 0){
+        // Usa o primeiro lead do mês como referência
+        const firstMonthLeadCreated = thisMonthLeads[0].createdAt ? 
+          (typeof thisMonthLeads[0].createdAt.toDate === 'function' ? thisMonthLeads[0].createdAt.toDate().getTime() :
+           thisMonthLeads[0].createdAt.seconds ? thisMonthLeads[0].createdAt.seconds * 1000 :
+           thisMonthLeads[0].createdAt instanceof Date ? thisMonthLeads[0].createdAt.getTime() : monthStart.getTime()) 
+          : monthStart.getTime();
+        
+        items.push({
+          id: `new-leads-month-${monthKey}`,
+          category: 'leads',
+          severity: 'info',
+          icon: '📊',
+          title: `${formatNotificationNumber(thisMonthLeads.length)} lead(s) no mês atual`,
+          message: `Total de leads recebidos em ${monthKey || 'este mês'}.`,
+          meta: `Acompanhe o desempenho do mês`,
+          action: { label: 'Ver leads', section: 'leads' },
+          leadCreated: firstMonthLeadCreated
+        });
+      }
+      
+      // Notificação: Leads do mês passado (para referência)
+      if(lastMonthLeads.length > 0){
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Usa o primeiro lead do mês passado como referência
+        const firstLastMonthLeadCreated = lastMonthLeads[0].createdAt ? 
+          (typeof lastMonthLeads[0].createdAt.toDate === 'function' ? lastMonthLeads[0].createdAt.toDate().getTime() :
+           lastMonthLeads[0].createdAt.seconds ? lastMonthLeads[0].createdAt.seconds * 1000 :
+           lastMonthLeads[0].createdAt instanceof Date ? lastMonthLeads[0].createdAt.getTime() : lastMonth.getTime()) 
+          : lastMonth.getTime();
+        
+        items.push({
+          id: `new-leads-last-month-${lastMonthKey}`,
+          category: 'leads',
+          severity: 'info',
+          icon: '📅',
+          title: `${formatNotificationNumber(lastMonthLeads.length)} lead(s) no mês passado`,
+          message: `Total de leads recebidos em ${lastMonthKey || 'mês anterior'}.`,
+          meta: `Para comparação com o mês atual`,
+          action: { label: 'Ver leads', section: 'leads' },
+          leadCreated: firstLastMonthLeadCreated
         });
       }
 
@@ -57757,9 +58106,17 @@ FORMATO PADRÃO:
       notificationListEl.innerHTML = '';
       if(!notificationItems.length){
         notificationEmptyEl.hidden = false;
+        updateNotificationSummaryCounts(0, 0, 0); // Zerar contadores
         return;
       }
       notificationEmptyEl.hidden = true;
+      
+      // Contar notificações por severidade
+      const criticalCount = notificationItems.filter(i => i.severity === 'critical').length;
+      const warnCount = notificationItems.filter(i => i.severity === 'warn' || i.severity === 'alert').length;
+      const infoCount = notificationItems.filter(i => i.severity === 'info').length;
+      updateNotificationSummaryCounts(criticalCount, warnCount, infoCount);
+      
       const frag = document.createDocumentFragment();
       notificationItems.forEach(item=>{
         const wrapper = document.createElement('div');
@@ -57812,6 +58169,25 @@ FORMATO PADRÃO:
       notificationListEl.appendChild(frag);
     }
 
+    function updateNotificationSummaryCounts(critical, warn, info){
+      const criticalCard = document.getElementById('notifCountCritical');
+      const warnCard = document.getElementById('notifCountWarn');
+      const infoCard = document.getElementById('notifCountInfo');
+      
+      if(criticalCard){
+        const num = criticalCard.querySelector('div:first-child');
+        if(num) num.textContent = String(critical);
+      }
+      if(warnCard){
+        const num = warnCard.querySelector('div:first-child');
+        if(num) num.textContent = String(warn);
+      }
+      if(infoCard){
+        const num = infoCard.querySelector('div:first-child');
+        if(num) num.textContent = String(info);
+      }
+    }
+
     function updateNotificationBadge(){
       ensureNotificationElements();
       if(!notificationBadgeEl) return;
@@ -57838,11 +58214,31 @@ FORMATO PADRÃO:
         if(!item || !item.id) return;
         const id = String(item.id);
         activeIds.add(id);
-        if(!Object.prototype.hasOwnProperty.call(notificationCreatedMap, id)){
-          notificationCreatedMap[id] = now;
+        
+        // Se já existe no mapa, usa o timestamp existente
+        if(Object.prototype.hasOwnProperty.call(notificationCreatedMap, id)){
+          item.createdAt = notificationCreatedMap[id];
+        } else {
+          // Nova notificação: tenta usar a data real do item
+          let timestamp = now;
+          
+          // Para demandas, usa o campo 'created' se disponível
+          if(item.category === 'demand' && item.demandaCreated){
+            timestamp = item.demandaCreated;
+          }
+          // Para leads, usa o campo 'leadCreated' se disponível
+          else if(item.category === 'leads' && item.leadCreated){
+            timestamp = item.leadCreated;
+          }
+          // Para posts, usa o campo 'postCreated' se disponível
+          else if(item.category === 'posts' && item.postCreated){
+            timestamp = item.postCreated;
+          }
+          
+          notificationCreatedMap[id] = timestamp;
+          item.createdAt = timestamp;
           changed = true;
         }
-        item.createdAt = notificationCreatedMap[id];
       });
       Object.keys(notificationCreatedMap).forEach(id=>{
         if(!activeIds.has(id)){
@@ -57851,12 +58247,35 @@ FORMATO PADRÃO:
         }
       });
       if(changed) saveNotificationCreated();
+      
+      console.log('🔔 [NOTIFICATIONS] RESUMO FINAL:', {
+        totalNotificacoes: items.length,
+        criticas: items.filter(i => i.severity === 'critical').length,
+        alertas: items.filter(i => i.severity === 'alert').length,
+        avisos: items.filter(i => i.severity === 'warn').length,
+        info: items.filter(i => i.severity === 'info').length,
+        notificacoes: items.map(i => ({ 
+          titulo: i.title, 
+          mensagem: i.message, 
+          severidade: i.severity 
+        }))
+      });
+      
       return items;
     }
 
     function applyNotificationData(data){
-      if(!data || !Array.isArray(data.items)) return;
+      console.log('📥 [applyNotificationData] Recebendo dados:', data);
+      
+      if(!data || !Array.isArray(data.items)) {
+        console.warn('⚠️ [applyNotificationData] Dados inválidos:', data);
+        return;
+      }
+      
+      console.log('📥 [applyNotificationData] Items antes de anexar timestamps:', data.items.length);
       notificationItems = attachNotificationTimestamps(data.items);
+      console.log('📥 [applyNotificationData] Items após anexar timestamps:', notificationItems.length);
+      
       notificationLatestSnapshot = data.countersSnapshot || notificationLatestSnapshot || {};
       renderNotifications();
       updateNotificationBadge();
@@ -57952,9 +58371,20 @@ FORMATO PADRÃO:
     }
 
     function initNotificationWidget(){
+      console.log('🚀 [WIDGET] Inicializando notification widget');
       ensureNotificationElements();
+      // Gerar notificações ao inicializar
+      try{ 
+        console.log('🚀 [WIDGET] Chamando buildNotificationItems...');
+        const items = buildNotificationItems();
+        console.log('🚀 [WIDGET] Items gerados:', items.length);
+        applyNotificationData(items); 
+      } catch(err){ 
+        console.error('❌ [WIDGET] Erro ao inicializar notificações:', err); 
+      }
       renderNotifications();
       updateNotificationBadge();
+      console.log('🚀 [WIDGET] Inicialização concluída');
     }
     document.addEventListener('DOMContentLoaded', initNotificationWidget);
 
@@ -57984,7 +58414,10 @@ FORMATO PADRÃO:
     
     function checkIfOverdue(demanda) {
       // Não marcar como atrasada se já está concluída
-      if (demanda.status === 'concluida' || demanda.status === 'finalizada' || demanda.status === 'completa') {
+      // Verificar múltiplas variações do status "concluído"
+      const status = (demanda.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const concluidos = ['concluida', 'finalizada', 'completa', 'concluido', 'done', 'completed', 'finished'];
+      if (concluidos.some(c => status.includes(c))) {
         return false;
       }
       
@@ -58266,6 +58699,8 @@ FORMATO PADRÃO:
         try{ renderCalendarDays(); }catch(_err){}
       }
       try{ refreshMacroInsights(); }catch(_){ }
+      // Atualizar notificações após carregar demandas
+      try{ scheduleNotificationRefresh({ immediate: true }); }catch(_err){}
     }
     async function persistDemandas(){
       const uid=auth.currentUser?.uid;
@@ -58385,7 +58820,10 @@ FORMATO PADRÃO:
         const dueDate=getDemandaDueDate(d);
         if(!dueDate) return false;
         const due=dueDate.getTime();
-        const done=d.status==='concluido'||d.status==='concluido-grupo';
+        // Verificar múltiplas variações do status "concluído"
+        const status = (d.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const concluidos = ['concluida', 'finalizada', 'completa', 'concluido', 'done', 'completed', 'finished', 'concluido-grupo'];
+        const done = concluidos.some(c => status.includes(c));
         return !done && due<now;
       });
       if(overdue.length){
@@ -61300,6 +61738,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         if(window.googleCalendarIntegration){
           window.googleCalendarIntegration.notifyPostsLoaded(POSTS);
         }
+        try{ scheduleNotificationRefresh({ immediate: true }); }catch(_err){}
       }, err=> console.error("onSnapshot posts", err));
     }
 
@@ -64791,6 +65230,23 @@ function renderReviewNotes(post){
     <div class="notification-header">
       <h3 class="notification-title">Notificações</h3>
     </div>
+    
+    <!-- CARTÕES DE RESUMO POR SEVERIDADE -->
+    <div class="notification-summary" style="display: flex; gap: 8px; padding: 12px; margin-bottom: 8px;">
+      <div id="notifCountCritical" class="notification-summary-card" style="flex: 1; background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 24px; font-weight: bold; color: #dc2626;">0</div>
+        <div style="color: #991b1b; font-weight: 500; font-size: 12px;">Críticas</div>
+      </div>
+      <div id="notifCountWarn" class="notification-summary-card" style="flex: 1; background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 24px; font-weight: bold; color: #d97706;">0</div>
+        <div style="color: #92400e; font-weight: 500; font-size: 12px;">Avisos</div>
+      </div>
+      <div id="notifCountInfo" class="notification-summary-card" style="flex: 1; background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 24px; font-weight: bold; color: #2563eb;">0</div>
+        <div style="color: #1e40af; font-weight: 500; font-size: 12px;">Informações</div>
+      </div>
+    </div>
+    
     <div class="notification-list" id="notificationList"></div>
     <div class="notification-empty" id="notificationEmpty" hidden>Tudo em dia por aqui! Cadastre novas demandas, metas ou posts para receber alertas.</div>
   </div>

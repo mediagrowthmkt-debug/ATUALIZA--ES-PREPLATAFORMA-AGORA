@@ -28,19 +28,21 @@ function buildDashboardEmail(clientName: string, notifications: any[]) {
     return '<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 32px 16px; background: #f9fafb;"><div style="background: white; border-radius: 16px; padding: 32px;"><div style="text-align: center; margin-bottom: 32px;"><h1 style="color: #6366f1; font-size: 32px; margin: 0;">🔔 Notificacoes do Dashboard</h1><p style="color: #6b7280;">Dashboard: ' + clientName + '</p><p style="color: #9ca3af; font-size: 14px;">' + new Date().toLocaleString('pt-BR') + '</p></div><p style="text-align: center; padding: 40px; color: #999;">Nenhuma notificacao no momento. Tudo esta em ordem! ✅</p></div></div>';
   }
 
-  const alertCount = notifications.filter(n => n.severity === 'alert' || n.severity === 'danger').length;
+  // CORRIGIDO: Adicionar 'critical' como severidade crítica (vermelho)
+  const criticalCount = notifications.filter(n => n.severity === 'critical' || n.severity === 'alert' || n.severity === 'danger').length;
   const warnCount = notifications.filter(n => n.severity === 'warn' || n.severity === 'warning').length;
   const infoCount = notifications.filter(n => n.severity === 'info' || n.severity === 'success').length;
 
-  const summaryCards = '<div style="display: flex; gap: 16px; margin: 24px 0; flex-wrap: wrap;"><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #dc2626;">' + alertCount + '</div><div style="color: #991b1b; font-weight: 500; font-size: 14px;">Criticas</div></div><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #d97706;">' + warnCount + '</div><div style="color: #92400e; font-weight: 500; font-size: 14px;">Avisos</div></div><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #2563eb;">' + infoCount + '</div><div style="color: #1e40af; font-weight: 500; font-size: 14px;">Informacoes</div></div></div>';
+  const summaryCards = '<div style="display: flex; gap: 16px; margin: 24px 0; flex-wrap: wrap;"><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #dc2626;">' + criticalCount + '</div><div style="color: #991b1b; font-weight: 500; font-size: 14px;">Criticas</div></div><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #d97706;">' + warnCount + '</div><div style="color: #92400e; font-weight: 500; font-size: 14px;">Avisos</div></div><div style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; text-align: center;"><div style="font-size: 32px; font-weight: bold; color: #2563eb;">' + infoCount + '</div><div style="color: #1e40af; font-weight: 500; font-size: 14px;">Informacoes</div></div></div>';
 
   let notificationsHTML = '';
   notifications.forEach(item => {
     const sev = (item.severity || 'info').toLowerCase();
-    const isAlert = sev === 'alert' || sev === 'danger';
+    // CORRIGIDO: Adicionar 'critical' como severidade crítica (vermelho)
+    const isCritical = sev === 'critical' || sev === 'alert' || sev === 'danger';
     const isWarn = sev === 'warn' || sev === 'warning';
-    const severityColor = isAlert ? '#fee2e2' : isWarn ? '#fef3c7' : '#f0f9ff';
-    const severityBorder = isAlert ? '#f87171' : isWarn ? '#fbbf24' : '#60a5fa';
+    const severityColor = isCritical ? '#fee2e2' : isWarn ? '#fef3c7' : '#f0f9ff';
+    const severityBorder = isCritical ? '#dc2626' : isWarn ? '#fbbf24' : '#60a5fa';
     
     notificationsHTML += '<div style="display: flex; gap: 12px; padding: 16px; margin: 12px 0; background: ' + severityColor + '; border-left: 4px solid ' + severityBorder + '; border-radius: 8px;"><div style="font-size: 24px; flex-shrink: 0;">' + (item.icon || '🔔') + '</div><div style="flex: 1;"><div style="font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #1e293b;">' + (item.title || 'Notificacao') + '</div><div style="font-size: 14px; color: #475569; margin-bottom: 4px;">' + (item.message || '') + '</div>' + (item.meta ? '<div style="font-size: 12px; color: #64748b; margin-top: 6px;">' + item.meta + '</div>' : '') + '</div></div>';
   });
