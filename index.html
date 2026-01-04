@@ -1406,9 +1406,10 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .note-title{font-weight:900}
     .note-meta{font-size:.85rem;color:#ddd}
     .tag{font-size:.75rem;font-weight:800;background:#333;padding:3px 8px;border-radius:999px}
-    .media-resizable{display:inline-block;max-width:100%;border:1px dashed rgba(255,255,255,.25);border-radius:6px;overflow:hidden;resize:both;padding:2px;margin:6px 2px;vertical-align:middle;background:rgba(255,255,255,.02);box-sizing:border-box}
-    .media-resizable img,.media-resizable video{display:block;max-width:100%;height:auto;pointer-events:none}
+    .media-resizable{display:inline-block;max-width:100%;border:1px dashed rgba(255,255,255,.25);border-radius:6px;overflow:hidden;resize:both;padding:2px;margin:6px 2px;vertical-align:middle;background:rgba(255,255,255,.02);box-sizing:border-box;width:420px;position:relative;cursor:pointer}
+    .media-resizable img,.media-resizable video{display:block;max-width:100%;width:100%;height:auto;pointer-events:none;object-fit:contain}
     .media-resizable.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,102,0,.25) inset}
+    .media-resizable.selected::after{content:"Pressione Delete ou Backspace para remover";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;white-space:nowrap;pointer-events:none;z-index:10}
     .note-editor .media-resizable{max-width:calc(100% - 4px)}
 
     /* ===== ESTRUTURAÇÃO (GAMIFICAÇÃO) ===== */
@@ -32224,8 +32225,16 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
     }
     function generateNoteTitleFromMarkdown(raw){
-      const normalized = normalizeNoteRaw(raw||'').trim();
+      let normalized = normalizeNoteRaw(raw||'').trim();
       if(!normalized) return '';
+      // Remover tags HTML de mídia para não poluir o título
+      normalized = normalized.replace(/<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>[\s\S]*?<\/span>/gi, '');
+      // Remover placeholders de mídia se existirem
+      normalized = normalized.replace(/___MEDIA_PLACEHOLDER_\d+___/g, '');
+      // Remover outras tags HTML
+      normalized = normalized.replace(/<[^>]+>/g, '');
+      normalized = normalized.trim();
+      if(!normalized) return 'Anotação com imagem';
       const words = normalized.split(/\s+/).filter(Boolean).slice(0, NOTE_TITLE_MAX_WORDS);
       let title = words.join(' ');
       if(title.length > NOTE_TITLE_MAX_LENGTH){
@@ -32257,6 +32266,23 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
     function extractNoteEditorMarkdown(){
       if(!noteEditor) return '';
       const sanitizedCurrent = sanitizeMarkdownHtml(noteEditor.innerHTML || '');
+      
+      // IMPORTANTE: Se há mídia no editor, NÃO converter para markdown!
+      // Apenas retornar textContent para o título, preservando o HTML original
+      const hasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(sanitizedCurrent) ||
+                       /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(sanitizedCurrent);
+      
+      if(hasMedia){
+        // Quando há mídia, retornar apenas texto simples para o título
+        // O HTML será preservado diretamente sem processamento
+        const textOnly = noteEditor.textContent || '';
+        const normalized = normalizeNoteRaw(textOnly);
+        noteMarkdownSource = normalized;
+        noteEditor.dataset.raw = normalized;
+        return normalized;
+      }
+      
+      // Apenas para notas sem mídia, fazer conversão markdown normal
       let markdown = htmlToMarkdown(sanitizedCurrent);
       if(!markdown){
         markdown = noteEditor.textContent || '';
@@ -32269,20 +32295,85 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
     function computeNoteHtmlFromMarkdown(raw){
       const normalized = normalizeNoteRaw(raw);
       if(!normalized.trim()) return '';
+      
+      // Preservar blocos media-resizable antes do processamento markdown
+      // Usar abordagem baseada em DOM para maior robustez
+      const mediaPlaceholders = [];
+      
+      // Primeiro, tentar extrair usando DOM para pegar spans corretamente
+      let processed = normalized;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = normalized;
+      const mediaSpans = tempDiv.querySelectorAll('span.media-resizable');
+      
+      if(mediaSpans.length > 0){
+        // Usar abordagem DOM - mais confiável
+        mediaSpans.forEach((span, idx) => {
+          const outerHTML = span.outerHTML;
+          mediaPlaceholders.push(outerHTML);
+          // Criar um marcador de texto para substituir
+          const marker = document.createTextNode(`\n\n___MEDIA_PLACEHOLDER_${idx}___\n\n`);
+          span.parentNode.replaceChild(marker, span);
+        });
+        processed = tempDiv.innerHTML;
+        // Limpar qualquer HTML residual do container
+        processed = processed.replace(/<\/?div>/gi, '');
+      } else {
+        // Fallback: tentar regex
+        const mediaRegex = /<span\s+[^>]*class\s*=\s*["']media-resizable["'][^>]*>[\s\S]*?<\/span>/gi;
+        processed = normalized.replace(mediaRegex, (match) => {
+          const idx = mediaPlaceholders.length;
+          mediaPlaceholders.push(match);
+          return `\n\n___MEDIA_PLACEHOLDER_${idx}___\n\n`;
+        });
+      }
+      
       const markedLib = window.marked;
       let html = '';
       if(markedLib){
         try{
           const parser = typeof markedLib.parse === 'function' ? markedLib.parse : markedLib;
-          const rendered = parser.call(markedLib, normalized, { gfm:true, breaks:true });
+          const rendered = parser.call(markedLib, processed, { gfm:true, breaks:true });
           if(typeof rendered === 'string') html = rendered;
         }catch(err){
           console.warn('Markdown render error', err);
         }
       }
       if(!html){
-        html = escapeHtml(normalized).replace(/\n/g,'<br>');
+        html = escapeHtml(processed).replace(/\n/g,'<br>');
       }
+      
+      // Restaurar blocos media-resizable após o processamento markdown
+      // Tentar múltiplas variações de como o marked pode ter embrulhado o placeholder
+      mediaPlaceholders.forEach((block, idx) => {
+        const placeholder = `___MEDIA_PLACEHOLDER_${idx}___`;
+        // Variação 1: dentro de parágrafo
+        html = html.replace(`<p>${placeholder}</p>`, block);
+        // Variação 2: placeholder puro
+        html = html.replace(placeholder, block);
+        // Variação 3: com quebras de linha ao redor (regex)
+        html = html.replace(new RegExp(`<p>\\s*${placeholder}\\s*</p>`, 'g'), block);
+        // Variação 4: placeholder com br ao redor
+        html = html.replace(new RegExp(`<br\\s*/?>${placeholder}<br\\s*/?>`, 'gi'), block);
+        html = html.replace(new RegExp(`<br\\s*/?>${placeholder}`, 'gi'), block);
+        html = html.replace(new RegExp(`${placeholder}<br\\s*/?>`, 'gi'), block);
+      });
+      
+      // Verificação final: se ainda há placeholders não substituídos, algo deu errado
+      // Tentar substituir qualquer placeholder restante
+      const remainingPlaceholders = html.match(/___MEDIA_PLACEHOLDER_(\d+)___/g);
+      if(remainingPlaceholders){
+        remainingPlaceholders.forEach(ph => {
+          const match = ph.match(/___MEDIA_PLACEHOLDER_(\d+)___/);
+          if(match){
+            const idx = parseInt(match[1], 10);
+            if(mediaPlaceholders[idx]){
+              html = html.split(ph).join(mediaPlaceholders[idx]);
+            }
+          }
+        });
+      }
+      
       let safe = html;
       const purifier = window.DOMPurify;
       if(purifier && typeof purifier.sanitize === 'function'){
@@ -32322,6 +32413,8 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       }
       noteEditor.scrollTop = prevScrollTop;
       noteEditor.scrollLeft = prevScrollLeft;
+      // Normalizar tamanho das imagens e vídeos
+      setTimeout(()=>{ if(typeof normalizeNoteEditorMedia === 'function') normalizeNoteEditorMedia(); }, 50);
     }
     function refreshNoteEditorFromCurrentHtml(options={}){
       if(!noteEditor || noteEditorUpdating) return;
@@ -32381,15 +32474,42 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
             </div>
           </div>`;
         div.querySelector('[data-act="edit"]').onclick=()=>{
-          const sanitized = sanitizeMarkdownHtml(n.html||'');
-          let markdown = htmlToMarkdown(sanitized);
-          if(!markdown && sanitized){
-            const temp=document.createElement('div');
-            temp.innerHTML=sanitized;
-            markdown=temp.textContent||'';
+          let sanitized = sanitizeMarkdownHtml(n.html||'');
+          
+          // Debug: verificar o que está vindo do banco
+          console.log('📂 Carregando nota:', n.id);
+          console.log('📄 HTML do banco (primeiros 500 chars):', (n.html || '').substring(0, 500));
+          console.log('🔍 Título da nota:', n.title);
+          
+          // Limpar qualquer placeholder residual de notas antigas que foram salvas incorretamente
+          sanitized = sanitized.replace(/___MEDIA_PLACEHOLDER_\d+___/g, '');
+          sanitized = sanitized.replace(/MEDIA_PLACEHOLDER_\d+/g, '');
+          
+          // Verificar se o HTML contém elementos de mídia (imagens/vídeos)
+          const hasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(sanitized) ||
+                          /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(sanitized);
+          
+          console.log('🎨 Contém mídia?', hasMedia);
+          
+          if(hasMedia && noteEditor){
+            // Se tem mídia, usar o HTML diretamente para preservar as imagens
+            console.log('✅ Carregando HTML direto com mídia');
+            noteEditor.innerHTML = sanitized;
+            noteMarkdownSource = sanitized;
+            noteEditor.dataset.raw = sanitized;
+            setTimeout(()=>normalizeNoteEditorMedia(), 50);
+          } else {
+            // Sem mídia, converter para markdown normalmente
+            let markdown = htmlToMarkdown(sanitized);
+            if(!markdown && sanitized){
+              const temp=document.createElement('div');
+              temp.innerHTML=sanitized;
+              markdown=temp.textContent||'';
+            }
+            markdown = normalizeNoteRaw(markdown||'');
+            setNoteEditorMarkdown(markdown);
           }
-          markdown = normalizeNoteRaw(markdown||'');
-          setNoteEditorMarkdown(markdown);
+          
           if(noteEditor){
             const len = (noteEditor.textContent||'').length;
             restoreEditableSelection(noteEditor, { start: len, end: len });
@@ -32397,7 +32517,8 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
             setTimeout(()=>normalizeNoteEditorMedia(), 50);
           }
           currentNoteId = n.id;
-          noteTitle.value=n.title||generateNoteTitleFromMarkdown(markdown)||"";
+          const titleFromContent = hasMedia ? (n.title || 'Anotação com imagem') : generateNoteTitleFromMarkdown(sanitized);
+          noteTitle.value=n.title||titleFromContent||"";
           noteSector.value=n.sector||"roi";
           noteDate.value=n.dateISO||ensureDateISOFromTimestamp(n.createdAt||n.updatedAt||Date.now());
           if(noteAutoSaveStatus){
@@ -32623,7 +32744,18 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       scheduleNoteAutoSave();
     });
     noteEditor.addEventListener("blur",()=>{
-      refreshNoteEditorFromCurrentHtml({ forceRender: true });
+      // 🛡️ PROTEÇÃO: Se o editor tem mídia, NÃO fazer refresh (que destruiria as imagens)
+      const currentHtml = noteEditor?.innerHTML || '';
+      const hasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(currentHtml) ||
+                       /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(currentHtml);
+      
+      if(!hasMedia){
+        // Apenas fazer refresh se NÃO tiver mídia
+        refreshNoteEditorFromCurrentHtml({ forceRender: true });
+      } else {
+        console.log('🛡️ PROTEÇÃO blur: Editor tem mídia, pulando refresh que destruiria imagens');
+      }
+      
       scheduleNoteAutoSave({ force: true });
     });
     let lastMediaBox=null;
@@ -32643,12 +32775,18 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         const randomId = Math.random().toString(36).substring(2, 10);
         const ext = file.name.split('.').pop() || 'png';
         const fileName = `note-image-${timestamp}-${randomId}.${ext}`;
-        const storageRef = ref(STORAGE, `usuarios/${uid}/notes-images/${fileName}`);
+        const storageRef = sRef(STORAGE, `usuarios/${uid}/notes-images/${fileName}`);
+        console.log('📤 Iniciando upload de imagem para:', `usuarios/${uid}/notes-images/${fileName}`);
         const uploadTask = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(uploadTask.ref);
+        console.log('✅ Upload de imagem concluído:', downloadURL);
         return downloadURL;
       }catch(err){
         console.error('Erro ao fazer upload da imagem:', err);
+        // Verificar tipo de erro para mensagem mais específica
+        if(err.code === 'storage/unauthorized'){
+          console.error('⚠️ PERMISSÃO NEGADA: As regras do Firebase Storage precisam ser atualizadas. Execute: firebase deploy --only storage');
+        }
         return null;
       }
     }
@@ -32704,7 +32842,7 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         const randomId = Math.random().toString(36).substring(2, 10);
         const ext = file.name.split('.').pop() || 'mp4';
         const fileName = `note-video-${timestamp}-${randomId}.${ext}`;
-        const storageRef = ref(STORAGE, `usuarios/${uid}/notes-videos/${fileName}`);
+        const storageRef = sRef(STORAGE, `usuarios/${uid}/notes-videos/${fileName}`);
         const uploadTask = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(uploadTask.ref);
         return downloadURL;
@@ -32769,16 +32907,46 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
     });
     document.addEventListener("click",(e)=>{ if(!noteEditor.contains(e.target) && lastMediaBox){ lastMediaBox.classList.remove("selected"); lastMediaBox=null; } });
 
+    // 🗑️ Deletar mídia com Delete/Backspace
+    document.addEventListener("keydown",(e)=>{
+      if(!lastMediaBox || !noteEditor.contains(lastMediaBox)) return;
+      
+      // Delete ou Backspace
+      if(e.key === "Delete" || e.key === "Backspace"){
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Confirmar antes de deletar
+        if(confirm("Deseja deletar esta mídia?")){
+          console.log('🗑️ Deletando mídia selecionada');
+          lastMediaBox.remove();
+          lastMediaBox = null;
+          scheduleNoteAutoSave();
+        }
+      }
+    });
+
     function normalizeNoteEditorMedia(){
       if(!noteEditor) return;
       const mediaBoxes = noteEditor.querySelectorAll('.media-resizable');
       const editorWidth = noteEditor.offsetWidth;
       if(!editorWidth) return;
       const maxWidth = editorWidth - 20; // subtrair padding/margem
+      const defaultWidth = 420;
       mediaBoxes.forEach(box => {
+        // Garantir que o box tenha uma largura definida
+        if(!box.style.width || box.style.width === 'auto'){
+          box.style.width = Math.min(defaultWidth, maxWidth) + 'px';
+        }
         const currentWidth = box.offsetWidth;
+        // Limitar se exceder o máximo
         if(currentWidth > maxWidth){
-          box.style.width = Math.min(420, maxWidth) + 'px';
+          box.style.width = Math.min(defaultWidth, maxWidth) + 'px';
+        }
+        // Adicionar evento de click se ainda não tem
+        if(!box.dataset.mediaClickBound){
+          box.dataset.mediaClickBound = 'true';
+          box.addEventListener("click",(ev)=>{ ev.stopPropagation(); selectMediaBox(box); });
         }
       });
     }
@@ -32836,7 +33004,32 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
     function getNoteEditorContentForSaving(){
       if(!noteEditor) return { normalized: '', html: '' };
       const normalized = extractNoteEditorMarkdown();
-      const html = normalized ? (computeNoteHtmlFromMarkdown(normalized) || '') : '';
+      // Usar o HTML diretamente do editor para preservar as imagens corretamente
+      // ao invés de reprocessar via computeNoteHtmlFromMarkdown que pode perder os media
+      let html = sanitizeMarkdownHtml(noteEditor.innerHTML || '');
+      
+      // Debug: Verificar se há imagens no HTML
+      const hasImages = /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(html);
+      const hasMediaSpans = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(html);
+      if(hasImages || hasMediaSpans){
+        console.log('💾 Salvando nota COM imagem:', { hasImages, hasMediaSpans, htmlLength: html.length });
+        console.log('📸 Preview HTML ANTES limpeza:', html.substring(0, 500));
+      }
+      
+      // IMPORTANTE: Remover qualquer placeholder de mídia residual que não deveria estar no HTML final
+      // Estes placeholders são apenas para processamento interno, não devem ser salvos
+      html = html.replace(/___MEDIA_PLACEHOLDER_\d+___/g, '');
+      html = html.replace(/MEDIA_PLACEHOLDER_\d+/g, '');
+      
+      if(hasImages || hasMediaSpans){
+        console.log('📸 Preview HTML DEPOIS limpeza:', html.substring(0, 500));
+        console.log('📝 Normalized (markdown/text) usado para título:', normalized.substring(0, 200));
+      }
+      
+      // Fallback: se não tem HTML, tenta gerar do markdown
+      if(!html.trim() && normalized.trim()){
+        html = computeNoteHtmlFromMarkdown(normalized) || '';
+      }
       return { normalized, html };
     }
     async function autoSaveCurrentNote(force=false){
@@ -32859,6 +33052,16 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         }
         const existing = NOTES.find(n=>n.id===currentNoteId);
         if(existing){
+          // 🛡️ PROTEÇÃO: Se a nota original tinha mídia, NÃO sobrescrever com vazio
+          const existingHasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(existing.html || '') ||
+                                   /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(existing.html || '');
+          
+          if(existingHasMedia){
+            console.log('🛡️ PROTEÇÃO: Nota tem mídia, não sobrescrever com vazio');
+            updateAutoSaveStatus('Alterações preservadas (nota contém mídia).');
+            return;
+          }
+          
           const hadContent = !!(existing.html && existing.html.trim());
           existing.title = '';
           existing.html = '';
@@ -32878,6 +33081,18 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
 
       const html = editorHtml || '';
       const title = generateNoteTitleFromMarkdown(normalizedContent) || 'Anotação';
+      
+      // Debug: Log do que vai ser salvo
+      const debugHasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(html) ||
+                           /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(html);
+      if(debugHasMedia){
+        console.log('📦 Preparando para salvar nota COM mídia:', { 
+          htmlLength: html.length, 
+          title,
+          htmlPreview: html.substring(0, 300)
+        });
+      }
+      
       if(noteTitle) noteTitle.value = title;
       let note = currentNoteId ? NOTES.find(n=>n.id===currentNoteId) : null;
       let noteWasNew = false;
@@ -32958,7 +33173,41 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       saveNotesToUserData();
       const uid = auth.currentUser?.uid;
       if(!uid) return;
-      const result = await safeWriteUserDoc({ notes: NOTES });
+      
+      // Debug: Log do que está sendo salvo no Firestore
+      const notesWithMedia = NOTES.filter(n => {
+        const hasMedia = /<span[^>]*class\s*=\s*["']media-resizable["'][^>]*>/i.test(n.html || '') ||
+                        /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i.test(n.html || '');
+        return hasMedia;
+      });
+      if(notesWithMedia.length > 0){
+        console.log('💾 Salvando no Firestore', notesWithMedia.length, 'notas COM mídia');
+        notesWithMedia.forEach(n => {
+          console.log('  Nota:', n.id, 'HTML length:', (n.html || '').length, 'Preview:', (n.html || '').substring(0, 200));
+        });
+      }
+      
+      // CRÍTICO: Quando há notas com mídia, usar save direto no Firestore
+      // para evitar corrupção de dados pela função reduzirDocumentoUsuario()
+      const hasMedia = notesWithMedia.length > 0;
+      let result;
+      
+      if(hasMedia){
+        console.log('🎯 Save DIRETO (bypass auto-cleanup) para preservar mídia');
+        try {
+          // Save direto no Firestore sem passar por safeWriteUserDoc
+          await setDoc(doc(db, "usuarios", uid), { notes: NOTES }, { merge: true });
+          result = { success: true, directSave: true };
+          console.log('✅ Save direto bem-sucedido!');
+        } catch(err) {
+          console.error('❌ Erro no save direto:', err);
+          result = { success: false, error: err };
+        }
+      } else {
+        // Notas sem mídia podem usar o fluxo normal com auto-cleanup
+        result = await safeWriteUserDoc({ notes: NOTES });
+      }
+      
       if(!result.success) {
         console.error('❌ Falha ao salvar notas:', result.error);
         mgToast('⚠️ Erro ao salvar notas', 'error', 3000);
@@ -32966,6 +33215,9 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       }
       if(result.autoCleanup || result.emergencyCleanup) {
         console.log('🧹 Limpeza automática executada ao salvar notas');
+      }
+      if(result.directSave) {
+        console.log('📸 Notas com mídia salvas diretamente no Firestore');
       }
       await refreshStorageUsage();
       try{ refreshMacroInsights(); }catch(_){ }
