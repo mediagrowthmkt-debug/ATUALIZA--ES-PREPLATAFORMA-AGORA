@@ -14770,10 +14770,220 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     
     const IA_CONTEXT_CACHE = { ts: 0, data: null };
     const IA_CONTEXT_TTL = 10000;
-    const IA_MAX_CONTEXT_CHARS = 150000; // Aumentado para 150k para garantir que análises completas sejam incluídas
-    const IA_MAX_PLATFORM_CHARS = 60000;
-    const IA_DOC_SNIPPET_CHARS = 20000;
-    const IA_MAX_DOC_CHARS = 120000;
+    
+    // ================================================================
+    // 🎯 CONFIGURAÇÕES DE OTIMIZAÇÃO DE TOKENS (Economia de ~60%)
+    // ================================================================
+    const IA_MAX_CONTEXT_CHARS = 50000;  // Reduzido de 150k para 50k (economia de ~67%)
+    const IA_MAX_PLATFORM_CHARS = 15000; // Reduzido de 60k para 15k (economia de ~75%)
+    const IA_DOC_SNIPPET_CHARS = 8000;   // Reduzido de 20k para 8k (economia de ~60%)
+    const IA_MAX_DOC_CHARS = 40000;      // Reduzido de 120k para 40k (economia de ~67%)
+    
+    // Limites INDIVIDUAIS por aba (mais granular)
+    // 🎯 LIMITES OTIMIZADOS v2 - Reduzidos para economia de tokens
+    // Meta: ~10k tokens input por consulta (antes era ~32k)
+    const IA_LIMITS = {
+      estruturacaoNotes: 6000,     // Reduzido de 15k - Anotações resumidas
+      estruturacaoAnalyses: 12000, // Reduzido de 25k - Análises principais
+      posts: 3000,                 // Reduzido de 8k - Posts recentes/relevantes
+      demandas: 3000,              // Reduzido de 6k - Demandas ativas
+      metas: 5000,                 // Reduzido de 10k - Metas principais
+      cac: 3000,                   // Reduzido de 6k - CAC resumido
+      anotacoes: 2500,             // Reduzido de 5k - Últimas anotações
+      acessos: 1500,               // Reduzido de 3k - Credenciais essenciais
+      macro: 4000,                 // Reduzido de 8k - Macro resumido
+      planejamento: 4000,          // Reduzido de 8k - Planejamento atual
+      arquivos: 1000,              // Reduzido de 2k - Estrutura mínima
+      calendario: 2500,            // Reduzido de 5k - Eventos próximos
+      iframes: 1500                // Reduzido de 3k - Widgets ativos
+    };
+    
+    // Cache de contexto comprimido para evitar reprocessamento
+    const IA_COMPRESSED_CACHE = { ts: 0, data: null, hash: '' };
+    const IA_COMPRESSED_TTL = 30000; // 30 segundos de cache
+    
+    // Função para criar hash simples do conteúdo
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return hash.toString(16);
+    }
+    
+    // Função para comprimir texto removendo redundâncias
+    function compressContextText(text, maxChars) {
+      if (!text || text.length <= maxChars) return text;
+      
+      // 1. Remover espaços múltiplos e linhas em branco excessivas
+      let compressed = text
+        .replace(/\n{3,}/g, '\n\n')           // Múltiplas quebras → duas
+        .replace(/[ \t]{2,}/g, ' ')            // Múltiplos espaços → um
+        .replace(/(\n\s*){3,}/g, '\n\n')       // Linhas vazias excessivas
+        .replace(/\.{3,}/g, '...')             // Múltiplos pontos
+        .replace(/={3,}/g, '===')              // Múltiplos iguais
+        .replace(/-{3,}/g, '---')              // Múltiplos traços
+        .replace(/_{3,}/g, '___')              // Múltiplos underscores
+        .trim();
+      
+      // 2. Se ainda muito grande, remover seções menos importantes
+      if (compressed.length > maxChars) {
+        // Remover logs de debug e timestamps detalhados
+        compressed = compressed
+          .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, '[data]')
+          .replace(/\[\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2}\]/g, '[data]')
+          .replace(/console\.log\([^)]+\)/g, '')
+          .replace(/Atualizado em:.*$/gm, '')
+          .replace(/Criado em:.*$/gm, '');
+      }
+      
+      // 3. Truncar se ainda necessário
+      if (compressed.length > maxChars) {
+        const cutPoint = compressed.lastIndexOf('\n', maxChars - 50);
+        compressed = compressed.slice(0, cutPoint > maxChars * 0.8 ? cutPoint : maxChars - 50);
+        compressed += '\n...[resumido para economia de tokens]';
+      }
+      
+      return compressed;
+    }
+    
+    // Função para sumarizar análises longas mantendo pontos-chave
+    function summarizeAnalysis(analysisText, maxChars = 8000) {
+      if (!analysisText || analysisText.length <= maxChars) return analysisText;
+      
+      // Extrair seções importantes (títulos em negrito, bullets principais)
+      const lines = analysisText.split('\n');
+      const importantLines = [];
+      let currentSection = '';
+      let charCount = 0;
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        
+        // Sempre incluir títulos e cabeçalhos
+        if (trimmed.startsWith('**') || trimmed.startsWith('📊') || 
+            trimmed.startsWith('🎯') || trimmed.startsWith('📋') ||
+            trimmed.startsWith('✅') || trimmed.startsWith('❌') ||
+            trimmed.startsWith('•') || trimmed.match(/^\d+\./)) {
+          
+          if (charCount + trimmed.length < maxChars) {
+            importantLines.push(line);
+            charCount += line.length + 1;
+          }
+        }
+        // Incluir primeiras linhas de cada seção
+        else if (trimmed && importantLines.length < 100 && charCount < maxChars * 0.9) {
+          // Limitar linhas de conteúdo a 200 chars cada
+          const shortLine = trimmed.length > 200 ? trimmed.slice(0, 197) + '...' : trimmed;
+          if (charCount + shortLine.length < maxChars) {
+            importantLines.push(shortLine);
+            charCount += shortLine.length + 1;
+          }
+        }
+      }
+      
+      return importantLines.join('\n') + '\n...[análise resumida]';
+    }
+    
+    // 🎯 OTIMIZAÇÃO: Detectar relevância do contexto com base na pergunta
+    function detectRelevantSources(question) {
+      const q = question.toLowerCase();
+      const relevant = new Set(['estruturacao']); // Sempre incluir estruturação base
+      
+      // Mapeamento de palavras-chave para fontes
+      const keywordMap = {
+        metas: ['meta', 'objetivo', 'target', 'resultado', 'faturamento', 'vendas', 'leads', 'conversão', 'conversao'],
+        cac: ['cac', 'custo', 'investimento', 'gasto', 'budget', 'roi', 'roas', 'retorno'],
+        calendario: ['post', 'publicação', 'publicacao', 'conteúdo', 'conteudo', 'agend', 'calendário', 'calendario'],
+        posts: ['post', 'publicação', 'publicacao', 'feed', 'stories', 'reels', 'carrossel'],
+        demandas: ['tarefa', 'demanda', 'projeto', 'pendência', 'pendencia', 'to-do', 'todo', 'atividade'],
+        macro: ['mensal', 'análise macro', 'analise macro', 'desempenho', 'performance', 'histórico', 'historico'],
+        planejamento: ['planejamento', 'plano', 'estratégia', 'estrategia', 'roadmap', 'trimestre', 'semestre'],
+        anotacoes: ['anotação', 'anotacao', 'nota', 'observação', 'observacao', 'lembrete'],
+        acessos: ['acesso', 'login', 'senha', 'credencial', 'ferramenta', 'conta'],
+        arquivos: ['arquivo', 'documento', 'pasta', 'upload', 'anexo'],
+        diagnostico: ['diagnóstico', 'diagnostico', 'problema', 'oportunidade', 'swot', 'forças', 'fraquezas'],
+        direcionamento: ['direcionamento', 'meta anual', 'projeção', 'projecao', '12 meses'],
+        concorrencia: ['concorrente', 'concorrência', 'concorrencia', 'mercado', 'competidor'],
+        cdt: ['cdt', 'construir', 'diminuir', 'transformar', 'matriz'],
+        puv: ['puv', 'proposta única', 'proposta unica', 'diferencial', 'valor'],
+        pai: ['pai', 'público alvo', 'publico alvo', 'persona', 'avatar', 'cliente ideal'],
+        anuncios: ['anúncio', 'anuncio', 'ads', 'tráfego', 'trafego', 'campanha paga', 'facebook ads', 'google ads'],
+        seo: ['seo', 'orgânico', 'organico', 'google', 'busca', 'rankeamento'],
+        redes: ['rede social', 'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'],
+        copy: ['copy', 'copywriting', 'texto', 'headline', 'cta', 'persuasão', 'persuasao'],
+        conteudo: ['conteúdo', 'conteudo', 'blog', 'artigo', 'vídeo', 'video', 'podcast'],
+        criativos: ['criativo', 'banner', 'imagem', 'visual', 'design'],
+        crm: ['crm', 'automação', 'automacao', 'email', 'funil', 'nutrição', 'nutricao'],
+        comercial: ['comercial', 'vendas', 'script', 'objeção', 'objecao', 'fechamento'],
+        lp: ['landing page', 'lp', 'página de captura', 'pagina de captura', 'squeeze'],
+        website: ['site', 'website', 'institucional', 'homepage']
+      };
+      
+      // Detectar fontes relevantes baseado nas palavras-chave
+      for (const [source, keywords] of Object.entries(keywordMap)) {
+        if (keywords.some(kw => q.includes(kw))) {
+          relevant.add(source);
+        }
+      }
+      
+      // Se a pergunta é genérica (curta ou sem palavras-chave específicas), incluir mais fontes
+      if (q.length < 30 || relevant.size <= 1) {
+        relevant.add('metas');
+        relevant.add('analise-todos');
+      }
+      
+      return Array.from(relevant);
+    }
+    
+    // Função para filtrar contexto baseado em relevância (ECONOMIA EXTRA)
+    function filterContextByRelevance(contextText, question, maxChars) {
+      if (!contextText || contextText.length <= maxChars) return contextText;
+      
+      const q = question.toLowerCase();
+      const lines = contextText.split('\n');
+      const scoredLines = [];
+      
+      // Palavras importantes da pergunta (excluindo stopwords)
+      const stopwords = ['o', 'a', 'os', 'as', 'um', 'uma', 'de', 'da', 'do', 'para', 'com', 'em', 'que', 'é', 'e', 'ou'];
+      const questionWords = q.split(/\s+/).filter(w => w.length > 2 && !stopwords.includes(w));
+      
+      for (const line of lines) {
+        const lineLower = line.toLowerCase();
+        let score = 0;
+        
+        // Títulos e cabeçalhos = alta prioridade
+        if (line.match(/^[\*📊🎯📋🔬✅❌🏢💰🔑📝📦📅🔎]/)) score += 10;
+        if (line.includes('**')) score += 5;
+        
+        // Palavras da pergunta encontradas = alta prioridade
+        for (const word of questionWords) {
+          if (lineLower.includes(word)) score += 3;
+        }
+        
+        // Linhas com dados numéricos = média prioridade
+        if (line.match(/\d+[,.]?\d*%?|\$|R\$/)) score += 2;
+        
+        scoredLines.push({ line, score });
+      }
+      
+      // Ordenar por relevância e reconstruir
+      scoredLines.sort((a, b) => b.score - a.score);
+      
+      let result = '';
+      let charCount = 0;
+      
+      for (const { line } of scoredLines) {
+        if (charCount + line.length + 1 > maxChars) break;
+        result += line + '\n';
+        charCount += line.length + 1;
+      }
+      
+      return result.trim() + (result.length < contextText.length ? '\n...[filtrado por relevância]' : '');
+    }
+    
     const IA_DEFAULT_SOURCE_LABEL = 'Conversa com o usuário na aba I.A';
     function updateIASourceNote(sources){
       if(!iaSourceNote) return;
@@ -17893,33 +18103,38 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           error: 'Falha ao coletar dados do Firebase automaticamente.'
         };
       }
-      const platformSnippet = trimLargeText(PLATFORM_CODE || '', IA_MAX_PLATFORM_CHARS);
-      const platformTextSnippet = trimLargeText(PLATFORM_TEXT || '', IA_MAX_PLATFORM_CHARS);
       
-      // Não incluir snapshot completo e guia quando busca é focada
-      const contextJson = searchAll ? trimLargeText(safeStringify(contextData), IA_MAX_CONTEXT_CHARS) : '';
-      const tabGuide = searchAll ? trimLargeText(buildTabGuide(contextData), IA_MAX_CONTEXT_CHARS) : '';
+      // 🎯 OTIMIZAÇÃO: Usar limites individuais por aba + compressão
+      // REMOVIDO: platformSnippet e platformTextSnippet - Economia de ~7.500 tokens!
+      // Código da plataforma NÃO É NECESSÁRIO para responder perguntas do usuário
+      const platformSnippet = ''; // Desativado para economia
+      const platformTextSnippet = ''; // Desativado para economia
       
-      // Extrair dados específicos por aba
+      // Não incluir snapshot completo quando busca é focada (ECONOMIA SIGNIFICATIVA)
+      // Reduzido de 20000 para 10000 chars
+      const contextJson = searchAll ? compressContextText(safeStringify(contextData), 10000) : '';
+      const tabGuide = ''; // REMOVIDO - Economia de ~5k tokens (IA já sabe navegar)
+      
+      // Extrair dados específicos por aba COM LIMITES INDIVIDUAIS
       const postsDetail = (shouldInclude('posts') || shouldInclude('calendario')) 
-        ? trimLargeText(buildPostsText(contextData?.platformState?.postsState), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildPostsText(contextData?.platformState?.postsState), IA_LIMITS.posts) 
         : '';
       const calendarNotesDetail = shouldInclude('calendario') 
-        ? trimLargeText(buildCalendarNotesDetail(contextData?.platformState?.calendarNotesState), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildCalendarNotesDetail(contextData?.platformState?.calendarNotesState), IA_LIMITS.calendario) 
         : '';
       const demandasDetail = shouldInclude('demandas') 
-        ? trimLargeText(buildDemandasText(contextData?.platformState?.demandasState), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildDemandasText(contextData?.platformState?.demandasState), IA_LIMITS.demandas) 
         : '';
       const iframeDetail = shouldInclude('arquivos') 
-        ? trimLargeText(buildIframeText(contextData?.firebase?.iframes), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildIframeText(contextData?.firebase?.iframes), IA_LIMITS.iframes) 
         : '';
       
-      // Adicionar anotações da aba Estruturação
+      // Anotações da aba Estruturação COM LIMITE ESPECÍFICO
       const estruturacaoNotes = shouldInclude('estruturacao') 
-        ? trimLargeText(buildEstruturacaoNotesText(), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildEstruturacaoNotesText(), IA_LIMITS.estruturacaoNotes) 
         : '';
       
-      // Análises específicas ou todas
+      // Análises específicas ou todas - COM SUMARIZAÇÃO INTELIGENTE
       let estruturacaoAnalyses = '';
       
       // DEBUG: Verificar estado antes de buscar análises
@@ -17944,226 +18159,107 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         console.log('======================================');
       }
       
+      // 🎯 OTIMIZAÇÃO: Usar sumarização inteligente para análises
+      const analysisLimit = IA_LIMITS.estruturacaoAnalyses;
+      
       if(shouldInclude('analise-todos')){
-        estruturacaoAnalyses = trimLargeText(buildEstruturacaoAnalysesText(), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildEstruturacaoAnalysesText(), analysisLimit);
       } else if(shouldInclude('diagnostico')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('diagnostico'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('diagnostico'), analysisLimit);
       } else if(shouldInclude('direcionamento')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('direcionamento'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('direcionamento'), analysisLimit);
       } else if(shouldInclude('concorrencia')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('concorrencia'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('concorrencia'), analysisLimit);
       } else if(shouldInclude('cdt')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('cdt'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('cdt'), analysisLimit);
       } else if(shouldInclude('puv')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('puv'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('puv'), analysisLimit);
       } else if(shouldInclude('pai')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('pai'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('pai'), analysisLimit);
       } else if(shouldInclude('anuncios')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('anuncios'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('anuncios'), analysisLimit);
       } else if(shouldInclude('seo')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('seo'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('seo'), analysisLimit);
       } else if(shouldInclude('redes')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('redes'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('redes'), analysisLimit);
       } else if(shouldInclude('copy')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('copy'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('copy'), analysisLimit);
       } else if(shouldInclude('conteudo')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('conteudo'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('conteudo'), analysisLimit);
       } else if(shouldInclude('criativos')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('criativos'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('criativos'), analysisLimit);
       } else if(shouldInclude('crm')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('crm'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('crm'), analysisLimit);
       } else if(shouldInclude('comercial')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('comercial'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('comercial'), analysisLimit);
       } else if(shouldInclude('lp')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('lp'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('lp'), analysisLimit);
       } else if(shouldInclude('website')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('website'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('website'), analysisLimit);
       } else if(shouldInclude('visual')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('visual'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('visual'), analysisLimit);
       } else if(shouldInclude('plataforma')){
-        estruturacaoAnalyses = trimLargeText(buildSpecificAnalysisText('plataforma'), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildSpecificAnalysisText('plataforma'), analysisLimit);
       } else if(shouldInclude('estruturacao')){
         // Se "Estruturação (Notas)" estiver selecionado mas nenhuma análise específica, carregar todas
-        estruturacaoAnalyses = trimLargeText(buildEstruturacaoAnalysesText(), IA_MAX_CONTEXT_CHARS);
+        estruturacaoAnalyses = summarizeAnalysis(buildEstruturacaoAnalysesText(), analysisLimit);
       }
       
-      // Log detalhado do que será enviado
+      // Log detalhado do que será enviado (REDUZIDO para economia de performance)
       if(shouldInclude('estruturacao') || needsAnalises){
-        console.log('📊 ========== DADOS DA ESTRUTURAÇÃO PARA I.A ==========');
-        console.log('📋 Notas da Estruturação:', estruturacaoNotes ? `${estruturacaoNotes.length} caracteres` : 'VAZIO');
-        console.log('🔬 Análises da Estruturação:', estruturacaoAnalyses ? `${estruturacaoAnalyses.length} caracteres` : 'VAZIO');
-        
-        // Mostrar qual tipo de análise foi carregado
-        const analiseTypes = [
-          'diagnostico', 'direcionamento', 'concorrencia', 'cdt', 'puv', 'pai',
-          'anuncios', 'seo', 'redes', 'copy', 'conteudo', 'criativos',
-          'crm', 'comercial', 'lp', 'website', 'visual', 'plataforma'
-        ];
-        const selectedAnalises = analiseTypes.filter(type => shouldInclude(type));
-        if(selectedAnalises.length > 0){
-          console.log('📌 Entregáveis específicos selecionados:', selectedAnalises.join(', '));
-        } else if(shouldInclude('analise-todos')){
-          console.log('📌 Modo: TODOS os entregáveis');
-        } else if(shouldInclude('estruturacao')){
-          console.log('📌 Modo: Estruturação + Todos entregáveis (padrão)');
-        }
-        
-        if(estruturacaoNotes){
-          console.log('📋 Preview das Notas (primeiros 500 chars):', estruturacaoNotes.substring(0, 500));
-        }
-        if(estruturacaoAnalyses){
-          console.log('🔬 Preview das Análises (primeiros 500 chars):', estruturacaoAnalyses.substring(0, 500));
-        }
-        console.log('📊 ==================================================');
+        console.log('📊 DADOS ESTRUTURAÇÃO:', {
+          notas: estruturacaoNotes ? `${estruturacaoNotes.length} chars` : 'vazio',
+          analises: estruturacaoAnalyses ? `${estruturacaoAnalyses.length} chars` : 'vazio'
+        });
       }
       
-      // Extrair dados das outras abas específicas
+      // 🎯 OTIMIZAÇÃO: Extrair dados das outras abas com limites específicos
       const metasDetail = shouldInclude('metas') 
-        ? trimLargeText(buildMetasDetail(contextData?.platformState?.metasState), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildMetasDetail(contextData?.platformState?.metasState), IA_LIMITS.metas) 
         : '';
       const cacDetail = shouldInclude('cac') 
-        ? trimLargeText(buildCACDetail(), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildCACDetail(), IA_LIMITS.cac) 
         : '';
       const anotacoesDetail = shouldInclude('anotacoes') 
-        ? trimLargeText(buildAnotacoesDetail(contextData?.platformState?.notesState), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildAnotacoesDetail(contextData?.platformState?.notesState), IA_LIMITS.anotacoes) 
         : '';
       const acessosDetail = shouldInclude('acessos') 
-        ? trimLargeText(buildAcessosDetail(contextData?.firebase), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildAcessosDetail(contextData?.firebase), IA_LIMITS.acessos) 
         : '';
       const macroDetail = shouldInclude('macro') 
-        ? trimLargeText(buildMacroDetail(contextData?.firebase), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildMacroDetail(contextData?.firebase), IA_LIMITS.macro) 
         : '';
       const planejamentoDetail = shouldInclude('planejamento') 
-        ? trimLargeText(buildPlanejamentoDetail(contextData?.firebase), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildPlanejamentoDetail(contextData?.firebase), IA_LIMITS.planejamento) 
         : '';
       const arquivosDetail = shouldInclude('arquivos') 
-        ? trimLargeText(buildArquivosDetail(contextData?.firebase), IA_MAX_CONTEXT_CHARS) 
+        ? compressContextText(buildArquivosDetail(contextData?.firebase), IA_LIMITS.arquivos) 
         : '';
       
       const sources = [];
+      
+      // 🎯 OTIMIZAÇÃO: PROMPT DO SISTEMA REDUZIDO (~60% menor)
       const messages = [{
         role: 'system',
-        content: `Você é o Assistente de Marketing e Vendas da Mediagrowth, especializado em ajudar a bater metas e crescer negócios.
+        content: `Você é o Assistente de Marketing da Mediagrowth.
 
-🎯 SEU PAPEL:
-• Consultor estratégico de marketing digital e vendas
-• Ajuda a criar estratégias, campanhas e ideias para atingir metas
-• **PODE e DEVE ser CRIATIVO** ao sugerir ideias, estratégias e soluções
-• **NÃO PODE inventar DADOS** - números, métricas e fatos devem vir da plataforma
-• Prioriza informações da aba ESTRUTURAÇÃO como base para recomendações
+🎯 PAPEL: Consultor estratégico de marketing digital e vendas.
+✅ PODE: Criar estratégias, campanhas, ideias criativas, copies, sugestões.
+❌ NÃO PODE: Inventar números, métricas ou dados não fornecidos.
 
-📋 FONTES DE DADOS (CONSULTE TODAS ANTES DE RESPONDER):
+📋 PRIORIDADE DE FONTES:
+1. ESTRUTURAÇÃO: Informações do negócio, semanas, blocos, análises salvas
+2. METAS/CAC: Números oficiais e objetivos
+3. MACRO/CALENDÁRIO/DEMANDAS: Dados operacionais
+4. DOCUMENTOS: Base de conhecimento do usuário
 
-🥇 **PRIORIDADE MÁXIMA - ABA ESTRUTURAÇÃO:**
-1. **Informações do Negócio** - Nome da empresa, nicho, localização, ticket médio, investimento
-2. **Semanas de Estruturação** - Todas as 6 semanas (1 a 6) com anotações estratégicas
-3. **Blocos e Itens** - Notas detalhadas de cada bloco (Direcionamento, Análise de Mercado, Matriz CDT, etc)
-4. **Análises Geradas** - Qualquer análise de IA salva na estruturação
+⚠️ PROTOCOLO:
+• Leia TODO o contexto antes de responder
+• Busque em TODAS as mensagens de sistema (📊, �, 📋, 🔬)
+• Se não encontrar dados, diga claramente e sugira onde adicionar
+• Cite a fonte quando usar dados: "Segundo a Estruturação..."
 
-🥈 **DADOS OPERACIONAIS:**
-5. **Aba METAS** - Números oficiais, objetivos e resultados (fonte única para métricas)
-6. **Aba MACRO** - Análise mensal e histórico de desempenho
-7. **Aba CALENDÁRIO e POSTS** - Execução de conteúdo e publicações
-8. **Aba DEMANDAS** - Tarefas e projetos em andamento
-9. **Aba CAC** - Custos de aquisição e investimentos
-10. **Aba ACESSOS** - Credenciais e ferramentas utilizadas
-
-🥉 **CONTEXTO ADICIONAL:**
-11. **Documentos enviados** pelo usuário na base de conhecimento
-12. **Dados do Firebase** - Informações técnicas da plataforma
-
-⚠️ PROTOCOLO OBRIGATÓRIO DE BUSCA:
-
-🚨 **ATENÇÃO CRÍTICA - LEIA TODO O CONTEXTO FORNECIDO:**
-Você recebe mensagens de sistema contendo:
-- "🎯 ANOTAÇÕES COMPLETAS DA ABA ESTRUTURAÇÃO" - Leia TUDO desta mensagem
-- "🔬 ANÁLISES GERADAS E SALVAS NA ABA ESTRUTURAÇÃO" - Leia TUDO desta mensagem
-- TODAS as mensagens começando com emojis 📊, 🏢, 📋, 🔬, 🎯
-
-**ANTES DE DIZER "NÃO ENCONTREI" OU "NÃO HÁ":**
-⛔ PARE! Você DEVE:
-1. Reler TODAS as mensagens do sistema recebidas
-2. Procurar por palavras-chave relacionadas (ex: "faturamento", "receita", "meta", "vendas", "ticket")
-3. Verificar dentro das ANÁLISES GERADAS (podem conter planilhas, tabelas, dados estruturados)
-4. Buscar nas NOTAS DE CADA BLOCO de CADA SEMANA
-5. Verificar nas INFORMAÇÕES DO NEGÓCIO
-6. SOMENTE após procurar em TODAS essas fontes você pode dizer que não encontrou
-
-**ANTES DE RESPONDER QUALQUER PERGUNTA SOBRE DADOS:**
-✅ 1. Verificar INFORMAÇÕES DO NEGÓCIO na Estruturação (nome, nicho, segmento, ticket médio, investimento)
-✅ 2. Buscar em TODAS AS SEMANAS da Estruturação (1, 2, 3, 4, 5 e 6) - uma por uma
-✅ 3. Verificar TODOS OS BLOCOS de cada semana - um por um
-✅ 4. Conferir TODAS AS ANÁLISES GERADAS salvas - LEIA O CONTEÚDO COMPLETO de cada análise
-✅ 5. Consultar METAS para números e objetivos
-✅ 6. Verificar MACRO para histórico e análises mensais
-✅ 7. Conferir outras abas relevantes à pergunta
-
-🔍 **EXEMPLOS DE ONDE PROCURAR:**
-- "Meta de faturamento" → Informações do Negócio, Análises Geradas, Blocos de Metas, Aba METAS
-- "Ticket médio" → Informações do Negócio (campo específico)
-- "Investimento" → Informações do Negócio (campo de budget)
-- Qualquer número/métrica → SEMPRE verificar nas Análises Geradas primeiro
-
-🎨 REGRAS - O QUE PODE E O QUE NÃO PODE:
-
-✅ **PODE E DEVE FAZER (Seja Criativo e Consultivo):**
-• Sugerir ideias de campanhas, posts e estratégias
-• Criar headlines, copies e scripts completos
-• Propor funis de vendas e jornadas do cliente
-• Sugerir públicos-alvo e segmentações
-• Recomendar ferramentas, canais e formatos
-• Fazer brainstorming de conteúdo
-• Sugerir testes A/B e experimentos
-• Propor cronogramas e planos de ação
-• Dar insights sobre tendências de marketing
-• Criar estratégias completas para bater metas
-
-❌ **NÃO PODE FAZER (Nunca Invente Dados):**
-• Inventar números de metas, faturamento ou vendas
-• Criar métricas falsas (CAC, ROI, conversões)
-• Supor investimentos não informados
-• Afirmar dados históricos não fornecidos
-• Inventar informações sobre a empresa
-
-💡 **EXEMPLOS PRÁTICOS:**
-
-**✅ CERTO - Consultivo com Dados Reais:**
-"Sua meta é [dado da aba METAS]. Para atingi-la, sugiro 3 estratégias:
-1. Campanha X com [ideia criativa completa]
-2. Conteúdo Y com [5 sugestões de posts]
-3. Automação Z com [sequência detalhada]"
-
-**❌ ERRADO - Inventando Números:**
-"Seu CAC é R$ 150..." (sem ter esse dado)
-"Você fatura R$ 50k/mês..." (sem confirmar)
-
-🎯 **MINDSET:**
-• DADOS = Apenas o que está na plataforma
-• IDEIAS = Seja criativo e proponha soluções
-• ESTRATÉGIAS = Baseie-se nos dados + sua expertise
-
-• **SEMPRE** cite a fonte quando usar dados:
-  ✅ "De acordo com as Informações do Negócio na Estruturação..."
-  ✅ "Conforme suas anotações na Semana 1..."
-  ✅ "Segundo a aba Metas, seu objetivo é..."
-
-• **SE FALTAR DADOS**, sugira ideias mesmo assim:
-  ✅ "Não encontrei sua meta específica, mas sugiro estas estratégias: [ideias]"
-  ✅ "Para melhorar seus resultados, recomendo: [sugestões criativas]"
-  
-• **SE PERGUNTAREM SOBRE DADOS**, busque primeiro e seja honesto:
-  ✅ "Verifiquei todas as abas e não encontrei [dado]. Recomendo adicionar em [local]"
-  ❌ NÃO invente: "Seu CAC é R$ 150" (sem essa informação)
-
-💬 ESTILO DE COMUNICAÇÃO:
-• Profissional, consultivo e propositivo
-• Use emojis moderadamente para visualização
-• Estruture respostas com tópicos e exemplos práticos
-• Seja acionável - sempre termine com próximos passos
-• Equilibre dados reais + ideias criativas
-
-� LEMBRE-SE:
-Você é um CONSULTOR DE MARKETING, não apenas um repositório de dados. Sua missão é AJUDAR A BATER METAS através de estratégias criativas baseadas nos dados disponíveis. Quando faltar informação, sugira o que fazer. Quando tiver dados, use-os para criar estratégias poderosas!`
+💡 ESTILO: Profissional, acionável, use bullets e exemplos práticos.`
       }];
       
       // Adicionar mensagem sobre fontes selecionadas se não for "all"
@@ -18500,15 +18596,141 @@ async function sendIAQuestion(){
     });
     const allMessages = [...contextMessages, ...chatMessages];
     
-    // Log de análise de consumo ANTES de enviar
-    console.log('📨 ========== ANÁLISE DE CONSUMO ==========');
-    let contextChars = contextMessages.reduce((sum, m) => sum + m.content.length, 0);
-    let chatChars = chatMessages.reduce((sum, m) => sum + m.content.length, 0);
-    let totalChars = contextChars + chatChars;
-    console.log(`📦 Mensagens de contexto: ${contextMessages.length} msgs, ${contextChars.toLocaleString()} chars (~${Math.ceil(contextChars/4).toLocaleString()} tokens)`);
-    console.log(`💬 Mensagens do chat: ${chatMessages.length} msgs, ${chatChars.toLocaleString()} chars (~${Math.ceil(chatChars/4).toLocaleString()} tokens)`);
-    console.log(`📏 TOTAL ENVIADO: ${allMessages.length} msgs, ${totalChars.toLocaleString()} chars (~${Math.ceil(totalChars/4).toLocaleString()} tokens)`);
-    console.log('📨 ========================================');
+    // 🔍 LOG DETALHADO DE CONSUMO - ANÁLISE COMPLETA
+    console.log('%c📊 ═══════════════════════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+    console.log('%c📊 ANÁLISE DETALHADA DE TOKENS - ANTES DO ENVIO', 'color: #00ff00; font-size: 14px; font-weight: bold');
+    console.log('%c📊 ═══════════════════════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+    
+    // Breakdown por tipo de mensagem
+    const breakdown = {
+      systemPrompt: 0,
+      estruturacao: 0,
+      analises: 0,
+      metas: 0,
+      cac: 0,
+      posts: 0,
+      demandas: 0,
+      documentos: 0,
+      outros: 0,
+      chatHistory: 0
+    };
+    
+    contextMessages.forEach((msg, idx) => {
+      const chars = msg.content.length;
+      const tokens = Math.ceil(chars / 4);
+      const content = msg.content.toLowerCase();
+      
+      // Classificar por tipo
+      if (idx === 0 && msg.role === 'system') {
+        breakdown.systemPrompt = chars;
+        console.log(`  📝 [${idx}] PROMPT SISTEMA: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('estruturação') || content.includes('anotações completas')) {
+        breakdown.estruturacao += chars;
+        console.log(`  📋 [${idx}] ESTRUTURAÇÃO: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('análise') || content.includes('analise')) {
+        breakdown.analises += chars;
+        console.log(`  🔬 [${idx}] ANÁLISES: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('metas')) {
+        breakdown.metas += chars;
+        console.log(`  🎯 [${idx}] METAS: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('cac') || content.includes('custo')) {
+        breakdown.cac += chars;
+        console.log(`  💰 [${idx}] CAC: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('post') || content.includes('calendário')) {
+        breakdown.posts += chars;
+        console.log(`  📅 [${idx}] POSTS/CALENDÁRIO: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('demanda') || content.includes('tarefa')) {
+        breakdown.demandas += chars;
+        console.log(`  ✅ [${idx}] DEMANDAS: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else if (content.includes('documento') || content.includes('treinamento')) {
+        breakdown.documentos += chars;
+        console.log(`  📄 [${idx}] DOCUMENTOS: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens)`);
+      } else {
+        breakdown.outros += chars;
+        console.log(`  ❓ [${idx}] OUTRO: ${chars.toLocaleString()} chars (~${tokens.toLocaleString()} tokens) - "${msg.content.substring(0, 50)}..."`);
+      }
+    });
+    
+    // Chat history
+    chatMessages.forEach((msg, idx) => {
+      const chars = typeof msg.content === 'string' ? msg.content.length : JSON.stringify(msg.content).length;
+      breakdown.chatHistory += chars;
+    });
+    
+    // Totais
+    const totalContextChars = Object.values(breakdown).reduce((a, b) => a + b, 0) - breakdown.chatHistory;
+    const totalChatChars = breakdown.chatHistory;
+    const totalChars = totalContextChars + totalChatChars;
+    const totalTokensEstimated = Math.ceil(totalChars / 4);
+    
+    console.log('%c📊 ───────────────────────────────────────────────────────────────', 'color: #ffaa00');
+    console.log('%c� RESUMO POR CATEGORIA:', 'color: #ffaa00; font-weight: bold');
+    console.log('%c📊 ───────────────────────────────────────────────────────────────', 'color: #ffaa00');
+    
+    const categories = [
+      { name: 'Prompt Sistema', chars: breakdown.systemPrompt, icon: '📝' },
+      { name: 'Estruturação', chars: breakdown.estruturacao, icon: '📋' },
+      { name: 'Análises IA', chars: breakdown.analises, icon: '🔬' },
+      { name: 'Metas', chars: breakdown.metas, icon: '🎯' },
+      { name: 'CAC', chars: breakdown.cac, icon: '💰' },
+      { name: 'Posts/Calendário', chars: breakdown.posts, icon: '📅' },
+      { name: 'Demandas', chars: breakdown.demandas, icon: '✅' },
+      { name: 'Documentos', chars: breakdown.documentos, icon: '📄' },
+      { name: 'Outros', chars: breakdown.outros, icon: '❓' },
+      { name: 'Histórico Chat', chars: breakdown.chatHistory, icon: '💬' }
+    ];
+    
+    categories.sort((a, b) => b.chars - a.chars);
+    
+    categories.forEach(cat => {
+      if (cat.chars > 0) {
+        const tokens = Math.ceil(cat.chars / 4);
+        const percent = ((cat.chars / totalChars) * 100).toFixed(1);
+        const bar = '█'.repeat(Math.ceil(percent / 5)) + '░'.repeat(20 - Math.ceil(percent / 5));
+        console.log(`  ${cat.icon} ${cat.name.padEnd(18)} ${bar} ${percent.padStart(5)}% | ${cat.chars.toLocaleString().padStart(8)} chars (~${tokens.toLocaleString()} tokens)`);
+      }
+    });
+    
+    console.log('%c� ───────────────────────────────────────────────────────────────', 'color: #ff6600');
+    console.log('%c📊 TOTAIS:', 'color: #ff6600; font-weight: bold');
+    console.log('%c📊 ───────────────────────────────────────────────────────────────', 'color: #ff6600');
+    console.log(`  📦 Contexto total: ${totalContextChars.toLocaleString()} chars (~${Math.ceil(totalContextChars/4).toLocaleString()} tokens)`);
+    console.log(`  💬 Chat histórico: ${totalChatChars.toLocaleString()} chars (~${Math.ceil(totalChatChars/4).toLocaleString()} tokens)`);
+    console.log(`  📏 TOTAL ENVIADO: ${totalChars.toLocaleString()} chars (~${totalTokensEstimated.toLocaleString()} tokens)`);
+    
+    // Estimativa de custo ANTES
+    const pricing = window.IA_CONFIG.pricing;
+    const estimatedInputCost = (totalTokensEstimated / 1000000) * pricing.input;
+    console.log(`  💵 Custo estimado input: $${estimatedInputCost.toFixed(4)}`);
+    
+    // Sugestões de economia
+    console.log('%c📊 ───────────────────────────────────────────────────────────────', 'color: #ff0000');
+    console.log('%c💡 OPORTUNIDADES DE ECONOMIA:', 'color: #ff0000; font-weight: bold');
+    console.log('%c📊 ───────────────────────────────────────────────────────────────', 'color: #ff0000');
+    
+    // Thresholds ajustados para os novos limites v2
+    if (breakdown.analises > 12000) {
+      console.log(`  ⚠️ ANÁLISES muito grandes (${Math.ceil(breakdown.analises/4).toLocaleString()} tokens) - Limite é 12k chars`);
+    }
+    if (breakdown.estruturacao > 8000) {
+      console.log(`  ⚠️ ESTRUTURAÇÃO grande (${Math.ceil(breakdown.estruturacao/4).toLocaleString()} tokens) - Selecione fontes específicas`);
+    }
+    if (breakdown.documentos > 6000) {
+      console.log(`  ⚠️ DOCUMENTOS ocupando muito (${Math.ceil(breakdown.documentos/4).toLocaleString()} tokens) - Remova docs não usados`);
+    }
+    if (breakdown.chatHistory > 6000) {
+      console.log(`  ⚠️ HISTÓRICO DO CHAT longo (${Math.ceil(breakdown.chatHistory/4).toLocaleString()} tokens) - Inicie nova conversa`);
+    }
+    if (breakdown.outros > 3000) {
+      console.log(`  ⚠️ CONTEXTO "OUTROS" grande (${Math.ceil(breakdown.outros/4).toLocaleString()} tokens) - Verifique dados redundantes`);
+    }
+    if (totalTokensEstimated < 8000) {
+      console.log(`  ✅ Consumo otimizado! Menos de 8k tokens de input.`);
+    } else if (totalTokensEstimated > 15000) {
+      console.log(`  🚨 ALERTA: ${totalTokensEstimated.toLocaleString()} tokens é MUITO! Meta é <10k`);
+    }
+    
+    console.log('%c� ═══════════════════════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
     
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -18543,12 +18765,59 @@ async function sendIAQuestion(){
       const outputCost = (outputTokens / 1000000) * pricing.output;
       const totalCost = inputCost + outputCost;
       
-      console.log('💰 ========== CUSTO DA RESPOSTA ==========');
-      console.log(`🤖 Modelo: ${window.IA_CONFIG.model}`);
-      console.log(`📥 Input tokens: ${inputTokens.toLocaleString()} (~$${inputCost.toFixed(4)})`);
-      console.log(`📤 Output tokens: ${outputTokens.toLocaleString()} (~$${outputCost.toFixed(4)})`);
-      console.log(`💵 Total: ${totalTokens.toLocaleString()} tokens = $${totalCost.toFixed(4)}`);
-      console.log('💰 ========================================');
+      // Log detalhado PÓS-RESPOSTA
+      console.log('%c💰 ═══════════════════════════════════════════════════════════════', 'color: #00ffff; font-weight: bold');
+      console.log('%c💰 CUSTO REAL DA RESPOSTA (OpenRouter)', 'color: #00ffff; font-size: 14px; font-weight: bold');
+      console.log('%c💰 ═══════════════════════════════════════════════════════════════', 'color: #00ffff; font-weight: bold');
+      console.log(`  🤖 Modelo: ${window.IA_CONFIG.model}`);
+      console.log(`  📥 Input tokens: ${inputTokens.toLocaleString()} tokens`);
+      console.log(`  📤 Output tokens: ${outputTokens.toLocaleString()} tokens`);
+      console.log(`  📊 Total tokens: ${totalTokens.toLocaleString()} tokens`);
+      console.log('%c💰 ───────────────────────────────────────────────────────────────', 'color: #ffff00');
+      console.log(`  💵 Custo input:  $${inputCost.toFixed(6)} (${inputTokens} × $${pricing.input}/1M)`);
+      console.log(`  � Custo output: $${outputCost.toFixed(6)} (${outputTokens} × $${pricing.output}/1M)`);
+      console.log(`  💰 CUSTO TOTAL:  $${totalCost.toFixed(6)}`);
+      console.log('%c💰 ───────────────────────────────────────────────────────────────', 'color: #ffff00');
+      
+      // Comparação com outros modelos
+      const modelComparison = {
+        'gemini-flash': { input: 0.15, output: 0.60 },
+        'gemini-pro': { input: 1.25, output: 10.00 },
+        'claude-sonnet': { input: 3.00, output: 15.00 },
+        'gpt-4o-mini': { input: 0.15, output: 0.60 },
+        'gpt-4o': { input: 5.00, output: 15.00 }
+      };
+      
+      console.log('%c💡 COMPARATIVO - Quanto custaria em outros modelos:', 'color: #ff00ff');
+      Object.entries(modelComparison).forEach(([model, prices]) => {
+        const altInputCost = (inputTokens / 1000000) * prices.input;
+        const altOutputCost = (outputTokens / 1000000) * prices.output;
+        const altTotal = altInputCost + altOutputCost;
+        const diff = altTotal - totalCost;
+        const emoji = diff > 0 ? '📈' : '📉';
+        const diffStr = diff > 0 ? `+$${diff.toFixed(6)}` : `-$${Math.abs(diff).toFixed(6)}`;
+        console.log(`  ${emoji} ${model.padEnd(15)} $${altTotal.toFixed(6)} (${diffStr})`);
+      });
+      
+      // Histórico de custos da sessão
+      if (!window.IA_SESSION_COSTS) window.IA_SESSION_COSTS = [];
+      window.IA_SESSION_COSTS.push({
+        timestamp: new Date().toISOString(),
+        inputTokens,
+        outputTokens,
+        totalCost,
+        question: question?.substring(0, 50) || 'imagem'
+      });
+      
+      const sessionTotal = window.IA_SESSION_COSTS.reduce((sum, c) => sum + c.totalCost, 0);
+      const avgCost = sessionTotal / window.IA_SESSION_COSTS.length;
+      
+      console.log('%c💰 ───────────────────────────────────────────────────────────────', 'color: #00ff00');
+      console.log('%c📈 CUSTOS DA SESSÃO:', 'color: #00ff00; font-weight: bold');
+      console.log(`  📊 Perguntas nesta sessão: ${window.IA_SESSION_COSTS.length}`);
+      console.log(`  💵 Custo total da sessão: $${sessionTotal.toFixed(6)}`);
+      console.log(`  📉 Custo médio por pergunta: $${avgCost.toFixed(6)}`);
+      console.log('%c💰 ═══════════════════════════════════════════════════════════════', 'color: #00ffff; font-weight: bold');
       
       // Mostrar popup temporário com o custo
       showCostNotification(inputTokens, outputTokens, totalCost);
@@ -46321,18 +46590,36 @@ Responda APENAS com um JSON válido (sem markdown, sem explicações) no formato
         return;
       }
 
-      // Preparar contexto completo das anotações
+      // 🎯 LIMITES DE OTIMIZAÇÃO PARA ESTRUTURAÇÃO (economia de tokens)
+      const ESTRUTURACAO_LIMITS = {
+        notasPorSemana: 1500,      // Max chars por semana de notas
+        totalNotas: 8000,          // Max chars total de notas
+        businessInfo: 2000,        // Max chars do business info
+        midiasDescricao: 1000,     // Max chars de descrição de mídias
+        promptExtra: 500           // Max chars de instruções extras
+      };
+
+      // Preparar contexto das anotações COM LIMITE
       const notasAgrupadas = {};
       data.notes.forEach(note => {
         if (!notasAgrupadas[note.week]) {
           notasAgrupadas[note.week] = [];
         }
-        notasAgrupadas[note.week].push(`• ${note.block} - ${note.item}:\n  "${note.content}"`);
+        // Limitar tamanho de cada nota individual
+        const notaTexto = `• ${note.block} - ${note.item}:\n  "${note.content.substring(0, 300)}"`;
+        notasAgrupadas[note.week].push(notaTexto);
       });
 
-      const contextoDasNotas = Object.keys(notasAgrupadas).map(week => 
-        `**${week}:**\n${notasAgrupadas[week].join('\n')}`
-      ).join('\n\n');
+      // Limitar chars por semana
+      let contextoDasNotas = Object.keys(notasAgrupadas).map(week => {
+        const notasSemana = notasAgrupadas[week].join('\n');
+        return `**${week}:**\n${notasSemana.substring(0, ESTRUTURACAO_LIMITS.notasPorSemana)}`;
+      }).join('\n\n');
+      
+      // Limitar total de notas
+      if (contextoDasNotas.length > ESTRUTURACAO_LIMITS.totalNotas) {
+        contextoDasNotas = contextoDasNotas.substring(0, ESTRUTURACAO_LIMITS.totalNotas) + '\n\n[... anotações adicionais resumidas para otimização ...]';
+      }
 
       // Preparar contexto das mídias tagueadas com descrições
       let contextoMidiasTagueadas = '';
@@ -46356,8 +46643,11 @@ ${midiasComDescricao.map((m, idx) => `${idx + 1}. **Mídia ${idx + 1}** ${m.file
       // Usar promptAnalise específico se disponível, senão usar prompt padrão
       const promptEspecifico = mapping.promptAnalise || mapping.prompt || `Analise o progresso do entregável "${mapping.title}" da Mediagrowth.`;
       
-      // Obter contexto do negócio usando a função global
-      const businessInfo = typeof getBusinessInfoForAI === 'function' ? getBusinessInfoForAI() : '';
+      // Obter contexto do negócio usando a função global - COM LIMITE
+      let businessInfo = typeof getBusinessInfoForAI === 'function' ? getBusinessInfoForAI() : '';
+      if (businessInfo.length > ESTRUTURACAO_LIMITS.businessInfo) {
+        businessInfo = businessInfo.substring(0, ESTRUTURACAO_LIMITS.businessInfo) + '\n[... contexto resumido ...]';
+      }
       
       const prompt = `${promptEspecifico}
 
@@ -46803,6 +47093,88 @@ IMPORTANTE: Distribua os tokens de forma inteligente para cobrir TODO o conteúd
           if (response.ok) {
             const result = await response.json();
             let insightText = result.choices?.[0]?.message?.content || '';
+            
+            // 💰 LOG DETALHADO DE CUSTOS - ESTRUTURAÇÃO
+            const usage = result.usage || {};
+            const inputTokens = usage.prompt_tokens || Math.ceil(promptComInstrucoes.length / 4);
+            const outputTokens = usage.completion_tokens || Math.ceil(insightText.length / 4);
+            const totalTokens = inputTokens + outputTokens;
+            
+            // Preços por modelo (por 1M tokens)
+            const precos = {
+              'google/gemini-2.5-flash': { input: 0.15, output: 0.60, nome: 'Gemini Flash' },
+              'google/gemini-2.5-pro': { input: 1.25, output: 10.00, nome: 'Gemini Pro' },
+              'anthropic/claude-sonnet': { input: 3.00, output: 15.00, nome: 'Claude Sonnet' },
+              'openai/gpt-4o-mini': { input: 0.15, output: 0.60, nome: 'GPT-4o Mini' },
+              'openai/gpt-4o': { input: 5.00, output: 15.00, nome: 'GPT-4o' }
+            };
+            
+            const modeloPreco = precos[modeloIA] || precos['google/gemini-2.5-flash'];
+            const custoInput = (inputTokens / 1000000) * modeloPreco.input;
+            const custoOutput = (outputTokens / 1000000) * modeloPreco.output;
+            const custoTotal = custoInput + custoOutput;
+            
+            // Rastrear custos da sessão de estruturação
+            if (!window.ESTRUTURACAO_CUSTOS) {
+              window.ESTRUTURACAO_CUSTOS = { total: 0, geracoes: 0 };
+            }
+            window.ESTRUTURACAO_CUSTOS.total += custoTotal;
+            window.ESTRUTURACAO_CUSTOS.geracoes++;
+            
+            console.log(`\n%c💰 ═══════════════════════════════════════════════════════════════`, 'color: #22c55e; font-weight: bold');
+            console.log(`%c💰 CUSTO DA ANÁLISE: ${entregavelId.toUpperCase()}`, 'color: #22c55e; font-weight: bold');
+            console.log(`%c💰 ═══════════════════════════════════════════════════════════════`, 'color: #22c55e; font-weight: bold');
+            console.log(`   🤖 Modelo: ${modeloIA} (${modeloPreco.nome})`);
+            console.log(`   📥 Input tokens: ${inputTokens.toLocaleString()}`);
+            console.log(`   📤 Output tokens: ${outputTokens.toLocaleString()}`);
+            console.log(`   📊 Total tokens: ${totalTokens.toLocaleString()}`);
+            console.log(`%c💰 ───────────────────────────────────────────────────────────────`, 'color: #22c55e');
+            console.log(`   💵 Custo input:  $${custoInput.toFixed(6)} (${inputTokens} × $${modeloPreco.input}/1M)`);
+            console.log(`   💵 Custo output: $${custoOutput.toFixed(6)} (${outputTokens} × $${modeloPreco.output}/1M)`);
+            console.log(`   💰 CUSTO TOTAL:  $${custoTotal.toFixed(6)}`);
+            console.log(`%c💰 ───────────────────────────────────────────────────────────────`, 'color: #22c55e');
+            
+            // Breakdown do prompt
+            console.log(`%c📊 BREAKDOWN DO PROMPT:`, 'color: #f59e0b; font-weight: bold');
+            console.log(`   📝 Prompt específico: ${promptEspecifico.length.toLocaleString()} chars (~${Math.ceil(promptEspecifico.length/4).toLocaleString()} tokens)`);
+            console.log(`   📋 Contexto notas: ${contextoDasNotas.length.toLocaleString()} chars (~${Math.ceil(contextoDasNotas.length/4).toLocaleString()} tokens)`);
+            console.log(`   🏢 Business info: ${businessInfo.length.toLocaleString()} chars (~${Math.ceil(businessInfo.length/4).toLocaleString()} tokens)`);
+            if (window.metricasPrimeiroMes) {
+              console.log(`   📊 Métricas modal: ~500 chars (~125 tokens)`);
+            }
+            console.log(`   📏 TOTAL PROMPT: ${promptComInstrucoes.length.toLocaleString()} chars (~${Math.ceil(promptComInstrucoes.length/4).toLocaleString()} tokens)`);
+            
+            // Comparativo com outros modelos
+            console.log(`%c💡 SE USASSE OUTRO MODELO:`, 'color: #f59e0b');
+            Object.entries(precos).forEach(([modelo, p]) => {
+              if (modelo !== modeloIA) {
+                const custoAlt = (inputTokens / 1000000) * p.input + (outputTokens / 1000000) * p.output;
+                const diff = custoAlt - custoTotal;
+                const emoji = diff > 0 ? '📈' : '📉';
+                console.log(`   ${emoji} ${p.nome}: $${custoAlt.toFixed(6)} (${diff > 0 ? '+' : ''}$${diff.toFixed(6)})`);
+              }
+            });
+            
+            // Oportunidades de economia
+            console.log(`%c💡 OPORTUNIDADES DE ECONOMIA:`, 'color: #ef4444; font-weight: bold');
+            if (contextoDasNotas.length > 8000) {
+              console.log(`   ⚠️ Notas muito extensas (${Math.ceil(contextoDasNotas.length/4)} tokens) - Considere resumir`);
+            }
+            if (businessInfo.length > 3000) {
+              console.log(`   ⚠️ Business info grande (${Math.ceil(businessInfo.length/4)} tokens) - Poderia ser mais conciso`);
+            }
+            if (inputTokens > 15000) {
+              console.log(`   🚨 ALERTA: ${inputTokens.toLocaleString()} tokens de input é MUITO! Meta é <10k`);
+            } else if (inputTokens < 8000) {
+              console.log(`   ✅ Consumo otimizado! Menos de 8k tokens de input.`);
+            }
+            
+            // Custos acumulados da sessão
+            console.log(`%c📈 CUSTOS DA SESSÃO DE ESTRUTURAÇÃO:`, 'color: #22c55e');
+            console.log(`   📊 Análises geradas: ${window.ESTRUTURACAO_CUSTOS.geracoes}`);
+            console.log(`   💵 Custo total sessão: $${window.ESTRUTURACAO_CUSTOS.total.toFixed(6)}`);
+            console.log(`   📉 Custo médio por análise: $${(window.ESTRUTURACAO_CUSTOS.total / window.ESTRUTURACAO_CUSTOS.geracoes).toFixed(6)}`);
+            console.log(`%c💰 ═══════════════════════════════════════════════════════════════\n`, 'color: #22c55e; font-weight: bold');
             
             // Renderizar markdown
             let htmlContent = '';
@@ -59923,6 +60295,16 @@ FORMATO PADRÃO:
     let lastDemandaInputTs = 0;
     let lastDemandaFocusTs = 0;
     let lastDemandaFocusTarget = null;
+
+    // Função para registrar foco em campos de demanda (usada no visibilitychange)
+    function noteDemandaFocus(target) {
+      if (target) {
+        lastDemandaFocusTarget = target;
+        lastDemandaFocusTs = Date.now();
+      } else {
+        lastDemandaFocusTarget = null;
+      }
+    }
 
     function isDemandasEditing(){
       const active = document.activeElement;
