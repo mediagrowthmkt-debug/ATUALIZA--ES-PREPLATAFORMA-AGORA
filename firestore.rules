@@ -188,6 +188,22 @@ service cloud.firestore {
         );
       }
 
+      /* ✅ NOTAS DO TIME: Subcoleção para salvar notas do time (evita limite de 1MB) */
+      /* Documento único: /usuarios/{userId}/teamNotes/notes */
+      match /teamNotes/{noteId} {
+        // O dono pode ler e escrever suas próprias notas do time
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ TIME (global): /usuarios/{userId}/team/{memberId} */
       match /team/{memberId} {
         allow read: if isOwner(userId)

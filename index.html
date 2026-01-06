@@ -25259,11 +25259,47 @@ async function sendIAQuestion(){
     let currentTeamNoteColumn = null;
     let teamNoteAttachmentUrls = [];
 
-    function loadTeamNotesFromData(){
-      TEAM_NOTES = Array.isArray(USER_DATA.teamNotes) ? USER_DATA.teamNotes : [];
+    async function loadTeamNotesFromData(){
+      const uid = getTeamNotesTargetUid();
+      if(!uid) {
+        console.warn('⚠️ Nenhum UID disponível para carregar notas');
+        TEAM_NOTES = [];
+        return;
+      }
+      
+      try {
+        // SEMPRE carregar da subcoleção primeiro (fonte principal)
+        const notesDocRef = doc(db, "usuarios", uid, "teamNotes", "notes");
+        const notesDoc = await getDoc(notesDocRef);
+        
+        if(notesDoc.exists()){
+          const data = notesDoc.data();
+          TEAM_NOTES = Array.isArray(data.notes) ? data.notes : [];
+          console.log('✅ Notas carregadas da subcoleção:', TEAM_NOTES.length);
+        } else {
+          console.log('📋 Nenhuma nota na subcoleção, verificando legado...');
+          
+          // Fallback: carregar do USER_DATA legado e migrar
+          if (Array.isArray(USER_DATA.teamNotes) && USER_DATA.teamNotes.length > 0) {
+            TEAM_NOTES = USER_DATA.teamNotes;
+            console.log('📋 Notas encontradas no legado:', TEAM_NOTES.length, '- Migrando para subcoleção...');
+            
+            // Migrar para subcoleção
+            await persistTeamNotes();
+            console.log('✅ Migração concluída!');
+          } else {
+            TEAM_NOTES = [];
+            console.log('📋 Nenhuma nota encontrada (nem subcoleção nem legado)');
+          }
+        }
+      } catch(err) {
+        console.error('❌ Erro ao carregar notas:', err);
+        TEAM_NOTES = [];
+      }
     }
 
     function saveTeamNotesToUserData(){
+      // Mantém para compatibilidade, mas não usa mais
       USER_DATA.teamNotes = TEAM_NOTES;
     }
 
@@ -25287,16 +25323,30 @@ async function sendIAQuestion(){
         return;
       }
       try {
-        await setDoc(doc(db, "usuarios", uid), { teamNotes: TEAM_NOTES }, { merge: true });
+        console.log('💾 Salvando notas para UID:', uid);
+        console.log('💾 Total de notas:', TEAM_NOTES.length);
+        
+        // SALVAR EM SUBCOLEÇÃO para evitar limite de 1MB do documento
+        const notesCollectionRef = collection(db, "usuarios", uid, "teamNotes");
+        
+        // Criar um documento único com todas as notas
+        const notesDocRef = doc(notesCollectionRef, "notes");
+        await setDoc(notesDocRef, { 
+          notes: TEAM_NOTES,
+          updatedAt: new Date().toISOString()
+        });
+        
         console.log('✅ Notas do time salvas para:', uid);
+        mgToast('Nota salva!');
       } catch(err) {
         console.error('❌ Erro ao salvar notas do time:', err);
-        mgToast('Erro ao salvar nota');
+        console.error('❌ Erro detalhado:', err.message, err.code, err.stack);
+        mgToast('Erro ao salvar nota: ' + (err.message || 'Erro desconhecido'));
       }
     }
 
-    function renderTeamNotes(){
-      loadTeamNotesFromData();
+    async function renderTeamNotes(){
+      await loadTeamNotesFromData();
       
       Object.keys(TEAM_NOTES_COLUMNS).forEach(columnKey => {
         const cardsContainer = document.getElementById(`teamNotesCards${capitalize(columnKey)}`);
@@ -25530,20 +25580,31 @@ async function sendIAQuestion(){
     window.handleTeamNoteFileSelect = handleTeamNoteFileSelect;
 
     async function saveTeamNote(){
-      const contentEl = document.getElementById('teamNoteContent');
-      const content = (contentEl?.value || '').trim();
-      
-      console.log('📝 Salvando nota com conteúdo:', content);
-      console.log('📝 Quebras de linha detectadas:', (content.match(/\n/g) || []).length);
-      
-      if(!content && teamNoteAttachmentUrls.length === 0){
-        mgToast('Digite algo ou anexe uma imagem');
-        return;
-      }
-      
-      // Usar getCurrentUser para suportar sessão admin
-      const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
-      const now = new Date().toISOString();
+      try {
+        const contentEl = document.getElementById('teamNoteContent');
+        const content = (contentEl?.value || '').trim();
+        
+        console.log('📝 Salvando nota com conteúdo:', content);
+        console.log('📝 Quebras de linha detectadas:', (content.match(/\n/g) || []).length);
+        
+        if(!content && teamNoteAttachmentUrls.length === 0){
+          mgToast('Digite algo ou anexe uma imagem');
+          return;
+        }
+        
+        // Verificar UID antes de salvar
+        const uid = getTeamNotesTargetUid();
+        if(!uid){
+          console.error('❌ Nenhum UID encontrado para salvar nota');
+          mgToast('Erro: Usuário não identificado. Faça login novamente.');
+          return;
+        }
+        
+        console.log('✅ UID verificado para salvar nota:', uid);
+        
+        // Usar getCurrentUser para suportar sessão admin
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
       
       if(currentEditingTeamNote){
         // Editar nota existente
@@ -25573,6 +25634,12 @@ async function sendIAQuestion(){
       closeTeamNoteModal();
       renderTeamNotes();
       mgToast('Nota salva!');
+      
+      } catch(err) {
+        console.error('❌ Erro ao salvar nota:', err);
+        console.error('❌ Stack trace:', err.stack);
+        mgToast('Erro ao salvar nota: ' + (err.message || 'Erro desconhecido'));
+      }
     }
     window.saveTeamNote = saveTeamNote;
 
