@@ -8398,6 +8398,411 @@ function renderReviewNotes(post){
   .goal-card.todo{ border-left-color:#3b82f6; }
   .goal-tag{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:.75rem; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); }
   @media(max-width:900px){ .goals-columns{ grid-template-columns:1fr; } }
+
+  /* ===================== NOTAS TIME (Kanban Style) ===================== */
+  .team-notes-wrap{
+    margin-left:var(--margin-left);
+    margin-right:var(--margin-right);
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding-bottom:40px;
+  }
+  .team-notes-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:16px 20px;
+    background:linear-gradient(135deg, rgba(99,102,241,.12), rgba(168,85,247,.12));
+    border:1px solid rgba(99,102,241,.25);
+    border-radius:14px;
+  }
+  .team-notes-header h2{
+    margin:0;
+    font-size:1.4rem;
+    font-weight:800;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .team-notes-header p{
+    margin:0;
+    color:#a5b4fc;
+    font-size:.9rem;
+  }
+  .team-notes-board{
+    display:flex;
+    gap:16px;
+    overflow-x:auto;
+    padding-bottom:16px;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(99,102,241,.4) transparent;
+  }
+  .team-notes-board::-webkit-scrollbar{
+    height:8px;
+  }
+  .team-notes-board::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.05);
+    border-radius:4px;
+  }
+  .team-notes-board::-webkit-scrollbar-thumb{
+    background:rgba(99,102,241,.4);
+    border-radius:4px;
+  }
+  .team-notes-board::-webkit-scrollbar-thumb:hover{
+    background:rgba(99,102,241,.6);
+  }
+  .team-notes-column{
+    flex:0 0 320px;
+    min-width:320px;
+    background:rgba(15,23,42,.6);
+    border:1px solid rgba(99,102,241,.2);
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    max-height:calc(100vh - 280px);
+  }
+  .team-notes-column-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    border-bottom:1px solid rgba(99,102,241,.2);
+    background:rgba(99,102,241,.1);
+    border-radius:14px 14px 0 0;
+  }
+  .team-notes-column-title{
+    font-size:1rem;
+    font-weight:700;
+    color:#e2e8f0;
+    margin:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .team-notes-column-title .column-icon{
+    font-size:1.1rem;
+  }
+  .team-notes-column-count{
+    background:rgba(99,102,241,.3);
+    color:#a5b4fc;
+    font-size:.75rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .team-notes-column-cards{
+    flex:1;
+    overflow-y:auto;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,255,255,.2) transparent;
+  }
+  .team-notes-column-cards::-webkit-scrollbar{
+    width:6px;
+  }
+  .team-notes-column-cards::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  .team-notes-column-cards::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.2);
+    border-radius:3px;
+  }
+  .team-notes-add-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:12px;
+    margin:12px;
+    background:rgba(99,102,241,.15);
+    border:1px dashed rgba(99,102,241,.4);
+    border-radius:10px;
+    color:#a5b4fc;
+    font-size:.9rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .team-notes-add-btn:hover{
+    background:rgba(99,102,241,.25);
+    border-color:rgba(99,102,241,.6);
+    color:#fff;
+    transform:translateY(-1px);
+  }
+  .team-notes-card{
+    background:rgba(30,41,59,.8);
+    border:1px solid rgba(99,102,241,.2);
+    border-radius:10px;
+    padding:12px;
+    cursor:pointer;
+    transition:all .2s ease;
+    position:relative;
+  }
+  .team-notes-card:hover{
+    background:rgba(30,41,59,1);
+    border-color:rgba(99,102,241,.4);
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+  }
+  .team-notes-card-content{
+    font-size:.9rem;
+    color:#e2e8f0;
+    line-height:1.5;
+    word-break:break-word;
+    white-space:pre-wrap;
+    max-height:200px;
+    overflow:hidden;
+    position:relative;
+  }
+  .team-notes-card-content.expanded{
+    max-height:none;
+  }
+  .team-notes-card-content img{
+    max-width:100%;
+    border-radius:8px;
+    margin:8px 0;
+  }
+  .team-notes-card-content a{
+    color:#60a5fa;
+    text-decoration:underline;
+  }
+  .team-notes-card-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+    font-size:.75rem;
+    color:#94a3b8;
+  }
+  .team-notes-card-author{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .team-notes-card-author img{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    object-fit:cover;
+  }
+  .team-notes-card-actions{
+    display:flex;
+    gap:6px;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .team-notes-card:hover .team-notes-card-actions{
+    opacity:1;
+  }
+  .team-notes-card-actions button{
+    background:rgba(255,255,255,.1);
+    border:none;
+    border-radius:6px;
+    padding:4px 8px;
+    color:#94a3b8;
+    cursor:pointer;
+    font-size:.8rem;
+    transition:all .15s ease;
+  }
+  .team-notes-card-actions button:hover{
+    background:rgba(255,255,255,.2);
+    color:#fff;
+  }
+  .team-notes-card-actions button.delete:hover{
+    background:rgba(239,68,68,.3);
+    color:#fca5a5;
+  }
+  /* Modal de edição de nota */
+  .team-notes-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100000;
+    padding:20px;
+  }
+  .team-notes-modal.show{
+    display:flex;
+  }
+  .team-notes-modal-content{
+    width:min(600px, 95vw);
+    max-height:85vh;
+    background:#1e293b;
+    border:1px solid rgba(99,102,241,.3);
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .team-notes-modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid rgba(99,102,241,.2);
+    background:rgba(99,102,241,.1);
+  }
+  .team-notes-modal-header h3{
+    margin:0;
+    font-size:1.1rem;
+    font-weight:700;
+    color:#fff;
+  }
+  .team-notes-modal-close{
+    background:rgba(255,255,255,.1);
+    border:none;
+    border-radius:8px;
+    padding:8px 12px;
+    color:#94a3b8;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .team-notes-modal-close:hover{
+    background:rgba(239,68,68,.3);
+    color:#fca5a5;
+  }
+  .team-notes-modal-body{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .team-notes-modal-body label{
+    font-size:.85rem;
+    font-weight:600;
+    color:#94a3b8;
+    display:block;
+    margin-bottom:6px;
+  }
+  .team-notes-modal-body textarea{
+    width:100%;
+    min-height:180px;
+    background:rgba(15,23,42,.6);
+    border:1px solid rgba(99,102,241,.3);
+    border-radius:10px;
+    padding:12px;
+    color:#e2e8f0;
+    font-size:.95rem;
+    line-height:1.6;
+    resize:vertical;
+    font-family:inherit;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+  }
+  .team-notes-modal-body textarea:focus{
+    outline:none;
+    border-color:rgba(99,102,241,.6);
+    box-shadow:0 0 0 3px rgba(99,102,241,.15);
+  }
+  .team-notes-modal-attachments{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:12px;
+    background:rgba(15,23,42,.4);
+    border:1px dashed rgba(99,102,241,.3);
+    border-radius:10px;
+  }
+  .team-notes-modal-attachments-label{
+    width:100%;
+    font-size:.8rem;
+    color:#64748b;
+    margin-bottom:4px;
+  }
+  .team-notes-attachment-preview{
+    position:relative;
+    width:80px;
+    height:80px;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .team-notes-attachment-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .team-notes-attachment-preview .remove-attachment{
+    position:absolute;
+    top:4px;
+    right:4px;
+    width:20px;
+    height:20px;
+    background:rgba(239,68,68,.9);
+    border:none;
+    border-radius:50%;
+    color:#fff;
+    font-size:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .team-notes-modal-upload-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    width:80px;
+    height:80px;
+    background:rgba(99,102,241,.15);
+    border:1px dashed rgba(99,102,241,.4);
+    border-radius:8px;
+    color:#a5b4fc;
+    font-size:1.5rem;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .team-notes-modal-upload-btn:hover{
+    background:rgba(99,102,241,.25);
+    border-color:rgba(99,102,241,.6);
+  }
+  .team-notes-modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    padding:16px 20px;
+    border-top:1px solid rgba(99,102,241,.2);
+    background:rgba(15,23,42,.4);
+  }
+  .team-notes-modal-footer .btn{
+    padding:10px 20px;
+    font-weight:600;
+  }
+  /* CRÍTICO: Prevenir iframes dentro do modal */
+  .team-notes-modal iframe,
+  .team-notes-modal-content iframe,
+  .team-notes-modal-body iframe{
+    display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+  @media(max-width:820px){
+    .team-notes-column{
+      flex:0 0 280px;
+      min-width:280px;
+    }
+    .team-notes-board{
+      padding:0 8px 16px;
+    }
+  }
+  /* ===================== FIM NOTAS TIME ===================== */
 </style>
 </meta></head>
 <body>
@@ -11568,6 +11973,94 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
   
 </div>
+
+<!-- NOTAS TIME (Kanban Board) -->
+<div aria-hidden="true" class="team-notes-wrap" id="teamNotesWrap" style="display:none">
+  <div class="team-notes-header">
+    <div>
+      <h2>📝 Notas do Time</h2>
+      <p>Anotações diárias para manter o controle das contas. Todos do time podem adicionar e visualizar.</p>
+    </div>
+  </div>
+  
+  <div class="team-notes-board" id="teamNotesBoard">
+    <!-- Coluna Tráfego -->
+    <div class="team-notes-column" data-column="trafego">
+      <div class="team-notes-column-header">
+        <h3 class="team-notes-column-title"><span class="column-icon">🎯</span> Tráfego</h3>
+        <span class="team-notes-column-count" id="teamNotesCountTrafego">0</span>
+      </div>
+      <div class="team-notes-column-cards" id="teamNotesCardsTrafego"></div>
+      <button type="button" class="team-notes-add-btn" data-column="trafego" onclick="openTeamNoteModal('trafego')">
+        <span>+</span> Adicionar nota
+      </button>
+    </div>
+    
+    <!-- Coluna Canais de Tração -->
+    <div class="team-notes-column" data-column="canais">
+      <div class="team-notes-column-header">
+        <h3 class="team-notes-column-title"><span class="column-icon">📢</span> Canais de Tração</h3>
+        <span class="team-notes-column-count" id="teamNotesCountCanais">0</span>
+      </div>
+      <div class="team-notes-column-cards" id="teamNotesCardsCanais"></div>
+      <button type="button" class="team-notes-add-btn" data-column="canais" onclick="openTeamNoteModal('canais')">
+        <span>+</span> Adicionar nota
+      </button>
+    </div>
+    
+    <!-- Coluna Liderança -->
+    <div class="team-notes-column" data-column="lideranca">
+      <div class="team-notes-column-header">
+        <h3 class="team-notes-column-title"><span class="column-icon">👔</span> Liderança</h3>
+        <span class="team-notes-column-count" id="teamNotesCountLideranca">0</span>
+      </div>
+      <div class="team-notes-column-cards" id="teamNotesCardsLideranca"></div>
+      <button type="button" class="team-notes-add-btn" data-column="lideranca" onclick="openTeamNoteModal('lideranca')">
+        <span>+</span> Adicionar nota
+      </button>
+    </div>
+    
+    <!-- Coluna Outros -->
+    <div class="team-notes-column" data-column="outros">
+      <div class="team-notes-column-header">
+        <h3 class="team-notes-column-title"><span class="column-icon">📌</span> Outros</h3>
+        <span class="team-notes-column-count" id="teamNotesCountOutros">0</span>
+      </div>
+      <div class="team-notes-column-cards" id="teamNotesCardsOutros"></div>
+      <button type="button" class="team-notes-add-btn" data-column="outros" onclick="openTeamNoteModal('outros')">
+        <span>+</span> Adicionar nota
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Notas Time -->
+<div class="team-notes-modal" id="teamNotesModal">
+  <div class="team-notes-modal-content">
+    <div class="team-notes-modal-header">
+      <h3 id="teamNotesModalTitle">Nova Nota</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeTeamNoteModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body">
+      <div>
+        <label for="teamNoteContent">Conteúdo da nota</label>
+        <textarea id="teamNoteContent" placeholder="Digite sua anotação aqui... 
+
+Você pode adicionar links (https://...) e colar imagens."></textarea>
+      </div>
+      <div class="team-notes-modal-attachments" id="teamNoteAttachments">
+        <div class="team-notes-modal-attachments-label">📎 Anexos (clique ou arraste imagens)</div>
+        <label class="team-notes-modal-upload-btn" for="teamNoteFileInput">+</label>
+        <input type="file" id="teamNoteFileInput" accept="image/*" multiple style="display:none" onchange="handleTeamNoteFileSelect(event)">
+      </div>
+    </div>
+    <div class="team-notes-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeTeamNoteModal()">Cancelar</button>
+      <button type="button" class="btn" id="teamNoteSaveBtn" onclick="saveTeamNote()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- EmailJS SDK -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
@@ -13101,7 +13594,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = false; // Desativado - iniciar na aba estruturação
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
-    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
+    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), teamNotesWrap = $("teamNotesWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
     const newNoteBtn = $("newNoteBtn"), filterSector = $("filterSector"), filterFrom = $("filterFrom"), filterTo = $("filterTo");
     const applyFilter = $("applyFilter"), clearFilter = $("clearFilter"), scrollHint = $("scrollHint");
@@ -21555,6 +22048,7 @@ async function sendIAQuestion(){
       { id:"cac",       name:"CAC" },
       { id:"leads",     name:"Leads" },
       { id:"notes",     name:"Anotações" },
+      { id:"teamNotes", name:"Notas Time" },
       { id:"access",    name:"Acessos" },
       { id:"arquivos",  name:"Arquivos" },
       { id:"relatorio", name:"Relatório" }
@@ -22187,7 +22681,7 @@ async function sendIAQuestion(){
       uploadClientLogo(file);
     });
 
-    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false, estruturacao=false}){
+    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false, estruturacao=false, teamNotes=false}){
       widgetsGrid.style.display = widgets? "flex":"none";
       iframeDica.style.display  = widgets? "block":"none";
       metasWrap.style.display = metas? "block":"none"; metasWrap.setAttribute("aria-hidden", metas? "false":"true");
@@ -22198,6 +22692,7 @@ async function sendIAQuestion(){
       accessWrap.style.display  = access? "flex":"none";  accessWrap.setAttribute("aria-hidden", access? "false":"true");
       filesWrap.style.display   = files? "flex":"none";  filesWrap.setAttribute("aria-hidden", files? "false":"true");
       iaWrap.style.display      = ia? "block":"none"; iaWrap.setAttribute("aria-hidden", ia? "false":"true");
+      if(teamNotesWrap){ teamNotesWrap.style.display = teamNotes? "flex":"none"; teamNotesWrap.setAttribute("aria-hidden", teamNotes? "false":"true"); }
       
       // Ao entrar na aba I.A, sempre usar a última conversa (mais recente)
       if(ia){
@@ -24738,6 +25233,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="relatorio"){
         setSectionVisibility({relatorio:true});
         initRelatorio();
+      } else if(currentSection==="teamNotes"){
+        setSectionVisibility({teamNotes:true});
+        renderTeamNotes();
       } else {
         setSectionVisibility({widgets:true});
         if(widgetsRenderedSection !== currentSection){
@@ -24748,6 +25246,371 @@ async function sendIAQuestion(){
       }
       updateScrollHint();
     }
+
+    /* ========= NOTAS TIME (Kanban) ========= */
+    let TEAM_NOTES = [];
+    let TEAM_NOTES_COLUMNS = {
+      trafego: { name: 'Tráfego', icon: '🎯' },
+      canais: { name: 'Canais de Tração', icon: '📢' },
+      lideranca: { name: 'Liderança', icon: '👔' },
+      outros: { name: 'Outros', icon: '📌' }
+    };
+    let currentEditingTeamNote = null;
+    let currentTeamNoteColumn = null;
+    let teamNoteAttachmentUrls = [];
+
+    function loadTeamNotesFromData(){
+      TEAM_NOTES = Array.isArray(USER_DATA.teamNotes) ? USER_DATA.teamNotes : [];
+    }
+
+    function saveTeamNotesToUserData(){
+      USER_DATA.teamNotes = TEAM_NOTES;
+    }
+
+    function getTeamNotesTargetUid(){
+      // Determinar o UID correto: se admin está visualizando cliente, usar UID do cliente
+      // Se é cliente direto, usar auth.currentUser.uid ou fakeUser
+      if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+        return clientDocPathParts[1]; // ['usuarios', 'uid-do-cliente', ...]
+      }
+      // Tentar getCurrentUser (que inclui _adminFakeUser)
+      const currentUser = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+      return currentUser?.uid;
+    }
+
+    async function persistTeamNotes(){
+      saveTeamNotesToUserData();
+      const uid = getTeamNotesTargetUid();
+      if(!uid) {
+        console.warn('⚠️ Nenhum UID disponível para salvar notas do time');
+        mgToast('Faça login para salvar notas');
+        return;
+      }
+      try {
+        await setDoc(doc(db, "usuarios", uid), { teamNotes: TEAM_NOTES }, { merge: true });
+        console.log('✅ Notas do time salvas para:', uid);
+      } catch(err) {
+        console.error('❌ Erro ao salvar notas do time:', err);
+        mgToast('Erro ao salvar nota');
+      }
+    }
+
+    function renderTeamNotes(){
+      loadTeamNotesFromData();
+      
+      Object.keys(TEAM_NOTES_COLUMNS).forEach(columnKey => {
+        const cardsContainer = document.getElementById(`teamNotesCards${capitalize(columnKey)}`);
+        const countEl = document.getElementById(`teamNotesCount${capitalize(columnKey)}`);
+        if(!cardsContainer) return;
+        
+        const columnNotes = TEAM_NOTES.filter(n => n.column === columnKey)
+          .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        
+        if(countEl) countEl.textContent = columnNotes.length;
+        
+        if(columnNotes.length === 0){
+          cardsContainer.innerHTML = `<p style="color:#64748b;font-size:.85rem;text-align:center;padding:20px 10px;">Nenhuma nota ainda</p>`;
+          return;
+        }
+        
+        cardsContainer.innerHTML = columnNotes.map(note => {
+          const content = escapeHtml(note.content || '').replace(/\n/g, '<br>');
+          const contentWithLinks = linkifyText(content);
+          const date = note.createdAt ? new Date(note.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+          const authorName = note.authorName || 'Anônimo';
+          const authorPhoto = note.authorPhoto || '';
+          
+          let attachmentsHtml = '';
+          if(note.attachments && note.attachments.length > 0){
+            attachmentsHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+              ${note.attachments.map(url => `<img src="${url}" style="max-width:100%;max-height:120px;border-radius:6px;cursor:pointer;" onclick="window.open('${url}', '_blank')">`).join('')}
+            </div>`;
+          }
+          
+          return `
+            <div class="team-notes-card" data-id="${note.id}">
+              <div class="team-notes-card-content">${contentWithLinks}${attachmentsHtml}</div>
+              <div class="team-notes-card-meta">
+                <div class="team-notes-card-author">
+                  ${authorPhoto ? `<img src="${authorPhoto}" alt="">` : ''}
+                  <span>${authorName}</span>
+                  <span style="margin-left:4px;opacity:.6">${date}</span>
+                </div>
+                <div class="team-notes-card-actions">
+                  <button onclick="editTeamNote('${note.id}')" title="Editar">✏️</button>
+                  <button class="delete" onclick="deleteTeamNote('${note.id}')" title="Excluir">🗑️</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    function capitalize(str){
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function linkifyText(text){
+      const urlRegex = /(https?:\/\/[^\s<]+)/g;
+      return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function openTeamNoteModal(column, noteId = null){
+      currentTeamNoteColumn = column;
+      currentEditingTeamNote = noteId;
+      teamNoteAttachmentUrls = [];
+      
+      const modal = document.getElementById('teamNotesModal');
+      const titleEl = document.getElementById('teamNotesModalTitle');
+      const contentEl = document.getElementById('teamNoteContent');
+      const attachmentsEl = document.getElementById('teamNoteAttachments');
+      
+      // Limpar e garantir que não há conteúdo indesejado
+      if(!modal || !titleEl || !contentEl || !attachmentsEl) {
+        console.error('Elementos do modal não encontrados');
+        return;
+      }
+      
+      // CRÍTICO: Remover TODOS os iframes que possam ter sido injetados no modal
+      const allIframes = modal.querySelectorAll('iframe');
+      allIframes.forEach(iframe => {
+        console.warn('⚠️ Removendo iframe indesejado do modal:', iframe);
+        iframe.remove();
+      });
+      
+      // Remover divs .show que não pertencem ao modal
+      const showDivs = modal.querySelectorAll('div.show');
+      showDivs.forEach(div => {
+        if(!div.classList.contains('team-notes-modal') && !div.closest('.team-notes-modal-content')){
+          console.warn('⚠️ Removendo div.show indesejada:', div);
+          div.remove();
+        }
+      });
+      
+      // IMPORTANTE: Remover qualquer elemento estranho que possa ter sido injetado no modal
+      const modalBody = modal.querySelector('.team-notes-modal-body');
+      if(modalBody){
+        // Remover apenas elementos INDESEJADOS (não o textarea nem attachments)
+        const children = Array.from(modalBody.children);
+        children.forEach(child => {
+          const isTextareaContainer = child.querySelector('#teamNoteContent');
+          const isAttachmentsContainer = child.id === 'teamNoteAttachments';
+          
+          if(!isTextareaContainer && !isAttachmentsContainer){
+            console.warn('⚠️ Removendo elemento indesejado do modal body:', child);
+            child.remove();
+          }
+        });
+      }
+      
+      // Debug: Verificar se há elementos indesejados dentro do modal
+      console.log('🔍 Abrindo modal. Children do attachmentsEl antes da limpeza:', attachmentsEl.children.length);
+      
+      if(noteId){
+        const note = TEAM_NOTES.find(n => n.id === noteId);
+        if(note){
+          titleEl.textContent = 'Editar Nota';
+          contentEl.value = note.content || '';
+          teamNoteAttachmentUrls = Array.isArray(note.attachments) ? [...note.attachments] : [];
+          currentTeamNoteColumn = note.column;
+        }
+      } else {
+        titleEl.textContent = `Nova Nota - ${TEAM_NOTES_COLUMNS[column]?.name || column}`;
+        contentEl.value = '';
+        teamNoteAttachmentUrls = [];
+      }
+      
+      // Renderizar anexos ANTES de abrir o modal
+      renderTeamNoteAttachments();
+      
+      // Debug: Verificar após renderização
+      console.log('✅ Anexos renderizados. Children do attachmentsEl:', attachmentsEl.children.length);
+      
+      // GARANTIR que o textarea aceite Enter (adicionar listener se não existe)
+      if(contentEl && !contentEl.dataset.enterListenerAdded){
+        contentEl.dataset.enterListenerAdded = 'true';
+        contentEl.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter'){
+            // Permitir Enter SEMPRE no textarea
+            e.stopPropagation();
+            console.log('✅ Enter pressionado no textarea - quebra de linha permitida');
+          }
+        }, true); // useCapture = true para pegar o evento primeiro
+      }
+      
+      // Abrir modal
+      modal.classList.add('show');
+      
+      // Focar no textarea após pequeno delay para garantir que está visível
+      setTimeout(() => {
+        if(contentEl) {
+          contentEl.focus();
+          console.log('🎯 Textarea focado, pronto para digitação');
+        }
+      }, 100);
+    }
+    window.openTeamNoteModal = openTeamNoteModal;
+
+    function closeTeamNoteModal(){
+      const modal = document.getElementById('teamNotesModal');
+      modal.classList.remove('show');
+      currentEditingTeamNote = null;
+      currentTeamNoteColumn = null;
+      teamNoteAttachmentUrls = [];
+    }
+    window.closeTeamNoteModal = closeTeamNoteModal;
+
+    function renderTeamNoteAttachments(){
+      const container = document.getElementById('teamNoteAttachments');
+      if(!container) {
+        console.error('❌ Container de anexos não encontrado');
+        return;
+      }
+      
+      // Limpar COMPLETAMENTE o container primeiro
+      while(container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      
+      const previewsHtml = teamNoteAttachmentUrls.map((url, idx) => `
+        <div class="team-notes-attachment-preview">
+          <img src="${escapeHtml(url)}" alt="Anexo">
+          <button type="button" class="remove-attachment" onclick="removeTeamNoteAttachment(${idx})">×</button>
+        </div>
+      `).join('');
+      
+      container.innerHTML = `
+        <div class="team-notes-modal-attachments-label">📎 Anexos (clique ou arraste imagens)</div>
+        ${previewsHtml}
+        <label class="team-notes-modal-upload-btn" for="teamNoteFileInput">+</label>
+        <input type="file" id="teamNoteFileInput" accept="image/*" multiple style="display:none" onchange="handleTeamNoteFileSelect(event)">
+      `;
+    }
+
+    function removeTeamNoteAttachment(idx){
+      teamNoteAttachmentUrls.splice(idx, 1);
+      renderTeamNoteAttachments();
+    }
+    window.removeTeamNoteAttachment = removeTeamNoteAttachment;
+
+    async function handleTeamNoteFileSelect(event){
+      const files = event.target.files;
+      if(!files || files.length === 0) return;
+      
+      const uid = getTeamNotesTargetUid();
+      if(!uid){
+        mgToast('Faça login para anexar imagens');
+        return;
+      }
+      
+      for(const file of files){
+        if(!file.type.startsWith('image/')){
+          mgToast('Apenas imagens são permitidas');
+          continue;
+        }
+        
+        try {
+          mgToast('Enviando imagem...');
+          const fileName = `team-notes/${uid}/${Date.now()}-${file.name}`;
+          const fileRef = sRef(storage, fileName);
+          await uploadBytes(fileRef, file);
+          const url = await getDownloadURL(fileRef);
+          teamNoteAttachmentUrls.push(url);
+          renderTeamNoteAttachments();
+          mgToast('Imagem anexada!');
+        } catch(err) {
+          console.error('Erro ao enviar imagem:', err);
+          mgToast('Erro ao enviar imagem');
+        }
+      }
+      
+      event.target.value = '';
+    }
+    window.handleTeamNoteFileSelect = handleTeamNoteFileSelect;
+
+    async function saveTeamNote(){
+      const contentEl = document.getElementById('teamNoteContent');
+      const content = (contentEl?.value || '').trim();
+      
+      console.log('📝 Salvando nota com conteúdo:', content);
+      console.log('📝 Quebras de linha detectadas:', (content.match(/\n/g) || []).length);
+      
+      if(!content && teamNoteAttachmentUrls.length === 0){
+        mgToast('Digite algo ou anexe uma imagem');
+        return;
+      }
+      
+      // Usar getCurrentUser para suportar sessão admin
+      const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+      const now = new Date().toISOString();
+      
+      if(currentEditingTeamNote){
+        // Editar nota existente
+        const idx = TEAM_NOTES.findIndex(n => n.id === currentEditingTeamNote);
+        if(idx !== -1){
+          TEAM_NOTES[idx].content = content;
+          TEAM_NOTES[idx].attachments = teamNoteAttachmentUrls;
+          TEAM_NOTES[idx].updatedAt = now;
+        }
+      } else {
+        // Nova nota
+        const newNote = {
+          id: uuid(),
+          column: currentTeamNoteColumn,
+          content: content,
+          attachments: teamNoteAttachmentUrls,
+          authorId: user?.uid || '',
+          authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+          authorPhoto: user?.photoURL || '',
+          createdAt: now,
+          updatedAt: now
+        };
+        TEAM_NOTES.push(newNote);
+      }
+      
+      await persistTeamNotes();
+      closeTeamNoteModal();
+      renderTeamNotes();
+      mgToast('Nota salva!');
+    }
+    window.saveTeamNote = saveTeamNote;
+
+    function editTeamNote(noteId){
+      openTeamNoteModal(null, noteId);
+    }
+    window.editTeamNote = editTeamNote;
+
+    async function deleteTeamNote(noteId){
+      if(!confirm('Tem certeza que deseja excluir esta nota?')) return;
+      
+      TEAM_NOTES = TEAM_NOTES.filter(n => n.id !== noteId);
+      await persistTeamNotes();
+      renderTeamNotes();
+      mgToast('Nota excluída');
+    }
+    window.deleteTeamNote = deleteTeamNote;
+
+    // Suporte para colar imagens no textarea
+    document.addEventListener('paste', async (e) => {
+      const modal = document.getElementById('teamNotesModal');
+      if(!modal || !modal.classList.contains('show')) return;
+      
+      const items = e.clipboardData?.items;
+      if(!items) return;
+      
+      for(const item of items){
+        if(item.type.startsWith('image/')){
+          e.preventDefault();
+          const file = item.getAsFile();
+          if(file){
+            const fakeEvent = { target: { files: [file], value: '' } };
+            await handleTeamNoteFileSelect(fakeEvent);
+          }
+          break;
+        }
+      }
+    });
 
     /* ========= Relatório ========= */
   let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
