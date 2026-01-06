@@ -12226,7 +12226,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     window.googleCalendarIntegration = googleCalendarIntegration;
 
     // Set OpenRouter API key for AI integration
-    window.OPENROUTER_API_KEY = "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"; // API Key para Gemini 2.5 Flash
+    window.OPENROUTER_API_KEY = "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"; // API Key para Gemini 2.5 Flash
 
     // ================================================================
     // CONFIGURAÇÃO CENTRALIZADA DE IA - FÁCIL TROCA DE MODELOS

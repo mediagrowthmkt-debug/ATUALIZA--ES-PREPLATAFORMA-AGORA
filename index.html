@@ -12742,7 +12742,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     window.googleCalendarIntegration = googleCalendarIntegration;
 
     // Set OpenRouter API key for AI integration
-    window.OPENROUTER_API_KEY = "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"; // API Key para Gemini 2.5 Flash
+    window.OPENROUTER_API_KEY = "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"; // API Key para Gemini 2.5 Flash
 
     // ================================================================
     // CONFIGURAÇÃO CENTRALIZADA DE IA - FÁCIL TROCA DE MODELOS
@@ -16853,7 +16853,16 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         // Se for erro de tamanho, avisar o usuário
         if(err.message && err.message.includes('exceeds')) {
           console.error('🚨 ERRO DE TAMANHO DO DOCUMENTO!');
-          console.error('📏 Campo iaChats: ' + (dataSize / 1024).toFixed(2) + ' KB');
+          
+          // Recalcular tamanho para mostrar no erro
+          try {
+            const errorDataStr = JSON.stringify({ iaChats: recentChats });
+            const errorDataSize = new Blob([errorDataStr]).size;
+            console.error('📏 Campo iaChats: ' + (errorDataSize / 1024).toFixed(2) + ' KB');
+          } catch(e) {
+            console.error('📏 Não foi possível calcular tamanho do campo iaChats');
+          }
+          
           console.error('📦 Documento completo excedeu 1MB (Firebase limit)');
           console.error('💡 SOLUÇÃO: Execute reduzirDocumentoUsuario() no console AGORA!');
           
@@ -49430,31 +49439,62 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
           }
         }
         
-        // 5. Limpar campos temporários/cache
+        // 5. Limpar campo notes (maior vilão do tamanho)
+        let cleanedNotes = data.notes || '';
+        if (cleanedNotes && typeof cleanedNotes === 'string') {
+          const notesSize = new Blob([cleanedNotes]).size;
+          const maxNotesSize = 200 * 1024; // 200 KB máximo
+          
+          if (notesSize > maxNotesSize) {
+            console.log(`📝 Notes muito grande (${Math.round(notesSize/1024)}KB) - reduzindo para 200KB`);
+            // Manter apenas os últimos 200KB de caracteres (notas mais recentes geralmente estão no final)
+            const maxChars = 200000; // aproximadamente 200KB
+            cleanedNotes = '...[notas antigas removidas para economizar espaço]...\n\n' + 
+                          cleanedNotes.slice(-maxChars);
+            console.log(`   → Reduzido para ${Math.round(new Blob([cleanedNotes]).size/1024)}KB`);
+          }
+        }
+        
+        // 6. Limpar campos temporários/cache
         const cleanedData = {
-          iaChats,
-          posts,
-          leads,
-          _lastCleanup: new Date().toISOString(),
-          // Manter campos essenciais
-          email: data.email,
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-          metas2025: data.metas2025,
-          metas2026: data.metas2026,
-          analises: data.analises,
-          notas: data.notas,
-          clientKey: data.clientKey,
-          observacoes: data.observacoes,
-          demandas: data.demandas,
-          cacData: data.cacData,
-          // Remover campos grandes desnecessários
-          // estruturacao: dados movidos para subcoleção
-          // iaHistory: redundante com iaChats
-          // tempData, cache, etc.
+          _lastCleanup: new Date().toISOString()
         };
         
-        // 6. Salvar documento reduzido
+        // Adicionar apenas campos que existem e não são undefined
+        if (data.email) cleanedData.email = data.email;
+        if (data.displayName) cleanedData.displayName = data.displayName;
+        if (data.photoURL) cleanedData.photoURL = data.photoURL;
+        if (data.clientKey) cleanedData.clientKey = data.clientKey;
+        if (iaChats && iaChats.length > 0) cleanedData.iaChats = iaChats;
+        if (posts && posts.length > 0) cleanedData.posts = posts;
+        if (leads && leads.length > 0) cleanedData.leads = leads;
+        if (data.metas2025) cleanedData.metas2025 = data.metas2025;
+        if (data.metas2026) cleanedData.metas2026 = data.metas2026;
+        if (data.analises) cleanedData.analises = data.analises;
+        if (cleanedNotes) cleanedData.notes = cleanedNotes;
+        if (data.observacoes) cleanedData.observacoes = data.observacoes;
+        if (data.demandas) cleanedData.demandas = data.demandas;
+        if (data.cacData) cleanedData.cacData = data.cacData;
+        if (data.demandaMonthPlans) cleanedData.demandaMonthPlans = data.demandaMonthPlans;
+        if (data.trafegoOptimizationHistory) cleanedData.trafegoOptimizationHistory = data.trafegoOptimizationHistory;
+        if (data.widgets) cleanedData.widgets = data.widgets;
+        if (data.calendarioPosts) cleanedData.calendarioPosts = data.calendarioPosts;
+        
+        // Remover campos grandes desnecessários:
+        // estruturacao: dados movidos para subcoleção
+        // iaHistory: redundante com iaChats
+        // tempData, cache, etc.
+        
+        // 7. Verificar tamanho final antes de salvar
+        const finalDataStr = JSON.stringify(cleanedData);
+        const finalSize = new Blob([finalDataStr]).size;
+        console.log(`📊 Tamanho final do documento: ${Math.round(finalSize/1024)}KB / 1024KB`);
+        
+        if (finalSize > 1048576) {
+          throw new Error(`❌ Documento ainda muito grande (${Math.round(finalSize/1024)}KB)! Precisamos remover mais dados.`);
+        }
+        
+        // 8. Salvar documento reduzido
         console.log('💾 Salvando documento limpo...');
         await setDoc(userDocRef, cleanedData);
         
