@@ -7360,15 +7360,29 @@ function renderReviewNotes(post){
   
   /* Resumo de demandas para WhatsApp */
   .demandas-summary-box{margin-top:24px;background:rgba(15,23,42,.35);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px}
-  .demandas-summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .demandas-summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
   .demandas-summary-title{font-size:1rem;font-weight:700;color:#fff;margin:0}
-  .demandas-summary-buttons{display:flex;gap:8px;align-items:center}
-  .demandas-summary-textarea{width:100%;min-height:200px;background:#0a0a0a;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:12px;font-size:.85rem;font-family:'Courier New',monospace;line-height:1.6;resize:vertical}
+  .demandas-summary-buttons{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .demandas-summary-textarea{width:100%;min-height:400px;max-height:600px;background:#0a0a0a;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:12px;font-size:.85rem;font-family:'Courier New',monospace;line-height:1.6;resize:vertical;display:none}
+  .demandas-summary-preview{width:100%;min-height:400px;max-height:600px;background:#0b141a;color:#e9edef;border:1px solid #374151;border-radius:8px;padding:16px;font-size:.9rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word}
+  .demandas-summary-preview .wa-bold{font-weight:700}
+  .demandas-summary-preview .wa-italic{font-style:italic;color:#8696a0}
+  .demandas-summary-preview .wa-strike{text-decoration:line-through;color:#8696a0}
+  .demandas-summary-preview .wa-link{color:#53bdeb;text-decoration:none}
+  .demandas-summary-preview .wa-link:hover{text-decoration:underline}
+  .demandas-summary-preview .wa-atrasada{color:#ff6b6b;font-weight:700}
+  .demandas-summary-preview .wa-separator{color:#3b4a54;display:block;margin:4px 0}
   .demandas-summary-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s ease;display:inline-flex;align-items:center;gap:6px}
   .demandas-summary-btn:hover{background:#1eb054}
   .demandas-summary-btn:active{transform:scale(.98)}
   .demandas-summary-btn.refresh{background:#3b82f6}
   .demandas-summary-btn.refresh:hover{background:#2563eb}
+  .demandas-summary-btn.user-copy{background:#8b5cf6;border-radius:0 8px 8px 0;padding:8px 12px}
+  .demandas-summary-btn.user-copy:hover{background:#7c3aed}
+  .demandas-summary-btn.user-copy:disabled{background:#4b5563;cursor:not-allowed;opacity:.6}
+  .demandas-summary-user-filter{display:flex;align-items:center}
+  .demandas-user-select{background:#1f2937;color:#fff;border:1px solid #374151;border-right:none;border-radius:8px 0 0 8px;padding:8px 12px;font-size:.85rem;cursor:pointer;min-width:140px}
+  .demandas-user-select:focus{outline:none;border-color:#8b5cf6}
   .demanda-plan-month{border:1px solid var(--shell-border);background:rgba(255,255,255,.04);border-radius:12px;padding:14px}
   .demanda-plan-month-title{margin:0 0 12px;font-size:1rem;font-weight:700;text-transform:capitalize;color:#fff}
   .demanda-plan-month-content{display:flex;flex-direction:column;gap:14px}
@@ -10054,11 +10068,23 @@ function renderReviewNotes(post){
           <span>🔄</span>
           <span>Atualizar</span>
         </button>
+        <div class="demandas-summary-user-filter">
+          <select id="selectDemandasUser" class="demandas-user-select">
+            <option value="">👤 Por usuário...</option>
+          </select>
+          <button class="demandas-summary-btn user-copy" id="btnCopyDemandasByUser" disabled>
+            <span>📋</span>
+            <span>Copiar</span>
+          </button>
+        </div>
         <button class="demandas-summary-btn" id="btnCopyDemandasSummary">
           <span>📋</span>
-          <span>Copiar Resumo</span>
+          <span>Copiar Tudo</span>
         </button>
       </div>
+    </div>
+    <div id="demandasSummaryPreview" class="demandas-summary-preview">
+      <span style="color:#8696a0">O resumo das demandas aparecerá aqui...</span>
     </div>
     <textarea id="demandasSummaryText" class="demandas-summary-textarea" readonly placeholder="O resumo das demandas aparecerá aqui..."></textarea>
   </div>
@@ -61418,6 +61444,10 @@ FORMATO PADRÃO:
       if(typeof updateDemandasSummary === 'function'){
         try{ updateDemandasSummary(); }catch(_err){}
       }
+      // Atualizar dropdown de usuários
+      if(typeof updateDemandasUserDropdown === 'function'){
+        try{ updateDemandasUserDropdown(); }catch(_err){}
+      }
     }
 
     function renderDemandas(eventOrOptions){
@@ -62024,6 +62054,41 @@ FORMATO PADRÃO:
     const demandasSummaryTextEl = $('demandasSummaryText');
     const btnCopyDemandasSummaryEl = $('btnCopyDemandasSummary');
     const btnRefreshDemandasSummaryEl = $('btnRefreshDemandasSummary');
+    const selectDemandasUserEl = $('selectDemandasUser');
+    const btnCopyDemandasByUserEl = $('btnCopyDemandasByUser');
+    
+    // Função para atualizar dropdown de usuários das demandas
+    function updateDemandasUserDropdown(){
+      if(!selectDemandasUserEl) return;
+      
+      // Coletar todos os responsáveis únicos das demandas
+      const responsaveis = new Set();
+      if(Array.isArray(DEMANDAS)){
+        DEMANDAS.forEach(d => {
+          if(d.responsavel && d.responsavel.trim()){
+            responsaveis.add(d.responsavel.trim());
+          }
+        });
+      }
+      
+      // Limpar e preencher dropdown
+      selectDemandasUserEl.innerHTML = '<option value="">👤 Por usuário...</option>';
+      Array.from(responsaveis).sort().forEach(resp => {
+        const opt = document.createElement('option');
+        opt.value = resp;
+        opt.textContent = resp;
+        selectDemandasUserEl.appendChild(opt);
+      });
+    }
+    
+    // Habilitar/desabilitar botão de copiar por usuário
+    if(selectDemandasUserEl){
+      selectDemandasUserEl.addEventListener('change', () => {
+        if(btnCopyDemandasByUserEl){
+          btnCopyDemandasByUserEl.disabled = !selectDemandasUserEl.value;
+        }
+      });
+    }
     
     // Função para formatar data de forma legível
     function formatDateReadable(dateStr){
@@ -62103,7 +62168,8 @@ FORMATO PADRÃO:
     }
     
     // Função para gerar resumo formatado para WhatsApp (ASSÍNCRONA)
-    async function generateDemandasSummary(){
+    // filterUser: se fornecido, filtra apenas demandas desse responsável
+    async function generateDemandasSummary(filterUser = null){
       if(!Array.isArray(DEMANDAS) || DEMANDAS.length === 0){
         return '_Nenhuma demanda cadastrada no momento._';
       }
@@ -62142,6 +62208,9 @@ FORMATO PADRÃO:
       const fMonth = selectedDemandaMonth;
       
       const filtered = DEMANDAS.filter(d => {
+        // Filtro por usuário específico (para copiar por usuário)
+        if(filterUser && (d.responsavel || '') !== filterUser) return false;
+        
         const sMatch = !search || (d.demanda || '').toLowerCase().includes(search);
         const stMatch = !fStatus || d.status === fStatus;
         const objetivoMatch = !fObjetivo || (d.demanda || '').toLowerCase().includes(fObjetivo);
@@ -62164,7 +62233,9 @@ FORMATO PADRÃO:
       });
       
       if(filtered.length === 0){
-        return '_Nenhuma demanda encontrada com os filtros aplicados._';
+        return filterUser 
+          ? `_Nenhuma demanda encontrada para ${filterUser}._`
+          : '_Nenhuma demanda encontrada com os filtros aplicados._';
       }
       
       // Ordenar demandas (mesma lógica da tabela)
@@ -62262,19 +62333,66 @@ FORMATO PADRÃO:
       return summary;
     }
     
+    // Função para formatar texto com estilos do WhatsApp para visualização
+    function formatWhatsAppPreview(text){
+      if(!text) return '';
+      
+      // Escapar HTML
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      
+      // Formatar *negrito*
+      html = html.replace(/\*([^*\n]+)\*/g, '<span class="wa-bold">$1</span>');
+      
+      // Formatar _itálico_
+      html = html.replace(/_([^_\n]+)_/g, '<span class="wa-italic">$1</span>');
+      
+      // Formatar ~riscado~
+      html = html.replace(/~([^~\n]+)~/g, '<span class="wa-strike">$1</span>');
+      
+      // Destacar texto ATRASADA
+      html = html.replace(/(⚠️🔴\s*<span class="wa-bold">ATRASADA<\/span>)/g, '<span class="wa-atrasada">$1</span>');
+      
+      // Formatar links
+      html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="wa-link">$1</a>');
+      
+      // Formatar separadores
+      html = html.replace(/(━{5,})/g, '<span class="wa-separator">$1</span>');
+      
+      return html;
+    }
+    
+    // Atualizar preview do resumo
+    function updateDemandasPreview(text){
+      const previewEl = $('demandasSummaryPreview');
+      if(!previewEl) return;
+      
+      if(!text || text.trim() === ''){
+        previewEl.innerHTML = '<span style="color:#8696a0">O resumo das demandas aparecerá aqui...</span>';
+        return;
+      }
+      
+      previewEl.innerHTML = formatWhatsAppPreview(text);
+    }
+    
     // Atualizar resumo sempre que demandas mudarem (ASSÍNCRONO)
     async function updateDemandasSummary(){
       if(!demandasSummaryTextEl) return;
       
-      // Mostrar loading enquanto gera os links
+      // Mostrar loading
       demandasSummaryTextEl.value = '⏳ Gerando resumo...';
+      updateDemandasPreview('⏳ Gerando resumo...');
       
       try {
         const summary = await generateDemandasSummary();
         demandasSummaryTextEl.value = summary;
+        updateDemandasPreview(summary);
       } catch (e) {
         console.error('Erro ao gerar resumo:', e);
         demandasSummaryTextEl.value = '❌ Erro ao gerar resumo. Tente novamente.';
+        updateDemandasPreview('❌ Erro ao gerar resumo. Tente novamente.');
       }
     }
     
@@ -62314,6 +62432,7 @@ FORMATO PADRÃO:
         
         try {
           await updateDemandasSummary();
+          updateDemandasUserDropdown(); // Atualizar dropdown de usuários também
           showToast('✅ Resumo atualizado!', 'success');
         } catch (e) {
           console.error('Erro ao atualizar resumo:', e);
@@ -62321,6 +62440,35 @@ FORMATO PADRÃO:
         } finally {
           btnRefreshDemandasSummaryEl.disabled = false;
           btnRefreshDemandasSummaryEl.innerHTML = '<span>🔄</span><span>Atualizar</span>';
+        }
+      });
+    }
+    
+    // Botão de copiar resumo POR USUÁRIO
+    if(btnCopyDemandasByUserEl){
+      btnCopyDemandasByUserEl.addEventListener('click', async () => {
+        const selectedUser = selectDemandasUserEl?.value;
+        if(!selectedUser){
+          showToast('Selecione um usuário primeiro', 'error');
+          return;
+        }
+        
+        btnCopyDemandasByUserEl.disabled = true;
+        btnCopyDemandasByUserEl.innerHTML = '<span>⏳</span>';
+        
+        try {
+          // Gerar resumo filtrado pelo usuário selecionado
+          const summary = await generateDemandasSummary(selectedUser);
+          
+          // Copiar para clipboard
+          await navigator.clipboard.writeText(summary);
+          showToast(`✅ Demandas de ${selectedUser} copiadas!`, 'success');
+        } catch (e) {
+          console.error('Erro ao copiar por usuário:', e);
+          showToast('❌ Erro ao copiar. Tente novamente.', 'error');
+        } finally {
+          btnCopyDemandasByUserEl.disabled = !selectDemandasUserEl?.value;
+          btnCopyDemandasByUserEl.innerHTML = '<span>📋</span><span>Copiar</span>';
         }
       });
     }
