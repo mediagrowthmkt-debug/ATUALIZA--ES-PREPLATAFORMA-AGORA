@@ -7357,6 +7357,15 @@ function renderReviewNotes(post){
   .demandas-table .del-cell button{background:#550000;border:1px solid #880000;color:#fff;border-radius:4px;padding:2px 6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto}
   .demanda-plans{margin-top:16px;display:flex;flex-direction:column;gap:16px}
   .demanda-ai-actions{margin-top:18px;display:flex;justify-content:flex-end;align-items:center;gap:12px}
+  
+  /* Resumo de demandas para WhatsApp */
+  .demandas-summary-box{margin-top:24px;background:rgba(15,23,42,.35);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px}
+  .demandas-summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .demandas-summary-title{font-size:1rem;font-weight:700;color:#fff;margin:0}
+  .demandas-summary-textarea{width:100%;min-height:200px;background:#0a0a0a;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:12px;font-size:.85rem;font-family:'Courier New',monospace;line-height:1.6;resize:vertical}
+  .demandas-summary-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s ease;display:inline-flex;align-items:center;gap:6px}
+  .demandas-summary-btn:hover{background:#1eb054}
+  .demandas-summary-btn:active{transform:scale(.98)}
   .demanda-plan-month{border:1px solid var(--shell-border);background:rgba(255,255,255,.04);border-radius:12px;padding:14px}
   .demanda-plan-month-title{margin:0 0 12px;font-size:1rem;font-weight:700;text-transform:capitalize;color:#fff}
   .demanda-plan-month-content{display:flex;flex-direction:column;gap:14px}
@@ -10031,6 +10040,18 @@ function renderReviewNotes(post){
   <div class="demanda-ai-actions">
     <button class="btn small secondary" id="demandaObjectiveAIButton" type="button">Gerar Planejamento</button>
     <button class="btn small secondary" id="btnCopyPlanningLink" type="button">Copiar link do planejamento</button>
+  </div>
+  
+  <!-- Resumo de demandas para WhatsApp -->
+  <div class="demandas-summary-box">
+    <div class="demandas-summary-header">
+      <h4 class="demandas-summary-title">📱 Resumo para WhatsApp</h4>
+      <button class="demandas-summary-btn" id="btnCopyDemandasSummary">
+        <span>📋</span>
+        <span>Copiar Resumo</span>
+      </button>
+    </div>
+    <textarea id="demandasSummaryText" class="demandas-summary-textarea" readonly placeholder="O resumo das demandas aparecerá aqui..."></textarea>
   </div>
 </div>
 
@@ -61384,6 +61405,10 @@ FORMATO PADRÃO:
       if(typeof renderCalendarDays === 'function'){
         try{ renderCalendarDays(); }catch(_err){}
       }
+      // Atualizar resumo para WhatsApp
+      if(typeof updateDemandasSummary === 'function'){
+        try{ updateDemandasSummary(); }catch(_err){}
+      }
     }
 
     function renderDemandas(eventOrOptions){
@@ -61982,6 +62007,244 @@ FORMATO PADRÃO:
       demandaPlanModalEl.addEventListener('click', (e) => {
         if(e.target === demandaPlanModalEl){
           closeDemandaPlanModal();
+        }
+      });
+    }
+    
+    /* ========= RESUMO DE DEMANDAS PARA WHATSAPP ========= */
+    const demandasSummaryTextEl = $('demandasSummaryText');
+    const btnCopyDemandasSummaryEl = $('btnCopyDemandasSummary');
+    
+    // Função para formatar data de forma legível
+    function formatDateReadable(dateStr){
+      if(!dateStr) return '';
+      try{
+        const d = new Date(dateStr);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      }catch(_){
+        return dateStr;
+      }
+    }
+    
+    // Função para gerar link compartilhável do plano (CURTO)
+    async function generatePlanLink(demanda) {
+      try {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return '';
+        
+        // Gerar ID curto (8 caracteres)
+        const shortId = demanda.id.substring(0, 8);
+        
+        // Salvar link no Firebase para referência futura
+        const linkData = {
+          demandaId: demanda.id,
+          userId: uid,
+          createdAt: Date.now()
+        };
+        
+        try {
+          await setDoc(doc(db, 'planLinks', shortId), linkData);
+        } catch (e) {
+          console.warn('Erro ao salvar link:', e);
+        }
+        
+        // Retornar link curto
+        const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html?$/i, '');
+        return `${baseUrl}p/${shortId}`;
+      } catch (e) {
+        return '';
+      }
+    }
+    
+    // Função síncrona para link curto (não salva no Firebase)
+    function generatePlanLinkSync(demanda) {
+      try {
+        const shortId = demanda.id.substring(0, 8);
+        const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html?$/i, '');
+        return `${baseUrl}p/${shortId}`;
+      } catch (e) {
+        return '';
+      }
+    }
+    
+    // Função para gerar resumo formatado para WhatsApp
+    function generateDemandasSummary(){
+      if(!Array.isArray(DEMANDAS) || DEMANDAS.length === 0){
+        return '_Nenhuma demanda cadastrada no momento._';
+      }
+      
+      // Obter nome da conta da URL (pathname) ou do usuário
+      let contaNome = 'Cliente';
+      try {
+        // Tentar pegar do pathname primeiro (ex: /wolfcarpenters/)
+        const pathSegment = window.location.pathname.split('/').filter(Boolean)[0];
+        if (pathSegment && pathSegment !== 'index.html') {
+          contaNome = pathSegment;
+        } else if (typeof CLIENT_DATA !== 'undefined' && CLIENT_DATA?.nome) {
+          // Fallback para nome do cliente
+          contaNome = CLIENT_DATA.nome;
+        } else if (auth?.currentUser?.email) {
+          // Fallback para email do usuário
+          contaNome = auth.currentUser.email.split('@')[0];
+        }
+      } catch (e) {
+        contaNome = 'Cliente';
+      }
+      
+      // Filtrar demandas conforme exibido na tabela (usando os mesmos filtros)
+      const search = ($('demandaSearch')?.value || '').toLowerCase();
+      const statusFilterEl = $('demandaStatusColumnFilter');
+      const objetivoFilterEl = $('demandaObjetivoFilter');
+      const responsavelFilterEl = $('demandaResponsavelFilter');
+      const periodoInicioEl = $('demandaPeriodoInicioFilter');
+      const periodoFimEl = $('demandaPeriodoFimFilter');
+      
+      const fStatus = statusFilterEl ? statusFilterEl.value || '' : '';
+      const fObjetivo = objetivoFilterEl ? (objetivoFilterEl.value || '').toLowerCase().trim() : '';
+      const fResponsavel = responsavelFilterEl ? responsavelFilterEl.value || '' : '';
+      const fPeriodoInicio = periodoInicioEl ? parseFilterDate(periodoInicioEl.value, false) : null;
+      const fPeriodoFim = periodoFimEl ? parseFilterDate(periodoFimEl.value, true) : null;
+      const fMonth = selectedDemandaMonth;
+      
+      const filtered = DEMANDAS.filter(d => {
+        const sMatch = !search || (d.demanda || '').toLowerCase().includes(search);
+        const stMatch = !fStatus || d.status === fStatus;
+        const objetivoMatch = !fObjetivo || (d.demanda || '').toLowerCase().includes(fObjetivo);
+        const respMatch = !fResponsavel || (d.responsavel || '') === fResponsavel;
+        const demandMonths = getDemandMonthKeys(d);
+        const mMatch = !fMonth || !demandMonths.length || demandMonths.includes(fMonth);
+        
+        let periodoMatch = true;
+        if(fPeriodoInicio || fPeriodoFim){
+          const rangeStart = getDemandaStartDate(d) || getDemandaEndDate(d);
+          const rangeEnd = getDemandaEndDate(d) || rangeStart;
+          if(!rangeStart || !rangeEnd){
+            periodoMatch = false;
+          }else{
+            if(fPeriodoInicio && rangeEnd.getTime() < fPeriodoInicio.getTime()) periodoMatch = false;
+            if(fPeriodoFim && rangeStart.getTime() > fPeriodoFim.getTime()) periodoMatch = false;
+          }
+        }
+        return sMatch && stMatch && objetivoMatch && respMatch && mMatch && periodoMatch;
+      });
+      
+      if(filtered.length === 0){
+        return '_Nenhuma demanda encontrada com os filtros aplicados._';
+      }
+      
+      // Ordenar demandas (mesma lógica da tabela)
+      const sorted = filtered.slice().sort((a, b) => {
+        const aMeta = getDemandaSortMeta(a);
+        const bMeta = getDemandaSortMeta(b);
+        if(aMeta.startMs !== bMeta.startMs) return aMeta.startMs - bMeta.startMs;
+        if(aMeta.endMs !== bMeta.endMs) return aMeta.endMs - bMeta.endMs;
+        return (a.demanda || '').localeCompare(b.demanda || '', 'pt-BR');
+      });
+      
+      // Agrupar por responsável
+      const porResponsavel = {};
+      sorted.forEach(d => {
+        const resp = d.responsavel || 'Não definido';
+        if(!porResponsavel[resp]) porResponsavel[resp] = [];
+        porResponsavel[resp].push(d);
+      });
+      
+      // Gerar resumo formatado (minimalista)
+      let summary = `*${contaNome.toUpperCase()}*\n`;
+      summary += '*📋 PLANEJAMENTO*\n\n';
+      
+      const responsaveis = Object.keys(porResponsavel).sort();
+      
+      responsaveis.forEach((responsavel, respIndex) => {
+        const demandas = porResponsavel[responsavel];
+        
+        // Cabeçalho do responsável
+        summary += `*👤 ${responsavel}*\n`;
+        summary += `_${demandas.length} demanda(s)_\n\n`;
+        
+        demandas.forEach((d, index) => {
+          // Status emoji
+          let statusEmoji = '⚪';
+          if(d.status === 'em-andamento') statusEmoji = '🔵';
+          else if(d.status === 'bloqueado') statusEmoji = '🔴';
+          else if(d.status === 'concluido') statusEmoji = '✅';
+          else if(d.status === 'prioridade') statusEmoji = '🔥';
+          else if(d.status === 'prioridade-grupo') statusEmoji = '🔥👥';
+          else if(d.status === 'concluido-grupo') statusEmoji = '✅👥';
+          
+          // Demanda (objetivo)
+          const objetivo = (d.demanda || 'Sem título').trim();
+          
+          // Prazo (formato curto)
+          let prazoStr = '';
+          if(d.prazo && d.prazoFim){
+            prazoStr = `${formatDateReadable(d.prazo)} - ${formatDateReadable(d.prazoFim)}`;
+          }else if(d.prazo){
+            prazoStr = formatDateReadable(d.prazo);
+          }else{
+            prazoStr = 'Sem prazo';
+          }
+          
+          // Bloqueio
+          const bloqueadoInfo = d.status === 'bloqueado' ? ' _(bloqueada)_' : '';
+          
+          // Link do plano (se houver plano) - versão CURTA
+          let planoLink = '';
+          if(d.plano && d.plano.trim()){
+            const link = generatePlanLinkSync(d);
+            if(link) planoLink = `\n   📝 ${link}`;
+          }
+          
+          // Montar linha (minimalista com nome do membro)
+          summary += `${index + 1}. ${statusEmoji} *${objetivo}*${bloqueadoInfo}\n`;
+          summary += `   👤 ${responsavel} | 📅 ${prazoStr}${planoLink}\n\n`;
+        });
+        
+        // Separador entre responsáveis (exceto no último)
+        if(respIndex < responsaveis.length - 1){
+          summary += '━━━━━━━━━━━━━━━━━━━\n\n';
+        }
+      });
+      
+      summary += `\n_Total: ${sorted.length} demanda(s)_`;
+      
+      return summary;
+    }
+    
+    // Atualizar resumo sempre que demandas mudarem
+    function updateDemandasSummary(){
+      if(!demandasSummaryTextEl) return;
+      const summary = generateDemandasSummary();
+      demandasSummaryTextEl.value = summary;
+    }
+    
+    // Copiar resumo para clipboard
+    if(btnCopyDemandasSummaryEl){
+      btnCopyDemandasSummaryEl.addEventListener('click', async () => {
+        if(!demandasSummaryTextEl) return;
+        
+        const summary = demandasSummaryTextEl.value;
+        if(!summary || summary.trim() === ''){
+          showToast('Nenhum resumo para copiar', 'error');
+          return;
+        }
+        
+        try{
+          await navigator.clipboard.writeText(summary);
+          showToast('✅ Resumo copiado! Cole no WhatsApp', 'success');
+        }catch(err){
+          console.error('Erro ao copiar:', err);
+          // Fallback: selecionar texto
+          demandasSummaryTextEl.select();
+          try{
+            document.execCommand('copy');
+            showToast('✅ Resumo copiado!', 'success');
+          }catch(e){
+            showToast('❌ Erro ao copiar. Selecione manualmente.', 'error');
+          }
         }
       });
     }

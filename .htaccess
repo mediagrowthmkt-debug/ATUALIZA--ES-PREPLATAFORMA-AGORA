@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /
+
+# Redirecionar links curtos /p/{id} para /p/index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^p/([a-zA-Z0-9]+)$ /p/index.html [L]

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano da Demanda • MediaGrowth</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    .meta-label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .meta-value {
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .objetivo {
+      margin-bottom: 24px;
+    }
+    .objetivo h2 {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .objetivo-text {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      color: #f8fafc;
+      font-weight: 500;
+    }
+    .plano {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .plano h2 {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .plano-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .empty {
+      color: #64748b;
+      font-style: italic;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .loading {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 20px; }
+      .header h1 { font-size: 1.25rem; }
+      .meta { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="content">
+      <div class="loading">📋 Carregando plano da demanda...</div>
+    </div>
+  </div>
+
+  <script>
+    // Obter dados da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('d');
+
+    function getStatusEmoji(status) {
+      const statusMap = {
+        'nao-iniciado': '⚪',
+        'em-andamento': '🔵',
+        'bloqueado': '🔴',
+        'concluido': '✅',
+        'prioridade': '🔥',
+        'prioridade-grupo': '🔥👥',
+        'concluido-grupo': '✅👥'
+      };
+      return statusMap[status] || '⚪';
+    }
+
+    function getStatusText(status) {
+      const statusMap = {
+        'nao-iniciado': 'Não iniciado',
+        'em-andamento': 'Em andamento',
+        'bloqueado': 'Bloqueado',
+        'concluido': 'Concluído',
+        'prioridade': 'Prioridade',
+        'prioridade-grupo': 'Prioridade/Grupo',
+        'concluido-grupo': 'Concluído/Grupo'
+      };
+      return statusMap[status] || 'Não iniciado';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Não definido';
+      try {
+        const d = new Date(dateStr);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} às ${hours}:${minutes}`;
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function renderDemanda(data) {
+      const contentEl = document.getElementById('content');
+      
+      const statusEmoji = getStatusEmoji(data.status);
+      const statusText = getStatusText(data.status);
+      
+      let prazoHtml = '';
+      if (data.prazo && data.prazoFim) {
+        prazoHtml = `${formatDate(data.prazo)} até ${formatDate(data.prazoFim)}`;
+      } else if (data.prazo) {
+        prazoHtml = formatDate(data.prazo);
+      } else {
+        prazoHtml = 'Não definido';
+      }
+
+      contentEl.innerHTML = `
+        <div class="header">
+          <h1>📋 Plano da Demanda</h1>
+        </div>
+        
+        <div class="meta">
+          <div class="meta-item">
+            <span class="meta-label">Status:</span>
+            <span class="status-badge">${statusEmoji} ${statusText}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">👤 Responsável:</span>
+            <span class="meta-value">${data.responsavel || 'Não definido'}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">📅 Prazo:</span>
+            <span class="meta-value">${prazoHtml}</span>
+          </div>
+        </div>
+
+        <div class="objetivo">
+          <h2>🎯 Objetivo</h2>
+          <div class="objetivo-text">${data.demanda || 'Sem título'}</div>
+        </div>
+
+        <div class="plano">
+          <h2>📝 Plano de Ação</h2>
+          <div class="plano-content">
+            ${data.plano && data.plano.trim() 
+              ? data.plano 
+              : '<div class="empty">Nenhum plano registrado para esta demanda.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    // Processar e exibir
+    if (encodedData) {
+      try {
+        const decoded = atob(encodedData);
+        const data = JSON.parse(decoded);
+        renderDemanda(data);
+      } catch (e) {
+        document.getElementById('content').innerHTML = `
+          <div class="error">
+            ❌ Erro ao carregar dados da demanda.<br>
+            Link inválido ou corrompido.
+          </div>
+        `;
+      }
+    } else {
+      document.getElementById('content').innerHTML = `
+        <div class="error">
+          ❌ Nenhum dado encontrado.<br>
+          Link inválido ou incompleto.
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

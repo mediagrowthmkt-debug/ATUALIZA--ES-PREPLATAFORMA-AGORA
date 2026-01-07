@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecionando...</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .loader {
+      text-align: center;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .text {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <div class="text">Carregando plano...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyALIPjC1U7j-R82i9CYEy-u0ekbLKBT4RE",
+      authDomain: "mediagrowth-1c41e.firebaseapp.com",
+      projectId: "mediagrowth-1c41e",
+      storageBucket: "mediagrowth-1c41e.firebasestorage.app",
+      messagingSenderId: "27233768319",
+      appId: "1:27233768319:web:d4e7f3f5a4a9b5e5c5e5c5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    async function loadPlan() {
+      try {
+        // Pegar ID da URL
+        const pathParts = window.location.pathname.split('/');
+        const shortId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        
+        if (!shortId || shortId === 'index.html') {
+          throw new Error('ID não encontrado na URL');
+        }
+
+        // Aguardar autenticação
+        await new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+          });
+        });
+
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error('Usuário não autenticado');
+        }
+
+        // Buscar demanda pelo ID
+        const demandasRef = collection(db, 'usuarios', user.uid, 'demandas');
+        const q = query(demandasRef);
+        const snapshot = await getDocs(q);
+        
+        let demandaData = null;
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (doc.id.startsWith(shortId)) {
+            demandaData = { ...data, id: doc.id };
+          }
+        });
+
+        if (!demandaData) {
+          throw new Error('Demanda não encontrada');
+        }
+
+        // Codificar dados e redirecionar para página de visualização
+        const encoded = btoa(JSON.stringify(demandaData));
+        const baseUrl = window.location.origin + window.location.pathname.split('/p/')[0];
+        window.location.href = `${baseUrl}/demanda-plano.html?d=${encoded}`;
+
+      } catch (error) {
+        document.querySelector('.text').textContent = 'Erro ao carregar plano';
+        console.error(error);
+        
+        // Voltar para index após 2 segundos
+        setTimeout(() => {
+          const baseUrl = window.location.origin + window.location.pathname.split('/p/')[0];
+          window.location.href = baseUrl;
+        }, 2000);
+      }
+    }
+
+    loadPlan();
+  </script>
+</body>
+</html>
