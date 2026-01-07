@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano da Demanda • MediaGrowth</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #60a5fa;
+      flex: 1;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .status-badge.bloqueado { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); }
+    .status-badge.concluido { background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.4); }
+    .status-badge.em-andamento { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); }
+    .status-badge.prioridade { background: rgba(249, 115, 22, 0.2); border-color: rgba(249, 115, 22, 0.4); }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    .meta-label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .meta-value {
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .objetivo {
+      margin-bottom: 24px;
+    }
+    .objetivo h2 {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .objetivo-text {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      color: #f8fafc;
+      font-weight: 500;
+    }
+    .plano {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .plano h2 {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .plano-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .empty {
+      color: #64748b;
+      font-style: italic;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .loading {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      padding: 60px 20px;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .footer {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @media (max-width: 640px) {
+      .container { padding: 20px; }
+      .header h1 { font-size: 1.25rem; }
+      .meta { flex-direction: column; gap: 12px; }
+      .objetivo-text { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>📋 Carregando plano da demanda...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Firebase config (mesmo projeto do index.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4CbPQWrwOcfANX3ar0ibmGN20ffsRCqo",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "1074237637946",
+      appId: "1:1074237637946:web:cf5008b649bbb4d7d13c03"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function getStatusEmoji(status) {
+      const statusMap = {
+        'nao-iniciado': '⚪',
+        'em-andamento': '🔵',
+        'bloqueado': '🔴',
+        'concluido': '✅',
+        'prioridade': '🔥',
+        'prioridade-grupo': '🔥👥',
+        'concluido-grupo': '✅👥'
+      };
+      return statusMap[status] || '⚪';
+    }
+
+    function getStatusText(status) {
+      const statusMap = {
+        'nao-iniciado': 'Não iniciado',
+        'em-andamento': 'Em andamento',
+        'bloqueado': 'Bloqueado',
+        'concluido': 'Concluído',
+        'prioridade': 'Prioridade',
+        'prioridade-grupo': 'Prioridade/Grupo',
+        'concluido-grupo': 'Concluído/Grupo'
+      };
+      return statusMap[status] || 'Não iniciado';
+    }
+
+    function getStatusClass(status) {
+      if (status === 'bloqueado') return 'bloqueado';
+      if (status === 'concluido' || status === 'concluido-grupo') return 'concluido';
+      if (status === 'em-andamento') return 'em-andamento';
+      if (status === 'prioridade' || status === 'prioridade-grupo') return 'prioridade';
+      return '';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Não definido';
+      try {
+        const d = new Date(dateStr);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} às ${hours}:${minutes}`;
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function renderDemanda(data) {
+      const contentEl = document.getElementById('content');
+      
+      // Suporta ambos os formatos (Firebase e base64)
+      const status = data.status || data.s || 'nao-iniciado';
+      const demanda = data.demanda || data.d || '';
+      const responsavel = data.responsavel || data.r || '';
+      const prazo = data.prazo || data.p || '';
+      const prazoFim = data.prazoFim || data.pf || '';
+      const plano = data.plano || data.pl || '';
+      
+      const statusEmoji = getStatusEmoji(status);
+      const statusText = getStatusText(status);
+      const statusClass = getStatusClass(status);
+      
+      let prazoHtml = '';
+      if (prazo && prazoFim) {
+        prazoHtml = `${formatDate(prazo)} até ${formatDate(prazoFim)}`;
+      } else if (prazo) {
+        prazoHtml = formatDate(prazo);
+      } else {
+        prazoHtml = 'Não definido';
+      }
+
+      contentEl.innerHTML = `
+        <div class="header">
+          <h1>📋 Plano da Demanda</h1>
+        </div>
+        
+        <div class="meta">
+          <div class="meta-item">
+            <span class="meta-label">Status:</span>
+            <span class="status-badge ${statusClass}">${statusEmoji} ${statusText}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">👤 Responsável:</span>
+            <span class="meta-value">${responsavel || 'Não definido'}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">📅 Prazo:</span>
+            <span class="meta-value">${prazoHtml}</span>
+          </div>
+        </div>
+
+        <div class="objetivo">
+          <h2>🎯 Objetivo</h2>
+          <div class="objetivo-text">${demanda || 'Sem título'}</div>
+        </div>
+
+        <div class="plano">
+          <h2>📝 Plano de Ação</h2>
+          <div class="plano-content">${plano && plano.trim() 
+              ? plano 
+              : '<div class="empty">Nenhum plano registrado para esta demanda.</div>'}</div>
+        </div>
+
+        <div class="footer">
+          MediaGrowth • Planejamento de Demandas
+        </div>
+      `;
+    }
+
+    function showError(message) {
+      document.getElementById('content').innerHTML = `
+        <div class="error">
+          ❌ ${message}
+        </div>
+      `;
+    }
+
+    async function loadPlan() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Tentar carregar via token do Firebase (link curto)
+        const token = urlParams.get('t');
+        if (token) {
+          const docRef = doc(db, 'planShares', token);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            renderDemanda(docSnap.data());
+            return;
+          } else {
+            showError('Plano não encontrado ou link expirado.');
+            return;
+          }
+        }
+        
+        // Fallback: carregar via dados codificados na URL
+        const encoded = urlParams.get('d');
+        if (encoded) {
+          const decoded = decodeURIComponent(escape(atob(encoded)));
+          const data = JSON.parse(decoded);
+          renderDemanda(data);
+          return;
+        }
+        
+        showError('Link inválido. Nenhum plano especificado.');
+
+      } catch (error) {
+        console.error('Erro ao carregar plano:', error);
+        showError('Erro ao carregar dados da demanda.<br>Link inválido ou corrompido.');
+      }
+    }
+
+    // Carregar ao abrir a página
+    loadPlan();
+  </script>
+</body>
+</html>

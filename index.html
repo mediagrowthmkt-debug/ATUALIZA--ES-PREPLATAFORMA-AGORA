@@ -7362,10 +7362,13 @@ function renderReviewNotes(post){
   .demandas-summary-box{margin-top:24px;background:rgba(15,23,42,.35);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px}
   .demandas-summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
   .demandas-summary-title{font-size:1rem;font-weight:700;color:#fff;margin:0}
+  .demandas-summary-buttons{display:flex;gap:8px;align-items:center}
   .demandas-summary-textarea{width:100%;min-height:200px;background:#0a0a0a;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:12px;font-size:.85rem;font-family:'Courier New',monospace;line-height:1.6;resize:vertical}
   .demandas-summary-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s ease;display:inline-flex;align-items:center;gap:6px}
   .demandas-summary-btn:hover{background:#1eb054}
   .demandas-summary-btn:active{transform:scale(.98)}
+  .demandas-summary-btn.refresh{background:#3b82f6}
+  .demandas-summary-btn.refresh:hover{background:#2563eb}
   .demanda-plan-month{border:1px solid var(--shell-border);background:rgba(255,255,255,.04);border-radius:12px;padding:14px}
   .demanda-plan-month-title{margin:0 0 12px;font-size:1rem;font-weight:700;text-transform:capitalize;color:#fff}
   .demanda-plan-month-content{display:flex;flex-direction:column;gap:14px}
@@ -10046,10 +10049,16 @@ function renderReviewNotes(post){
   <div class="demandas-summary-box">
     <div class="demandas-summary-header">
       <h4 class="demandas-summary-title">📱 Resumo para WhatsApp</h4>
-      <button class="demandas-summary-btn" id="btnCopyDemandasSummary">
-        <span>📋</span>
-        <span>Copiar Resumo</span>
-      </button>
+      <div class="demandas-summary-buttons">
+        <button class="demandas-summary-btn refresh" id="btnRefreshDemandasSummary">
+          <span>🔄</span>
+          <span>Atualizar</span>
+        </button>
+        <button class="demandas-summary-btn" id="btnCopyDemandasSummary">
+          <span>📋</span>
+          <span>Copiar Resumo</span>
+        </button>
+      </div>
     </div>
     <textarea id="demandasSummaryText" class="demandas-summary-textarea" readonly placeholder="O resumo das demandas aparecerá aqui..."></textarea>
   </div>
@@ -62014,6 +62023,7 @@ FORMATO PADRÃO:
     /* ========= RESUMO DE DEMANDAS PARA WHATSAPP ========= */
     const demandasSummaryTextEl = $('demandasSummaryText');
     const btnCopyDemandasSummaryEl = $('btnCopyDemandasSummary');
+    const btnRefreshDemandasSummaryEl = $('btnRefreshDemandasSummary');
     
     // Função para formatar data de forma legível
     function formatDateReadable(dateStr){
@@ -62029,49 +62039,71 @@ FORMATO PADRÃO:
       }
     }
     
-    // Função para gerar link compartilhável do plano (CURTO)
-    async function generatePlanLink(demanda) {
+    // Função para gerar link compartilhável do plano (PÚBLICO - sem login)
+    // Usa Firebase para armazenar dados e gerar link curto
+    async function generatePlanLinkAsync(demanda) {
       try {
-        const uid = auth.currentUser?.uid;
-        if (!uid) return '';
+        if (!auth?.currentUser) return '';
         
-        // Gerar ID curto (8 caracteres)
-        const shortId = demanda.id.substring(0, 8);
+        const user = auth.currentUser;
         
-        // Salvar link no Firebase para referência futura
-        const linkData = {
-          demandaId: demanda.id,
-          userId: uid,
-          createdAt: Date.now()
+        // Gerar token curto único
+        const token = Math.random().toString(36).substring(2, 10);
+        
+        // Dados do plano para salvar no Firebase
+        const planData = {
+          token,
+          demanda: demanda.demanda || '',
+          status: demanda.status || 'nao-iniciado',
+          responsavel: demanda.responsavel || '',
+          prazo: demanda.prazo || '',
+          prazoFim: demanda.prazoFim || '',
+          plano: demanda.plano || '',
+          createdBy: user.uid,
+          createdAt: serverTimestamp()
         };
         
-        try {
-          await setDoc(doc(db, 'planLinks', shortId), linkData);
-        } catch (e) {
-          console.warn('Erro ao salvar link:', e);
-        }
+        // Salvar no Firebase (collection pública)
+        const docRef = doc(db, 'planShares', token);
+        await setDoc(docRef, planData);
         
-        // Retornar link curto
-        const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html?$/i, '');
-        return `${baseUrl}p/${shortId}`;
+        // Retornar link curto - usar raiz do site (plano.html está na raiz)
+        const baseUrl = window.location.origin + '/';
+        return `${baseUrl}plano.html?t=${token}`;
       } catch (e) {
+        console.error('Erro ao gerar link:', e);
         return '';
       }
     }
     
-    // Função síncrona para link curto (não salva no Firebase)
+    // Versão síncrona que retorna link com dados codificados (fallback - NÃO USAR)
     function generatePlanLinkSync(demanda) {
       try {
-        const shortId = demanda.id.substring(0, 8);
+        // Criar objeto com dados mínimos
+        const data = {
+          d: demanda.demanda || '',
+          s: demanda.status || 'nao-iniciado',
+          r: demanda.responsavel || '',
+          p: demanda.prazo || '',
+          pf: demanda.prazoFim || '',
+          pl: demanda.plano || ''
+        };
+        
+        // Codificar em base64
+        const jsonStr = JSON.stringify(data);
+        const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+        
+        // Retornar link com dados na query string
         const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html?$/i, '');
-        return `${baseUrl}p/${shortId}`;
+        return `${baseUrl}plano.html?d=${encoded}`;
       } catch (e) {
+        console.error('Erro ao gerar link:', e);
         return '';
       }
     }
     
-    // Função para gerar resumo formatado para WhatsApp
-    function generateDemandasSummary(){
+    // Função para gerar resumo formatado para WhatsApp (ASSÍNCRONA)
+    async function generateDemandasSummary(){
       if(!Array.isArray(DEMANDAS) || DEMANDAS.length === 0){
         return '_Nenhuma demanda cadastrada no momento._';
       }
@@ -62158,14 +62190,16 @@ FORMATO PADRÃO:
       
       const responsaveis = Object.keys(porResponsavel).sort();
       
-      responsaveis.forEach((responsavel, respIndex) => {
+      for (let respIndex = 0; respIndex < responsaveis.length; respIndex++) {
+        const responsavel = responsaveis[respIndex];
         const demandas = porResponsavel[responsavel];
         
         // Cabeçalho do responsável
         summary += `*👤 ${responsavel}*\n`;
         summary += `_${demandas.length} demanda(s)_\n\n`;
         
-        demandas.forEach((d, index) => {
+        for (let index = 0; index < demandas.length; index++) {
+          const d = demandas[index];
           // Status emoji
           let statusEmoji = '⚪';
           if(d.status === 'em-andamento') statusEmoji = '🔵';
@@ -62191,34 +62225,43 @@ FORMATO PADRÃO:
           // Bloqueio
           const bloqueadoInfo = d.status === 'bloqueado' ? ' _(bloqueada)_' : '';
           
-          // Link do plano (se houver plano) - versão CURTA
+          // Link do plano (se houver plano) - versão CURTA (Firebase)
           let planoLink = '';
           if(d.plano && d.plano.trim()){
-            const link = generatePlanLinkSync(d);
+            const link = await generatePlanLinkAsync(d);
             if(link) planoLink = `\n   📝 ${link}`;
           }
           
           // Montar linha (minimalista com nome do membro)
           summary += `${index + 1}. ${statusEmoji} *${objetivo}*${bloqueadoInfo}\n`;
           summary += `   👤 ${responsavel} | 📅 ${prazoStr}${planoLink}\n\n`;
-        });
+        }
         
         // Separador entre responsáveis (exceto no último)
         if(respIndex < responsaveis.length - 1){
           summary += '━━━━━━━━━━━━━━━━━━━\n\n';
         }
-      });
+      }
       
       summary += `\n_Total: ${sorted.length} demanda(s)_`;
       
       return summary;
     }
     
-    // Atualizar resumo sempre que demandas mudarem
-    function updateDemandasSummary(){
+    // Atualizar resumo sempre que demandas mudarem (ASSÍNCRONO)
+    async function updateDemandasSummary(){
       if(!demandasSummaryTextEl) return;
-      const summary = generateDemandasSummary();
-      demandasSummaryTextEl.value = summary;
+      
+      // Mostrar loading enquanto gera os links
+      demandasSummaryTextEl.value = '⏳ Gerando resumo...';
+      
+      try {
+        const summary = await generateDemandasSummary();
+        demandasSummaryTextEl.value = summary;
+      } catch (e) {
+        console.error('Erro ao gerar resumo:', e);
+        demandasSummaryTextEl.value = '❌ Erro ao gerar resumo. Tente novamente.';
+      }
     }
     
     // Copiar resumo para clipboard
@@ -62245,6 +62288,25 @@ FORMATO PADRÃO:
           }catch(e){
             showToast('❌ Erro ao copiar. Selecione manualmente.', 'error');
           }
+        }
+      });
+    }
+    
+    // Botão de atualizar resumo
+    if(btnRefreshDemandasSummaryEl){
+      btnRefreshDemandasSummaryEl.addEventListener('click', async () => {
+        btnRefreshDemandasSummaryEl.disabled = true;
+        btnRefreshDemandasSummaryEl.innerHTML = '<span>⏳</span><span>Atualizando...</span>';
+        
+        try {
+          await updateDemandasSummary();
+          showToast('✅ Resumo atualizado!', 'success');
+        } catch (e) {
+          console.error('Erro ao atualizar resumo:', e);
+          showToast('❌ Erro ao atualizar resumo', 'error');
+        } finally {
+          btnRefreshDemandasSummaryEl.disabled = false;
+          btnRefreshDemandasSummaryEl.innerHTML = '<span>🔄</span><span>Atualizar</span>';
         }
       });
     }

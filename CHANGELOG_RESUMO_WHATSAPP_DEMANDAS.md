@@ -3,11 +3,34 @@
 **Data:** 7 de janeiro de 2026  
 **Tipo:** Feature  
 **Categoria:** Planejamento / UX  
-**Versão:** 2.0 (Melhorias aplicadas)
+**Versão:** 3.0 (Links Públicos)
 
 ## 📋 Resumo
 
-Adicionada funcionalidade de geração automática de resumo das demandas do planejamento em formato otimizado para WhatsApp, permitindo compartilhamento rápido e claro com grupos de trabalho. Agora com agrupamento por responsável e formatação aprimorada.
+Adicionada funcionalidade de geração automática de resumo das demandas do planejamento em formato otimizado para WhatsApp, permitindo compartilhamento rápido e claro com grupos de trabalho. Agora com agrupamento por responsável, formatação aprimorada e **links públicos curtos** para visualizar planos sem necessidade de login.
+
+---
+
+## 🚀 Novidades v3.0 - Links Públicos
+
+### 1. **Links Curtos com Firebase**
+- Links de plano agora são curtos (ex: `plano.html?t=abc123`)
+- Dados salvos no Firebase collection `planShares`
+- Acesso público sem necessidade de login
+- Similar ao sistema de compartilhamento de calendário
+
+### 2. **Página Pública de Visualização**
+- Arquivo `plano.html` criado para visualização pública
+- Design moderno e responsivo
+- Mostra: demanda, status, responsável, prazo e plano completo
+- Funciona em qualquer dispositivo
+
+### 3. **Regras Firebase Atualizadas**
+- Collection `planShares` com leitura pública
+- Apenas usuários autenticados podem criar links
+- Token único gerado aleatoriamente
+
+---
 
 ## ✨ Novidades v2.0
 

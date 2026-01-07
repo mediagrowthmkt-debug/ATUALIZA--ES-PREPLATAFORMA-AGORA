@@ -487,5 +487,20 @@ service cloud.firestore {
       // Dono ou admin pode apagar
       allow delete: if isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin());
     }
+
+    /* ✅ Links públicos de PLANO de demandas (compartilhamento WhatsApp) */
+    match /planShares/{token} {
+      // Qualquer pessoa com o link pode visualizar (acesso público)
+      allow get: if true;
+      allow list: if false;
+      // Somente usuário autenticado pode criar
+      allow create: if isSignedIn()
+                    && request.resource.data.token == token
+                    && request.resource.data.demanda is string;
+      // Usuário autenticado pode atualizar seus próprios compartilhamentos
+      allow update: if isSignedIn() && request.auth.uid == resource.data.createdBy;
+      // Usuário autenticado pode apagar seus próprios compartilhamentos
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.createdBy;
+    }
   }
 }
