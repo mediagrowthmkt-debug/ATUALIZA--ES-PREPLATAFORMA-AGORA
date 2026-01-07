@@ -62225,6 +62225,20 @@ FORMATO PADRÃO:
           // Bloqueio
           const bloqueadoInfo = d.status === 'bloqueado' ? ' _(bloqueada)_' : '';
           
+          // Verificar se está ATRASADA (prazo fim já passou e não está concluída)
+          let atrasadoInfo = '';
+          if(d.status !== 'concluido' && d.status !== 'concluido-grupo'){
+            const prazoFimDate = d.prazoFim ? new Date(d.prazoFim) : (d.prazo ? new Date(d.prazo) : null);
+            if(prazoFimDate){
+              const hoje = new Date();
+              hoje.setHours(0, 0, 0, 0);
+              prazoFimDate.setHours(23, 59, 59, 999);
+              if(prazoFimDate < hoje){
+                atrasadoInfo = ' ⚠️🔴 *ATRASADA*';
+              }
+            }
+          }
+          
           // Link do plano (se houver plano) - versão CURTA (Firebase)
           let planoLink = '';
           if(d.plano && d.plano.trim()){
@@ -62233,7 +62247,7 @@ FORMATO PADRÃO:
           }
           
           // Montar linha (minimalista com nome do membro)
-          summary += `${index + 1}. ${statusEmoji} *${objetivo}*${bloqueadoInfo}\n`;
+          summary += `${index + 1}. ${statusEmoji} *${objetivo}*${bloqueadoInfo}${atrasadoInfo}\n`;
           summary += `   👤 ${responsavel} | 📅 ${prazoStr}${planoLink}\n\n`;
         }
         
