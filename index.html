@@ -12853,6 +12853,24 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       updateAllResponsavelSelects();
     }
     
+    // Função para carregar membros do time silenciosamente (apenas para sincronização)
+    async function loadTeamMembersSilently() {
+      if(!auth?.currentUser) return;
+      try {
+        const teamSnapshot = await getDocs(collection(db, 'usuarios', auth.currentUser.uid, 'team'));
+        const allMembers = [];
+        teamSnapshot.forEach(doc => {
+          allMembers.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sincroniza membros com RESP_OPTIONS
+        syncTeamToRespOptions(allMembers);
+        console.log('✅ Membros do time carregados e sincronizados com RESP_OPTIONS');
+      } catch(err) {
+        console.error('Erro ao carregar membros do time:', err);
+      }
+    }
+    
     function updateAllResponsavelSelects() {
       // Atualiza select do modal IA
       if(typeof populatePlanningDropdowns === 'function') {
@@ -62081,6 +62099,8 @@ FORMATO PADRÃO:
           const snap=await getDoc(ref); USER_DATA=snap.exists()?snap.data():{}; window.USER_DATA = USER_DATA; syncStorageLimitFromProfile(); loadBriefFromUserData();
           await loadClientProfile();
           startClientAccountsListener();
+          // Carrega membros do time para sincronizar com RESP_OPTIONS
+          await loadTeamMembersSilently();
           if(!postsUnsub){
             try{ subscribePosts(); }
             catch(err){ console.error('subscribePosts', err); }
