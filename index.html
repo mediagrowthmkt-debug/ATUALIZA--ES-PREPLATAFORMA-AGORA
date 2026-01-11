@@ -8819,6 +8819,122 @@ function renderReviewNotes(post){
     visibility:hidden !important;
     pointer-events:none !important;
   }
+  
+  /* ========== TEMPLATE TRÁFEGO ========== */
+  .template-question{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+  }
+  .template-label{
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .template-select, .template-input{
+    width: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .template-select:focus, .template-input:focus{
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+  .template-select option{
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+  .template-question textarea{
+    width: 100%;
+    min-height: 80px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .template-question textarea:focus{
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+  .traffic-template-modal .team-notes-modal-content{
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+  }
+  .traffic-template-modal .team-notes-modal-content::-webkit-scrollbar{
+    width: 8px;
+  }
+  .traffic-template-modal .team-notes-modal-content::-webkit-scrollbar-track{
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  .traffic-template-modal .team-notes-modal-content::-webkit-scrollbar-thumb{
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 4px;
+  }
+  .team-notes-add-btn.secondary{
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+  /* ========== FIM TEMPLATE TRÁFEGO ========== */
+  
+  /* ========== MODAL DE VISUALIZAÇÃO/EXPANSÃO ========== */
+  #expandNoteModal .team-notes-modal-content{
+    max-width: 800px;
+  }
+  #expandNoteContent{
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+    line-height: 1.8;
+    color: #e2e8f0;
+    font-size: 1rem;
+  }
+  #expandNoteContent a{
+    color: #60a5fa;
+    text-decoration: underline;
+  }
+  #expandNoteContent a:hover{
+    color: #93c5fd;
+  }
+  #expandNoteAttachments img{
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #expandNoteAttachments img:hover{
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  }
+  #expandNoteAuthor img{
+    border: 2px solid rgba(99, 102, 241, 0.3);
+  }
+  #expandNoteModal .team-notes-modal-footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  /* ========== FIM MODAL DE VISUALIZAÇÃO ========== */
+  
   @media(max-width:820px){
     .team-notes-column{
       flex:0 0 280px;
@@ -8826,6 +8942,9 @@ function renderReviewNotes(post){
     }
     .team-notes-board{
       padding:0 8px 16px;
+    }
+    #expandNoteModal .team-notes-modal-content{
+      max-width: 95vw;
     }
   }
   /* ===================== FIM NOTAS TIME ===================== */
@@ -12047,9 +12166,14 @@ document.addEventListener('DOMContentLoaded', function(){
         <span class="team-notes-column-count" id="teamNotesCountTrafego">0</span>
       </div>
       <div class="team-notes-column-cards" id="teamNotesCardsTrafego"></div>
-      <button type="button" class="team-notes-add-btn" data-column="trafego" onclick="openTeamNoteModal('trafego')">
-        <span>+</span> Adicionar nota
-      </button>
+      <div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="team-notes-add-btn" data-column="trafego" onclick="openTrafficTemplateModal()">
+          <span>📋</span> Template Tráfego
+        </button>
+        <button type="button" class="team-notes-add-btn secondary" data-column="trafego" onclick="openTeamNoteModal('trafego')" style="background: rgba(100, 116, 139, 0.3); border-color: rgba(148, 163, 184, 0.3);">
+          <span>+</span> Nota Livre
+        </button>
+      </div>
     </div>
     
     <!-- Coluna Canais de Tração -->
@@ -12059,9 +12183,14 @@ document.addEventListener('DOMContentLoaded', function(){
         <span class="team-notes-column-count" id="teamNotesCountCanais">0</span>
       </div>
       <div class="team-notes-column-cards" id="teamNotesCardsCanais"></div>
-      <button type="button" class="team-notes-add-btn" data-column="canais" onclick="openTeamNoteModal('canais')">
-        <span>+</span> Adicionar nota
-      </button>
+      <div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="team-notes-add-btn" data-column="canais" onclick="openContentTemplateModal()">
+          <span>📋</span> Template Conteúdo
+        </button>
+        <button type="button" class="team-notes-add-btn secondary" data-column="canais" onclick="openTeamNoteModal('canais')" style="background: rgba(100, 116, 139, 0.3); border-color: rgba(148, 163, 184, 0.3);">
+          <span>+</span> Nota Livre
+        </button>
+      </div>
     </div>
     
     <!-- Coluna Liderança -->
@@ -12113,6 +12242,340 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     <div class="team-notes-modal-footer">
       <button type="button" class="btn secondary" onclick="closeTeamNoteModal()">Cancelar</button>
       <button type="button" class="btn" id="teamNoteSaveBtn" onclick="saveTeamNote()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Template Tráfego -->
+<div class="team-notes-modal traffic-template-modal" id="trafficTemplateModal">
+  <div class="team-notes-modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+    <div class="team-notes-modal-header">
+      <h3>📋 Relatório de Tráfego - Template</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeTrafficTemplateModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Campanhas rodando -->
+      <div class="template-question">
+        <label class="template-label">🎯 Campanhas estão rodando? Quais?</label>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+            <input type="checkbox" id="trafficCampGoogle" style="width: 16px; height: 16px;">
+            <span>Google Ads</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+            <input type="checkbox" id="trafficCampMeta" style="width: 16px; height: 16px;">
+            <span>Meta Ads (Facebook/Instagram)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+            <input type="checkbox" id="trafficCampNenhuma" style="width: 16px; height: 16px;" onchange="if(this.checked){ document.getElementById('trafficCampGoogle').checked=false; document.getElementById('trafficCampMeta').checked=false; }">
+            <span>Nenhuma campanha rodando</span>
+          </label>
+        </div>
+        <textarea id="trafficCampDetails" placeholder="Especifique quais campanhas (ex: Campanha de pesquisa no Google, campanha de conversão no Meta)..." style="margin-top: 8px;"></textarea>
+      </div>
+
+      <!-- Gerando leads -->
+      <div class="template-question">
+        <label class="template-label">📊 Estão gerando leads?</label>
+        <select id="trafficLeadsGerando" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="No momento não, mas já fizemos a otimização">No momento não, mas já fizemos a otimização</option>
+          <option value="Aguardando aprovação dos anúncios">Aguardando aprovação dos anúncios</option>
+        </select>
+      </div>
+
+      <!-- Leads hoje -->
+      <div class="template-question">
+        <label class="template-label">📈 Quantos leads hoje?</label>
+        <input type="number" id="trafficLeadsHoje" class="template-input" placeholder="Ex: 0, 5, 11..." min="0">
+      </div>
+
+      <!-- Leads caindo corretamente -->
+      <div class="template-question">
+        <label class="template-label">✅ Leads estão caindo corretamente na plataforma e no CRM?</label>
+        <select id="trafficLeadsCaindo" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Parcialmente">Parcialmente (apenas na plataforma)</option>
+          <option value="Verificando integração">Verificando integração</option>
+        </select>
+      </div>
+
+      <!-- Leads no mês -->
+      <div class="template-question">
+        <label class="template-label">📅 Quantos leads no mês?</label>
+        <input type="number" id="trafficLeadsMes" class="template-input" placeholder="Ex: 11, 50, 120..." min="0">
+      </div>
+
+      <!-- Leads no gerenciador -->
+      <div class="template-question">
+        <label class="template-label">💼 Quantos leads no gerenciador de anúncios?</label>
+        <input type="number" id="trafficLeadsGerenciador" class="template-input" placeholder="Ex: 11, 50, 120..." min="0">
+      </div>
+
+      <!-- CTR -->
+      <div class="template-question">
+        <label class="template-label">🎯 CTR por campanha</label>
+        <input type="text" id="trafficCTR" class="template-input" placeholder="Ex: 10,49%, Google: 8%, Meta: 12%">
+      </div>
+
+      <!-- Cliques -->
+      <div class="template-question">
+        <label class="template-label">👆 Cliques por campanha</label>
+        <input type="text" id="trafficCliques" class="template-input" placeholder="Ex: 11, Google: 50, Meta: 35">
+      </div>
+
+      <!-- Melhores anúncios -->
+      <div class="template-question">
+        <label class="template-label">⭐ Quais são os melhores anúncios?</label>
+        <select id="trafficMelhoresAnuncios" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficMelhoresAnunciosCustom').style.display='block'; } else { document.getElementById('trafficMelhoresAnunciosCustom').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Todos estão de acordo com as palavras-chave e landing page. Todos estão qualificados.">Todos alinhados e qualificados</option>
+          <option value="Anúncios de conversão estão performando melhor">Anúncios de conversão performando melhor</option>
+          <option value="Anúncios de remarketing com melhor resultado">Remarketing com melhor resultado</option>
+          <option value="personalizado">Especificar anúncios...</option>
+        </select>
+        <textarea id="trafficMelhoresAnunciosCustom" placeholder="Especifique quais anúncios estão performando melhor..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Comentários nos anúncios -->
+      <div class="template-question">
+        <label class="template-label">💬 Algum anúncio com comentários?</label>
+        <select id="trafficComentarios" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('trafficComentariosDetails').style.display='block'; } else { document.getElementById('trafficComentariosDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Apenas Google está rodando">Apenas Google está rodando (não tem comentários)</option>
+          <option value="Não">Não</option>
+          <option value="Sim">Sim</option>
+        </select>
+        <textarea id="trafficComentariosDetails" placeholder="Descreva os comentários relevantes..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Orçamento rodando -->
+      <div class="template-question">
+        <label class="template-label">💰 Orçamento está rodando corretamente?</label>
+        <select id="trafficOrcamento" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Parcialmente">Parcialmente</option>
+        </select>
+      </div>
+
+      <!-- Campanha limitada -->
+      <div class="template-question">
+        <label class="template-label">⚠️ Alguma campanha limitada por orçamento?</label>
+        <select id="trafficLimitada" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('trafficLimitadaDetails').style.display='block'; } else { document.getElementById('trafficLimitadaDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Não">Não</option>
+          <option value="Sim">Sim</option>
+        </select>
+        <textarea id="trafficLimitadaDetails" placeholder="Especifique quais campanhas estão limitadas..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Precisa otimização -->
+      <div class="template-question">
+        <label class="template-label">🔧 Precisa de otimização hoje?</label>
+        <select id="trafficOtimizacao" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Não">Não</option>
+          <option value="Sim">Sim</option>
+          <option value="Foi feita ontem">Foi feita ontem</option>
+          <option value="Aguardando dados">Aguardando dados para otimizar</option>
+        </select>
+      </div>
+
+      <!-- Qual otimização -->
+      <div class="template-question">
+        <label class="template-label">🛠️ Qual otimização será feita/foi feita?</label>
+        <textarea id="trafficQualOtimizacao" placeholder="Ex: Ajuste de lances, pausar anúncios com baixo desempenho, testar novos criativos..."></textarea>
+      </div>
+
+      <!-- Insight geral -->
+      <div class="template-question">
+        <label class="template-label">💡 Insight geral após analisar todas as campanhas</label>
+        <select id="trafficInsight" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficInsightCustom').style.display='block'; } else { document.getElementById('trafficInsightCustom').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Esperar a campanha performar para ver no que dá">Esperar a campanha performar para avaliar</option>
+          <option value="Campanhas estão performando bem, manter estratégia">Campanhas performando bem, manter estratégia</option>
+          <option value="Necessário ajustes para melhorar conversão">Necessário ajustes para melhorar conversão</option>
+          <option value="Ampliar investimento nas campanhas com melhor ROI">Ampliar investimento nas melhores campanhas</option>
+          <option value="personalizado">Insight personalizado...</option>
+        </select>
+        <textarea id="trafficInsightCustom" placeholder="Descreva seu insight personalizado..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+    </div>
+    <div class="team-notes-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeTrafficTemplateModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveTrafficTemplate()">💾 Salvar Relatório</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Template Conteúdo/Canais -->
+<div class="team-notes-modal traffic-template-modal" id="contentTemplateModal">
+  <div class="team-notes-modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+    <div class="team-notes-modal-header">
+      <h3>📢 Relatório de Conteúdo e Canais - Template</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeContentTemplateModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Alcance do mês Instagram -->
+      <div class="template-question">
+        <label class="template-label">📊 Alcance do mês até agora - Instagram</label>
+        <input type="text" id="contentAlcanceInstagram" class="template-input" placeholder="Ex: 2k, 2000, 2.5k">
+      </div>
+
+      <!-- Alcance do mês Google -->
+      <div class="template-question">
+        <label class="template-label">🔍 Alcance do mês até agora - Google (interações)</label>
+        <input type="text" id="contentAlcanceGoogle" class="template-input" placeholder="Ex: 157, 200 interações">
+      </div>
+
+      <!-- Engajamento Instagram -->
+      <div class="template-question">
+        <label class="template-label">💬 Engajamento do mês até agora - Instagram</label>
+        <input type="text" id="contentEngajamentoInstagram" class="template-input" placeholder="Ex: 28, 50">
+      </div>
+
+      <!-- Salvamentos Instagram -->
+      <div class="template-question">
+        <label class="template-label">💾 Salvamentos do mês até agora - Instagram</label>
+        <input type="text" id="contentSalvamentosInstagram" class="template-input" placeholder="Ex: 1, 5, 10">
+      </div>
+
+      <!-- Resultados dia anterior -->
+      <div class="template-question">
+        <label class="template-label">📈 Resultados do dia anterior (posts, reels, stories)</label>
+        <select id="contentResultadosDia" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentResultadosDiaCustom').style.display='block'; } else { document.getElementById('contentResultadosDiaCustom').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Alcance por volta das 600 views">Alcance por volta das 600 views</option>
+          <option value="Alcance entre 600-1k views">Alcance entre 600-1k views</option>
+          <option value="Alcance entre 1k-3k views">Alcance entre 1k-3k views</option>
+          <option value="Alcance acima de 3k views">Alcance acima de 3k views</option>
+          <option value="Conteúdos com pessoa pegam 3k+ views">Conteúdos com pessoa pegam 3k+ views</option>
+          <option value="personalizado">Especificar...</option>
+        </select>
+        <textarea id="contentResultadosDiaCustom" placeholder="Descreva os resultados do dia anterior..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Conteúdos com pouco engajamento -->
+      <div class="template-question">
+        <label class="template-label">📉 Conteúdos com pouco engajamento</label>
+        <select id="contentPoucoEngajamento" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('contentPoucoEngajamentoDetails').style.display='block'; } else { document.getElementById('contentPoucoEngajamentoDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Não">Não</option>
+          <option value="Poucos">Poucos</option>
+          <option value="Alguns">Alguns</option>
+          <option value="Bastante">Bastante</option>
+          <option value="Sim">Sim (especificar)</option>
+        </select>
+        <textarea id="contentPoucoEngajamentoDetails" placeholder="Quais conteúdos tiveram pouco engajamento?" style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Houve DM -->
+      <div class="template-question">
+        <label class="template-label">💌 Houve DM no dia anterior?</label>
+        <select id="contentHouveDM" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Poucas">Poucas</option>
+          <option value="Várias">Várias</option>
+        </select>
+      </div>
+
+      <!-- DMs respondidas -->
+      <div class="template-question">
+        <label class="template-label">✅ Todas as DMs foram respondidas?</label>
+        <select id="contentDMsRespondidas" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Parcialmente">Parcialmente</option>
+          <option value="Aguardando resposta do cliente">Aguardando resposta do cliente</option>
+        </select>
+      </div>
+
+      <!-- Comentários respondidos -->
+      <div class="template-question">
+        <label class="template-label">💬 Todos os comentários estão respondidos?</label>
+        <select id="contentComentariosRespondidos" class="template-select">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Parcialmente">Parcialmente</option>
+          <option value="Não houve comentários">Não houve comentários</option>
+        </select>
+      </div>
+
+      <!-- Comentário negativo ou relevante -->
+      <div class="template-question">
+        <label class="template-label">⚠️ Algum comentário negativo ou relevante?</label>
+        <select id="contentComentarioNegativo" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('contentComentarioNegativoDetails').style.display='block'; } else { document.getElementById('contentComentarioNegativoDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Não">Não</option>
+          <option value="Sim">Sim (especificar)</option>
+        </select>
+        <textarea id="contentComentarioNegativoDetails" placeholder="Descreva o comentário negativo ou relevante..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Atualização de canais -->
+      <div class="template-question">
+        <label class="template-label">🔄 Está sendo atualizado todos os canais e Google?</label>
+        <select id="contentCanaisAtualizados" class="template-select" onchange="if(this.value==='Não'||this.value==='Parcialmente'){ document.getElementById('contentCanaisAtualizadosDetails').style.display='block'; } else { document.getElementById('contentCanaisAtualizadosDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+          <option value="Parcialmente">Parcialmente</option>
+          <option value="Aguardando aprovação">Aguardando aprovação</option>
+        </select>
+        <textarea id="contentCanaisAtualizadosDetails" placeholder="Quais canais não foram atualizados e por quê?" style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+      <!-- Insight -->
+      <div class="template-question">
+        <label class="template-label">💡 Algum insight após a análise do dia anterior?</label>
+        <select id="contentInsight" class="template-select" onchange="if(this.value==='Sim'||this.value==='personalizado'){ document.getElementById('contentInsightCustom').style.display='block'; } else { document.getElementById('contentInsightCustom').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Não">Não</option>
+          <option value="Conteúdos com pessoas performam melhor">Conteúdos com pessoas performam melhor</option>
+          <option value="Reels estão tendo mais alcance que posts">Reels estão tendo mais alcance que posts</option>
+          <option value="Horário de postagem pode ser otimizado">Horário de postagem pode ser otimizado</option>
+          <option value="Engagement aumentou após mudança de estratégia">Engagement aumentou após mudança de estratégia</option>
+          <option value="Sim">Sim (especificar)</option>
+          <option value="personalizado">Insight personalizado...</option>
+        </select>
+        <textarea id="contentInsightCustom" placeholder="Descreva o insight..." style="margin-top: 8px; display: none;"></textarea>
+      </div>
+
+    </div>
+    <div class="team-notes-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeContentTemplateModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveContentTemplate()">💾 Salvar Relatório</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Visualizar Nota Completa -->
+<div class="team-notes-modal" id="expandNoteModal">
+  <div class="team-notes-modal-content" style="max-width: 800px; max-height: 85vh;">
+    <div class="team-notes-modal-header">
+      <h3 id="expandNoteModalTitle">📝 Nota Completa</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeExpandNoteModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body" style="overflow-y: auto; max-height: calc(85vh - 140px);">
+      <div id="expandNoteContent" style="line-height: 1.8; color: #e2e8f0; font-size: 1rem;"></div>
+      <div id="expandNoteAttachments" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;"></div>
+    </div>
+    <div class="team-notes-modal-footer" style="border-top: 1px solid rgba(99,102,241,.2); padding: 16px 20px; background: rgba(15,23,42,.4);">
+      <div id="expandNoteAuthor" style="flex: 1; display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.9rem;"></div>
+      <button type="button" class="btn secondary" onclick="closeExpandNoteModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -25470,6 +25933,7 @@ async function sendIAQuestion(){
                   <span style="margin-left:4px;opacity:.6">${date}</span>
                 </div>
                 <div class="team-notes-card-actions">
+                  <button onclick="expandTeamNote('${note.id}')" title="Expandir" style="font-size:1rem;">🔍</button>
                   <button onclick="editTeamNote('${note.id}')" title="Editar">✏️</button>
                   <button class="delete" onclick="deleteTeamNote('${note.id}')" title="Excluir">🗑️</button>
                 </div>
@@ -25740,6 +26204,76 @@ async function sendIAQuestion(){
       mgToast('Nota excluída');
     }
     window.deleteTeamNote = deleteTeamNote;
+    
+    // Expandir nota em modal
+    function expandTeamNote(noteId){
+      const note = TEAM_NOTES.find(n => n.id === noteId);
+      if(!note){
+        console.error('Nota não encontrada:', noteId);
+        return;
+      }
+      
+      const modal = document.getElementById('expandNoteModal');
+      const titleEl = document.getElementById('expandNoteModalTitle');
+      const contentEl = document.getElementById('expandNoteContent');
+      const attachmentsEl = document.getElementById('expandNoteAttachments');
+      const authorEl = document.getElementById('expandNoteAuthor');
+      
+      if(!modal || !contentEl || !attachmentsEl || !authorEl) {
+        console.error('Elementos do modal de expansão não encontrados');
+        return;
+      }
+      
+      // Título da coluna
+      const columnName = TEAM_NOTES_COLUMNS[note.column]?.name || 'Nota';
+      const columnIcon = TEAM_NOTES_COLUMNS[note.column]?.icon || '📝';
+      titleEl.textContent = `${columnIcon} ${columnName} - Nota Completa`;
+      
+      // Conteúdo (com quebras de linha preservadas e links)
+      const content = escapeHtml(note.content || '').replace(/\n/g, '<br>');
+      const contentWithLinks = linkifyText(content);
+      contentEl.innerHTML = contentWithLinks;
+      
+      // Anexos
+      if(note.attachments && note.attachments.length > 0){
+        attachmentsEl.innerHTML = note.attachments.map(url => 
+          `<img src="${url}" style="max-width: 100%; max-height: 400px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);" onclick="window.open('${url}', '_blank')">`
+        ).join('');
+        attachmentsEl.style.display = 'flex';
+      } else {
+        attachmentsEl.style.display = 'none';
+      }
+      
+      // Autor e data
+      const authorName = note.authorName || 'Anônimo';
+      const authorPhoto = note.authorPhoto || '';
+      const date = note.createdAt ? new Date(note.createdAt).toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '';
+      
+      authorEl.innerHTML = `
+        ${authorPhoto ? `<img src="${authorPhoto}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" alt="">` : ''}
+        <span style="color: #e2e8f0; font-weight: 600;">${authorName}</span>
+        <span style="opacity: 0.7;">• ${date}</span>
+      `;
+      
+      // Abrir modal
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    window.expandTeamNote = expandTeamNote;
+    
+    function closeExpandNoteModal(){
+      const modal = document.getElementById('expandNoteModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    window.closeExpandNoteModal = closeExpandNoteModal;
 
     // Suporte para colar imagens no textarea
     document.addEventListener('paste', async (e) => {
@@ -25761,6 +26295,340 @@ async function sendIAQuestion(){
         }
       }
     });
+    
+    /* ========== TEMPLATE DE TRÁFEGO ========== */
+    function openTrafficTemplateModal(){
+      const modal = document.getElementById('trafficTemplateModal');
+      if(!modal) return;
+      
+      // Limpar todos os campos
+      document.getElementById('trafficCampGoogle').checked = false;
+      document.getElementById('trafficCampMeta').checked = false;
+      document.getElementById('trafficCampNenhuma').checked = false;
+      document.getElementById('trafficCampDetails').value = '';
+      document.getElementById('trafficLeadsGerando').value = '';
+      document.getElementById('trafficLeadsHoje').value = '';
+      document.getElementById('trafficLeadsCaindo').value = '';
+      document.getElementById('trafficLeadsMes').value = '';
+      document.getElementById('trafficLeadsGerenciador').value = '';
+      document.getElementById('trafficCTR').value = '';
+      document.getElementById('trafficCliques').value = '';
+      document.getElementById('trafficMelhoresAnuncios').value = '';
+      document.getElementById('trafficMelhoresAnunciosCustom').value = '';
+      document.getElementById('trafficMelhoresAnunciosCustom').style.display = 'none';
+      document.getElementById('trafficComentarios').value = '';
+      document.getElementById('trafficComentariosDetails').value = '';
+      document.getElementById('trafficComentariosDetails').style.display = 'none';
+      document.getElementById('trafficOrcamento').value = '';
+      document.getElementById('trafficLimitada').value = '';
+      document.getElementById('trafficLimitadaDetails').value = '';
+      document.getElementById('trafficLimitadaDetails').style.display = 'none';
+      document.getElementById('trafficOtimizacao').value = '';
+      document.getElementById('trafficQualOtimizacao').value = '';
+      document.getElementById('trafficInsight').value = '';
+      document.getElementById('trafficInsightCustom').value = '';
+      document.getElementById('trafficInsightCustom').style.display = 'none';
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    window.openTrafficTemplateModal = openTrafficTemplateModal;
+    
+    function closeTrafficTemplateModal(){
+      const modal = document.getElementById('trafficTemplateModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    window.closeTrafficTemplateModal = closeTrafficTemplateModal;
+    
+    async function saveTrafficTemplate(){
+      try {
+        // Coletar dados do formulário
+        const campanhasGoogle = document.getElementById('trafficCampGoogle').checked;
+        const campanhasMeta = document.getElementById('trafficCampMeta').checked;
+        const campanhasNenhuma = document.getElementById('trafficCampNenhuma').checked;
+        const campanhasDetalhes = document.getElementById('trafficCampDetails').value.trim();
+        
+        let campanhasTexto = '';
+        if(campanhasNenhuma){
+          campanhasTexto = 'Não\n';
+        } else {
+          campanhasTexto = 'Sim.\n';
+          if(campanhasGoogle) campanhasTexto += '- Google Ads\n';
+          if(campanhasMeta) campanhasTexto += '- Meta Ads (Facebook/Instagram)\n';
+          if(campanhasDetalhes) campanhasTexto += `\nDetalhes: ${campanhasDetalhes}`;
+        }
+        
+        const leadsGerando = document.getElementById('trafficLeadsGerando').value;
+        const leadsHoje = document.getElementById('trafficLeadsHoje').value;
+        const leadsCaindo = document.getElementById('trafficLeadsCaindo').value;
+        const leadsMes = document.getElementById('trafficLeadsMes').value;
+        const leadsGerenciador = document.getElementById('trafficLeadsGerenciador').value;
+        const ctr = document.getElementById('trafficCTR').value.trim();
+        const cliques = document.getElementById('trafficCliques').value.trim();
+        
+        let melhoresAnuncios = document.getElementById('trafficMelhoresAnuncios').value;
+        if(melhoresAnuncios === 'personalizado'){
+          melhoresAnuncios = document.getElementById('trafficMelhoresAnunciosCustom').value.trim();
+        }
+        
+        let comentarios = document.getElementById('trafficComentarios').value;
+        if(comentarios === 'Sim'){
+          const detalhes = document.getElementById('trafficComentariosDetails').value.trim();
+          if(detalhes) comentarios += `\n${detalhes}`;
+        }
+        
+        const orcamento = document.getElementById('trafficOrcamento').value;
+        
+        let limitada = document.getElementById('trafficLimitada').value;
+        if(limitada === 'Sim'){
+          const detalhes = document.getElementById('trafficLimitadaDetails').value.trim();
+          if(detalhes) limitada += `\n${detalhes}`;
+        }
+        
+        const otimizacao = document.getElementById('trafficOtimizacao').value;
+        const qualOtimizacao = document.getElementById('trafficQualOtimizacao').value.trim();
+        
+        let insight = document.getElementById('trafficInsight').value;
+        if(insight === 'personalizado'){
+          insight = document.getElementById('trafficInsightCustom').value.trim();
+        }
+        
+        // Montar o conteúdo da nota
+        let conteudo = '📊 RELATÓRIO DE TRÁFEGO\n';
+        conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n\n`;
+        
+        conteudo += '🎯 Campanhas estão rodando? Quais?\n' + campanhasTexto + '\n\n';
+        
+        if(leadsGerando) conteudo += '📊 Estão gerando leads?\n' + leadsGerando + '\n\n';
+        
+        if(leadsHoje) conteudo += '📈 Quantos leads hoje?\n' + leadsHoje + '\n\n';
+        
+        if(leadsCaindo) conteudo += '✅ Leads estão caindo corretamente na plataforma e no CRM?\n' + leadsCaindo + '\n\n';
+        
+        if(leadsMes) conteudo += '📅 Quantos leads no mês?\n' + leadsMes + '\n\n';
+        
+        if(leadsGerenciador) conteudo += '💼 Quantos leads no gerenciador de anúncios?\n' + leadsGerenciador + '\n\n';
+        
+        if(ctr) conteudo += '🎯 CTR por campanha\n' + ctr + '\n\n';
+        
+        if(cliques) conteudo += '👆 Cliques por campanha\n' + cliques + '\n\n';
+        
+        if(melhoresAnuncios) conteudo += '⭐ Quais são os melhores anúncios?\n' + melhoresAnuncios + '\n\n';
+        
+        if(comentarios) conteudo += '💬 Algum anúncio com comentários?\n' + comentarios + '\n\n';
+        
+        if(orcamento) conteudo += '💰 Orçamento está rodando corretamente?\n' + orcamento + '\n\n';
+        
+        if(limitada) conteudo += '⚠️ Alguma campanha limitada por orçamento?\n' + limitada + '\n\n';
+        
+        if(otimizacao) conteudo += '🔧 Precisa de otimização hoje?\n' + otimizacao + '\n\n';
+        
+        if(qualOtimizacao) conteudo += '🛠️ Qual otimização será feita/foi feita?\n' + qualOtimizacao + '\n\n';
+        
+        if(insight) conteudo += '💡 Insight geral após analisar todas as campanhas\n' + insight + '\n';
+        
+        // Verificar se há conteúdo suficiente
+        if(conteudo.split('\n').filter(line => line.trim()).length <= 3){
+          mgToast('Preencha pelo menos algumas perguntas');
+          return;
+        }
+        
+        // Verificar UID
+        const uid = getTeamNotesTargetUid();
+        if(!uid){
+          console.error('❌ Nenhum UID encontrado para salvar nota');
+          mgToast('Erro: Usuário não identificado. Faça login novamente.');
+          return;
+        }
+        
+        // Usar getCurrentUser para suportar sessão admin
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
+        
+        // Criar nova nota
+        const newNote = {
+          id: uuid(),
+          column: 'trafego',
+          content: conteudo,
+          attachments: [],
+          authorId: user?.uid || '',
+          authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+          authorPhoto: user?.photoURL || '',
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        TEAM_NOTES.push(newNote);
+        await persistTeamNotes();
+        closeTrafficTemplateModal();
+        renderTeamNotes();
+        mgToast('Relatório de tráfego salvo!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar relatório de tráfego:', err);
+        mgToast('Erro ao salvar relatório: ' + (err.message || 'Erro desconhecido'));
+      }
+    }
+    window.saveTrafficTemplate = saveTrafficTemplate;
+    /* ========== FIM TEMPLATE DE TRÁFEGO ========== */
+    
+    /* ========== TEMPLATE DE CONTEÚDO/CANAIS ========== */
+    function openContentTemplateModal(){
+      const modal = document.getElementById('contentTemplateModal');
+      if(!modal) return;
+      
+      // Limpar todos os campos
+      document.getElementById('contentAlcanceInstagram').value = '';
+      document.getElementById('contentAlcanceGoogle').value = '';
+      document.getElementById('contentEngajamentoInstagram').value = '';
+      document.getElementById('contentSalvamentosInstagram').value = '';
+      document.getElementById('contentResultadosDia').value = '';
+      document.getElementById('contentResultadosDiaCustom').value = '';
+      document.getElementById('contentResultadosDiaCustom').style.display = 'none';
+      document.getElementById('contentPoucoEngajamento').value = '';
+      document.getElementById('contentPoucoEngajamentoDetails').value = '';
+      document.getElementById('contentPoucoEngajamentoDetails').style.display = 'none';
+      document.getElementById('contentHouveDM').value = '';
+      document.getElementById('contentDMsRespondidas').value = '';
+      document.getElementById('contentComentariosRespondidos').value = '';
+      document.getElementById('contentComentarioNegativo').value = '';
+      document.getElementById('contentComentarioNegativoDetails').value = '';
+      document.getElementById('contentComentarioNegativoDetails').style.display = 'none';
+      document.getElementById('contentCanaisAtualizados').value = '';
+      document.getElementById('contentCanaisAtualizadosDetails').value = '';
+      document.getElementById('contentCanaisAtualizadosDetails').style.display = 'none';
+      document.getElementById('contentInsight').value = '';
+      document.getElementById('contentInsightCustom').value = '';
+      document.getElementById('contentInsightCustom').style.display = 'none';
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    window.openContentTemplateModal = openContentTemplateModal;
+    
+    function closeContentTemplateModal(){
+      const modal = document.getElementById('contentTemplateModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    window.closeContentTemplateModal = closeContentTemplateModal;
+    
+    async function saveContentTemplate(){
+      try {
+        // Coletar dados do formulário
+        const alcanceInstagram = document.getElementById('contentAlcanceInstagram').value.trim();
+        const alcanceGoogle = document.getElementById('contentAlcanceGoogle').value.trim();
+        const engajamentoInstagram = document.getElementById('contentEngajamentoInstagram').value.trim();
+        const salvamentosInstagram = document.getElementById('contentSalvamentosInstagram').value.trim();
+        
+        let resultadosDia = document.getElementById('contentResultadosDia').value;
+        if(resultadosDia === 'personalizado'){
+          resultadosDia = document.getElementById('contentResultadosDiaCustom').value.trim();
+        }
+        
+        let poucoEngajamento = document.getElementById('contentPoucoEngajamento').value;
+        if(poucoEngajamento === 'Sim'){
+          const detalhes = document.getElementById('contentPoucoEngajamentoDetails').value.trim();
+          if(detalhes) poucoEngajamento += `\n${detalhes}`;
+        }
+        
+        const houveDM = document.getElementById('contentHouveDM').value;
+        const dmsRespondidas = document.getElementById('contentDMsRespondidas').value;
+        const comentariosRespondidos = document.getElementById('contentComentariosRespondidos').value;
+        
+        let comentarioNegativo = document.getElementById('contentComentarioNegativo').value;
+        if(comentarioNegativo === 'Sim'){
+          const detalhes = document.getElementById('contentComentarioNegativoDetails').value.trim();
+          if(detalhes) comentarioNegativo += `\n${detalhes}`;
+        }
+        
+        let canaisAtualizados = document.getElementById('contentCanaisAtualizados').value;
+        const canaisDetalhes = document.getElementById('contentCanaisAtualizadosDetails').value.trim();
+        if((canaisAtualizados === 'Não' || canaisAtualizados === 'Parcialmente') && canaisDetalhes){
+          canaisAtualizados += `\n${canaisDetalhes}`;
+        }
+        
+        let insight = document.getElementById('contentInsight').value;
+        if(insight === 'Sim' || insight === 'personalizado'){
+          const custom = document.getElementById('contentInsightCustom').value.trim();
+          if(custom) insight = custom;
+        }
+        
+        // Montar o conteúdo da nota
+        let conteudo = '📢 RELATÓRIO DE CONTEÚDO E CANAIS\n';
+        conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n\n`;
+        
+        if(alcanceInstagram) conteudo += '📊 Alcance do mês até agora - Instagram\n' + alcanceInstagram + '\n\n';
+        
+        if(alcanceGoogle) conteudo += '🔍 Alcance do mês até agora - Google (interações)\n' + alcanceGoogle + '\n\n';
+        
+        if(engajamentoInstagram) conteudo += '💬 Engajamento do mês até agora - Instagram\n' + engajamentoInstagram + '\n\n';
+        
+        if(salvamentosInstagram) conteudo += '💾 Salvamentos do mês até agora - Instagram\n' + salvamentosInstagram + '\n\n';
+        
+        if(resultadosDia) conteudo += '📈 Resultados do dia anterior (posts, reels, stories)\n' + resultadosDia + '\n\n';
+        
+        if(poucoEngajamento) conteudo += '📉 Conteúdos com pouco engajamento\n' + poucoEngajamento + '\n\n';
+        
+        if(houveDM) conteudo += '💌 Houve DM no dia anterior?\n' + houveDM + '\n\n';
+        
+        if(dmsRespondidas) conteudo += '✅ Todas as DMs foram respondidas?\n' + dmsRespondidas + '\n\n';
+        
+        if(comentariosRespondidos) conteudo += '💬 Todos os comentários estão respondidos?\n' + comentariosRespondidos + '\n\n';
+        
+        if(comentarioNegativo) conteudo += '⚠️ Algum comentário negativo ou relevante?\n' + comentarioNegativo + '\n\n';
+        
+        if(canaisAtualizados) conteudo += '🔄 Está sendo atualizado todos os canais e Google?\n' + canaisAtualizados + '\n\n';
+        
+        if(insight) conteudo += '💡 Algum insight após a análise do dia anterior?\n' + insight + '\n';
+        
+        // Verificar se há conteúdo suficiente
+        if(conteudo.split('\n').filter(line => line.trim()).length <= 3){
+          mgToast('Preencha pelo menos algumas perguntas');
+          return;
+        }
+        
+        // Verificar UID
+        const uid = getTeamNotesTargetUid();
+        if(!uid){
+          console.error('❌ Nenhum UID encontrado para salvar nota');
+          mgToast('Erro: Usuário não identificado. Faça login novamente.');
+          return;
+        }
+        
+        // Usar getCurrentUser para suportar sessão admin
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
+        
+        // Criar nova nota
+        const newNote = {
+          id: uuid(),
+          column: 'canais',
+          content: conteudo,
+          attachments: [],
+          authorId: user?.uid || '',
+          authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+          authorPhoto: user?.photoURL || '',
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        TEAM_NOTES.push(newNote);
+        await persistTeamNotes();
+        closeContentTemplateModal();
+        renderTeamNotes();
+        mgToast('Relatório de conteúdo salvo!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar relatório de conteúdo:', err);
+        mgToast('Erro ao salvar relatório: ' + (err.message || 'Erro desconhecido'));
+      }
+    }
+    window.saveContentTemplate = saveContentTemplate;
+    /* ========== FIM TEMPLATE DE CONTEÚDO/CANAIS ========== */
 
     /* ========= Relatório ========= */
   let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
