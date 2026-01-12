@@ -7372,6 +7372,27 @@ function renderReviewNotes(post){
   .demandas-summary-preview .wa-link:hover{text-decoration:underline}
   .demandas-summary-preview .wa-atrasada{color:#ff6b6b;font-weight:700}
   .demandas-summary-preview .wa-separator{color:#3b4a54;display:block;margin:4px 0}
+  .demandas-preview-with-buttons{display:flex;gap:24px;align-items:flex-start;justify-content:center}
+  .demandas-preview-text{flex:1;max-width:50%;min-width:0}
+  .demandas-copy-buttons{width:480px;display:flex;flex-direction:column;gap:8px;padding-left:24px;border-left:1px solid rgba(255,255,255,.1)}
+  .demandas-copy-buttons-header{font-size:.9rem;font-weight:600;color:#8696a0;margin-bottom:10px;text-align:center}
+  .demandas-copy-buttons-list{display:flex;flex-direction:column;gap:6px;max-height:550px;overflow-y:auto;padding-right:6px}
+  .demandas-copy-buttons-list::-webkit-scrollbar{width:8px}
+  .demandas-copy-buttons-list::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:4px}
+  .demandas-copy-buttons-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+  .demandas-copy-buttons-list::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
+  .demandas-copy-group-header{font-size:.82rem;font-weight:700;color:#e9edef;margin-top:8px;margin-bottom:4px;padding:6px 10px;background:rgba(255,255,255,.05);border-radius:4px;display:flex;align-items:center;gap:6px}
+  .demandas-copy-separator{height:1px;background:rgba(255,255,255,.1);margin:10px 0}
+  .btn-copy-individual-inline{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 12px;font-size:.82rem;cursor:pointer;transition:all .2s ease;text-align:left;color:#e9edef;width:100%}
+  .btn-copy-individual-inline:hover{background:rgba(37,211,102,.1);border-color:#25d366;transform:translateX(2px)}
+  .btn-copy-individual-inline:active{transform:translateX(0)}
+  .btn-copy-status{font-size:1.1rem;flex-shrink:0}
+  .btn-copy-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;line-height:1.3}
+  .btn-copy-icon{font-size:1.1rem;flex-shrink:0;opacity:.7}
+  .btn-copy-individual-inline:hover .btn-copy-icon{opacity:1}
+  @media(max-width:1200px){.demandas-copy-buttons{width:400px}}
+  @media(max-width:1024px){.demandas-copy-buttons{width:350px}}
+  @media(max-width:768px){.demandas-preview-with-buttons{flex-direction:column}.demandas-preview-text{max-width:100%}.demandas-copy-buttons{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.1);padding-left:0;padding-top:16px}}
   .demandas-summary-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s ease;display:inline-flex;align-items:center;gap:6px}
   .demandas-summary-btn:hover{background:#1eb054}
   .demandas-summary-btn:active{transform:scale(.98)}
@@ -63204,6 +63225,83 @@ FORMATO PADRÃO:
       return summary;
     }
     
+    // Função para gerar demanda individual (para cópia)
+    async function generateIndividualDemanda(demanda){
+      if(!demanda) return '';
+      
+      // Obter nome da conta
+      let contaNome = 'Cliente';
+      try {
+        const pathSegment = window.location.pathname.split('/').filter(Boolean)[0];
+        if (pathSegment && pathSegment !== 'index.html') {
+          contaNome = pathSegment;
+        } else if (typeof CLIENT_DATA !== 'undefined' && CLIENT_DATA?.nome) {
+          contaNome = CLIENT_DATA.nome;
+        } else if (auth?.currentUser?.email) {
+          contaNome = auth.currentUser.email.split('@')[0];
+        }
+      } catch (e) {
+        contaNome = 'Cliente';
+      }
+      
+      // Status emoji
+      let statusEmoji = '⚪';
+      if(demanda.status === 'em-andamento') statusEmoji = '🔵';
+      else if(demanda.status === 'bloqueado') statusEmoji = '🔴';
+      else if(demanda.status === 'concluido') statusEmoji = '✅';
+      else if(demanda.status === 'prioridade') statusEmoji = '🔥';
+      else if(demanda.status === 'prioridade-grupo') statusEmoji = '🔥👥';
+      else if(demanda.status === 'concluido-grupo') statusEmoji = '✅👥';
+      
+      // Objetivo
+      const objetivo = (demanda.demanda || 'Sem título').trim();
+      
+      // Prazo
+      let prazoStr = '';
+      if(demanda.prazo && demanda.prazoFim){
+        prazoStr = `${formatDateReadable(demanda.prazo)} - ${formatDateReadable(demanda.prazoFim)}`;
+      }else if(demanda.prazo){
+        prazoStr = formatDateReadable(demanda.prazo);
+      }else{
+        prazoStr = 'Sem prazo';
+      }
+      
+      // Bloqueio
+      const bloqueadoInfo = demanda.status === 'bloqueado' ? ' _(bloqueada)_' : '';
+      
+      // Atrasada
+      let atrasadoInfo = '';
+      if(demanda.status !== 'concluido' && demanda.status !== 'concluido-grupo'){
+        const prazoFimDate = demanda.prazoFim ? new Date(demanda.prazoFim) : (demanda.prazo ? new Date(demanda.prazo) : null);
+        if(prazoFimDate){
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+          prazoFimDate.setHours(23, 59, 59, 999);
+          if(prazoFimDate < hoje){
+            atrasadoInfo = ' ⚠️🔴 *ATRASADA*';
+          }
+        }
+      }
+      
+      // Link do plano
+      let planoLink = '';
+      if(demanda.plano && demanda.plano.trim()){
+        const link = await generatePlanLinkAsync(demanda);
+        if(link) planoLink = `\n📝 ${link}`;
+      }
+      
+      // Responsável
+      const responsavel = demanda.responsavel || 'Não definido';
+      
+      // Montar texto individual
+      let texto = `*${contaNome.toUpperCase()}*\n`;
+      texto += `*📋 PLANEJAMENTO*\n\n`;
+      texto += `${statusEmoji} *${objetivo}*${bloqueadoInfo}${atrasadoInfo}\n`;
+      texto += `👤 ${responsavel} | 📅 ${prazoStr}${planoLink}`;
+      
+      return texto;
+    }
+    
     // Função para formatar texto com estilos do WhatsApp para visualização
     function formatWhatsAppPreview(text){
       if(!text) return '';
@@ -63235,8 +63333,8 @@ FORMATO PADRÃO:
       return html;
     }
     
-    // Atualizar preview do resumo
-    function updateDemandasPreview(text){
+    // Atualizar preview do resumo com botões individuais inline
+    async function updateDemandasPreview(text, demandasData = null){
       const previewEl = $('demandasSummaryPreview');
       if(!previewEl) return;
       
@@ -63245,7 +63343,105 @@ FORMATO PADRÃO:
         return;
       }
       
-      previewEl.innerHTML = formatWhatsAppPreview(text);
+      // Criar visualização com texto formatado + botões inline
+      let html = '<div class="demandas-preview-with-buttons">';
+      html += '<div class="demandas-preview-text">' + formatWhatsAppPreview(text) + '</div>';
+      
+      // Se temos dados das demandas, adicionar botões de cópia individual agrupados por responsável
+      if(demandasData && Array.isArray(demandasData) && demandasData.length > 0){
+        // Agrupar demandas por responsável
+        const porResponsavel = {};
+        demandasData.forEach((d, idx) => {
+          const resp = d.responsavel || 'Não definido';
+          if(!porResponsavel[resp]) porResponsavel[resp] = [];
+          porResponsavel[resp].push({demanda: d, index: idx});
+        });
+        
+        html += '<div class="demandas-copy-buttons">';
+        html += '<div class="demandas-copy-buttons-header">📋 Copiar demanda individual:</div>';
+        html += '<div class="demandas-copy-buttons-list">';
+        
+        // Ordenar responsáveis alfabeticamente
+        const responsaveis = Object.keys(porResponsavel).sort();
+        
+        for(let respIndex = 0; respIndex < responsaveis.length; respIndex++){
+          const responsavel = responsaveis[respIndex];
+          const demandasResp = porResponsavel[responsavel];
+          
+          // Cabeçalho do responsável
+          html += `<div class="demandas-copy-group-header">👤 ${responsavel}</div>`;
+          
+          // Botões das demandas desse responsável
+          for(let j = 0; j < demandasResp.length; j++){
+            const item = demandasResp[j];
+            const d = item.demanda;
+            const i = item.index;
+            
+            const objetivo = (d.demanda || 'Sem título').substring(0, 55);
+            const truncated = (d.demanda || '').length > 55 ? '...' : '';
+            
+            // Status emoji
+            let statusEmoji = '⚪';
+            if(d.status === 'em-andamento') statusEmoji = '🔵';
+            else if(d.status === 'bloqueado') statusEmoji = '🔴';
+            else if(d.status === 'prioridade') statusEmoji = '🔥';
+            else if(d.status === 'prioridade-grupo') statusEmoji = '🔥👥';
+            
+            html += `<button class="btn-copy-individual-inline" data-demanda-index="${i}" title="Copiar: ${d.demanda || 'Sem título'}">
+              <span class="btn-copy-status">${statusEmoji}</span>
+              <span class="btn-copy-text">${objetivo}${truncated}</span>
+              <span class="btn-copy-icon">📋</span>
+            </button>`;
+          }
+          
+          // Separador entre responsáveis (exceto no último)
+          if(respIndex < responsaveis.length - 1){
+            html += '<div class="demandas-copy-separator"></div>';
+          }
+        }
+        
+        html += '</div></div>';
+        
+        // Adicionar eventos depois de inserir HTML
+        setTimeout(() => {
+          const btnsCopy = previewEl.querySelectorAll('.btn-copy-individual-inline');
+          btnsCopy.forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const index = parseInt(btn.getAttribute('data-demanda-index'));
+              const demanda = demandasData[index];
+              if(!demanda) return;
+              
+              try {
+                const textoIndividual = await generateIndividualDemanda(demanda);
+                await navigator.clipboard.writeText(textoIndividual);
+                
+                // Feedback visual
+                const iconSpan = btn.querySelector('.btn-copy-icon');
+                const originalIcon = iconSpan.innerHTML;
+                iconSpan.innerHTML = '✅';
+                btn.style.background = '#25d366';
+                btn.style.borderColor = '#25d366';
+                btn.style.color = '#fff';
+                
+                setTimeout(() => {
+                  iconSpan.innerHTML = originalIcon;
+                  btn.style.background = '';
+                  btn.style.borderColor = '';
+                  btn.style.color = '';
+                }, 2000);
+                
+                showToast('Demanda copiada!', 'success');
+              } catch (e) {
+                console.error('Erro ao copiar demanda:', e);
+                showToast('Erro ao copiar demanda', 'error');
+              }
+            });
+          });
+        }, 0);
+      }
+      
+      html += '</div>';
+      previewEl.innerHTML = html;
     }
     
     // Atualizar resumo sempre que demandas mudarem (ASSÍNCRONO)
@@ -63254,16 +63450,68 @@ FORMATO PADRÃO:
       
       // Mostrar loading
       demandasSummaryTextEl.value = '⏳ Gerando resumo...';
-      updateDemandasPreview('⏳ Gerando resumo...');
+      const previewEl = $('demandasSummaryPreview');
+      if(previewEl) previewEl.innerHTML = '<span style="color:#8696a0">⏳ Gerando resumo...</span>';
       
       try {
         const summary = await generateDemandasSummary();
         demandasSummaryTextEl.value = summary;
-        updateDemandasPreview(summary);
+        
+        // Obter demandas filtradas para criar preview com botões
+        const filtered = DEMANDAS.filter(d => {
+          // Excluir concluídas
+          if(d.status === 'concluido' || d.status === 'concluido-grupo') return false;
+          
+          // Aplicar mesmos filtros
+          const search = ($('demandaSearch')?.value || '').toLowerCase();
+          const statusFilterEl = $('demandaStatusColumnFilter');
+          const objetivoFilterEl = $('demandaObjetivoFilter');
+          const responsavelFilterEl = $('demandaResponsavelFilter');
+          const periodoInicioEl = $('demandaPeriodoInicioFilter');
+          const periodoFimEl = $('demandaPeriodoFimFilter');
+          
+          const fStatus = statusFilterEl ? statusFilterEl.value || '' : '';
+          const fObjetivo = objetivoFilterEl ? (objetivoFilterEl.value || '').toLowerCase().trim() : '';
+          const fResponsavel = responsavelFilterEl ? responsavelFilterEl.value || '' : '';
+          const fPeriodoInicio = periodoInicioEl ? parseFilterDate(periodoInicioEl.value, false) : null;
+          const fPeriodoFim = periodoFimEl ? parseFilterDate(periodoFimEl.value, true) : null;
+          const fMonth = selectedDemandaMonth;
+          
+          const sMatch = !search || (d.demanda || '').toLowerCase().includes(search);
+          const stMatch = !fStatus || d.status === fStatus;
+          const objetivoMatch = !fObjetivo || (d.demanda || '').toLowerCase().includes(fObjetivo);
+          const respMatch = !fResponsavel || (d.responsavel || '') === fResponsavel;
+          const demandMonths = getDemandMonthKeys(d);
+          const mMatch = !fMonth || !demandMonths.length || demandMonths.includes(fMonth);
+          
+          let periodoMatch = true;
+          if(fPeriodoInicio || fPeriodoFim){
+            const rangeStart = getDemandaStartDate(d) || getDemandaEndDate(d);
+            const rangeEnd = getDemandaEndDate(d) || rangeStart;
+            if(!rangeStart || !rangeEnd){
+              periodoMatch = false;
+            }else{
+              if(fPeriodoInicio && rangeEnd.getTime() < fPeriodoInicio.getTime()) periodoMatch = false;
+              if(fPeriodoFim && rangeStart.getTime() > fPeriodoFim.getTime()) periodoMatch = false;
+            }
+          }
+          return sMatch && stMatch && objetivoMatch && respMatch && mMatch && periodoMatch;
+        });
+        
+        // Ordenar demandas
+        const sorted = filtered.slice().sort((a, b) => {
+          const aMeta = getDemandaSortMeta(a);
+          const bMeta = getDemandaSortMeta(b);
+          if(aMeta.startMs !== bMeta.startMs) return aMeta.startMs - bMeta.startMs;
+          if(aMeta.endMs !== bMeta.endMs) return aMeta.endMs - bMeta.endMs;
+          return (a.demanda || '').localeCompare(b.demanda || '', 'pt-BR');
+        });
+        
+        await updateDemandasPreview(summary, sorted);
       } catch (e) {
         console.error('Erro ao gerar resumo:', e);
         demandasSummaryTextEl.value = '❌ Erro ao gerar resumo. Tente novamente.';
-        updateDemandasPreview('❌ Erro ao gerar resumo. Tente novamente.');
+        if(previewEl) previewEl.innerHTML = '<span style="color:#ff6b6b">❌ Erro ao gerar resumo. Tente novamente.</span>';
       }
     }
     
