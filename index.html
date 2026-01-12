@@ -60992,8 +60992,51 @@ FORMATO PADRÃO:
       }
     }
     function createDemanda(){ const now=Date.now(); return normalizeDemanda({id:uuid(),status:'',tag:'',demanda:'',responsavel:'',prazo:'',plano:'',edited:now,created:now}); }
-    function loadDemandasFromUserData(){
-      DEMANDAS = Array.isArray(USER_DATA.demandas) ? USER_DATA.demandas.map(normalizeDemanda) : [];
+    async function loadDemandasFromSubcollection(uid){
+      try{
+        console.log('📥 [LOAD] Carregando demandas da subcoleção...');
+        const chunksSnapshot = await getDocs(collection(db, 'usuarios', uid, 'demandas_chunks'));
+        const chunks = [];
+        
+        chunksSnapshot.forEach(doc => {
+          const data = doc.data();
+          if(data.demandas && Array.isArray(data.demandas)){
+            chunks.push({
+              index: data.chunkIndex || 0,
+              demandas: data.demandas
+            });
+          }
+        });
+        
+        // Ordenar chunks por índice
+        chunks.sort((a, b) => a.index - b.index);
+        
+        // Combinar todas as demandas
+        const allDemandas = [];
+        chunks.forEach(chunk => {
+          allDemandas.push(...chunk.demandas);
+        });
+        
+        console.log(`✅ [LOAD] ${allDemandas.length} demandas carregadas de ${chunks.length} chunks`);
+        return allDemandas;
+      }catch(err){
+        console.error('❌ [LOAD] Erro ao carregar subcoleção:', err);
+        return [];
+      }
+    }
+    
+    async function loadDemandasFromUserData(){
+      const uid = auth.currentUser?.uid;
+      
+      // Verificar se usa subcoleção
+      if(uid && USER_DATA.usesSubcollection === true){
+        console.log('🔄 [LOAD] Detectado uso de subcoleção');
+        const subcolDemandas = await loadDemandasFromSubcollection(uid);
+        DEMANDAS = subcolDemandas.length > 0 ? subcolDemandas.map(normalizeDemanda) : [];
+      } else {
+        DEMANDAS = Array.isArray(USER_DATA.demandas) ? USER_DATA.demandas.map(normalizeDemanda) : [];
+      }
+      
       DEMANDA_MONTH_PLANS = cloneMonthPlans(USER_DATA.demandaMonthPlans);
       Object.keys(DEMANDA_MONTH_PLANS || {}).forEach(monthKey=> normalizeMonthPlan(monthKey));
       if(DEMANDAS.length===0){ DEMANDAS.push(createDemanda()); }
@@ -61035,8 +61078,67 @@ FORMATO PADRÃO:
       }
       syncDemandasSignatures();
       try{ refreshMacroInsights(); }catch(_){ }
+      
+      // Estratégia de salvamento com subcoleções para evitar limite de 1MB
+      const MAX_DEMANDAS_PER_CHUNK = 50; // Limite seguro por documento
+      const CHUNK_SIZE_BYTES_ESTIMATE = 800000; // ~800KB (deixa margem do limite de 1MB)
+      
       try{
-        await setDoc(doc(db,'usuarios',uid), { demandas: DEMANDAS, demandaMonthPlans: monthPlansPayload }, { merge:true });
+        // Calcular tamanho estimado dos dados
+        const estimatedSize = JSON.stringify({ demandas: DEMANDAS, demandaMonthPlans: monthPlansPayload }).length;
+        console.log(`📊 [PERSIST] Tamanho estimado dos dados: ${(estimatedSize/1024).toFixed(2)} KB`);
+        
+        // Se menor que 700KB, salvar normalmente
+        if(estimatedSize < 700000){
+          console.log('✅ [PERSIST] Salvando no documento principal (< 700KB)');
+          await setDoc(doc(db,'usuarios',uid), { 
+            demandas: DEMANDAS, 
+            demandaMonthPlans: monthPlansPayload,
+            usesSubcollection: false 
+          }, { merge:true });
+        } else {
+          console.log('⚠️ [PERSIST] Dados grandes detectados! Usando subcoleção...');
+          
+          // Dividir demandas em chunks
+          const chunks = [];
+          for(let i = 0; i < DEMANDAS.length; i += MAX_DEMANDAS_PER_CHUNK){
+            chunks.push(DEMANDAS.slice(i, i + MAX_DEMANDAS_PER_CHUNK));
+          }
+          
+          console.log(`📦 [PERSIST] Dividindo em ${chunks.length} chunks`);
+          
+          // Salvar metadata no documento principal
+          await setDoc(doc(db,'usuarios',uid), { 
+            usesSubcollection: true,
+            demandasCount: DEMANDAS.length,
+            demandaMonthPlans: monthPlansPayload,
+            lastUpdated: Date.now()
+          }, { merge:true });
+          
+          // Salvar chunks na subcoleção
+          const batch = writeBatch(db);
+          chunks.forEach((chunk, idx) => {
+            const chunkRef = doc(db, 'usuarios', uid, 'demandas_chunks', `chunk_${idx}`);
+            batch.set(chunkRef, { 
+              demandas: chunk,
+              chunkIndex: idx,
+              timestamp: Date.now()
+            });
+          });
+          
+          // Limpar chunks antigos se necessário
+          const totalChunksNeeded = chunks.length;
+          for(let i = totalChunksNeeded; i < totalChunksNeeded + 10; i++){
+            const oldChunkRef = doc(db, 'usuarios', uid, 'demandas_chunks', `chunk_${i}`);
+            batch.delete(oldChunkRef);
+          }
+          
+          await batch.commit();
+          console.log('✅ [PERSIST] Salvamento em subcoleção concluído!');
+        }
+      }catch(err){
+        console.error('❌ [PERSIST] Erro ao salvar:', err);
+        throw err;
       }finally{
         try{ refreshMacroInsights(); }catch(_){ }
       }
@@ -61066,15 +61168,94 @@ FORMATO PADRÃO:
         return;
       }
       if(!demandasSavePending){
-        maybeApplyPendingDemandasSnapshot();
+        await maybeApplyPendingDemandasSnapshot();
         return;
       }
       demandasSavePending = false;
       demandasSaveInFlight = true;
       try{
         await persistDemandas();
+        console.log('✅ [PERSIST] Demandas salvas com sucesso!');
       }catch(err){
-        console.error('Erro ao salvar demandas', err);
+        console.error('❌ [PERSIST] Erro ao salvar demandas:', err);
+        
+        // Detectar erro de limite de tamanho
+        if(err.code === 'invalid-argument' || err.message?.includes('maximum size') || err.message?.includes('too large') || err.message?.includes('exceeds the maximum')){
+          console.warn('🔄 [PERSIST] Documento muito grande! Tentando migração para subcoleção...');
+          try{
+            // Forçar uso de subcoleção
+            const uid = auth.currentUser?.uid;
+            if(uid){
+              // Calcular planos mensais separadamente (para salvar na subcoleção se necessário)
+              const monthPlansPayload = {};
+              if(DEMANDA_MONTH_PLANS && typeof DEMANDA_MONTH_PLANS === 'object'){
+                Object.keys(DEMANDA_MONTH_PLANS).forEach(monthKey=>{
+                  const plan = normalizeMonthPlan(monthKey);
+                  if(!plan) return;
+                  monthPlansPayload[monthKey] = {};
+                  PLAN_TYPES.forEach(({key})=>{
+                    monthPlansPayload[monthKey][key] = typeof plan[key] === 'string' ? plan[key] : '';
+                  });
+                  const notes = plan.objectiveNotes && typeof plan.objectiveNotes === 'object' ? plan.objectiveNotes : {};
+                  const payloadNotes = {};
+                  Object.keys(notes).forEach(noteKey=>{
+                    const noteVal = notes[noteKey];
+                    if(typeof noteVal === 'string' && noteVal.trim()){
+                      payloadNotes[noteKey] = noteVal;
+                    }
+                  });
+                  monthPlansPayload[monthKey].objectiveNotes = payloadNotes;
+                });
+              }
+              
+              // Dividir em chunks menores
+              const MAX_CHUNK = 50;
+              const chunks = [];
+              for(let i = 0; i < DEMANDAS.length; i += MAX_CHUNK){
+                chunks.push(DEMANDAS.slice(i, i + MAX_CHUNK));
+              }
+              
+              console.log(`🔄 [PERSIST] Migrando ${DEMANDAS.length} demandas em ${chunks.length} chunks`);
+              
+              // Primeiro: Limpar dados antigos do documento principal usando updateDoc
+              await updateDoc(doc(db,'usuarios',uid), { 
+                demandas: deleteField(), // Remove array de demandas
+                usesSubcollection: true,
+                demandasCount: DEMANDAS.length,
+                demandaMonthPlans: monthPlansPayload, // Mantém planos (geralmente pequeno)
+                lastUpdated: Date.now()
+              });
+              
+              console.log('✅ [PERSIST] Documento principal limpo');
+              
+              // Segundo: Salvar chunks na subcoleção
+              const batch = writeBatch(db);
+              chunks.forEach((chunk, idx) => {
+                const chunkRef = doc(db, 'usuarios', uid, 'demandas_chunks', `chunk_${idx}`);
+                batch.set(chunkRef, { 
+                  demandas: chunk,
+                  chunkIndex: idx,
+                  timestamp: Date.now()
+                });
+              });
+              
+              // Limpar chunks antigos se necessário
+              const totalChunksNeeded = chunks.length;
+              for(let i = totalChunksNeeded; i < totalChunksNeeded + 10; i++){
+                const oldChunkRef = doc(db, 'usuarios', uid, 'demandas_chunks', `chunk_${i}`);
+                batch.delete(oldChunkRef);
+              }
+              
+              await batch.commit();
+              console.log('✅ [PERSIST] Migração para subcoleção concluída com sucesso!');
+            }
+          }catch(migrationErr){
+            console.error('❌ [PERSIST] Erro na migração:', migrationErr);
+            throw migrationErr;
+          }
+        } else {
+          throw err;
+        }
       }finally{
         demandasSaveInFlight = false;
         if(demandasSaveQueued){
@@ -61082,7 +61263,7 @@ FORMATO PADRÃO:
           scheduleDemandasPersist({ immediate:true });
           return;
         }
-        maybeApplyPendingDemandasSnapshot();
+        await maybeApplyPendingDemandasSnapshot();
       }
     }
     function shouldDeferDemandasSnapshot(){
@@ -61099,7 +61280,7 @@ FORMATO PADRÃO:
         matchesLocalState: !!payload.matchesLocalState
       };
     }
-    function maybeApplyPendingDemandasSnapshot(){
+    async function maybeApplyPendingDemandasSnapshot(){
       if(!pendingDemandasSnapshot) return;
       if(shouldDeferDemandasSnapshot()) return;
       const { data, signatures, matchesLocalState } = pendingDemandasSnapshot;
@@ -61114,7 +61295,7 @@ FORMATO PADRÃO:
         lastDemandaPlansSignature = signatures.plans;
         return;
       }
-      loadDemandasFromUserData();
+      await loadDemandasFromUserData();
       requestRenderDemandas();
     }
     function updatePrazoAlert(){
@@ -63859,7 +64040,7 @@ FORMATO PADRÃO:
           loadNoteTemplatesFromUserData();
           loadAccessesFromUserData();
           loadCACFromUserData();
-          loadDemandasFromUserData();
+          await loadDemandasFromUserData();
           loadTrafficMetricsFromUserData();
           loadTrafficOptimizationsFromUserData();
           loadTrafficOptimizationHistoryFromUserData();
@@ -63891,7 +64072,7 @@ FORMATO PADRÃO:
             console.warn('IA context preload', err);
           }
           if(userDocUnsub) userDocUnsub();
-          userDocUnsub = onSnapshot(ref, snap=>{
+          userDocUnsub = onSnapshot(ref, async snap=>{
             const data = snap.data() || {};
             const signatures = computeDemandSnapshotSignatures(data.demandas, data.demandaMonthPlans);
             const remoteChanged = signatures.demandas !== lastRemoteDemandasSignature || signatures.plans !== lastRemoteDemandaPlansSignature;
@@ -63910,7 +64091,7 @@ FORMATO PADRÃO:
                 queuePendingDemandasSnapshot({ data, signatures, matchesLocalState });
               }else{
                 pendingDemandasSnapshot = null;
-                loadDemandasFromUserData();
+                await loadDemandasFromUserData();
                 requestRenderDemandas();
                 lastRemoteDemandasSignature = signatures.demandas;
                 lastRemoteDemandaPlansSignature = signatures.plans;
@@ -64057,7 +64238,7 @@ FORMATO PADRÃO:
             loadNoteTemplatesFromUserData();
             loadAccessesFromUserData();
             loadCACFromUserData();
-            loadDemandasFromUserData();
+            await loadDemandasFromUserData();
             loadTrafficMetricsFromUserData();
             loadTrafficOptimizationsFromUserData();
             loadTrafficOptimizationHistoryFromUserData();
@@ -64092,7 +64273,7 @@ FORMATO PADRÃO:
             
             // Listener para mudanças no documento do cliente
             if(userDocUnsub) userDocUnsub();
-            userDocUnsub = onSnapshot(ref, snap=>{
+            userDocUnsub = onSnapshot(ref, async snap=>{
               const data = snap.data() || {};
               const signatures = computeDemandSnapshotSignatures(data.demandas, data.demandaMonthPlans);
               const remoteChanged = signatures.demandas !== lastRemoteDemandasSignature || signatures.plans !== lastRemoteDemandaPlansSignature;
@@ -64112,7 +64293,7 @@ FORMATO PADRÃO:
                   queuePendingDemandasSnapshot({ data, signatures, matchesLocalState });
                 }else{
                   pendingDemandasSnapshot = null;
-                  loadDemandasFromUserData();
+                  await loadDemandasFromUserData();
                   requestRenderDemandas();
                   lastRemoteDemandasSignature = signatures.demandas;
                   lastRemoteDemandaPlansSignature = signatures.plans;

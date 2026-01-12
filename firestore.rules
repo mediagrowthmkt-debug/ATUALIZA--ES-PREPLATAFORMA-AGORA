@@ -140,6 +140,22 @@ service cloud.firestore {
         );
       }
 
+      /* ✅ DEMANDAS CHUNKS: Subcoleção para salvar demandas em chunks (evita limite de 1MB) */
+      /* Cada chunk é salvo como documento separado: /usuarios/{userId}/demandas_chunks/{chunkId} */
+      match /demandas_chunks/{chunkId} {
+        // O dono pode ler e escrever seus próprios chunks de demandas
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ ANÁLISES: Subcoleção para salvar análises dos entregáveis (evita limite de 1MB) */
       /* Cada análise é salva como documento separado: /usuarios/{userId}/analises/{entregavelId} */
       match /analises/{entregavelId} {
