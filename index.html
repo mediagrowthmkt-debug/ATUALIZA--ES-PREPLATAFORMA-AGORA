@@ -63079,6 +63079,9 @@ FORMATO PADRÃO:
         // Filtro por usuário específico (para copiar por usuário)
         if(filterUser && (d.responsavel || '') !== filterUser) return false;
         
+        // Excluir demandas concluídas do resumo de WhatsApp
+        if(d.status === 'concluido' || d.status === 'concluido-grupo') return false;
+        
         const sMatch = !search || (d.demanda || '').toLowerCase().includes(search);
         const stMatch = !fStatus || d.status === fStatus;
         const objetivoMatch = !fObjetivo || (d.demanda || '').toLowerCase().includes(fObjetivo);
