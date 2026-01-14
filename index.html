@@ -12669,6 +12669,61 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     const uuid = ()=> crypto.randomUUID ? crypto.randomUUID() : ('id-'+Math.random().toString(36).slice(2)+Date.now());
 function mgToast(msg){ try{ const el=document.createElement('div'); el.className='mg-toast'; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>{ el.remove(); }, 3000);}catch(_){} }
 
+    /**
+     * Função robusta para copiar texto que funciona em iframes e diferentes contextos de permissão
+     * @param {string} text - Texto a ser copiado
+     * @returns {Promise<boolean>} - Retorna true se a cópia foi bem-sucedida
+     */
+    async function mgCopyToClipboard(text) {
+      if(!text && text !== '') return false;
+      
+      let copiado = false;
+      
+      // Método 1: Clipboard API moderna (funciona com https e permissões)
+      if(navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          copiado = true;
+        } catch(clipErr) {
+          console.warn('[mgCopyToClipboard] Clipboard API falhou, tentando fallback:', clipErr);
+        }
+      }
+      
+      // Método 2: Fallback com textarea + execCommand (funciona em iframes sem permissão clipboard-write)
+      if(!copiado) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          textarea.style.top = '-9999px';
+          textarea.style.opacity = '0';
+          textarea.style.pointerEvents = 'none';
+          textarea.setAttribute('readonly', '');
+          textarea.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(textarea);
+          
+          // Focus e select completo
+          textarea.focus();
+          textarea.select();
+          textarea.setSelectionRange(0, text.length);
+          
+          // Executar comando de cópia
+          const sucesso = document.execCommand('copy');
+          if(sucesso) copiado = true;
+          
+          document.body.removeChild(textarea);
+        } catch(execErr) {
+          console.error('[mgCopyToClipboard] execCommand falhou:', execErr);
+        }
+      }
+      
+      return copiado;
+    }
+    
+    // Expor globalmente para uso em qualquer contexto
+    window.mgCopyToClipboard = mgCopyToClipboard;
+
     const __scriptLoadCache = new Map();
     function loadExternalScript(src, check){
       if(typeof check === 'function'){
@@ -16069,20 +16124,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         const targetMsg = CURRENT_CHAT.messages[index];
         const text = typeof targetMsg?.content === 'string' ? targetMsg.content : '';
         try{
-          if(navigator.clipboard?.writeText){
-            await navigator.clipboard.writeText(text);
-          }else{
-            const temp = document.createElement('textarea');
-            temp.value = text;
-            temp.style.position = 'fixed';
-            temp.style.opacity = '0';
-            document.body.appendChild(temp);
-            temp.focus();
-            temp.select();
-            document.execCommand('copy');
-            temp.remove();
-          }
-          if(typeof mgToast === 'function'){ mgToast('Resposta copiada!'); }
+          const copiado = await mgCopyToClipboard(text);
+          if(copiado && typeof mgToast === 'function'){ mgToast('Resposta copiada!'); }
+          else if(!copiado && typeof mgToast === 'function'){ mgToast('Não foi possível copiar.'); }
         }catch(err){
           console.error('copy ia message', err);
           if(typeof mgToast === 'function'){ mgToast('Não foi possível copiar.'); }
@@ -20462,27 +20506,8 @@ async function sendIAQuestion(){
         alert('Nenhum conteúdo para copiar.');
         return;
       }
-      let copied = false;
-      try{
-        if(navigator?.clipboard?.writeText){
-          await navigator.clipboard.writeText(text);
-          copied = true;
-        }
-      }catch(_err){ copied = false; }
-      if(!copied){
-        try{
-          const helper = document.createElement('textarea');
-          helper.value = text;
-          helper.setAttribute('readonly', '');
-          helper.style.position = 'fixed';
-          helper.style.opacity = '0';
-          document.body.appendChild(helper);
-          helper.select();
-          document.execCommand('copy');
-          document.body.removeChild(helper);
-          copied = true;
-        }catch(_err){ copied = false; }
-      }
+      // Usar função robusta de clipboard com fallback para iframes
+      const copied = await mgCopyToClipboard(text);
       if(copied){
         if(typeof mgToast === 'function'){
           mgToast('Briefing copiado para a área de transferência');
@@ -27184,25 +27209,19 @@ async function sendIAQuestion(){
             console.log('🔗 [Botão Copiar Link] Token gerado:', token);
             url = buildRelatorioShareUrl(mesISO, token);
             console.log('🔗 [Botão Copiar Link] URL gerada:', url);
-            const clip = navigator.clipboard;
-            if(clip?.writeText){
-              await clip.writeText(url);
+            
+            // Usar função robusta de clipboard com fallback para iframes
+            const copiado = await mgCopyToClipboard(url);
+            if(copiado){
               alert('Link do relatório copiado! (acesso público)');
               console.log('🔗 [Botão Copiar Link] ✅ Link copiado com sucesso!');
-              return;
-            }
-            throw new Error('Clipboard API indisponível');
-          }catch(_err){
-            console.error('🔗 [Botão Copiar Link] ❌ Erro:', _err);
-            // fallback manual
-            url = url || buildRelatorioShareUrl(mesISO);
-            try{
-              const ta = document.createElement('textarea');
-              ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-              alert('Link do relatório copiado! (acesso público)');
-            }catch(_){
+            } else {
               prompt('Copie o link do relatório:', url);
             }
+          }catch(_err){
+            console.error('🔗 [Botão Copiar Link] ❌ Erro:', _err);
+            url = url || buildRelatorioShareUrl(mesISO);
+            prompt('Copie o link do relatório:', url);
           }
         });
       }
@@ -28310,9 +28329,10 @@ async function sendIAQuestion(){
       const texto = relatorioResumoTextoContent.textContent;
       
       try {
-        if(navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(texto);
-          
+        // Usar função robusta de clipboard com fallback para iframes
+        const copiado = await mgCopyToClipboard(texto);
+        
+        if(copiado) {
           // Feedback visual
           if(btnCopiarResumo) {
             const textoOriginal = btnCopiarResumo.textContent;
@@ -28327,16 +28347,7 @@ async function sendIAQuestion(){
             }, 2000);
           }
         } else {
-          // Fallback para navegadores antigos
-          const textArea = document.createElement('textarea');
-          textArea.value = texto;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-9999px';
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          alert('✅ Resumo copiado!');
+          alert('Não foi possível copiar. Tente selecionar e copiar manualmente.');
         }
       } catch(err) {
         console.error('Erro ao copiar resumo:', err);
@@ -28876,9 +28887,10 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       const texto = relatorioIAPrompt.textContent;
       
       try {
-        if(navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(texto);
-          
+        // Usar função robusta de clipboard com fallback para iframes
+        const copiado = await mgCopyToClipboard(texto);
+        
+        if(copiado) {
           // Feedback visual
           if(btnCopiarPromptIA) {
             const textoOriginal = btnCopiarPromptIA.textContent;
@@ -28895,16 +28907,7 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
           
           mgToast('✅ Prompt copiado! Cole no ChatGPT ou Claude para análise avançada.');
         } else {
-          // Fallback para navegadores antigos
-          const textArea = document.createElement('textarea');
-          textArea.value = texto;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-9999px';
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          alert('✅ Prompt copiado! Cole no ChatGPT ou Claude.');
+          alert('Não foi possível copiar. Tente selecionar e copiar manualmente.');
         }
       } catch(err) {
         console.error('Erro ao copiar prompt:', err);
@@ -30959,7 +30962,7 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       }
     });
 
-    function copyFileLink(fileId){
+    async function copyFileLink(fileId){
       const file = findFileById(fileId);
       if(!file){
         alert('Arquivo não encontrado.');
@@ -30973,35 +30976,12 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         alert('Link indisponível para este arquivo.');
         return;
       }
-      const clipboard = typeof navigator !== 'undefined' ? navigator.clipboard : null;
-      if(clipboard?.writeText){
-        clipboard.writeText(file.url).then(()=>{
-          alert('Link copiado com sucesso!');
-        }).catch(err=>{
-          console.warn('copyFileLink', err);
-          alert('Não foi possível copiar o link do arquivo.');
-        });
-        return;
-      }
-      let tempInput;
-      try{
-        tempInput = document.createElement('input');
-        tempInput.type = 'text';
-        tempInput.value = file.url;
-        tempInput.setAttribute('readonly', '');
-        tempInput.style.position = 'fixed';
-        tempInput.style.opacity = '0';
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
+      // Usar função robusta de clipboard com fallback para iframes
+      const copiado = await mgCopyToClipboard(file.url);
+      if(copiado){
         alert('Link copiado com sucesso!');
-      }catch(err){
-        console.warn('copyFileLink fallback', err);
+      } else {
         alert('Não foi possível copiar o link do arquivo.');
-      }finally{
-        if(tempInput && tempInput.parentNode){
-          tempInput.parentNode.removeChild(tempInput);
-        }
       }
     }
 
@@ -32088,8 +32068,9 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         try{
           const val = leadsWebhookUrlEl?.value || '';
           if(!val){ return; }
-          await navigator.clipboard.writeText(val);
-          if(typeof mgToast==='function') mgToast('URL copiada!');
+          const copiado = await mgCopyToClipboard(val);
+          if(copiado && typeof mgToast==='function') mgToast('URL copiada!');
+          else if(!copiado) alert('Não foi possível copiar a URL');
         }catch(err){ alert('Falha ao copiar: ' + (err?.message||err)); }
       });
       leadsWebhookRegenerateBtn?.addEventListener('click', async ()=>{
@@ -32151,8 +32132,9 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
             if(typeof mgToast==='function') mgToast('Aguarde o relatório ser gerado...');
             return;
           }
-          await navigator.clipboard.writeText(texto);
-          if(typeof mgToast==='function') mgToast('✅ Relatório copiado para área de transferência!');
+          const copiado = await mgCopyToClipboard(texto);
+          if(copiado && typeof mgToast==='function') mgToast('✅ Relatório copiado para área de transferência!');
+          else if(!copiado) alert('Não foi possível copiar o relatório');
         } catch(err){
           console.error('Erro ao copiar relatório:', err);
           alert('Falha ao copiar: ' + (err?.message || err));
@@ -46145,16 +46127,17 @@ ${escapeHtml(prompt)}
     }
 
     // Copiar prompt para clipboard
-    window.copyPromptToClipboard = function() {
+    window.copyPromptToClipboard = async function() {
       const content = document.getElementById('docPreviewContent');
       const rawContent = content.dataset.rawContent || content.innerText;
       
-      navigator.clipboard.writeText(rawContent).then(() => {
+      const copiado = await mgCopyToClipboard(rawContent);
+      if(copiado) {
         showToast('Prompt copiado para a área de transferência!', 'success');
-      }).catch(err => {
-        console.error('Erro ao copiar:', err);
+      } else {
+        console.error('Erro ao copiar prompt');
         showToast('Erro ao copiar. Selecione e copie manualmente.', 'error');
-      });
+      }
     };
 
     // Exportar função para uso global
@@ -46174,15 +46157,17 @@ ${escapeHtml(prompt)}
       }
 
       if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
+        copyBtn.addEventListener('click', async () => {
           const content = document.getElementById('docPreviewContent');
           const rawContent = content.dataset.rawContent || content.innerText;
           
-          navigator.clipboard.writeText(rawContent).then(() => {
+          const copiado = await mgCopyToClipboard(rawContent);
+          if(copiado) {
             showToast('Conteúdo copiado!', 'success');
-          }).catch(err => {
-            console.error('Erro ao copiar:', err);
-          });
+          } else {
+            console.error('Erro ao copiar conteúdo');
+            showToast('Erro ao copiar. Tente selecionar e copiar manualmente.', 'error');
+          }
         });
       }
 
@@ -52139,14 +52124,14 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         const baseUrl = window.location.origin;
         const approvalUrl = baseUrl + '/analise-aprovacao.html?token=' + token;
 
-        // Copiar para área de transferência
-        await navigator.clipboard.writeText(approvalUrl);
+        // Copiar para área de transferência com fallback para iframes
+        const copiado = await mgCopyToClipboard(approvalUrl);
 
         // Feedback visual de sucesso
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('copied');
-          btnElement.innerHTML = '✅ Copiado!';
+          btnElement.innerHTML = copiado ? '✅ Copiado!' : '📋 Link gerado';
           
           setTimeout(() => {
             btnElement.classList.remove('copied');
@@ -52155,7 +52140,11 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         }
 
         // Toast de confirmação
-        mostrarToast('Link de aprovação copiado! 📋');
+        if(copiado) {
+          mostrarToast('Link de aprovação copiado! 📋');
+        } else {
+          prompt('Copie o link de aprovação:', approvalUrl);
+        }
 
       } catch (error) {
         console.error('Erro ao gerar link de aprovação:', error);
@@ -52269,14 +52258,14 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         const baseUrl = window.location.origin;
         const relatorioUrl = baseUrl + '/relatorio-compartilhado.html?token=' + token;
 
-        // Copiar para área de transferência
-        await navigator.clipboard.writeText(relatorioUrl);
+        // Copiar para área de transferência com fallback para iframes
+        const copiado = await mgCopyToClipboard(relatorioUrl);
 
         // Feedback visual de sucesso
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('copied');
-          btnElement.innerHTML = '✅ Copiado!';
+          btnElement.innerHTML = copiado ? '✅ Copiado!' : '📋 Link gerado';
           
           setTimeout(() => {
             btnElement.classList.remove('copied');
@@ -52285,7 +52274,11 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         }
 
         // Toast de confirmação
-        mostrarToast('Link do relatório copiado! 📋');
+        if(copiado) {
+          mostrarToast('Link do relatório copiado! 📋');
+        } else {
+          prompt('Copie o link do relatório:', relatorioUrl);
+        }
         console.log('📋 Link do relatório compartilhado:', relatorioUrl);
 
       } catch (error) {
@@ -55121,16 +55114,22 @@ FORMATO PADRÃO:
       });
       modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
       
-      modal.querySelector('.ai-fill-copy-btn').onclick = () => {
-        navigator.clipboard.writeText(prompt).then(() => {
-          const btn = modal.querySelector('.ai-fill-copy-btn');
+      modal.querySelector('.ai-fill-copy-btn').onclick = async () => {
+        const copiado = await mgCopyToClipboard(prompt);
+        const btn = modal.querySelector('.ai-fill-copy-btn');
+        if(copiado) {
           btn.textContent = '✓ Copiado!';
           btn.style.background = '#22c55e';
           setTimeout(() => {
             btn.textContent = '📋 Copiar Prompt';
             btn.style.background = '';
           }, 2000);
-        });
+        } else {
+          btn.textContent = '❌ Erro ao copiar';
+          setTimeout(() => {
+            btn.textContent = '📋 Copiar Prompt';
+          }, 2000);
+        }
       };
       
       // Selecionar texto ao clicar
@@ -56876,8 +56875,14 @@ FORMATO PADRÃO:
           if(cur.startsWith("•")) span.textContent = span.dataset.pw || "";
           else span.textContent = "••••••••";
         };
-        row.querySelector(".btn-copy-pass").onclick=()=> navigator.clipboard.writeText(row.querySelector(".pw").dataset.pw||"");
-        row.querySelector('[data-act="copy-user"]').onclick=()=> navigator.clipboard.writeText(a.user||"");
+        row.querySelector(".btn-copy-pass").onclick=async()=> {
+          const copiado = await mgCopyToClipboard(row.querySelector(".pw").dataset.pw||"");
+          if(copiado && typeof mgToast === 'function') mgToast('Senha copiada!');
+        };
+        row.querySelector('[data-act="copy-user"]').onclick=async()=> {
+          const copiado = await mgCopyToClipboard(a.user||"");
+          if(copiado && typeof mgToast === 'function') mgToast('Usuário copiado!');
+        };
         row.querySelector('[data-act="open"]').onclick=()=> { if(a.url) window.open(a.url,"_blank","noopener"); };
         row.querySelector('[data-act="edit"]').onclick=()=> openAccessForm(a);
         row.querySelector('[data-act="del"]').onclick=async()=>{
@@ -57411,13 +57416,10 @@ FORMATO PADRÃO:
         };
         await setDoc(doc(db, 'metasForms', token), docData);
         const shareUrl = buildMetasFormUrl(token, docData.clientKeyNormalized, clientKey);
-        let copied = false;
-        if(navigator?.clipboard?.writeText){
-          try{
-            await navigator.clipboard.writeText(shareUrl);
-            copied = true;
-          }catch(_e){ copied = false; }
-        }
+        
+        // Copiar com fallback robusto para iframes
+        const copied = await mgCopyToClipboard(shareUrl);
+        
         if(copied){
           if(typeof mgToast === 'function'){
             mgToast('Link copiado! Envie ao cliente para preencher as metas.');
@@ -63601,47 +63603,8 @@ FORMATO PADRÃO:
               try {
                 const textoIndividual = await generateIndividualDemanda(demanda);
                 
-                // Tentar copiar usando Clipboard API (suporta iframes com permissão)
-                let copiado = false;
-                
-                // Método 1: Clipboard API moderna
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                  try {
-                    await navigator.clipboard.writeText(textoIndividual);
-                    copiado = true;
-                  } catch (clipErr) {
-                    console.warn('Clipboard API falhou, tentando fallback:', clipErr);
-                  }
-                }
-                
-                // Método 2: Fallback para iframes e contextos sem permissão
-                if (!copiado) {
-                  const textarea = document.createElement('textarea');
-                  textarea.value = textoIndividual;
-                  textarea.style.position = 'fixed';
-                  textarea.style.left = '-9999px';
-                  textarea.style.top = '-9999px';
-                  textarea.style.opacity = '0';
-                  textarea.setAttribute('readonly', '');
-                  document.body.appendChild(textarea);
-                  
-                  // Focus e select
-                  textarea.focus();
-                  textarea.select();
-                  textarea.setSelectionRange(0, textoIndividual.length);
-                  
-                  // Executar comando de cópia
-                  try {
-                    const sucesso = document.execCommand('copy');
-                    if (sucesso) {
-                      copiado = true;
-                    }
-                  } catch (execErr) {
-                    console.error('execCommand falhou:', execErr);
-                  }
-                  
-                  document.body.removeChild(textarea);
-                }
+                // Usar função robusta de clipboard com fallback para iframes
+                const copiado = await mgCopyToClipboard(textoIndividual);
                 
                 if (copiado) {
                   // Feedback visual de sucesso
@@ -63772,43 +63735,9 @@ FORMATO PADRÃO:
           return;
         }
         
-        let copiado = false;
-        
         try{
-          // Método 1: Clipboard API moderna
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            try {
-              await navigator.clipboard.writeText(summary);
-              copiado = true;
-            } catch (clipErr) {
-              console.warn('Clipboard API falhou, tentando fallback:', clipErr);
-            }
-          }
-          
-          // Método 2: Fallback com textarea e execCommand
-          if (!copiado) {
-            const textarea = document.createElement('textarea');
-            textarea.value = summary;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '-9999px';
-            textarea.style.opacity = '0';
-            textarea.setAttribute('readonly', '');
-            document.body.appendChild(textarea);
-            
-            textarea.focus();
-            textarea.select();
-            textarea.setSelectionRange(0, summary.length);
-            
-            try {
-              const sucesso = document.execCommand('copy');
-              if (sucesso) copiado = true;
-            } catch (execErr) {
-              console.error('execCommand falhou:', execErr);
-            }
-            
-            document.body.removeChild(textarea);
-          }
+          // Usar função robusta de clipboard com fallback para iframes
+          const copiado = await mgCopyToClipboard(summary);
           
           if (copiado) {
             showToast('✅ Resumo copiado! Cole no WhatsApp', 'success');
@@ -63863,42 +63792,8 @@ FORMATO PADRÃO:
           // Gerar resumo filtrado pelo usuário selecionado
           const summary = await generateDemandasSummary(selectedUser);
           
-          let copiado = false;
-          
-          // Método 1: Clipboard API moderna
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            try {
-              await navigator.clipboard.writeText(summary);
-              copiado = true;
-            } catch (clipErr) {
-              console.warn('Clipboard API falhou, tentando fallback:', clipErr);
-            }
-          }
-          
-          // Método 2: Fallback com textarea e execCommand
-          if (!copiado) {
-            const textarea = document.createElement('textarea');
-            textarea.value = summary;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '-9999px';
-            textarea.style.opacity = '0';
-            textarea.setAttribute('readonly', '');
-            document.body.appendChild(textarea);
-            
-            textarea.focus();
-            textarea.select();
-            textarea.setSelectionRange(0, summary.length);
-            
-            try {
-              const sucesso = document.execCommand('copy');
-              if (sucesso) copiado = true;
-            } catch (execErr) {
-              console.error('execCommand falhou:', execErr);
-            }
-            
-            document.body.removeChild(textarea);
-          }
+          // Usar função robusta de clipboard com fallback para iframes
+          const copiado = await mgCopyToClipboard(summary);
           
           if (copiado) {
             showToast(`✅ Demandas de ${selectedUser} copiadas!`, 'success');
@@ -65410,13 +65305,10 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         };
         await setDoc(docRef, docData);
         const shareUrl = buildCalendarShareLink(token, safeKey, clientKey, monthKey);
-        let copied = false;
-        if(navigator?.clipboard?.writeText){
-          try{
-            await navigator.clipboard.writeText(shareUrl);
-            copied = true;
-          }catch(_err){ copied = false; }
-        }
+        
+        // Copiar com fallback robusto para iframes
+        const copied = await mgCopyToClipboard(shareUrl);
+        
         if(copied){
           if(typeof mgToast === 'function'){
             mgToast('Link do calendário copiado! Compartilhe com o cliente.');
@@ -65760,42 +65652,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         const shareUrl = buildPlanningShareLink(token, safeKey, clientKey, monthKey);
         
         // Copiar com fallback robusto para iframes
-        let copied = false;
-        
-        // Método 1: Clipboard API moderna
-        if(navigator?.clipboard?.writeText){
-          try{
-            await navigator.clipboard.writeText(shareUrl);
-            copied = true;
-          }catch(clipErr){
-            console.warn('Clipboard API falhou, tentando fallback:', clipErr);
-          }
-        }
-        
-        // Método 2: Fallback com textarea e execCommand
-        if(!copied){
-          try{
-            const textarea = document.createElement('textarea');
-            textarea.value = shareUrl;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '-9999px';
-            textarea.style.opacity = '0';
-            textarea.setAttribute('readonly', '');
-            document.body.appendChild(textarea);
-            
-            textarea.focus();
-            textarea.select();
-            textarea.setSelectionRange(0, shareUrl.length);
-            
-            const sucesso = document.execCommand('copy');
-            if(sucesso) copied = true;
-            
-            document.body.removeChild(textarea);
-          }catch(execErr){
-            console.error('execCommand falhou:', execErr);
-          }
-        }
+        const copied = await mgCopyToClipboard(shareUrl);
         
         if(copied){
           if(typeof mgToast === 'function'){
@@ -65895,13 +65752,10 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
         const docRef = doc(db, 'postApprovals', token);
         await setDoc(docRef, docData);
         const approvalUrl = buildApprovalLink(token, safeKey, clientKey);
-        let copied = false;
-        if(navigator?.clipboard?.writeText){
-          try{
-            await navigator.clipboard.writeText(approvalUrl);
-            copied = true;
-          }catch(_err){ copied = false; }
-        }
+        
+        // Copiar com fallback robusto para iframes
+        const copied = await mgCopyToClipboard(approvalUrl);
+        
         if(copied){
           if(typeof mgToast === 'function'){
             mgToast('Link copiado! Envie ao cliente para aprovar o post.');

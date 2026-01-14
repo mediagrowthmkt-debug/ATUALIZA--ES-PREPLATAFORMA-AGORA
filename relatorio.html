@@ -391,6 +391,56 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    /**
+     * Função robusta para copiar texto que funciona em iframes e diferentes contextos de permissão
+     * @param {string} text - Texto a ser copiado
+     * @returns {Promise<boolean>} - Retorna true se a cópia foi bem-sucedida
+     */
+    async function mgCopyToClipboard(text) {
+      if(!text && text !== '') return false;
+      
+      let copiado = false;
+      
+      // Método 1: Clipboard API moderna
+      if(navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          copiado = true;
+        } catch(clipErr) {
+          console.warn('[mgCopyToClipboard] Clipboard API falhou, tentando fallback:', clipErr);
+        }
+      }
+      
+      // Método 2: Fallback com textarea + execCommand (funciona em iframes sem permissão clipboard-write)
+      if(!copiado) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          textarea.style.top = '-9999px';
+          textarea.style.opacity = '0';
+          textarea.style.pointerEvents = 'none';
+          textarea.setAttribute('readonly', '');
+          textarea.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(textarea);
+          
+          textarea.focus();
+          textarea.select();
+          textarea.setSelectionRange(0, text.length);
+          
+          const sucesso = document.execCommand('copy');
+          if(sucesso) copiado = true;
+          
+          document.body.removeChild(textarea);
+        } catch(execErr) {
+          console.error('[mgCopyToClipboard] execCommand falhou:', execErr);
+        }
+      }
+      
+      return copiado;
+    }
+
     // Helpers metas (copiados do index de forma mínima)
     const META_MONTHS = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12'];
     function normalizeMetaNumber(value){
@@ -1066,8 +1116,9 @@
         btnCopiar.addEventListener('click', async ()=>{
           const texto = resumoContent.textContent;
           try {
-            if(navigator.clipboard?.writeText) {
-              await navigator.clipboard.writeText(texto);
+            // Usar função robusta de clipboard com fallback para iframes
+            const copiado = await mgCopyToClipboard(texto);
+            if(copiado) {
               const original = btnCopiar.textContent;
               btnCopiar.textContent = '✅ Copiado!';
               btnCopiar.style.background = 'rgba(16, 185, 129, 0.3)';
@@ -1078,15 +1129,7 @@
                 btnCopiar.style.borderColor = '';
               }, 2000);
             } else {
-              const textArea = document.createElement('textarea');
-              textArea.value = texto;
-              textArea.style.position = 'fixed';
-              textArea.style.left = '-9999px';
-              document.body.appendChild(textArea);
-              textArea.select();
-              document.execCommand('copy');
-              document.body.removeChild(textArea);
-              alert('✅ Resumo copiado!');
+              alert('Não foi possível copiar. Tente selecionar e copiar manualmente.');
             }
           } catch(err) {
             console.error('Erro ao copiar:', err);
