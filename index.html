@@ -10249,6 +10249,7 @@ function renderReviewNotes(post){
       </div>
     </div>
     <div class="demanda-plan-modal-footer">
+      <button type="button" class="btn btn-ai" id="btnGenerateAIPlan" style="background:#7c3aed;margin-right:auto;">🤖 Gerar Plano com IA</button>
       <button type="button" class="btn btn-cancel" id="btnCancelDemandaPlan">Cancelar</button>
       <button type="button" class="btn btn-primary" id="btnSaveDemandaPlan">Salvar Plano</button>
     </div>
@@ -63111,6 +63112,365 @@ FORMATO PADRÃO:
         // Fechar modal
         closeDemandaPlanModal();
       });
+    }
+    
+    // Botão gerar plano com IA
+    const btnGenerateAIPlanEl = $('btnGenerateAIPlan');
+    if(btnGenerateAIPlanEl){
+      btnGenerateAIPlanEl.addEventListener('click', async () => {
+        if(!currentPlanDemanda) return;
+        
+        // Verificar se tem API key
+        if(!window.OPENROUTER_API_KEY){
+          showToast('⚠️ Configure a API Key do OpenRouter para usar a IA', 'error', 5000);
+          return;
+        }
+        
+        // Desabilitar botão e mostrar loading
+        btnGenerateAIPlanEl.disabled = true;
+        btnGenerateAIPlanEl.textContent = '⏳ Gerando plano...';
+        
+        try {
+          // Coletar todo o contexto necessário
+          const contexto = await coletarContextoParaPlanoIA(currentPlanDemanda);
+          
+          // Gerar prompt focado no objetivo
+          const prompt = gerarPromptParaPlanoIA(currentPlanDemanda, contexto);
+          
+          // Chamar API OpenRouter
+          const planoGerado = await gerarPlanoComIA(prompt);
+          
+          // Preencher textarea com o plano gerado
+          const textareaEl = $('demandaPlanText');
+          if(textareaEl && planoGerado){
+            textareaEl.value = planoGerado;
+            console.log('✅ Plano inserido no textarea:', planoGerado.substring(0, 100) + '...');
+            showToast('✨ Plano gerado com sucesso! Revise e salve.', 'success', 5000);
+          } else {
+            console.warn('⚠️ Textarea não encontrado ou plano vazio', {textareaEl, planoGerado: !!planoGerado});
+          }
+          
+        } catch(error) {
+          console.error('❌ Erro ao gerar plano com IA:', error);
+          showToast(`❌ Erro ao gerar plano: ${error.message}`, 'error', 5000);
+        } finally {
+          // Reabilitar botão
+          btnGenerateAIPlanEl.disabled = false;
+          btnGenerateAIPlanEl.textContent = '🤖 Gerar Plano com IA';
+        }
+      });
+    }
+    
+    // Função para coletar contexto completo da plataforma
+    async function coletarContextoParaPlanoIA(demanda){
+      console.log('🔍 Coletando contexto completo para gerar plano...');
+      
+      // Função auxiliar para pegar metas ativas
+      const getMetasAtivas = () => {
+        try {
+          if(typeof METAS !== 'undefined' && Array.isArray(METAS)){
+            return METAS.filter(m => !m.concluida);
+          }
+          return [];
+        } catch(e) {
+          console.warn('Erro ao buscar metas:', e);
+          return [];
+        }
+      };
+      
+      // Verificar qual variável de estruturação está disponível
+      const estructuracionState = window.ESTRUCTURACION_STATE || window.ESTRUCTURACAO_STATE || {};
+      
+      const contexto = {
+        // Informações do negócio
+        negocio: estructuracionState?.businessInfo || {},
+        
+        // Metas anuais e mensais
+        metas: {
+          anuais: estructuracionState?.goals || [],
+          mensais: getMetasAtivas()
+        },
+        
+        // Planejamento (todas as demandas)
+        planejamento: (typeof DEMANDAS !== 'undefined' && Array.isArray(DEMANDAS)) ? DEMANDAS : [],
+        
+        // Estruturação (anotações das semanas)
+        estruturacao: estructuracionState,
+        
+        // Posts do calendário
+        posts: (typeof POSTS !== 'undefined' && Array.isArray(POSTS)) ? POSTS : [],
+        
+        // Macro (visão geral)
+        macro: {
+          metas: window.METAS_PLANILHA || [],
+          anuncios: window.ANUNCIOS_PLANILHA || []
+        },
+        
+        // Calendário (resumo)
+        calendario: getCalendarioResumo(),
+        
+        // Leads
+        leads: (typeof LEADS !== 'undefined' && Array.isArray(LEADS)) ? LEADS : [],
+        
+        // Notas do time
+        notasTime: getNotasTimeResumo(),
+        
+        // Contexto específico da demanda
+        demanda: {
+          objetivo: demanda.demanda || '',
+          status: demanda.status || '',
+          responsavel: demanda.responsavel || '',
+          prazo: demanda.prazo || '',
+          prazoFim: demanda.prazoFim || '',
+          planoAtual: demanda.plano || ''
+        }
+      };
+      
+      console.log('✅ Contexto coletado:', {
+        negocio: !!contexto.negocio.name,
+        metas: contexto.metas.mensais.length,
+        planejamento: contexto.planejamento.length,
+        posts: contexto.posts.length,
+        leads: contexto.leads.length
+      });
+      
+      return contexto;
+    }
+    
+    // Função auxiliar para pegar resumo do calendário
+    function getCalendarioResumo(){
+      try {
+        if(typeof POSTS === 'undefined' || !Array.isArray(POSTS)) {
+          return { total: 0, aprovados: 0, pendentes: 0 };
+        }
+        
+        const aprovados = POSTS.filter(p => p.aprovacao === 'aprovado').length;
+        const pendentes = POSTS.filter(p => p.aprovacao === 'aguardando').length;
+        
+        return {
+          total: POSTS.length,
+          aprovados,
+          pendentes
+        };
+      } catch(e) {
+        console.warn('Erro ao buscar resumo do calendário:', e);
+        return { total: 0, aprovados: 0, pendentes: 0 };
+      }
+    }
+    
+    // Função auxiliar para pegar resumo das notas do time
+    function getNotasTimeResumo(){
+      try {
+        if(typeof TEAM_MEMBERS === 'undefined' || !Array.isArray(TEAM_MEMBERS)) {
+          return [];
+        }
+        
+        return TEAM_MEMBERS.map(m => ({
+          nome: m.name || '',
+          tarefas: m.tasks?.length || 0,
+          notas: m.notes || ''
+        }));
+      } catch(e) {
+        console.warn('Erro ao buscar notas do time:', e);
+        return [];
+      }
+    }
+    
+    // Função para gerar prompt completo com TODO o contexto
+    function gerarPromptParaPlanoIA(demanda, contexto){
+      const objetivo = demanda.demanda || 'objetivo não especificado';
+      
+      let prompt = `Você é um especialista em marketing digital e gestão de projetos.
+
+OBJETIVO DA DEMANDA: ${objetivo}
+
+=== CONTEXTO COMPLETO DO NEGÓCIO ===
+
+`;
+
+      // 1. INFORMAÇÕES DO NEGÓCIO
+      if(contexto.negocio.name){
+        prompt += `NEGÓCIO:
+Nome: ${contexto.negocio.name}
+Nicho: ${contexto.negocio.niche || 'Não informado'}
+Ticket Médio: ${contexto.negocio.ticket || 'Não informado'}
+Orçamento Mensal: ${contexto.negocio.budget || 'Não informado'}
+Observações: ${contexto.negocio.observations || 'Nenhuma'}
+
+`;
+      }
+      
+      // 2. METAS ANUAIS E MENSAIS
+      if(contexto.metas.anuais.length > 0 || contexto.metas.mensais.length > 0){
+        prompt += `METAS:
+`;
+        if(contexto.metas.anuais.length > 0){
+          prompt += `Metas Anuais:\n`;
+          contexto.metas.anuais.forEach(meta => {
+            prompt += `- ${meta.name}: ${meta.target}\n`;
+          });
+        }
+        if(contexto.metas.mensais.length > 0){
+          prompt += `Metas do Mês:\n`;
+          contexto.metas.mensais.forEach(meta => {
+            prompt += `- ${meta.nome}: ${meta.valor} (${meta.progresso || 0}% concluído)\n`;
+          });
+        }
+        prompt += '\n';
+      }
+      
+      // 3. PLANEJAMENTO (outras demandas)
+      if(contexto.planejamento.length > 1){
+        prompt += `PLANEJAMENTO ATUAL (outras demandas):\n`;
+        contexto.planejamento.filter(d => d.id !== demanda.id).forEach((d, i) => {
+          prompt += `${i+1}. ${d.demanda} - Status: ${d.status}, Responsável: ${d.responsavel || 'Não definido'}, Prazo: ${d.prazo || 'Sem prazo'}\n`;
+        });
+        prompt += '\n';
+      }
+      
+      // 4. ESTRUTURAÇÃO (notas das semanas)
+      if(contexto.estruturacao.deliverables){
+        prompt += `ESTRUTURAÇÃO (anotações das semanas):\n`;
+        const deliverables = contexto.estruturacao.deliverables;
+        Object.keys(deliverables).forEach(key => {
+          const del = deliverables[key];
+          if(del.notes && del.notes.length > 0){
+            prompt += `${del.title || key}:\n`;
+            del.notes.forEach(note => {
+              const texto = typeof note === 'string' ? note : (note.text || '');
+              if(texto) prompt += `- ${texto}\n`;
+            });
+          }
+        });
+        prompt += '\n';
+      }
+      
+      // 5. CALENDÁRIO DE POSTS
+      if(contexto.posts.length > 0){
+        prompt += `POSTS NO CALENDÁRIO:\n`;
+        contexto.posts.slice(0, 10).forEach((post, i) => {
+          prompt += `${i+1}. ${post.titulo || 'Post'} - Data: ${post.data || 'Não definida'}, Status: ${post.aprovacao || 'pendente'}\n`;
+        });
+        prompt += `Total de posts: ${contexto.calendario.total}, Aprovados: ${contexto.calendario.aprovados}, Pendentes: ${contexto.calendario.pendentes}\n\n`;
+      }
+      
+      // 6. MACRO (visão estratégica)
+      if(contexto.macro.metas && contexto.macro.metas.length > 0){
+        prompt += `MACRO - VISÃO ESTRATÉGICA:\n`;
+        contexto.macro.metas.forEach((meta, i) => {
+          prompt += `${i+1}. ${meta.meta || 'Meta'}: ${meta.valor || ''} - Período: ${meta.periodo || ''}\n`;
+        });
+        prompt += '\n';
+      }
+      
+      if(contexto.macro.anuncios && contexto.macro.anuncios.length > 0){
+        prompt += `ANÚNCIOS PLANEJADOS:\n`;
+        contexto.macro.anuncios.forEach((anuncio, i) => {
+          prompt += `${i+1}. ${anuncio.nome || 'Anúncio'}: Budget ${anuncio.budget || ''}, Objetivo: ${anuncio.objetivo || ''}\n`;
+        });
+        prompt += '\n';
+      }
+      
+      // 7. LEADS
+      if(contexto.leads.length > 0){
+        prompt += `LEADS CADASTRADOS:\n`;
+        contexto.leads.slice(0, 10).forEach((lead, i) => {
+          prompt += `${i+1}. ${lead.name || 'Lead'} - Email: ${lead.email || ''}, Telefone: ${lead.phone || ''}, Status: ${lead.status || 'novo'}\n`;
+        });
+        prompt += `Total de leads: ${contexto.leads.length}\n\n`;
+      }
+      
+      // 8. NOTAS DO TIME
+      if(contexto.notasTime.length > 0){
+        prompt += `NOTAS DO TIME:\n`;
+        contexto.notasTime.forEach(nota => {
+          if(nota.notas){
+            prompt += `${nota.nome}: ${nota.notas}\n`;
+          }
+        });
+        prompt += '\n';
+      }
+      
+      // 9. PLANO ATUAL (se existir)
+      if(contexto.demanda.planoAtual){
+        prompt += `PLANO EXISTENTE (para referência ou melhoria):\n${contexto.demanda.planoAtual}\n\n`;
+      }
+      
+      // INSTRUÇÕES FINAIS
+      prompt += `=== SUA TAREFA ===
+
+Crie um plano de ação PERSONALIZADO e PRÁTICO para executar APENAS este objetivo: "${objetivo}"
+
+IMPORTANTE:
+- Use o contexto acima APENAS como referência para entender o negócio e personalizar suas sugestões
+- NÃO mencione outras demandas ou objetivos do planejamento
+- NÃO fale sobre metas que não estejam diretamente relacionadas a este objetivo
+- FOQUE 100% em como executar ESTE objetivo específico
+
+FORMATO DA RESPOSTA (texto simples, SEM markdown, SEM asteriscos, SEM hashtags):
+Escreva um plano com 3 a 7 passos práticos SOMENTE para este objetivo. Para cada passo:
+- O que fazer (seja específico)
+- Como executar (detalhes práticos baseados no contexto do negócio)
+- O que considerar ou recursos necessários
+
+Escreva em texto corrido, direto e acionável. Foque em ações concretas para executar APENAS este objetivo.`;
+
+      return prompt;
+    }
+    
+    // Função para chamar a IA e gerar o plano
+    async function gerarPlanoComIA(prompt){
+      console.log('🤖 Gerando plano com IA...');
+      console.log('📏 Tamanho do prompt:', prompt.length, 'caracteres');
+      
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'Plataforma Mediagrowth - Gerador de Planos'
+        },
+        body: JSON.stringify({
+          model: window.IA_CONFIG.model, // Usa o modelo configurado (Gemini 2.5 Flash)
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é um consultor estratégico especialista em planejamento e execução de projetos de marketing digital. Sua missão é criar planos de ação detalhados, práticos e executáveis baseados no contexto fornecido. Seja específico, acionável e focado em resultados.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 4000,
+          temperature: 0.7
+        })
+      });
+      
+      if(!response.ok){
+        const error = await response.json();
+        throw new Error(error?.error?.message || `HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const planoGerado = data.choices?.[0]?.message?.content || '';
+      
+      // Log de custo
+      if(data.usage){
+        const inputTokens = data.usage.prompt_tokens || 0;
+        const outputTokens = data.usage.completion_tokens || 0;
+        const pricing = window.IA_CONFIG.pricing;
+        const cost = (inputTokens / 1000000) * pricing.input + (outputTokens / 1000000) * pricing.output;
+        
+        console.log('💰 Custo da geração do plano:');
+        console.log(`   📥 Input: ${inputTokens} tokens`);
+        console.log(`   📤 Output: ${outputTokens} tokens`);
+        console.log(`   💵 Custo total: $${cost.toFixed(6)}`);
+      }
+      
+      console.log('✅ Plano gerado com sucesso!');
+      return planoGerado;
     }
     
     // Fechar modal clicando fora
