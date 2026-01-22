@@ -13337,8 +13337,11 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     })();
     window.googleCalendarIntegration = googleCalendarIntegration;
 
-    // Set OpenRouter API key for AI integration
-    window.OPENROUTER_API_KEY = "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"; // API Key para Gemini 2.5 Flash
+    // ================================================================
+    // 🔐 API KEY REMOVIDA DO FRONTEND POR SEGURANÇA
+    // A API key agora fica no backend (Firebase Functions)
+    // Use a função callAIProxy() para fazer chamadas à IA
+    // ================================================================
 
     // ================================================================
     // CONFIGURAÇÃO CENTRALIZADA DE IA - FÁCIL TROCA DE MODELOS
@@ -13412,6 +13415,49 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     // expõe instâncias globais para outros scripts (ex.: planilha Macro)
     window.auth = auth;
     window.onAuthStateChanged = onAuthStateChanged;
+    
+    // ================================================================
+    // 🔐 FUNÇÃO PARA CHAMAR A IA VIA BACKEND (API KEY SEGURA)
+    // ================================================================
+    // Esta função usa Firebase Functions como proxy para a API OpenRouter
+    // A API key nunca é exposta no frontend
+    // ================================================================
+    window.callAIProxy = async function(model, messages, userId, maxTokens, temperature) {
+      // URL da Firebase Function (v2 - Cloud Run)
+      const AI_PROXY_URL = 'https://aiproxy-2uquufjjxa-uc.a.run.app';
+      
+      try {
+        const requestBody = {
+          model: model || window.IA_CONFIG.model,
+          messages: messages,
+          userId: userId || (auth.currentUser?.uid || 'anonymous'),
+          stream: false
+        };
+        
+        // Adicionar parâmetros opcionais se fornecidos
+        if (maxTokens) requestBody.max_tokens = maxTokens;
+        if (temperature !== undefined) requestBody.temperature = temperature;
+        
+        const response = await fetch(AI_PROXY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data?.error || `HTTP ${response.status}`);
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('callAIProxy error:', error);
+        throw error;
+      }
+    };
     
     // Variável global para sessão admin fake
     window._adminFakeUser = null;
@@ -19661,10 +19707,10 @@ async function sendIAQuestion(){
   const sizeInstruction = sizeInstructions[IA_RESPONSE_SIZE] || sizeInstructions['pequena'];
   contextMessages.push({ role: 'system', content: `🎯 INSTRUÇÃO CRÍTICA DE TAMANHO - VOCÊ DEVE OBEDECER ESTRITAMENTE:\n\n${sizeInstruction}\n\n⚠️ ESTA É UMA ORDEM PRIORITÁRIA. Ignore qualquer outro prompt que contradiga estes limites de tamanho.` });
 
-  const OPENROUTER_API_KEY = window.OPENROUTER_API_KEY;
-  if(!OPENROUTER_API_KEY){
+  // 🔐 API Key agora está no backend - verificamos se temos a função proxy
+  if(typeof window.callAIProxy !== 'function'){
     loadingMsg.loading = false;
-    loadingMsg.content = 'Defina window.OPENROUTER_API_KEY = "cole_sua_chave_do_openrouter_aqui"';
+    loadingMsg.content = 'Erro: Função callAIProxy não disponível. Recarregue a página.';
     loadingMsg.ts = Date.now();
     touchChat(chat);
     renderIAHistory();
@@ -19835,22 +19881,11 @@ async function sendIAQuestion(){
       console.log(`  🚨 ALERTA: ${totalTokensEstimated.toLocaleString()} tokens é MUITO! Meta é <10k`);
     }
     
-    console.log('%c� ═══════════════════════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+    console.log('%c📊 ═══════════════════════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
     
-    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: window.IA_CONFIG.model,
-        messages: allMessages,
-        stream: false
-      })
-    });
-    const data = await resp.json();
-    if(!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
+    // 🔐 Chamada via proxy backend (API key segura no servidor)
+    const data = await window.callAIProxy(window.IA_CONFIG.model, allMessages, auth.currentUser?.uid);
+    
     loadingMsg.loading = false;
     const answer = data.choices?.[0]?.message?.content || 'Sem resposta da IA';
     loadingMsg.content = appendSourcesToResponse(answer, contextSources);
@@ -20525,9 +20560,9 @@ async function sendIAQuestion(){
         alert('Faça login para gerar o briefing com a I.A.');
         return;
       }
-      const OPENROUTER_API_KEY = window.OPENROUTER_API_KEY;
-      if(!OPENROUTER_API_KEY){
-        alert('Configure a chave da API do OpenRouter para usar a I.A.');
+      // 🔐 API Key agora está no backend
+      if(typeof window.callAIProxy !== 'function'){
+        alert('Erro: Função de IA não disponível. Recarregue a página.');
         return;
       }
       const prompt = buildBriefingIAPrompt(briefText?.value || "").trim();
@@ -20539,24 +20574,12 @@ async function sendIAQuestion(){
       briefGenerateAI.disabled = true;
       briefGenerateAI.textContent = 'Gerando...';
       try{
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENROUTER_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { role: 'system', content: 'Você é o assistente de marketing da Mediagrowth. Leia as instruções e retorne apenas JSON válido com as chaves q1 a q56.' },
-              { role: 'user', content: prompt }
-            ]
-          })
-        });
-        const data = await response.json();
-        if(!response.ok){
-          throw new Error(data?.error?.message || `HTTP ${response.status}`);
-        }
+        // 🔐 Chamada via proxy backend (API key segura no servidor)
+        const data = await window.callAIProxy('gpt-4o-mini', [
+          { role: 'system', content: 'Você é o assistente de marketing da Mediagrowth. Leia as instruções e retorne apenas JSON válido com as chaves q1 a q56.' },
+          { role: 'user', content: prompt }
+        ], auth.currentUser?.uid);
+        
         const content = data?.choices?.[0]?.message?.content || '';
         const parsed = parseBriefingAIResponse(content);
         if(!parsed){
@@ -46838,48 +46861,43 @@ ${escapeHtml(prompt)}
 
     // ===== NOVOS GRÁFICOS: DIAGNÓSTICO ESTRATÉGICO COMPLETO =====
     
-    // Função para chamar a API do Gemini (Google AI)
+    // Função para chamar a API do Gemini via proxy backend (protege a API key)
     async function callGeminiAPI(prompt) {
-      // API Key do Google Gemini AI
-      const GEMINI_API_KEY = 'AIzaSyBq7xLrNnWZl8XqlAUMBUxLxKHxXLTEeDA';
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const GEMINI_PROXY_URL = 'https://us-central1-mediagrowth-a5349.cloudfunctions.net/geminiProxy';
       
       try {
-        const response = await fetch(API_URL, {
+        // Obter userId para rate limiting
+        const user = firebase.auth().currentUser;
+        const userId = user ? user.uid : 'anonymous-' + Date.now();
+        
+        const response = await fetch(GEMINI_PROXY_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }],
-            generationConfig: {
-              temperature: 0.3,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 8192
-            }
+            prompt: prompt,
+            userId: userId,
+            temperature: 0.3,
+            maxTokens: 8192
           })
         });
         
         if (!response.ok) {
-          console.error('Gemini API error:', response.status, response.statusText);
+          console.error('Gemini Proxy error:', response.status, response.statusText);
           return null;
         }
         
         const data = await response.json();
         
-        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-          return data.candidates[0].content.parts[0].text;
+        if (data.text) {
+          return data.text;
         }
         
-        console.warn('Resposta inesperada da API Gemini:', data);
+        console.warn('Resposta inesperada do Gemini Proxy:', data);
         return null;
       } catch (error) {
-        console.error('Erro ao chamar API Gemini:', error);
+        console.error('Erro ao chamar Gemini Proxy:', error);
         return null;
       }
     }
@@ -48726,8 +48744,8 @@ Baseie toda sua análise nas anotações acima. Seja ESPECÍFICO e cite informa�
           </div>
         `;
 
-        // Verificar se temos a API key do OpenRouter
-        if (window.OPENROUTER_API_KEY) {
+        // 🔒 Verificar se temos o proxy de IA disponível (API key agora está no backend)
+        if (typeof window.callAIProxy === 'function') {
           // Determinar max_tokens baseado no tipo de entregável
           // PAI precisa de mais tokens para gerar 5 personas completas
           const entregavelId = window.currentEntregavelId || '';
@@ -48954,31 +48972,19 @@ IMPORTANTE: Distribua os tokens de forma inteligente para cobrir TODO o conteúd
           }
           console.log(``);
           
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
-              'HTTP-Referer': window.location.href,
-              'X-Title': 'Plataforma Mediagrowth'
-            },
-            body: JSON.stringify({
-              model: modeloIA,
-              messages: [
-                { 
-                  role: 'system', 
-                  content: entregavelId === 'plataforma_mediagrowth' 
-                    ? 'Você é o DIRETOR DE ESTRATÉGIA da Mediagrowth. Sua missão é criar o PLANO MESTRE ANUAL mais completo possível, consolidando TODAS as informações coletadas. Use dados REAIS das anotações e relatórios. Seja EXTREMAMENTE detalhado com datas, números, ações e metas. Este é o documento mais importante da plataforma. ⚠️ CRÍTICO: SEMPRE complete a análise INTEIRA dentro do limite de tokens - ajuste o nível de detalhe mas NUNCA deixe incompleto.'
-                    : 'Você é um consultor sênior de marketing digital da Mediagrowth, especializado em análise estratégica de entregáveis. Sua missão é fornecer insights profundos, específicos e acionáveis baseados em dados reais. Não limite suas respostas - forneça análises completas e detalhadas. ⚠️ CRÍTICO: SEMPRE complete a análise INTEIRA dentro do limite de tokens - ajuste o nível de detalhe mas NUNCA deixe incompleto.' 
-                },
-                { role: 'user', content: promptComInstrucoes }
-              ],
-              max_tokens: maxTokensAnalise,
-              temperature: window.IA_CONFIG.temperature.default
-            })
-          });
+          // 🔒 Usando proxy seguro (API key no backend)
+          const systemContent = entregavelId === 'plataforma_mediagrowth' 
+            ? 'Você é o DIRETOR DE ESTRATÉGIA da Mediagrowth. Sua missão é criar o PLANO MESTRE ANUAL mais completo possível, consolidando TODAS as informações coletadas. Use dados REAIS das anotações e relatórios. Seja EXTREMAMENTE detalhado com datas, números, ações e metas. Este é o documento mais importante da plataforma. ⚠️ CRÍTICO: SEMPRE complete a análise INTEIRA dentro do limite de tokens - ajuste o nível de detalhe mas NUNCA deixe incompleto.'
+            : 'Você é um consultor sênior de marketing digital da Mediagrowth, especializado em análise estratégica de entregáveis. Sua missão é fornecer insights profundos, específicos e acionáveis baseados em dados reais. Não limite suas respostas - forneça análises completas e detalhadas. ⚠️ CRÍTICO: SEMPRE complete a análise INTEIRA dentro do limite de tokens - ajuste o nível de detalhe mas NUNCA deixe incompleto.';
+          
+          const messagesEntregavel = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: promptComInstrucoes }
+          ];
+          
+          const result = await window.callAIProxy(modeloIA, messagesEntregavel, auth.currentUser?.uid, maxTokensAnalise, window.IA_CONFIG.temperature.default);
 
-          if (response.ok) {
+          if (result && result.choices) {
             const result = await response.json();
             let insightText = result.choices?.[0]?.message?.content || '';
             
@@ -49446,9 +49452,10 @@ IMPORTANTE: Distribua os tokens de forma inteligente para cobrir TODO o conteúd
       console.log('🔄 Modo:', modo);
       console.log('📊 Formato:', formato);
       
-      if (!window.OPENROUTER_API_KEY) {
-        console.warn('❌ API Key do OpenRouter não configurada');
-        alert('API Key do OpenRouter não configurada. Vá em Configurações para adicionar.');
+      // 🔒 Verificar se o proxy de IA está disponível (API key agora está no backend)
+      if (typeof window.callAIProxy !== 'function') {
+        console.warn('❌ Proxy de IA não disponível');
+        alert('Serviço de IA não disponível. Recarregue a página.');
         return null;
       }
       
@@ -49606,34 +49613,21 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
       console.log('📤 Enviando para API com max_tokens:', config.tokens);
       
       try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
-            'HTTP-Referer': window.location.href,
-            'X-Title': 'Plataforma Mediagrowth - Regen Bloco'
-          },
-          body: JSON.stringify({
-            model: window.IA_CONFIG.model,
-            messages: [
-              { 
-                role: 'system', 
-                content: modo === 'adicionar' 
-                  ? `Você é um consultor de marketing digital. MODO ADICIONAR: Mantenha TODO o texto original e ADICIONE mais conteúdo após ele. NÃO reescreva, apenas adicione. TAMANHO: ${config.desc.toUpperCase()}. ${formatoFinal === 'planilha' ? 'FORMATO: GERE UMA TABELA MARKDOWN! Use |---|---|---| para separadores.' : ''} ${instrucoes ? `ADICIONE conteúdo sobre: "${instrucoes}"` : ''} Use formatação Markdown. ⚠️ CRÍTICO: Complete TODA a seção dentro dos ${config.tokens} tokens - ajuste o detalhe mas NUNCA deixe incompleto.`
-                  : `Você é um consultor de marketing digital. MODO REFAZER: Reescreva toda a seção. TAMANHO: ${config.desc.toUpperCase()}. ${config.instrucao} ${formatoFinal === 'planilha' ? 'FORMATO OBRIGATÓRIO: GERE UMA TABELA MARKDOWN! Use | coluna1 | coluna2 | e |---|---|---| para separadores. NÃO GERE TEXTO, GERE TABELA!' : ''} ${instrucoes ? `O USUÁRIO PEDIU: "${instrucoes}" - VOCÊ DEVE FAZER ISSO!` : ''} Use formatação Markdown. Comece sempre com o título da seção. ⚠️ CRÍTICO: Complete TODA a seção dentro dos ${config.tokens} tokens - ajuste o detalhe mas NUNCA deixe incompleto ou cortado no meio.`
-              },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: config.tokens,
-            temperature: window.IA_CONFIG.temperature.default
-          })
-        });
-
-        console.log('📥 Response status:', response.status);
+        // 🔒 Usando proxy seguro (API key no backend)
+        const systemContentRegen = modo === 'adicionar' 
+          ? `Você é um consultor de marketing digital. MODO ADICIONAR: Mantenha TODO o texto original e ADICIONE mais conteúdo após ele. NÃO reescreva, apenas adicione. TAMANHO: ${config.desc.toUpperCase()}. ${formatoFinal === 'planilha' ? 'FORMATO: GERE UMA TABELA MARKDOWN! Use |---|---|---| para separadores.' : ''} ${instrucoes ? `ADICIONE conteúdo sobre: "${instrucoes}"` : ''} Use formatação Markdown. ⚠️ CRÍTICO: Complete TODA a seção dentro dos ${config.tokens} tokens - ajuste o detalhe mas NUNCA deixe incompleto.`
+          : `Você é um consultor de marketing digital. MODO REFAZER: Reescreva toda a seção. TAMANHO: ${config.desc.toUpperCase()}. ${config.instrucao} ${formatoFinal === 'planilha' ? 'FORMATO OBRIGATÓRIO: GERE UMA TABELA MARKDOWN! Use | coluna1 | coluna2 | e |---|---|---| para separadores. NÃO GERE TEXTO, GERE TABELA!' : ''} ${instrucoes ? `O USUÁRIO PEDIU: "${instrucoes}" - VOCÊ DEVE FAZER ISSO!` : ''} Use formatação Markdown. Comece sempre com o título da seção. ⚠️ CRÍTICO: Complete TODA a seção dentro dos ${config.tokens} tokens - ajuste o detalhe mas NUNCA deixe incompleto ou cortado no meio.`;
         
-        if (response.ok) {
-          const result = await response.json();
+        const messagesRegen = [
+          { role: 'system', content: systemContentRegen },
+          { role: 'user', content: prompt }
+        ];
+        
+        const result = await window.callAIProxy(window.IA_CONFIG.model, messagesRegen, auth.currentUser?.uid, config.tokens, window.IA_CONFIG.temperature.default);
+
+        console.log('📥 Response recebido');
+        
+        if (result && result.choices) {
           let novoTexto = result.choices?.[0]?.message?.content || '';
           
           console.log('✅ Texto recebido da IA (primeiros 500 chars):', novoTexto.substring(0, 500));
@@ -49652,9 +49646,8 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
             return novoTexto.replace(/\n/g, '<br>');
           }
         } else {
-          const errorText = await response.text();
-          console.error('❌ Erro na API:', response.status, errorText);
-          alert(`Erro na API: ${response.status}`);
+          console.error('❌ Erro na API:', result?.error);
+          alert(`Erro na API: ${result?.error || 'Resposta inválida'}`);
           return null;
         }
       } catch (error) {
@@ -54460,9 +54453,9 @@ ${formatInstruction}`;
         prompt += `\n\n**OBSERVAÇÃO DO USUÁRIO (aplicar a este item):** ${userObservation}`;
       }
       
-      // Verificar se temos API key
-      if(!window.OPENROUTER_API_KEY){
-        throw new Error('API key não configurada');
+      // 🔒 Verificar se o proxy de IA está disponível (API key agora está no backend)
+      if(typeof window.callAIProxy !== 'function'){
+        throw new Error('Serviço de IA não disponível');
       }
       
       // System prompt simplificado
@@ -54482,31 +54475,18 @@ FORMATAÇÃO OBRIGATÓRIA:
 - Comece DIRETO com o conteúdo (sem saudações)`;
 
       try{
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Mediagrowth Dashboard'
-          },
-          body: JSON.stringify({
-            model: window.IA_CONFIG.model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: promptData.maxTokens,
-            temperature: window.IA_CONFIG.temperature.default
-          })
-        });
+        // 🔒 Usando proxy seguro (API key no backend)
+        const messagesBloco = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ];
         
-        if(!response.ok){
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || 'Erro na API');
+        const data = await window.callAIProxy(window.IA_CONFIG.model, messagesBloco, auth.currentUser?.uid, promptData.maxTokens, window.IA_CONFIG.temperature.default);
+        
+        if(!data || data.error){
+          throw new Error(data?.error || 'Erro na API');
         }
         
-        const data = await response.json();
         const aiText = data.choices?.[0]?.message?.content || '';
         
         if(aiText){
@@ -54801,9 +54781,9 @@ FORMATAÇÃO OBRIGATÓRIA:
         prompt += `\n\n**OBSERVAÇÃO DO USUÁRIO:** ${userObservation}`;
       }
       
-      // Verificar se temos API key
-      if(!window.OPENROUTER_API_KEY){
-        showToast('❌ Configure a chave da API (OPENROUTER_API_KEY)', 'error');
+      // 🔒 Verificar se o proxy de IA está disponível (API key agora está no backend)
+      if(typeof window.callAIProxy !== 'function'){
+        showToast('❌ Serviço de IA não disponível. Recarregue a página.', 'error');
         return;
       }
       
@@ -54976,31 +54956,19 @@ FORMATO PADRÃO:
           };
         }
         
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
-            'HTTP-Referer': window.location.href,
-            'X-Title': 'Mediagrowth Estruturação'
-          },
-          body: JSON.stringify({
-            model: window.IA_CONFIG.model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              userMessage
-            ],
-            max_tokens: maxTokens,
-            temperature: isBlog ? window.IA_CONFIG.temperature.creative : (isLongCopy ? window.IA_CONFIG.temperature.longform : window.IA_CONFIG.temperature.default)
-          })
-        });
+        // 🔒 Usando proxy seguro (API key no backend)
+        const tempForProxy = isBlog ? window.IA_CONFIG.temperature.creative : (isLongCopy ? window.IA_CONFIG.temperature.longform : window.IA_CONFIG.temperature.default);
+        const messagesEstruturacao = [
+          { role: 'system', content: systemPrompt },
+          userMessage
+        ];
+        
+        const result = await window.callAIProxy(window.IA_CONFIG.model, messagesEstruturacao, auth.currentUser?.uid, maxTokens, tempForProxy);
 
-        if(!response.ok){
-          const errorData = await response.json();
-          throw new Error(errorData?.error?.message || `HTTP ${response.status}`);
+        if(!result || result.error){
+          throw new Error(result?.error || 'Erro na resposta da API');
         }
 
-        const result = await response.json();
         let aiResponse = result.choices?.[0]?.message?.content || '';
         
         if(!aiResponse.trim()){
@@ -62329,9 +62297,9 @@ FORMATO PADRÃO:
         if(!auth?.currentUser){
           throw new Error('Faça login para gerar o planejamento automaticamente.');
         }
-        const apiKey = window.OPENROUTER_API_KEY;
-        if(!apiKey){
-          throw new Error('Configure a chave do OpenRouter (window.OPENROUTER_API_KEY).');
+        // 🔒 Verificar se o proxy de IA está disponível (API key agora está no backend)
+        if(typeof window.callAIProxy !== 'function'){
+          throw new Error('Serviço de IA não disponível. Recarregue a página.');
         }
         const monthKey = typeof selectedDemandaMonth === 'string' ? selectedDemandaMonth : '';
         if(!monthKey){
@@ -62355,23 +62323,16 @@ FORMATO PADRÃO:
         if(!prompt.trim()){
           throw new Error('Não foi possível preparar a solicitação automática.');
         }
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { role: 'system', content: 'Você é o planejador de marketing da Mediagrowth. Respeite fielmente o formato JSON solicitado.' },
-              { role: 'user', content: prompt }
-            ]
-          })
-        });
-        const data = await response.json();
-        if(!response.ok){
-          throw new Error(data?.error?.message || `HTTP ${response.status}`);
+        // 🔒 Usando proxy seguro (API key no backend)
+        const messagesObjective = [
+          { role: 'system', content: 'Você é o planejador de marketing da Mediagrowth. Respeite fielmente o formato JSON solicitado.' },
+          { role: 'user', content: prompt }
+        ];
+        
+        const data = await window.callAIProxy('gpt-4o-mini', messagesObjective, auth.currentUser?.uid);
+        
+        if(!data || data.error){
+          throw new Error(data?.error || 'Erro na resposta da API');
         }
         const content = data?.choices?.[0]?.message?.content || '';
         const parsed = extractJsonBlock(content);
@@ -63120,9 +63081,9 @@ FORMATO PADRÃO:
       btnGenerateAIPlanEl.addEventListener('click', async () => {
         if(!currentPlanDemanda) return;
         
-        // Verificar se tem API key
-        if(!window.OPENROUTER_API_KEY){
-          showToast('⚠️ Configure a API Key do OpenRouter para usar a IA', 'error', 5000);
+        // 🔒 Verificar se o proxy de IA está disponível (API key agora está no backend)
+        if(typeof window.callAIProxy !== 'function'){
+          showToast('⚠️ Serviço de IA não disponível. Recarregue a página.', 'error', 5000);
           return;
         }
         
@@ -63423,37 +63384,24 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
       console.log('🤖 Gerando plano com IA...');
       console.log('📏 Tamanho do prompt:', prompt.length, 'caracteres');
       
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${window.OPENROUTER_API_KEY}`,
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'Plataforma Mediagrowth - Gerador de Planos'
+      // 🔒 Usando proxy seguro (API key no backend)
+      const messagesPlano = [
+        {
+          role: 'system',
+          content: 'Você é um consultor estratégico especialista em planejamento e execução de projetos de marketing digital. Sua missão é criar planos de ação detalhados, práticos e executáveis baseados no contexto fornecido. Seja específico, acionável e focado em resultados.'
         },
-        body: JSON.stringify({
-          model: window.IA_CONFIG.model, // Usa o modelo configurado (Gemini 2.5 Flash)
-          messages: [
-            {
-              role: 'system',
-              content: 'Você é um consultor estratégico especialista em planejamento e execução de projetos de marketing digital. Sua missão é criar planos de ação detalhados, práticos e executáveis baseados no contexto fornecido. Seja específico, acionável e focado em resultados.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 4000,
-          temperature: 0.7
-        })
-      });
+        {
+          role: 'user',
+          content: prompt
+        }
+      ];
       
-      if(!response.ok){
-        const error = await response.json();
-        throw new Error(error?.error?.message || `HTTP ${response.status}`);
+      const data = await window.callAIProxy(window.IA_CONFIG.model, messagesPlano, auth.currentUser?.uid, 4000, 0.7);
+      
+      if(!data || data.error){
+        throw new Error(data?.error || 'Erro na resposta da API');
       }
       
-      const data = await response.json();
       const planoGerado = data.choices?.[0]?.message?.content || '';
       
       // Log de custo

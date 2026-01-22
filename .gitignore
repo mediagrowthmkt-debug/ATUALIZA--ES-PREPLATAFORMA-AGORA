@@ -39,5 +39,15 @@ Thumbs.db
 *.bak2
 *.broken
 
+# HTML backups with exposed API keys
+index.html.backup*
+index.html.bak*
+index.html.bkp*
+
+# Environment files with secrets
+.env
+.env.local
+*.env
+
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md

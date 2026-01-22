@@ -1,25 +1,23 @@
-import * as functions from 'firebase-functions';
+import * as functionsV1 from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+
 admin.initializeApp();
 
-// Importar funções de envio de email do arquivo separado
-// Funções de email habilitadas
-export * from './sendEmailNotifications';
+// Importar funções de proxy da IA (usa v2)
+export * from './aiProxy';
+export * from './geminiProxy';
 
 // 👉 Função para transformar a conta em AGENCIA
-export const becomeAgency = functions.https.onCall(async (data: any, context: any) => {
-  // Verifica se o usuário está logado
+export const becomeAgency = functionsV1.https.onCall(async (data: any, context: any) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'Faça login primeiro.');
+    throw new functionsV1.https.HttpsError('unauthenticated', 'Faça login primeiro.');
   }
 
   const uid = context.auth.uid;
   const agencyId = data?.agencyId || uid;
 
-  // Marca a conta como agência
   await admin.auth().setCustomUserClaims(uid, { role: 'agency', agencyId });
 
-  // Cria o registro da agência (opcional)
   await admin.firestore().doc(`agencies/${agencyId}`).set({
     ownerUid: uid,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -28,11 +26,8 @@ export const becomeAgency = functions.https.onCall(async (data: any, context: an
   return { ok: true, role: 'agency', agencyId };
 });
 
-// 👉 Recebe LEADS do Make.com via POST e grava no Firestore
-// Segurança: exige token secreto por cliente em query (?uid=...&client=...&token=...) ou header "x-webhook-secret"
-// Body esperado (JSON): { name, email, phone, question, source?, tags?[] }
-export const receiveLead = functions.https.onRequest(async (req: any, res: any) => {
-  // Habilita CORS básico (Make e testes locais)
+// 👉 Recebe LEADS do Make.com via POST
+export const receiveLead = functionsV1.https.onRequest(async (req: any, res: any) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, x-webhook-secret');
@@ -53,8 +48,7 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
       return res.status(400).json({ ok: false, error: 'Missing uid, client or token' });
     }
 
-  // Valida token consultando doc /usuarios/{uid}/clients/{client}/settings/leadWebhook
-  const tokenRef = admin.firestore().doc(`usuarios/${uid}/clients/${client}/settings/leadWebhook`);
+    const tokenRef = admin.firestore().doc(`usuarios/${uid}/clients/${client}/settings/leadWebhook`);
     const tokenSnap = await tokenRef.get();
     if (!tokenSnap.exists) {
       return res.status(403).json({ ok: false, error: 'Invalid token (not configured)' });
@@ -65,7 +59,6 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
     }
 
     const body = (typeof req.body === 'object' && req.body) ? req.body : {};
-    // Normaliza campos comuns
     const name = (body.name || body.nome || body.full_name || '').toString().trim();
     const email = (body.email || body.mail || '').toString().trim().toLowerCase();
     const phone = (body.phone || body.telefone || body.whatsapp || '').toString().trim();
@@ -90,11 +83,10 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
       status: 'novo',
       createdAt: now,
       updatedAt: now,
-      agencyId: uid, // compat helpers nas rules
+      agencyId: uid,
       clientId: client
     } as Record<string, any>;
 
-    // Grava em /usuarios/{uid}/clients/{client}/leads/{autoId}
     const ref = await admin.firestore()
       .collection('usuarios').doc(uid)
       .collection('clients').doc(client)
@@ -106,11 +98,3 @@ export const receiveLead = functions.https.onRequest(async (req: any, res: any) 
     return res.status(500).json({ ok: false, error: err?.message || 'Internal error' });
   }
 });
-
-// ============================================
-// 📧 EMAIL NOTIFICATIONS
-// ============================================
-// NOTA: Implementação movida para sendEmailNotifications.ts
-// As funções sendDailyNotifications, sendWeeklyNotifications, sendMonthlyNotifications
-// e sendTestEmail agora são importadas via export * from './sendEmailNotifications'
-// (veja linha 6 deste arquivo)
