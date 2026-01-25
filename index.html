@@ -12188,14 +12188,9 @@ document.addEventListener('DOMContentLoaded', function(){
         <span class="team-notes-column-count" id="teamNotesCountTrafego">0</span>
       </div>
       <div class="team-notes-column-cards" id="teamNotesCardsTrafego"></div>
-      <div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px;">
-        <button type="button" class="team-notes-add-btn" data-column="trafego" onclick="openTrafficTemplateModal()">
-          <span>📋</span> Template Tráfego
-        </button>
-        <button type="button" class="team-notes-add-btn secondary" data-column="trafego" onclick="openTeamNoteModal('trafego')" style="background: rgba(100, 116, 139, 0.3); border-color: rgba(148, 163, 184, 0.3);">
-          <span>+</span> Nota Livre
-        </button>
-      </div>
+      <button type="button" class="team-notes-add-btn" data-column="trafego" onclick="openTrafficTemplateModal()">
+        <span>📋</span> Template Tráfego
+      </button>
     </div>
     
     <!-- Coluna Canais de Tração -->
@@ -12205,14 +12200,9 @@ document.addEventListener('DOMContentLoaded', function(){
         <span class="team-notes-column-count" id="teamNotesCountCanais">0</span>
       </div>
       <div class="team-notes-column-cards" id="teamNotesCardsCanais"></div>
-      <div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px;">
-        <button type="button" class="team-notes-add-btn" data-column="canais" onclick="openContentTemplateModal()">
-          <span>📋</span> Template Conteúdo
-        </button>
-        <button type="button" class="team-notes-add-btn secondary" data-column="canais" onclick="openTeamNoteModal('canais')" style="background: rgba(100, 116, 139, 0.3); border-color: rgba(148, 163, 184, 0.3);">
-          <span>+</span> Nota Livre
-        </button>
-      </div>
+      <button type="button" class="team-notes-add-btn" data-column="canais" onclick="openContentTemplateModal()">
+        <span>📋</span> Template Conteúdo
+      </button>
     </div>
     
     <!-- Coluna Liderança -->
@@ -12222,8 +12212,8 @@ document.addEventListener('DOMContentLoaded', function(){
         <span class="team-notes-column-count" id="teamNotesCountLideranca">0</span>
       </div>
       <div class="team-notes-column-cards" id="teamNotesCardsLideranca"></div>
-      <button type="button" class="team-notes-add-btn" data-column="lideranca" onclick="openTeamNoteModal('lideranca')">
-        <span>+</span> Adicionar nota
+      <button type="button" class="team-notes-add-btn" data-column="lideranca" onclick="openLeadershipTemplateModal()">
+        <span>📋</span> Template Liderança
       </button>
     </div>
     
@@ -12237,6 +12227,106 @@ document.addEventListener('DOMContentLoaded', function(){
       <button type="button" class="team-notes-add-btn" data-column="outros" onclick="openTeamNoteModal('outros')">
         <span>+</span> Adicionar nota
       </button>
+    </div>
+  </div>
+  
+  <!-- BLOCO DE RESUMO AUTOMÁTICO (ABAIXO DAS COLUNAS) -->
+  <div class="team-notes-summary-block" id="teamNotesSummaryBlock" style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1)); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 16px; margin: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+      <h3 style="color: #e2e8f0; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+        <span>📊</span> Resumo Automático
+      </h3>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="summary-filter-btn" data-filter="dia" onclick="setSummaryFilter('dia')" style="padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.3); background: transparent; color: #94a3b8; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+          📅 Hoje
+        </button>
+        <button type="button" class="summary-filter-btn active" data-filter="semana" onclick="setSummaryFilter('semana')" style="padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.5); background: rgba(99,102,241,0.3); color: #e2e8f0; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+          📆 Semana
+        </button>
+        <button type="button" class="summary-filter-btn" data-filter="mes" onclick="setSummaryFilter('mes')" style="padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.3); background: transparent; color: #94a3b8; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+          🗓️ Mês
+        </button>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      <!-- Card Resumo Tráfego -->
+      <div class="summary-card" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(251,191,36,0.3); border-radius: 10px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="color: #fbbf24; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span>🎯</span> Tráfego
+          </h4>
+          <button type="button" onclick="copySummary('trafego')" style="background: rgba(251,191,36,0.2); border: 1px solid rgba(251,191,36,0.4); border-radius: 6px; padding: 4px 10px; color: #fbbf24; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            📋 Copiar
+          </button>
+        </div>
+        <div id="summaryTrafegoContent" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; max-height: 200px; overflow-y: auto;">
+          <p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de tráfego no período selecionado.</p>
+        </div>
+      </div>
+      
+      <!-- Card Resumo Conteúdo -->
+      <div class="summary-card" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="color: #22c55e; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span>📢</span> Conteúdo
+          </h4>
+          <button type="button" onclick="copySummary('conteudo')" style="background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.4); border-radius: 6px; padding: 4px 10px; color: #22c55e; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            📋 Copiar
+          </button>
+        </div>
+        <div id="summaryConteudoContent" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; max-height: 200px; overflow-y: auto;">
+          <p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de conteúdo no período selecionado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- BLOCO RESUMO GERAL DA SEMANA (TODAS AS COLUNAS) -->
+  <div class="team-notes-summary-block" id="teamNotesWeeklyResumeBlock" style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.1)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 16px; margin: 0 16px 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+      <h3 style="color: #3b82f6; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+        <span>📆</span> Resumo Geral da Semana
+        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;" id="weeklyResumeWeekLabel"></span>
+      </h3>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <button type="button" onclick="copyWeeklyResume()" id="copyWeeklyResumeBtn" style="padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(59,130,246,0.4); background: rgba(59,130,246,0.2); color: #3b82f6; font-size: 0.85rem; cursor: pointer; display: none;">
+          📋 Copiar
+        </button>
+        <button type="button" onclick="generateWeeklyResume()" id="generateWeeklyResumeBtn" style="padding: 8px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-size: 0.85rem; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fas fa-magic"></i> Gerar Resumo da Semana
+        </button>
+      </div>
+    </div>
+    
+    <div id="weeklyResumeContent" style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; background: rgba(15,23,42,0.6); border-radius: 10px; padding: 16px; min-height: 80px;">
+      <p style="color: #64748b; font-style: italic; margin: 0; text-align: center;">
+        Clique em "Gerar Resumo da Semana" para consolidar todas as anotações de Tráfego, Conteúdo, Liderança e Outros dos últimos 7 dias.
+      </p>
+    </div>
+  </div>
+
+  <!-- BLOCO RESUMO GERAL DO MÊS (TODAS AS COLUNAS) -->
+  <div class="team-notes-summary-block" id="teamNotesMonthlyResumeBlock" style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(234,88,12,0.1)); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 16px; margin: 0 16px 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+      <h3 style="color: #fbbf24; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+        <span>📅</span> Resumo Geral do Mês
+        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;" id="monthlyResumeMonthLabel"></span>
+      </h3>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <button type="button" onclick="copyMonthlyResume()" id="copyMonthlyResumeBtn" style="padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.2); color: #fbbf24; font-size: 0.85rem; cursor: pointer; display: none;">
+          📋 Copiar
+        </button>
+        <button type="button" onclick="generateMonthlyResume()" id="generateMonthlyResumeBtn" style="padding: 8px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; font-size: 0.85rem; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fas fa-magic"></i> Gerar Resumo do Mês
+        </button>
+      </div>
+    </div>
+    
+    <div id="monthlyResumeContent" style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; background: rgba(15,23,42,0.6); border-radius: 10px; padding: 16px; min-height: 80px;">
+      <p style="color: #64748b; font-style: italic; margin: 0; text-align: center;">
+        Clique em "Gerar Resumo do Mês" para consolidar todas as anotações de Tráfego, Conteúdo, Liderança e Outros em um único resumo.
+      </p>
     </div>
   </div>
 </div>
@@ -12275,159 +12365,152 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
       <h3>📋 Relatório de Tráfego - Template</h3>
       <button type="button" class="team-notes-modal-close" onclick="closeTrafficTemplateModal()">✕</button>
     </div>
-    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
       
-      <!-- Campanhas rodando -->
+      <!-- 1. Campanhas rodando -->
       <div class="template-question">
         <label class="template-label">🎯 Campanhas estão rodando? Quais?</label>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(99,102,241,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
             <input type="checkbox" id="trafficCampGoogle" style="width: 16px; height: 16px;">
             <span>Google Ads</span>
           </label>
-          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(99,102,241,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
             <input type="checkbox" id="trafficCampMeta" style="width: 16px; height: 16px;">
-            <span>Meta Ads (Facebook/Instagram)</span>
+            <span>Meta Ads</span>
           </label>
-          <label style="display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.9rem;">
+          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(239,68,68,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
             <input type="checkbox" id="trafficCampNenhuma" style="width: 16px; height: 16px;" onchange="if(this.checked){ document.getElementById('trafficCampGoogle').checked=false; document.getElementById('trafficCampMeta').checked=false; }">
-            <span>Nenhuma campanha rodando</span>
+            <span>Nenhuma</span>
           </label>
         </div>
-        <textarea id="trafficCampDetails" placeholder="Especifique quais campanhas (ex: Campanha de pesquisa no Google, campanha de conversão no Meta)..." style="margin-top: 8px;"></textarea>
+        <input type="text" id="trafficCampDetails" class="template-input" placeholder="Especificar campanhas (opcional)..." style="margin-top: 8px;">
       </div>
 
-      <!-- Gerando leads -->
+      <!-- 2. Gerando leads -->
       <div class="template-question">
         <label class="template-label">📊 Estão gerando leads?</label>
         <select id="trafficLeadsGerando" class="template-select">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="No momento não, mas já fizemos a otimização">No momento não, mas já fizemos a otimização</option>
-          <option value="Aguardando aprovação dos anúncios">Aguardando aprovação dos anúncios</option>
+          <option value="Sim">✅ Sim</option>
+          <option value="Não">❌ Não</option>
+          <option value="Aguardando aprovação">⏳ Aguardando aprovação</option>
+          <option value="Em otimização">🔧 Em otimização</option>
         </select>
       </div>
 
-      <!-- Leads hoje -->
+      <!-- 3. Leads ontem -->
       <div class="template-question">
-        <label class="template-label">📈 Quantos leads hoje?</label>
-        <input type="number" id="trafficLeadsHoje" class="template-input" placeholder="Ex: 0, 5, 11..." min="0">
+        <label class="template-label">📈 Quantos leads ontem?</label>
+        <input type="number" id="trafficLeadsOntem" class="template-input" placeholder="Ex: 5" min="0">
       </div>
 
-      <!-- Leads caindo corretamente -->
+      <!-- 4. Leads no mês -->
+      <div class="template-question">
+        <label class="template-label">📅 Quantos leads no mês?</label>
+        <input type="number" id="trafficLeadsMes" class="template-input" placeholder="Ex: 120" min="0">
+      </div>
+
+      <!-- 5. Investimento total -->
+      <div class="template-question">
+        <label class="template-label">💰 Investimento total até agora?</label>
+        <input type="text" id="trafficInvestimento" class="template-input" placeholder="Ex: R$ 2.500">
+      </div>
+
+      <!-- 6. CPL médio -->
+      <div class="template-question">
+        <label class="template-label">💵 CPL médio por campanha</label>
+        <input type="text" id="trafficCPL" class="template-input" placeholder="Ex: R$ 25 Google | R$ 18 Meta">
+      </div>
+
+      <!-- 7. Leads caindo corretamente -->
       <div class="template-question">
         <label class="template-label">✅ Leads estão caindo corretamente na plataforma e no CRM?</label>
         <select id="trafficLeadsCaindo" class="template-select">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Parcialmente">Parcialmente (apenas na plataforma)</option>
-          <option value="Verificando integração">Verificando integração</option>
+          <option value="Sim">✅ Sim, tudo ok</option>
+          <option value="Não">❌ Não</option>
+          <option value="Apenas na plataforma">⚠️ Apenas na plataforma</option>
+          <option value="Verificando integração">🔍 Verificando</option>
         </select>
       </div>
 
-      <!-- Leads no mês -->
-      <div class="template-question">
-        <label class="template-label">📅 Quantos leads no mês?</label>
-        <input type="number" id="trafficLeadsMes" class="template-input" placeholder="Ex: 11, 50, 120..." min="0">
-      </div>
-
-      <!-- Leads no gerenciador -->
-      <div class="template-question">
-        <label class="template-label">💼 Quantos leads no gerenciador de anúncios?</label>
-        <input type="number" id="trafficLeadsGerenciador" class="template-input" placeholder="Ex: 11, 50, 120..." min="0">
-      </div>
-
-      <!-- CTR -->
+      <!-- 8. CTR por campanha -->
       <div class="template-question">
         <label class="template-label">🎯 CTR por campanha</label>
-        <input type="text" id="trafficCTR" class="template-input" placeholder="Ex: 10,49%, Google: 8%, Meta: 12%">
+        <input type="text" id="trafficCTR" class="template-input" placeholder="Ex: Google 3,5% | Meta 2,1%">
       </div>
 
-      <!-- Cliques -->
+      <!-- 9. Melhores anúncios -->
       <div class="template-question">
-        <label class="template-label">👆 Cliques por campanha</label>
-        <input type="text" id="trafficCliques" class="template-input" placeholder="Ex: 11, Google: 50, Meta: 35">
-      </div>
-
-      <!-- Melhores anúncios -->
-      <div class="template-question">
-        <label class="template-label">⭐ Quais são os melhores anúncios?</label>
+        <label class="template-label">⭐ Quais são os melhores anúncios hoje?</label>
         <select id="trafficMelhoresAnuncios" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficMelhoresAnunciosCustom').style.display='block'; } else { document.getElementById('trafficMelhoresAnunciosCustom').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Todos estão de acordo com as palavras-chave e landing page. Todos estão qualificados.">Todos alinhados e qualificados</option>
-          <option value="Anúncios de conversão estão performando melhor">Anúncios de conversão performando melhor</option>
-          <option value="Anúncios de remarketing com melhor resultado">Remarketing com melhor resultado</option>
-          <option value="personalizado">Especificar anúncios...</option>
+          <option value="Todos performando bem">✅ Todos performando bem</option>
+          <option value="Anúncios de conversão">🎯 Anúncios de conversão</option>
+          <option value="Remarketing">🔄 Remarketing</option>
+          <option value="Carrossel/Imagem">🖼️ Carrossel/Imagem</option>
+          <option value="Vídeo">🎬 Vídeo</option>
+          <option value="personalizado">✏️ Especificar...</option>
         </select>
-        <textarea id="trafficMelhoresAnunciosCustom" placeholder="Especifique quais anúncios estão performando melhor..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="trafficMelhoresAnunciosCustom" class="template-input" placeholder="Especifique..." style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Comentários nos anúncios -->
+      <!-- 10. Comentários nos anúncios -->
       <div class="template-question">
-        <label class="template-label">💬 Algum anúncio com comentários?</label>
+        <label class="template-label">💬 Algum anúncio com comentários relevantes?</label>
         <select id="trafficComentarios" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('trafficComentariosDetails').style.display='block'; } else { document.getElementById('trafficComentariosDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Apenas Google está rodando">Apenas Google está rodando (não tem comentários)</option>
-          <option value="Não">Não</option>
-          <option value="Sim">Sim</option>
+          <option value="Não">❌ Não</option>
+          <option value="Apenas Google rodando">📊 Apenas Google (sem comentários)</option>
+          <option value="Sim">✅ Sim</option>
         </select>
-        <textarea id="trafficComentariosDetails" placeholder="Descreva os comentários relevantes..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="trafficComentariosDetails" class="template-input" placeholder="Quais comentários?" style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Orçamento rodando -->
+      <!-- 11. Otimização hoje -->
       <div class="template-question">
-        <label class="template-label">💰 Orçamento está rodando corretamente?</label>
-        <select id="trafficOrcamento" class="template-select">
+        <label class="template-label">🛠️ Otimização hoje? Qual foi/será feita</label>
+        <select id="trafficOtimizacao" class="template-select" onchange="if(this.value==='Sim' || this.value==='Feita'){ document.getElementById('trafficOtimizacaoDetails').style.display='block'; } else { document.getElementById('trafficOtimizacaoDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Parcialmente">Parcialmente</option>
+          <option value="Não">❌ Não precisa hoje</option>
+          <option value="Feita">✅ Já foi feita</option>
+          <option value="Sim">🔧 Será feita</option>
+          <option value="Aguardando dados">⏳ Aguardando dados</option>
         </select>
+        <input type="text" id="trafficOtimizacaoDetails" class="template-input" placeholder="O que foi/será feito?" style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Campanha limitada -->
+      <!-- 12. Insight geral -->
       <div class="template-question">
-        <label class="template-label">⚠️ Alguma campanha limitada por orçamento?</label>
-        <select id="trafficLimitada" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('trafficLimitadaDetails').style.display='block'; } else { document.getElementById('trafficLimitadaDetails').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Não">Não</option>
-          <option value="Sim">Sim</option>
-        </select>
-        <textarea id="trafficLimitadaDetails" placeholder="Especifique quais campanhas estão limitadas..." style="margin-top: 8px; display: none;"></textarea>
-      </div>
-
-      <!-- Precisa otimização -->
-      <div class="template-question">
-        <label class="template-label">🔧 Precisa de otimização hoje?</label>
-        <select id="trafficOtimizacao" class="template-select">
-          <option value="">Selecione...</option>
-          <option value="Não">Não</option>
-          <option value="Sim">Sim</option>
-          <option value="Foi feita ontem">Foi feita ontem</option>
-          <option value="Aguardando dados">Aguardando dados para otimizar</option>
-        </select>
-      </div>
-
-      <!-- Qual otimização -->
-      <div class="template-question">
-        <label class="template-label">🛠️ Qual otimização será feita/foi feita?</label>
-        <textarea id="trafficQualOtimizacao" placeholder="Ex: Ajuste de lances, pausar anúncios com baixo desempenho, testar novos criativos..."></textarea>
-      </div>
-
-      <!-- Insight geral -->
-      <div class="template-question">
-        <label class="template-label">💡 Insight geral após analisar todas as campanhas</label>
+        <label class="template-label">💡 Insight geral da conta</label>
         <select id="trafficInsight" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficInsightCustom').style.display='block'; } else { document.getElementById('trafficInsightCustom').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Esperar a campanha performar para ver no que dá">Esperar a campanha performar para avaliar</option>
-          <option value="Campanhas estão performando bem, manter estratégia">Campanhas performando bem, manter estratégia</option>
-          <option value="Necessário ajustes para melhorar conversão">Necessário ajustes para melhorar conversão</option>
-          <option value="Ampliar investimento nas campanhas com melhor ROI">Ampliar investimento nas melhores campanhas</option>
-          <option value="personalizado">Insight personalizado...</option>
+          <option value="Conta saudável, manter estratégia">✅ Conta saudável, manter estratégia</option>
+          <option value="Precisa mais investimento">💰 Precisa mais investimento</option>
+          <option value="Necessário ajustes urgentes">⚠️ Ajustes urgentes</option>
+          <option value="Aguardando resultados da otimização">⏳ Aguardando resultados</option>
+          <option value="Escalar campanhas que performam">🚀 Escalar campanhas boas</option>
+          <option value="personalizado">✏️ Insight personalizado...</option>
         </select>
-        <textarea id="trafficInsightCustom" placeholder="Descreva seu insight personalizado..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="trafficInsightCustom" class="template-input" placeholder="Seu insight..." style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 13. Decisão tomada hoje -->
+      <div class="template-question">
+        <label class="template-label">🎯 Decisão tomada hoje</label>
+        <select id="trafficDecisao" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficDecisaoCustom').style.display='block'; } else { document.getElementById('trafficDecisaoCustom').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="Manter como está">✅ Manter como está</option>
+          <option value="Aumentar orçamento">💰 Aumentar orçamento</option>
+          <option value="Pausar campanhas fracas">⏸️ Pausar campanhas fracas</option>
+          <option value="Testar novos criativos">🎨 Testar novos criativos</option>
+          <option value="Ajustar público-alvo">🎯 Ajustar público-alvo</option>
+          <option value="Criar novas campanhas">➕ Criar novas campanhas</option>
+          <option value="Nenhuma ação necessária">➖ Nenhuma ação necessária</option>
+          <option value="personalizado">✏️ Outra decisão...</option>
+        </select>
+        <input type="text" id="trafficDecisaoCustom" class="template-input" placeholder="Qual decisão?" style="margin-top: 8px; display: none;">
       </div>
 
     </div>
@@ -12445,141 +12528,295 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
       <h3>📢 Relatório de Conteúdo e Canais - Template</h3>
       <button type="button" class="team-notes-modal-close" onclick="closeContentTemplateModal()">✕</button>
     </div>
-    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
       
-      <!-- Alcance do mês Instagram -->
+      <!-- 1. Alcance total mês | ontem -->
       <div class="template-question">
-        <label class="template-label">📊 Alcance do mês até agora - Instagram</label>
-        <input type="text" id="contentAlcanceInstagram" class="template-input" placeholder="Ex: 2k, 2000, 2.5k">
+        <label class="template-label">🌐 Alcance total – mês | ontem (todas as redes)</label>
+        <div style="display: flex; gap: 12px;">
+          <input type="text" id="contentAlcanceMes" class="template-input" placeholder="Mês: 15k" style="flex: 1;">
+          <input type="text" id="contentAlcanceOntem" class="template-input" placeholder="Ontem: 2.5k" style="flex: 1;">
+        </div>
       </div>
 
-      <!-- Alcance do mês Google -->
+      <!-- 2. Instagram alcance | Google interações -->
       <div class="template-question">
-        <label class="template-label">🔍 Alcance do mês até agora - Google (interações)</label>
-        <input type="text" id="contentAlcanceGoogle" class="template-input" placeholder="Ex: 157, 200 interações">
+        <label class="template-label">📱 Instagram – alcance | 🔍 Google – interações</label>
+        <div style="display: flex; gap: 12px;">
+          <input type="text" id="contentAlcanceInstagram" class="template-input" placeholder="IG: 12k" style="flex: 1;">
+          <input type="text" id="contentAlcanceGoogle" class="template-input" placeholder="Google: 350" style="flex: 1;">
+        </div>
       </div>
 
-      <!-- Engajamento Instagram -->
+      <!-- 3. Material disponível -->
       <div class="template-question">
-        <label class="template-label">💬 Engajamento do mês até agora - Instagram</label>
-        <input type="text" id="contentEngajamentoInstagram" class="template-input" placeholder="Ex: 28, 50">
-      </div>
-
-      <!-- Salvamentos Instagram -->
-      <div class="template-question">
-        <label class="template-label">💾 Salvamentos do mês até agora - Instagram</label>
-        <input type="text" id="contentSalvamentosInstagram" class="template-input" placeholder="Ex: 1, 5, 10">
-      </div>
-
-      <!-- Resultados dia anterior -->
-      <div class="template-question">
-        <label class="template-label">📈 Resultados do dia anterior (posts, reels, stories)</label>
-        <select id="contentResultadosDia" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentResultadosDiaCustom').style.display='block'; } else { document.getElementById('contentResultadosDiaCustom').style.display='none'; }">
+        <label class="template-label">📦 Material disponível (semana/mês)</label>
+        <select id="contentMaterialDisponivel" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentMaterialDetails').style.display='block'; } else { document.getElementById('contentMaterialDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Alcance por volta das 600 views">Alcance por volta das 600 views</option>
-          <option value="Alcance entre 600-1k views">Alcance entre 600-1k views</option>
-          <option value="Alcance entre 1k-3k views">Alcance entre 1k-3k views</option>
-          <option value="Alcance acima de 3k views">Alcance acima de 3k views</option>
-          <option value="Conteúdos com pessoa pegam 3k+ views">Conteúdos com pessoa pegam 3k+ views</option>
-          <option value="personalizado">Especificar...</option>
+          <option value="Temos material para a semana toda">✅ Temos material para a semana toda</option>
+          <option value="Temos material para o mês">✅ Temos material para o mês</option>
+          <option value="Precisamos de mais material">⚠️ Precisamos de mais material</option>
+          <option value="Pouco material, precisa gravar">📹 Pouco material, precisa gravar</option>
+          <option value="Sem material disponível">❌ Sem material disponível</option>
+          <option value="personalizado">✏️ Especificar...</option>
         </select>
-        <textarea id="contentResultadosDiaCustom" placeholder="Descreva os resultados do dia anterior..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="contentMaterialDetails" class="template-input" placeholder="Especifique..." style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Conteúdos com pouco engajamento -->
+      <!-- 4. Próximos conteúdos planejados -->
       <div class="template-question">
-        <label class="template-label">📉 Conteúdos com pouco engajamento</label>
-        <select id="contentPoucoEngajamento" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('contentPoucoEngajamentoDetails').style.display='block'; } else { document.getElementById('contentPoucoEngajamentoDetails').style.display='none'; }">
+        <label class="template-label">🗓️ Próximos conteúdos planejados</label>
+        <select id="contentProximosConteudos" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentProximosDetails').style.display='block'; } else { document.getElementById('contentProximosDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Não">Não</option>
-          <option value="Poucos">Poucos</option>
-          <option value="Alguns">Alguns</option>
-          <option value="Bastante">Bastante</option>
-          <option value="Sim">Sim (especificar)</option>
+          <option value="Conteúdos da semana já programados">✅ Conteúdos da semana já programados</option>
+          <option value="Precisa planejar próximos conteúdos">📝 Precisa planejar próximos</option>
+          <option value="Aguardando aprovação do cliente">⏳ Aguardando aprovação do cliente</option>
+          <option value="Calendário atualizado">📅 Calendário atualizado</option>
+          <option value="personalizado">✏️ Especificar...</option>
         </select>
-        <textarea id="contentPoucoEngajamentoDetails" placeholder="Quais conteúdos tiveram pouco engajamento?" style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="contentProximosDetails" class="template-input" placeholder="Quais conteúdos?" style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Houve DM -->
+      <!-- 5. Resultado de ontem -->
       <div class="template-question">
-        <label class="template-label">💌 Houve DM no dia anterior?</label>
-        <select id="contentHouveDM" class="template-select">
+        <label class="template-label">📈 Resultado de ontem (posts, reels, stories)</label>
+        <select id="contentResultadoOntem" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentResultadoOntemDetails').style.display='block'; } else { document.getElementById('contentResultadoOntemDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Poucas">Poucas</option>
-          <option value="Várias">Várias</option>
+          <option value="Nenhum conteúdo postado">➖ Nenhum conteúdo postado</option>
+          <option value="Alcance baixo (menos de 500)">📉 Alcance baixo (&lt;500)</option>
+          <option value="Alcance médio (500-2k)">📊 Alcance médio (500-2k)</option>
+          <option value="Alcance bom (2k-5k)">📈 Alcance bom (2k-5k)</option>
+          <option value="Alcance excelente (5k+)">🚀 Alcance excelente (5k+)</option>
+          <option value="Reel viralizou">🔥 Reel viralizou</option>
+          <option value="personalizado">✏️ Especificar...</option>
         </select>
+        <input type="text" id="contentResultadoOntemDetails" class="template-input" placeholder="Detalhes do resultado..." style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- DMs respondidas -->
+      <!-- 6. Conteúdos postados no mês -->
       <div class="template-question">
-        <label class="template-label">✅ Todas as DMs foram respondidas?</label>
+        <label class="template-label">📅 Conteúdos postados no mês</label>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="color: #94a3b8; font-size: 0.85rem;">Posts:</span>
+            <input type="number" id="contentPostsMes" class="template-input" placeholder="0" min="0" style="width: 70px;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="color: #94a3b8; font-size: 0.85rem;">Reels:</span>
+            <input type="number" id="contentReelsMes" class="template-input" placeholder="0" min="0" style="width: 70px;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="color: #94a3b8; font-size: 0.85rem;">Stories:</span>
+            <input type="number" id="contentStoriesMes" class="template-input" placeholder="0" min="0" style="width: 70px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Melhor reel | Conteúdos fracos -->
+      <div class="template-question">
+        <label class="template-label">🎥 Melhor reel do dia | 📉 Conteúdos fracos</label>
+        <div style="display: flex; gap: 12px;">
+          <input type="text" id="contentMelhorReel" class="template-input" placeholder="Melhor: Reel de dicas" style="flex: 1;">
+          <input type="text" id="contentConteudosFracos" class="template-input" placeholder="Fracos: Post institucional" style="flex: 1;">
+        </div>
+      </div>
+
+      <!-- 8. DMs respondidas -->
+      <div class="template-question">
+        <label class="template-label">💌 DMs ontem respondidas?</label>
         <select id="contentDMsRespondidas" class="template-select">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Parcialmente">Parcialmente</option>
-          <option value="Aguardando resposta do cliente">Aguardando resposta do cliente</option>
+          <option value="Sim, todas">✅ Sim, todas</option>
+          <option value="Não houve DMs">➖ Não houve DMs</option>
+          <option value="Parcialmente">⚠️ Parcialmente</option>
+          <option value="Não respondidas">❌ Não respondidas</option>
+          <option value="Cliente responde">👤 Cliente responde</option>
         </select>
       </div>
 
-      <!-- Comentários respondidos -->
+      <!-- 9. Comentários respondidos -->
       <div class="template-question">
-        <label class="template-label">💬 Todos os comentários estão respondidos?</label>
+        <label class="template-label">💬 Comentários respondidos?</label>
         <select id="contentComentariosRespondidos" class="template-select">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Parcialmente">Parcialmente</option>
-          <option value="Não houve comentários">Não houve comentários</option>
+          <option value="Sim, todos">✅ Sim, todos</option>
+          <option value="Não houve comentários">➖ Não houve comentários</option>
+          <option value="Parcialmente">⚠️ Parcialmente</option>
+          <option value="Não respondidos">❌ Não respondidos</option>
+          <option value="Cliente responde">👤 Cliente responde</option>
         </select>
       </div>
 
-      <!-- Comentário negativo ou relevante -->
+      <!-- 10. Comentário negativo ou relevante -->
       <div class="template-question">
-        <label class="template-label">⚠️ Algum comentário negativo ou relevante?</label>
+        <label class="template-label">⚠️ Comentário negativo ou relevante?</label>
         <select id="contentComentarioNegativo" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('contentComentarioNegativoDetails').style.display='block'; } else { document.getElementById('contentComentarioNegativoDetails').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Não">Não</option>
-          <option value="Sim">Sim (especificar)</option>
+          <option value="Não">❌ Não</option>
+          <option value="Comentário positivo relevante">💚 Comentário positivo relevante</option>
+          <option value="Sim">⚠️ Sim, tem comentário negativo</option>
         </select>
-        <textarea id="contentComentarioNegativoDetails" placeholder="Descreva o comentário negativo ou relevante..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="contentComentarioNegativoDetails" class="template-input" placeholder="Qual comentário?" style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Atualização de canais -->
+      <!-- 11. Insight do dia -->
       <div class="template-question">
-        <label class="template-label">🔄 Está sendo atualizado todos os canais e Google?</label>
-        <select id="contentCanaisAtualizados" class="template-select" onchange="if(this.value==='Não'||this.value==='Parcialmente'){ document.getElementById('contentCanaisAtualizadosDetails').style.display='block'; } else { document.getElementById('contentCanaisAtualizadosDetails').style.display='none'; }">
+        <label class="template-label">💡 Insight do dia</label>
+        <select id="contentInsight" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentInsightCustom').style.display='block'; } else { document.getElementById('contentInsightCustom').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-          <option value="Parcialmente">Parcialmente</option>
-          <option value="Aguardando aprovação">Aguardando aprovação</option>
+          <option value="Conteúdos com pessoas performam melhor">👤 Conteúdos com pessoas performam melhor</option>
+          <option value="Reels têm mais alcance que posts">🎬 Reels têm mais alcance que posts</option>
+          <option value="Melhor horário de postagem identificado">⏰ Melhor horário identificado</option>
+          <option value="Engajamento aumentando">📈 Engajamento aumentando</option>
+          <option value="Precisa variar tipos de conteúdo">🔄 Precisa variar conteúdos</option>
+          <option value="Tudo normal, manter estratégia">✅ Tudo normal, manter estratégia</option>
+          <option value="personalizado">✏️ Insight personalizado...</option>
         </select>
-        <textarea id="contentCanaisAtualizadosDetails" placeholder="Quais canais não foram atualizados e por quê?" style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="contentInsightCustom" class="template-input" placeholder="Seu insight..." style="margin-top: 8px; display: none;">
       </div>
 
-      <!-- Insight -->
+      <!-- 12. Ação decidida hoje -->
       <div class="template-question">
-        <label class="template-label">💡 Algum insight após a análise do dia anterior?</label>
-        <select id="contentInsight" class="template-select" onchange="if(this.value==='Sim'||this.value==='personalizado'){ document.getElementById('contentInsightCustom').style.display='block'; } else { document.getElementById('contentInsightCustom').style.display='none'; }">
+        <label class="template-label">🎯 Ação decidida hoje</label>
+        <select id="contentAcaoDecidida" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('contentAcaoDecididaCustom').style.display='block'; } else { document.getElementById('contentAcaoDecididaCustom').style.display='none'; }">
           <option value="">Selecione...</option>
-          <option value="Não">Não</option>
-          <option value="Conteúdos com pessoas performam melhor">Conteúdos com pessoas performam melhor</option>
-          <option value="Reels estão tendo mais alcance que posts">Reels estão tendo mais alcance que posts</option>
-          <option value="Horário de postagem pode ser otimizado">Horário de postagem pode ser otimizado</option>
-          <option value="Engagement aumentou após mudança de estratégia">Engagement aumentou após mudança de estratégia</option>
-          <option value="Sim">Sim (especificar)</option>
-          <option value="personalizado">Insight personalizado...</option>
+          <option value="Manter estratégia atual">✅ Manter estratégia atual</option>
+          <option value="Aumentar frequência de postagens">📈 Aumentar frequência de postagens</option>
+          <option value="Focar em reels">🎬 Focar em reels</option>
+          <option value="Solicitar mais material ao cliente">📹 Solicitar mais material ao cliente</option>
+          <option value="Testar novos formatos">🧪 Testar novos formatos</option>
+          <option value="Ajustar horários de postagem">⏰ Ajustar horários de postagem</option>
+          <option value="Nenhuma ação necessária">➖ Nenhuma ação necessária</option>
+          <option value="personalizado">✏️ Outra ação...</option>
         </select>
-        <textarea id="contentInsightCustom" placeholder="Descreva o insight..." style="margin-top: 8px; display: none;"></textarea>
+        <input type="text" id="contentAcaoDecididaCustom" class="template-input" placeholder="Qual ação?" style="margin-top: 8px; display: none;">
       </div>
 
     </div>
     <div class="team-notes-modal-footer">
       <button type="button" class="btn secondary" onclick="closeContentTemplateModal()">Cancelar</button>
       <button type="button" class="btn" onclick="saveContentTemplate()">💾 Salvar Relatório</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Template Liderança (Check-in Diário) -->
+<div class="team-notes-modal traffic-template-modal" id="leadershipTemplateModal">
+  <div class="team-notes-modal-content" style="max-width: 600px;">
+    <div class="team-notes-modal-header" style="background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(168,85,247,0.2)); border-bottom: 1px solid rgba(139,92,246,0.3);">
+      <h3>🧭 Check-in Diário — Visão Macro</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeLeadershipTemplateModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 65vh; overflow-y: auto;">
+      
+      <!-- Seção Check-in -->
+      <div class="template-section" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #a78bfa; margin: 0 0 12px 0; font-size: 0.95rem;">🧭 Check-in Diário</h4>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Leads entraram -->
+          <div style="padding: 8px 12px; background: rgba(30,41,59,0.5); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0;">Leads entraram?</span>
+              <select id="leadershipLeadsEntraram" class="template-input" style="width: auto; min-width: 100px;" onchange="toggleLeadershipObs(this, 'leadershipLeadsEntraramObs')">
+                <option value="">Selecione</option>
+                <option value="Sim">✅ Sim</option>
+                <option value="Não">❌ Não</option>
+              </select>
+            </div>
+            <input type="text" id="leadershipLeadsEntraramObs" class="template-input" placeholder="Observação (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+          </div>
+          
+          <!-- Leads atendidos -->
+          <div style="padding: 8px 12px; background: rgba(30,41,59,0.5); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0;">Leads foram atendidos?</span>
+              <select id="leadershipLeadsAtendidos" class="template-input" style="width: auto; min-width: 100px;" onchange="toggleLeadershipObs(this, 'leadershipLeadsAtendidosObs')">
+                <option value="">Selecione</option>
+                <option value="Sim">✅ Sim</option>
+                <option value="Não">❌ Não</option>
+              </select>
+            </div>
+            <input type="text" id="leadershipLeadsAtendidosObs" class="template-input" placeholder="Observação (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+          </div>
+          
+          <!-- Custo ok -->
+          <div style="padding: 8px 12px; background: rgba(30,41,59,0.5); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0;">Custo está ok?</span>
+              <select id="leadershipCustoOk" class="template-input" style="width: auto; min-width: 120px;" onchange="toggleLeadershipObs(this, 'leadershipCustoOkObs')">
+                <option value="">Selecione</option>
+                <option value="Sim">✅ Sim</option>
+                <option value="Atenção">⚠️ Atenção</option>
+                <option value="Não">❌ Não</option>
+              </select>
+            </div>
+            <input type="text" id="leadershipCustoOkObs" class="template-input" placeholder="Observação (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+          </div>
+          
+          <!-- Conteúdo ativo -->
+          <div style="padding: 8px 12px; background: rgba(30,41,59,0.5); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0;">Conteúdo ativo?</span>
+              <select id="leadershipConteudoAtivo" class="template-input" style="width: auto; min-width: 100px;" onchange="toggleLeadershipObs(this, 'leadershipConteudoAtivoObs')">
+                <option value="">Selecione</option>
+                <option value="Sim">✅ Sim</option>
+                <option value="Não">❌ Não</option>
+              </select>
+            </div>
+            <input type="text" id="leadershipConteudoAtivoObs" class="template-input" placeholder="Observação (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+          </div>
+          
+          <!-- Marca visível -->
+          <div style="padding: 8px 12px; background: rgba(30,41,59,0.5); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0;">Marca visível hoje?</span>
+              <select id="leadershipMarcaVisivel" class="template-input" style="width: auto; min-width: 100px;" onchange="toggleLeadershipObs(this, 'leadershipMarcaVisivelObs')">
+                <option value="">Selecione</option>
+                <option value="Sim">✅ Sim</option>
+                <option value="Não">❌ Não</option>
+              </select>
+            </div>
+            <input type="text" id="leadershipMarcaVisivelObs" class="template-input" placeholder="Observação (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Seção Status Geral -->
+      <div class="template-section" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #a78bfa; margin: 0 0 12px 0; font-size: 0.95rem;">🚦 Status Geral</h4>
+        <select id="leadershipStatusGeral" class="template-input" style="width: 100%;" onchange="toggleLeadershipObs(this, 'leadershipStatusGeralObs')">
+          <option value="">Selecione o status</option>
+          <option value="🟢 Verde, tudo rodando">🟢 Verde, tudo rodando</option>
+          <option value="🟡 Amarelo, ajustar algo">🟡 Amarelo, ajustar algo</option>
+          <option value="🔴 Vermelho, agir agora">🔴 Vermelho, agir agora</option>
+        </select>
+        <input type="text" id="leadershipStatusGeralObs" class="template-input" placeholder="Detalhe o status (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+      </div>
+      
+      <!-- Seção Insight do Dia -->
+      <div class="template-section" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #a78bfa; margin: 0 0 12px 0; font-size: 0.95rem;">💡 Insight do Dia</h4>
+        <input type="text" id="leadershipInsight" class="template-input" placeholder="1 frase clara sobre o dia" style="width: 100%;">
+      </div>
+      
+      <!-- Seção Decisão de Hoje -->
+      <div class="template-section" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #a78bfa; margin: 0 0 12px 0; font-size: 0.95rem;">🎯 Decisão de Hoje</h4>
+        <select id="leadershipDecisao" class="template-input" style="width: 100%;" onchange="toggleLeadershipObs(this, 'leadershipDecisaoObs')">
+          <option value="">Selecione a decisão</option>
+          <option value="Manter">✅ Manter</option>
+          <option value="Ajustar">🔧 Ajustar</option>
+          <option value="Escalar">📈 Escalar</option>
+          <option value="Corrigir">🛠️ Corrigir</option>
+        </select>
+        <input type="text" id="leadershipDecisaoObs" class="template-input" placeholder="O que vai manter/ajustar/escalar/corrigir? (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
+      </div>
+
+    </div>
+    <div class="team-notes-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeLeadershipTemplateModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveLeadershipTemplate()" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">💾 Salvar Check-in</button>
     </div>
   </div>
 </div>
@@ -26012,6 +26249,19 @@ async function sendIAQuestion(){
           `;
         }).join('');
       });
+      
+      // Atualiza resumos após renderizar notas
+      if(typeof updateSummaries === 'function') {
+        setTimeout(updateSummaries, 100);
+      }
+      // Inicializa bloco de resumo semanal consolidado
+      if(typeof initWeeklySummaryBlock === 'function') {
+        setTimeout(initWeeklySummaryBlock, 150);
+      }
+      // Inicializa bloco de resumo mensal consolidado
+      if(typeof initMonthlySummaryBlock === 'function') {
+        setTimeout(initMonthlySummaryBlock, 200);
+      }
     }
 
     function capitalize(str){
@@ -26377,27 +26627,27 @@ async function sendIAQuestion(){
       document.getElementById('trafficCampNenhuma').checked = false;
       document.getElementById('trafficCampDetails').value = '';
       document.getElementById('trafficLeadsGerando').value = '';
-      document.getElementById('trafficLeadsHoje').value = '';
-      document.getElementById('trafficLeadsCaindo').value = '';
+      document.getElementById('trafficLeadsOntem').value = '';
       document.getElementById('trafficLeadsMes').value = '';
-      document.getElementById('trafficLeadsGerenciador').value = '';
+      document.getElementById('trafficInvestimento').value = '';
+      document.getElementById('trafficCPL').value = '';
+      document.getElementById('trafficLeadsCaindo').value = '';
       document.getElementById('trafficCTR').value = '';
-      document.getElementById('trafficCliques').value = '';
       document.getElementById('trafficMelhoresAnuncios').value = '';
       document.getElementById('trafficMelhoresAnunciosCustom').value = '';
       document.getElementById('trafficMelhoresAnunciosCustom').style.display = 'none';
       document.getElementById('trafficComentarios').value = '';
       document.getElementById('trafficComentariosDetails').value = '';
       document.getElementById('trafficComentariosDetails').style.display = 'none';
-      document.getElementById('trafficOrcamento').value = '';
-      document.getElementById('trafficLimitada').value = '';
-      document.getElementById('trafficLimitadaDetails').value = '';
-      document.getElementById('trafficLimitadaDetails').style.display = 'none';
       document.getElementById('trafficOtimizacao').value = '';
-      document.getElementById('trafficQualOtimizacao').value = '';
+      document.getElementById('trafficOtimizacaoDetails').value = '';
+      document.getElementById('trafficOtimizacaoDetails').style.display = 'none';
       document.getElementById('trafficInsight').value = '';
       document.getElementById('trafficInsightCustom').value = '';
       document.getElementById('trafficInsightCustom').style.display = 'none';
+      document.getElementById('trafficDecisao').value = '';
+      document.getElementById('trafficDecisaoCustom').value = '';
+      document.getElementById('trafficDecisaoCustom').style.display = 'none';
       
       modal.classList.add('show');
       document.body.style.overflow = 'hidden';
@@ -26422,21 +26672,24 @@ async function sendIAQuestion(){
         
         let campanhasTexto = '';
         if(campanhasNenhuma){
-          campanhasTexto = 'Não\n';
+          campanhasTexto = 'Nenhuma rodando';
+        } else if(campanhasGoogle || campanhasMeta){
+          const plataformas = [];
+          if(campanhasGoogle) plataformas.push('Google Ads');
+          if(campanhasMeta) plataformas.push('Meta Ads');
+          campanhasTexto = plataformas.join(' + ');
+          if(campanhasDetalhes) campanhasTexto += ` (${campanhasDetalhes})`;
         } else {
-          campanhasTexto = 'Sim.\n';
-          if(campanhasGoogle) campanhasTexto += '- Google Ads\n';
-          if(campanhasMeta) campanhasTexto += '- Meta Ads (Facebook/Instagram)\n';
-          if(campanhasDetalhes) campanhasTexto += `\nDetalhes: ${campanhasDetalhes}`;
+          campanhasTexto = campanhasDetalhes || '-';
         }
         
         const leadsGerando = document.getElementById('trafficLeadsGerando').value;
-        const leadsHoje = document.getElementById('trafficLeadsHoje').value;
-        const leadsCaindo = document.getElementById('trafficLeadsCaindo').value;
+        const leadsOntem = document.getElementById('trafficLeadsOntem').value;
         const leadsMes = document.getElementById('trafficLeadsMes').value;
-        const leadsGerenciador = document.getElementById('trafficLeadsGerenciador').value;
+        const investimento = document.getElementById('trafficInvestimento').value.trim();
+        const cpl = document.getElementById('trafficCPL').value.trim();
+        const leadsCaindo = document.getElementById('trafficLeadsCaindo').value;
         const ctr = document.getElementById('trafficCTR').value.trim();
-        const cliques = document.getElementById('trafficCliques').value.trim();
         
         let melhoresAnuncios = document.getElementById('trafficMelhoresAnuncios').value;
         if(melhoresAnuncios === 'personalizado'){
@@ -26446,58 +26699,42 @@ async function sendIAQuestion(){
         let comentarios = document.getElementById('trafficComentarios').value;
         if(comentarios === 'Sim'){
           const detalhes = document.getElementById('trafficComentariosDetails').value.trim();
-          if(detalhes) comentarios += `\n${detalhes}`;
+          if(detalhes) comentarios += `: ${detalhes}`;
         }
         
-        const orcamento = document.getElementById('trafficOrcamento').value;
-        
-        let limitada = document.getElementById('trafficLimitada').value;
-        if(limitada === 'Sim'){
-          const detalhes = document.getElementById('trafficLimitadaDetails').value.trim();
-          if(detalhes) limitada += `\n${detalhes}`;
+        let otimizacao = document.getElementById('trafficOtimizacao').value;
+        if(otimizacao === 'Sim' || otimizacao === 'Feita'){
+          const detalhes = document.getElementById('trafficOtimizacaoDetails').value.trim();
+          if(detalhes) otimizacao += `: ${detalhes}`;
         }
-        
-        const otimizacao = document.getElementById('trafficOtimizacao').value;
-        const qualOtimizacao = document.getElementById('trafficQualOtimizacao').value.trim();
         
         let insight = document.getElementById('trafficInsight').value;
         if(insight === 'personalizado'){
           insight = document.getElementById('trafficInsightCustom').value.trim();
         }
         
-        // Montar o conteúdo da nota
+        let decisao = document.getElementById('trafficDecisao').value;
+        if(decisao === 'personalizado'){
+          decisao = document.getElementById('trafficDecisaoCustom').value.trim();
+        }
+        
+        // Montar o conteúdo da nota - formato compacto
         let conteudo = '📊 RELATÓRIO DE TRÁFEGO\n';
         conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n\n`;
         
-        conteudo += '🎯 Campanhas estão rodando? Quais?\n' + campanhasTexto + '\n\n';
-        
-        if(leadsGerando) conteudo += '📊 Estão gerando leads?\n' + leadsGerando + '\n\n';
-        
-        if(leadsHoje) conteudo += '📈 Quantos leads hoje?\n' + leadsHoje + '\n\n';
-        
-        if(leadsCaindo) conteudo += '✅ Leads estão caindo corretamente na plataforma e no CRM?\n' + leadsCaindo + '\n\n';
-        
-        if(leadsMes) conteudo += '📅 Quantos leads no mês?\n' + leadsMes + '\n\n';
-        
-        if(leadsGerenciador) conteudo += '💼 Quantos leads no gerenciador de anúncios?\n' + leadsGerenciador + '\n\n';
-        
-        if(ctr) conteudo += '🎯 CTR por campanha\n' + ctr + '\n\n';
-        
-        if(cliques) conteudo += '👆 Cliques por campanha\n' + cliques + '\n\n';
-        
-        if(melhoresAnuncios) conteudo += '⭐ Quais são os melhores anúncios?\n' + melhoresAnuncios + '\n\n';
-        
-        if(comentarios) conteudo += '💬 Algum anúncio com comentários?\n' + comentarios + '\n\n';
-        
-        if(orcamento) conteudo += '💰 Orçamento está rodando corretamente?\n' + orcamento + '\n\n';
-        
-        if(limitada) conteudo += '⚠️ Alguma campanha limitada por orçamento?\n' + limitada + '\n\n';
-        
-        if(otimizacao) conteudo += '🔧 Precisa de otimização hoje?\n' + otimizacao + '\n\n';
-        
-        if(qualOtimizacao) conteudo += '🛠️ Qual otimização será feita/foi feita?\n' + qualOtimizacao + '\n\n';
-        
-        if(insight) conteudo += '💡 Insight geral após analisar todas as campanhas\n' + insight + '\n';
+        conteudo += `🎯 Campanhas: ${campanhasTexto}\n`;
+        if(leadsGerando) conteudo += `📊 Gerando leads: ${leadsGerando}\n`;
+        if(leadsOntem) conteudo += `📈 Leads ontem: ${leadsOntem}\n`;
+        if(leadsMes) conteudo += `📅 Leads mês: ${leadsMes}\n`;
+        if(investimento) conteudo += `� Investimento: ${investimento}\n`;
+        if(cpl) conteudo += `💵 CPL: ${cpl}\n`;
+        if(leadsCaindo) conteudo += `✅ Leads no CRM: ${leadsCaindo}\n`;
+        if(ctr) conteudo += `🎯 CTR: ${ctr}\n`;
+        if(melhoresAnuncios) conteudo += `⭐ Melhores anúncios: ${melhoresAnuncios}\n`;
+        if(comentarios) conteudo += `💬 Comentários: ${comentarios}\n`;
+        if(otimizacao) conteudo += `🛠️ Otimização: ${otimizacao}\n`;
+        if(insight) conteudo += `💡 Insight: ${insight}\n`;
+        if(decisao) conteudo += `🎯 Decisão: ${decisao}\n`;
         
         // Verificar se há conteúdo suficiente
         if(conteudo.split('\n').filter(line => line.trim()).length <= 3){
@@ -26550,28 +26787,35 @@ async function sendIAQuestion(){
       if(!modal) return;
       
       // Limpar todos os campos
+      document.getElementById('contentAlcanceMes').value = '';
+      document.getElementById('contentAlcanceOntem').value = '';
       document.getElementById('contentAlcanceInstagram').value = '';
       document.getElementById('contentAlcanceGoogle').value = '';
-      document.getElementById('contentEngajamentoInstagram').value = '';
-      document.getElementById('contentSalvamentosInstagram').value = '';
-      document.getElementById('contentResultadosDia').value = '';
-      document.getElementById('contentResultadosDiaCustom').value = '';
-      document.getElementById('contentResultadosDiaCustom').style.display = 'none';
-      document.getElementById('contentPoucoEngajamento').value = '';
-      document.getElementById('contentPoucoEngajamentoDetails').value = '';
-      document.getElementById('contentPoucoEngajamentoDetails').style.display = 'none';
-      document.getElementById('contentHouveDM').value = '';
+      document.getElementById('contentMaterialDisponivel').value = '';
+      document.getElementById('contentMaterialDetails').value = '';
+      document.getElementById('contentMaterialDetails').style.display = 'none';
+      document.getElementById('contentProximosConteudos').value = '';
+      document.getElementById('contentProximosDetails').value = '';
+      document.getElementById('contentProximosDetails').style.display = 'none';
+      document.getElementById('contentResultadoOntem').value = '';
+      document.getElementById('contentResultadoOntemDetails').value = '';
+      document.getElementById('contentResultadoOntemDetails').style.display = 'none';
+      document.getElementById('contentPostsMes').value = '';
+      document.getElementById('contentReelsMes').value = '';
+      document.getElementById('contentStoriesMes').value = '';
+      document.getElementById('contentMelhorReel').value = '';
+      document.getElementById('contentConteudosFracos').value = '';
       document.getElementById('contentDMsRespondidas').value = '';
       document.getElementById('contentComentariosRespondidos').value = '';
       document.getElementById('contentComentarioNegativo').value = '';
       document.getElementById('contentComentarioNegativoDetails').value = '';
       document.getElementById('contentComentarioNegativoDetails').style.display = 'none';
-      document.getElementById('contentCanaisAtualizados').value = '';
-      document.getElementById('contentCanaisAtualizadosDetails').value = '';
-      document.getElementById('contentCanaisAtualizadosDetails').style.display = 'none';
       document.getElementById('contentInsight').value = '';
       document.getElementById('contentInsightCustom').value = '';
       document.getElementById('contentInsightCustom').style.display = 'none';
+      document.getElementById('contentAcaoDecidida').value = '';
+      document.getElementById('contentAcaoDecididaCustom').value = '';
+      document.getElementById('contentAcaoDecididaCustom').style.display = 'none';
       
       modal.classList.add('show');
       document.body.style.overflow = 'hidden';
@@ -26589,71 +26833,85 @@ async function sendIAQuestion(){
     async function saveContentTemplate(){
       try {
         // Coletar dados do formulário
+        const alcanceMes = document.getElementById('contentAlcanceMes').value.trim();
+        const alcanceOntem = document.getElementById('contentAlcanceOntem').value.trim();
         const alcanceInstagram = document.getElementById('contentAlcanceInstagram').value.trim();
         const alcanceGoogle = document.getElementById('contentAlcanceGoogle').value.trim();
-        const engajamentoInstagram = document.getElementById('contentEngajamentoInstagram').value.trim();
-        const salvamentosInstagram = document.getElementById('contentSalvamentosInstagram').value.trim();
         
-        let resultadosDia = document.getElementById('contentResultadosDia').value;
-        if(resultadosDia === 'personalizado'){
-          resultadosDia = document.getElementById('contentResultadosDiaCustom').value.trim();
+        let materialDisponivel = document.getElementById('contentMaterialDisponivel').value;
+        if(materialDisponivel === 'personalizado'){
+          materialDisponivel = document.getElementById('contentMaterialDetails').value.trim();
         }
         
-        let poucoEngajamento = document.getElementById('contentPoucoEngajamento').value;
-        if(poucoEngajamento === 'Sim'){
-          const detalhes = document.getElementById('contentPoucoEngajamentoDetails').value.trim();
-          if(detalhes) poucoEngajamento += `\n${detalhes}`;
+        let proximosConteudos = document.getElementById('contentProximosConteudos').value;
+        if(proximosConteudos === 'personalizado'){
+          proximosConteudos = document.getElementById('contentProximosDetails').value.trim();
         }
         
-        const houveDM = document.getElementById('contentHouveDM').value;
+        let resultadoOntem = document.getElementById('contentResultadoOntem').value;
+        if(resultadoOntem === 'personalizado'){
+          resultadoOntem = document.getElementById('contentResultadoOntemDetails').value.trim();
+        }
+        
+        const postsMes = document.getElementById('contentPostsMes').value;
+        const reelsMes = document.getElementById('contentReelsMes').value;
+        const storiesMes = document.getElementById('contentStoriesMes').value;
+        const melhorReel = document.getElementById('contentMelhorReel').value.trim();
+        const conteudosFracos = document.getElementById('contentConteudosFracos').value.trim();
+        
         const dmsRespondidas = document.getElementById('contentDMsRespondidas').value;
         const comentariosRespondidos = document.getElementById('contentComentariosRespondidos').value;
         
         let comentarioNegativo = document.getElementById('contentComentarioNegativo').value;
         if(comentarioNegativo === 'Sim'){
           const detalhes = document.getElementById('contentComentarioNegativoDetails').value.trim();
-          if(detalhes) comentarioNegativo += `\n${detalhes}`;
-        }
-        
-        let canaisAtualizados = document.getElementById('contentCanaisAtualizados').value;
-        const canaisDetalhes = document.getElementById('contentCanaisAtualizadosDetails').value.trim();
-        if((canaisAtualizados === 'Não' || canaisAtualizados === 'Parcialmente') && canaisDetalhes){
-          canaisAtualizados += `\n${canaisDetalhes}`;
+          if(detalhes) comentarioNegativo += `: ${detalhes}`;
         }
         
         let insight = document.getElementById('contentInsight').value;
-        if(insight === 'Sim' || insight === 'personalizado'){
-          const custom = document.getElementById('contentInsightCustom').value.trim();
-          if(custom) insight = custom;
+        if(insight === 'personalizado'){
+          insight = document.getElementById('contentInsightCustom').value.trim();
         }
         
-        // Montar o conteúdo da nota
-        let conteudo = '📢 RELATÓRIO DE CONTEÚDO E CANAIS\n';
+        let acaoDecidida = document.getElementById('contentAcaoDecidida').value;
+        if(acaoDecidida === 'personalizado'){
+          acaoDecidida = document.getElementById('contentAcaoDecididaCustom').value.trim();
+        }
+        
+        // Montar o conteúdo da nota - formato compacto
+        let conteudo = '📢 RELATÓRIO DE CONTEÚDO\n';
         conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n\n`;
         
-        if(alcanceInstagram) conteudo += '📊 Alcance do mês até agora - Instagram\n' + alcanceInstagram + '\n\n';
+        // Alcance total
+        if(alcanceMes || alcanceOntem){
+          conteudo += `🌐 Alcance total: ${alcanceMes || '-'} (mês) | ${alcanceOntem || '-'} (ontem)\n`;
+        }
         
-        if(alcanceGoogle) conteudo += '🔍 Alcance do mês até agora - Google (interações)\n' + alcanceGoogle + '\n\n';
+        // Instagram e Google
+        if(alcanceInstagram || alcanceGoogle){
+          conteudo += `📱 IG: ${alcanceInstagram || '-'} | 🔍 Google: ${alcanceGoogle || '-'}\n`;
+        }
         
-        if(engajamentoInstagram) conteudo += '💬 Engajamento do mês até agora - Instagram\n' + engajamentoInstagram + '\n\n';
+        if(materialDisponivel) conteudo += `📦 Material: ${materialDisponivel}\n`;
+        if(proximosConteudos) conteudo += `🗓️ Próximos: ${proximosConteudos}\n`;
+        if(resultadoOntem) conteudo += `📈 Ontem: ${resultadoOntem}\n`;
         
-        if(salvamentosInstagram) conteudo += '💾 Salvamentos do mês até agora - Instagram\n' + salvamentosInstagram + '\n\n';
+        // Conteúdos no mês
+        if(postsMes || reelsMes || storiesMes){
+          conteudo += `📅 Mês: ${postsMes || 0} posts | ${reelsMes || 0} reels | ${storiesMes || 0} stories\n`;
+        }
         
-        if(resultadosDia) conteudo += '📈 Resultados do dia anterior (posts, reels, stories)\n' + resultadosDia + '\n\n';
+        // Melhor reel e fracos
+        if(melhorReel || conteudosFracos){
+          if(melhorReel) conteudo += `🎥 Melhor: ${melhorReel}\n`;
+          if(conteudosFracos) conteudo += `📉 Fracos: ${conteudosFracos}\n`;
+        }
         
-        if(poucoEngajamento) conteudo += '📉 Conteúdos com pouco engajamento\n' + poucoEngajamento + '\n\n';
-        
-        if(houveDM) conteudo += '💌 Houve DM no dia anterior?\n' + houveDM + '\n\n';
-        
-        if(dmsRespondidas) conteudo += '✅ Todas as DMs foram respondidas?\n' + dmsRespondidas + '\n\n';
-        
-        if(comentariosRespondidos) conteudo += '💬 Todos os comentários estão respondidos?\n' + comentariosRespondidos + '\n\n';
-        
-        if(comentarioNegativo) conteudo += '⚠️ Algum comentário negativo ou relevante?\n' + comentarioNegativo + '\n\n';
-        
-        if(canaisAtualizados) conteudo += '🔄 Está sendo atualizado todos os canais e Google?\n' + canaisAtualizados + '\n\n';
-        
-        if(insight) conteudo += '💡 Algum insight após a análise do dia anterior?\n' + insight + '\n';
+        if(dmsRespondidas) conteudo += `💌 DMs: ${dmsRespondidas}\n`;
+        if(comentariosRespondidos) conteudo += `💬 Comentários: ${comentariosRespondidos}\n`;
+        if(comentarioNegativo) conteudo += `⚠️ Relevante: ${comentarioNegativo}\n`;
+        if(insight) conteudo += `💡 Insight: ${insight}\n`;
+        if(acaoDecidida) conteudo += `🎯 Ação: ${acaoDecidida}\n`;
         
         // Verificar se há conteúdo suficiente
         if(conteudo.split('\n').filter(line => line.trim()).length <= 3){
@@ -26698,7 +26956,1439 @@ async function sendIAQuestion(){
       }
     }
     window.saveContentTemplate = saveContentTemplate;
+    
+    /* ========== TEMPLATE DE LIDERANÇA (CHECK-IN DIÁRIO) ========== */
+    
+    // Função para mostrar/ocultar campo de observação
+    function toggleLeadershipObs(selectEl, obsId) {
+      const obsInput = document.getElementById(obsId);
+      if(obsInput) {
+        // Mostrar campo de observação quando uma opção é selecionada
+        obsInput.style.display = selectEl.value ? 'block' : 'none';
+      }
+    }
+    window.toggleLeadershipObs = toggleLeadershipObs;
+    
+    function openLeadershipTemplateModal(){
+      const modal = document.getElementById('leadershipTemplateModal');
+      if(modal){
+        modal.style.display = 'flex';
+        // Limpar campos de seleção
+        document.getElementById('leadershipLeadsEntraram').value = '';
+        document.getElementById('leadershipLeadsAtendidos').value = '';
+        document.getElementById('leadershipCustoOk').value = '';
+        document.getElementById('leadershipConteudoAtivo').value = '';
+        document.getElementById('leadershipMarcaVisivel').value = '';
+        document.getElementById('leadershipStatusGeral').value = '';
+        document.getElementById('leadershipInsight').value = '';
+        document.getElementById('leadershipDecisao').value = '';
+        // Limpar e ocultar campos de observação
+        const obsFields = ['leadershipLeadsEntraramObs', 'leadershipLeadsAtendidosObs', 'leadershipCustoOkObs', 
+                          'leadershipConteudoAtivoObs', 'leadershipMarcaVisivelObs', 'leadershipStatusGeralObs', 'leadershipDecisaoObs'];
+        obsFields.forEach(id => {
+          const el = document.getElementById(id);
+          if(el) { el.value = ''; el.style.display = 'none'; }
+        });
+      }
+    }
+    window.openLeadershipTemplateModal = openLeadershipTemplateModal;
+    
+    function closeLeadershipTemplateModal(){
+      const modal = document.getElementById('leadershipTemplateModal');
+      if(modal) modal.style.display = 'none';
+    }
+    window.closeLeadershipTemplateModal = closeLeadershipTemplateModal;
+    
+    async function saveLeadershipTemplate(){
+      try {
+        const leadsEntraram = document.getElementById('leadershipLeadsEntraram').value;
+        const leadsEntraramObs = document.getElementById('leadershipLeadsEntraramObs').value.trim();
+        const leadsAtendidos = document.getElementById('leadershipLeadsAtendidos').value;
+        const leadsAtendidosObs = document.getElementById('leadershipLeadsAtendidosObs').value.trim();
+        const custoOk = document.getElementById('leadershipCustoOk').value;
+        const custoOkObs = document.getElementById('leadershipCustoOkObs').value.trim();
+        const conteudoAtivo = document.getElementById('leadershipConteudoAtivo').value;
+        const conteudoAtivoObs = document.getElementById('leadershipConteudoAtivoObs').value.trim();
+        const marcaVisivel = document.getElementById('leadershipMarcaVisivel').value;
+        const marcaVisivelObs = document.getElementById('leadershipMarcaVisivelObs').value.trim();
+        const statusGeral = document.getElementById('leadershipStatusGeral').value;
+        const statusGeralObs = document.getElementById('leadershipStatusGeralObs').value.trim();
+        const insight = document.getElementById('leadershipInsight').value.trim();
+        const decisao = document.getElementById('leadershipDecisao').value;
+        const decisaoObs = document.getElementById('leadershipDecisaoObs').value.trim();
+        
+        // Validar campos obrigatórios
+        if(!leadsEntraram || !leadsAtendidos || !custoOk || !conteudoAtivo || !marcaVisivel || !statusGeral || !decisao) {
+          mgToast('⚠️ Preencha todos os campos obrigatórios');
+          return;
+        }
+        
+        // Montar conteúdo formatado para WhatsApp
+        const dataHoje = new Date().toLocaleDateString('pt-BR');
+        let conteudo = `🧭 *CHECK-IN DIÁRIO — VISÃO MACRO*\n`;
+        conteudo += `_${dataHoje}_\n\n`;
+        
+        conteudo += `*📋 STATUS DO DIA*\n`;
+        conteudo += `• Leads entraram? *${leadsEntraram}*${leadsEntraramObs ? ` — ${leadsEntraramObs}` : ''}\n`;
+        conteudo += `• Leads foram atendidos? *${leadsAtendidos}*${leadsAtendidosObs ? ` — ${leadsAtendidosObs}` : ''}\n`;
+        conteudo += `• Custo está ok? *${custoOk}*${custoOkObs ? ` — ${custoOkObs}` : ''}\n`;
+        conteudo += `• Conteúdo ativo? *${conteudoAtivo}*${conteudoAtivoObs ? ` — ${conteudoAtivoObs}` : ''}\n`;
+        conteudo += `• Marca visível hoje? *${marcaVisivel}*${marcaVisivelObs ? ` — ${marcaVisivelObs}` : ''}\n\n`;
+        
+        conteudo += `*🚦 STATUS GERAL*\n`;
+        conteudo += `${statusGeral}${statusGeralObs ? `\n_${statusGeralObs}_` : ''}\n\n`;
+        
+        if(insight) {
+          conteudo += `*💡 INSIGHT DO DIA*\n`;
+          conteudo += `${insight}\n\n`;
+        }
+        
+        conteudo += `*🎯 DECISÃO DE HOJE*\n`;
+        conteudo += `${decisao}${decisaoObs ? ` — ${decisaoObs}` : ''}`;
+        
+        // Usar getCurrentUser para suportar sessão admin
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
+        
+        // Criar nova nota
+        const newNote = {
+          id: uuid(),
+          column: 'lideranca',
+          content: conteudo,
+          attachments: [],
+          authorId: user?.uid || '',
+          authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+          authorPhoto: user?.photoURL || '',
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        TEAM_NOTES.push(newNote);
+        await persistTeamNotes();
+        closeLeadershipTemplateModal();
+        renderTeamNotes();
+        mgToast('✅ Check-in diário salvo!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar check-in de liderança:', err);
+        mgToast('Erro ao salvar check-in: ' + (err.message || 'Erro desconhecido'));
+      }
+    }
+    window.saveLeadershipTemplate = saveLeadershipTemplate;
+    /* ========== FIM TEMPLATE DE LIDERANÇA ========== */
     /* ========== FIM TEMPLATE DE CONTEÚDO/CANAIS ========== */
+
+    /* ========== RESUMO AUTOMÁTICO DAS NOTAS ========== */
+    let currentSummaryFilter = 'semana'; // 'dia', 'semana', 'mes'
+    console.log('🎯 [INIT] currentSummaryFilter inicializado como:', currentSummaryFilter);
+    
+    function setSummaryFilter(filter) {
+      console.log('🎯 [FILTER] setSummaryFilter chamado com:', filter);
+      
+      // NÃO limpar cache ao mudar de filtro - cada período tem seu próprio cache salvo
+      currentSummaryFilter = filter;
+      console.log('🎯 [FILTER] currentSummaryFilter agora é:', currentSummaryFilter);
+      
+      // Atualizar botões visuais
+      document.querySelectorAll('.summary-filter-btn').forEach(btn => {
+        if(btn.dataset.filter === filter) {
+          btn.style.background = 'rgba(99,102,241,0.3)';
+          btn.style.borderColor = 'rgba(99,102,241,0.5)';
+          btn.style.color = '#e2e8f0';
+          btn.classList.add('active');
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.borderColor = 'rgba(99,102,241,0.3)';
+          btn.style.color = '#94a3b8';
+          btn.classList.remove('active');
+        }
+      });
+      
+      // Atualizar resumos
+      updateSummaries();
+    }
+    window.setSummaryFilter = setSummaryFilter;
+    
+    function getNotesInPeriod(column, filter) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      let startDate;
+      if(filter === 'dia') {
+        startDate = today;
+      } else if(filter === 'semana') {
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - 7);
+      } else { // mes
+        startDate = new Date(today);
+        startDate.setMonth(today.getMonth() - 1);
+      }
+      
+      return TEAM_NOTES.filter(note => {
+        if(note.column !== column) return false;
+        // Tentar converter createdAt de vários formatos
+        let noteDate;
+        if(note.createdAt) {
+          if(typeof note.createdAt === 'string') {
+            noteDate = new Date(note.createdAt);
+          } else if(note.createdAt.seconds) {
+            // Firebase Timestamp
+            noteDate = new Date(note.createdAt.seconds * 1000);
+          } else if(note.createdAt.toDate) {
+            noteDate = note.createdAt.toDate();
+          } else {
+            noteDate = new Date(note.createdAt);
+          }
+        } else {
+          noteDate = new Date(); // Fallback para agora
+        }
+        return noteDate >= startDate;
+      }).sort((a, b) => {
+        const dateA = new Date(a.createdAt?.seconds ? a.createdAt.seconds * 1000 : a.createdAt);
+        const dateB = new Date(b.createdAt?.seconds ? b.createdAt.seconds * 1000 : b.createdAt);
+        return dateB - dateA;
+      });
+    }
+    
+    function parseTrafegoNote(content) {
+      const data = {};
+      if(!content) return data;
+      
+      const lines = content.split('\n');
+      const lower = content.toLowerCase();
+      
+      // Extrair TODOS os números que parecem leads
+      const allLeadsMatches = content.match(/(\d+)\s*(leads?|lead)/gi) || [];
+      let totalLeads = 0;
+      allLeadsMatches.forEach(m => {
+        const num = parseInt(m.match(/\d+/)[0]) || 0;
+        if(num > 0 && num < 10000) totalLeads += num;
+      });
+      if(totalLeads > 0) data.leadsOntem = totalLeads.toString();
+      
+      // Extrair "quantos leads hoje" ou similar
+      const quantosLeadsMatch = content.match(/quantos leads[^\d]*(\d+)/i);
+      if(quantosLeadsMatch) {
+        data.leadsOntem = quantosLeadsMatch[1];
+      }
+      
+      // Extrair leads do mês
+      const leadsMesMatch = content.match(/leads?\s*(do\s*)?m[êe]s[^\d]*(\d+)/i) || content.match(/(\d+)\s*leads?\s*(no\s*)?m[êe]s/i);
+      if(leadsMesMatch) {
+        const num = leadsMesMatch[2] || leadsMesMatch[1];
+        if(num) data.leadsMes = num;
+      }
+      
+      // Campanhas ativas
+      let campanhas = [];
+      if(lower.includes('google ads') || lower.includes('google')) campanhas.push('Google Ads');
+      if(lower.includes('meta ads') || lower.includes('meta') || lower.includes('facebook') || lower.includes('instagram ads')) campanhas.push('Meta Ads');
+      if(lower.includes('tiktok')) campanhas.push('TikTok Ads');
+      if(campanhas.length > 0) data.campanhas = campanhas.join(', ');
+      
+      // CPL
+      const cplMatch = content.match(/cpl[^\d]*R?\$?\s*([\d,\.]+)/i) || content.match(/R?\$?\s*([\d,\.]+)[^\d]*cpl/i);
+      if(cplMatch) data.cpl = 'R$ ' + cplMatch[1];
+      
+      // CTR
+      const ctrMatch = content.match(/ctr[^\d]*([\d,\.]+)\s*%?/i);
+      if(ctrMatch) data.ctr = ctrMatch[1] + '%';
+      
+      // Investimento
+      const investMatch = content.match(/investimento[^\d]*R?\$?\s*([\d,\.]+)/i) || content.match(/gasto[^\d]*R?\$?\s*([\d,\.]+)/i);
+      if(investMatch) data.investimento = 'R$ ' + investMatch[1];
+      
+      // Insights e observações - capturar textos relevantes
+      lines.forEach(line => {
+        const l = line.toLowerCase();
+        if(line.includes('Insight:')) data.insight = line.split('Insight:')[1]?.trim();
+        if(line.includes('Decisão:')) data.decisao = line.split('Decisão:')[1]?.trim();
+        if(line.includes('Otimização:')) data.otimizacao = line.split('Otimização:')[1]?.trim();
+        if(line.includes('Melhores anúncios:')) data.melhoresAnuncios = line.split('Melhores anúncios:')[1]?.trim();
+        
+        // Capturar observações importantes
+        if(l.includes('observ') || l.includes('nota:') || l.includes('obs:')) {
+          data.observacao = line;
+        }
+      });
+      
+      // Se não extraiu leads estruturados mas tem número no texto
+      if(!data.leadsOntem) {
+        const simpleNumMatch = content.match(/(\d+)\s*leads?/i);
+        if(simpleNumMatch) data.leadsOntem = simpleNumMatch[1];
+      }
+      
+      // Guardar conteúdo completo para análise
+      data.conteudoOriginal = content;
+      
+      return data;
+    }
+    
+    function parseConteudoNote(content) {
+      const data = {};
+      if(!content) return data;
+      
+      const lines = content.split('\n');
+      const lower = content.toLowerCase();
+      
+      // Alcance - extrair números grandes (geralmente alcance)
+      const alcanceMatches = content.match(/alcance[^\d]*([\d.,]+)\s*k?/gi) || [];
+      alcanceMatches.forEach(m => {
+        const numMatch = m.match(/([\d.,]+)\s*(k)?/i);
+        if(numMatch) {
+          let val = parseFloat(numMatch[1].replace('.','').replace(',','.'));
+          if(numMatch[2]?.toLowerCase() === 'k') val *= 1000;
+          if(val > 100) data.alcanceTotal = val.toLocaleString('pt-BR');
+        }
+      });
+      
+      // Instagram específico
+      const igMatch = content.match(/instagram[^\d]*([\d.,]+)\s*(k)?/i);
+      if(igMatch) {
+        let val = parseFloat(igMatch[1].replace('.','').replace(',','.'));
+        if(igMatch[2]?.toLowerCase() === 'k') val *= 1000;
+        data.alcanceIG = val.toString();
+      }
+      
+      // Formato "15.6k" isolado
+      const kMatch = content.match(/([\d.,]+)\s*k\b/i);
+      if(kMatch && !data.alcanceTotal) {
+        let val = parseFloat(kMatch[1].replace(',','.')) * 1000;
+        data.alcanceTotal = val.toLocaleString('pt-BR');
+      }
+      
+      // Posts, Reels, Stories
+      const postsMatch = content.match(/(\d+)\s*posts?/i);
+      const reelsMatch = content.match(/(\d+)\s*reels?/i);
+      const storiesMatch = content.match(/(\d+)\s*stor(y|ies)/i);
+      if(postsMatch || reelsMatch || storiesMatch) {
+        const p = postsMatch ? postsMatch[1] : '0';
+        const r = reelsMatch ? reelsMatch[1] : '0';
+        const s = storiesMatch ? storiesMatch[1] : '0';
+        data.conteudosMes = `${p} posts, ${r} reels, ${s} stories`;
+      }
+      
+      // DMs
+      const dmsMatch = content.match(/(\d+)\s*dms?/i);
+      if(dmsMatch) data.dms = dmsMatch[1];
+      
+      // Comentários
+      const comentMatch = content.match(/(\d+)\s*coment[aá]rios?/i);
+      if(comentMatch) data.comentarios = comentMatch[1];
+      
+      // Insights e ações
+      lines.forEach(line => {
+        if(line.includes('Insight:')) data.insight = line.split('Insight:')[1]?.trim();
+        if(line.includes('Ação:')) data.acao = line.split('Ação:')[1]?.trim();
+        if(line.includes('Material:')) data.material = line.split('Material:')[1]?.trim();
+        if(line.includes('Melhor:')) data.melhorReel = line.split('Melhor:')[1]?.trim();
+      });
+      
+      // Guardar conteúdo completo
+      data.conteudoOriginal = content;
+      
+      return data;
+    }
+    
+    // Formatar notas brutas para WhatsApp (usado no modo DIÁRIO)
+    function formatNotesForWpp(notes, tipo) {
+      if(!notes.length) return null;
+      
+      const now = new Date();
+      const hoje = now.toLocaleDateString('pt-BR');
+      const emoji = tipo === 'trafego' ? '📊' : '📝';
+      const titulo = tipo === 'trafego' ? 'TRÁFEGO' : 'CONTEÚDO';
+      
+      let wpp = `*${emoji} ${titulo} — ${hoje}*\n\n`;
+      
+      notes.forEach((note, i) => {
+        const dateVal = note.createdAt || note.timestamp;
+        let noteDate = new Date();
+        if(dateVal) {
+          if(dateVal.seconds) noteDate = new Date(dateVal.seconds * 1000);
+          else if(dateVal.toDate) noteDate = dateVal.toDate();
+          else noteDate = new Date(dateVal);
+        }
+        
+        const hora = noteDate.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        
+        wpp += `*${hora}*\n`;
+        // Formatar o conteúdo preservando quebras de linha
+        const content = note.content.trim()
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line)
+          .join('\n• ');
+        wpp += `• ${content}\n`;
+        
+        if(i < notes.length - 1) wpp += `\n`;
+      });
+      
+      wpp += `\n_${notes.length} anotação(ões) registrada(s)_`;
+      return wpp;
+    }
+    
+    // Gerar resumo com IA para semana/mês
+    async function generateAISummary(notes, tipo, periodo) {
+      console.log('🤖 [IA SUMMARY] Iniciando com', notes.length, 'notas para', tipo, periodo);
+      
+      if(!notes.length) return null;
+      
+      const now = new Date();
+      const emoji = tipo === 'trafego' ? '📊' : '📝';
+      const titulo = tipo === 'trafego' ? 'TRÁFEGO PAGO' : 'PRODUÇÃO DE CONTEÚDO';
+      
+      // Preparar todas as notas para a IA
+      let notasTexto = notes.map((note, i) => {
+        const dateVal = note.createdAt || note.timestamp;
+        let noteDate = new Date();
+        if(dateVal) {
+          if(dateVal.seconds) noteDate = new Date(dateVal.seconds * 1000);
+          else if(dateVal.toDate) noteDate = dateVal.toDate();
+          else noteDate = new Date(dateVal);
+        }
+        const dataStr = noteDate.toLocaleDateString('pt-BR');
+        return `[${dataStr}] ${note.content || '(sem conteúdo)'}`;
+      }).join('\n\n');
+      
+      console.log('🤖 [IA SUMMARY] Notas preparadas:', notasTexto.length, 'caracteres');
+      console.log('🤖 [IA SUMMARY] Preview das notas:', notasTexto.substring(0, 200));
+      
+      // Definir período
+      let periodoTexto = '';
+      if(periodo === 'semana') {
+        const inicio = new Date(now);
+        inicio.setDate(now.getDate() - 7);
+        periodoTexto = `Semana: ${inicio.toLocaleDateString('pt-BR')} a ${now.toLocaleDateString('pt-BR')}`;
+      } else {
+        periodoTexto = `Mês: ${now.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'})}`;
+      }
+      
+      // Prompt específico por tipo
+      let prompt = '';
+      
+      if(tipo === 'trafego') {
+        prompt = `Você é um analista de marketing digital especialista em tráfego pago.
+
+Analise as seguintes anotações de tráfego pago do período (${periodoTexto}) e gere um RESUMO CONSOLIDADO formatado para WhatsApp.
+
+ANOTAÇÕES:
+${notasTexto}
+
+Gere um resumo no seguinte formato (use *texto* para negrito e _texto_ para itálico):
+
+*${emoji} RESUMO DE ${titulo}*
+_${periodoTexto}_
+
+*📈 RESULTADOS*
+• Total de leads mencionados: X
+• Campanhas ativas: listar
+• CPL médio (se mencionado): R$ X
+• Investimento (se mencionado): R$ X
+
+*🎯 PRINCIPAIS PONTOS*
+• Liste os 3-5 pontos mais importantes das anotações
+
+*💡 INSIGHTS E DECISÕES*
+• Extraia insights e decisões mencionadas
+
+*⚠️ PONTOS DE ATENÇÃO*
+• Problemas ou alertas mencionados
+
+_Resumo gerado com base em ${notes.length} anotações_
+
+IMPORTANTE:
+- Seja objetivo e direto
+- Consolide números quando possível (some leads, calcule médias)
+- Use apenas dados que REALMENTE aparecem nas anotações
+- Se alguma informação não existe, não invente
+- Mantenha o formato WhatsApp com * para negrito`;
+      } else {
+        prompt = `Você é um analista de marketing digital especialista em produção de conteúdo e redes sociais.
+
+Analise as seguintes anotações de conteúdo/redes sociais do período (${periodoTexto}) e gere um RESUMO CONSOLIDADO formatado para WhatsApp.
+
+ANOTAÇÕES:
+${notasTexto}
+
+Gere um resumo no seguinte formato (use *texto* para negrito e _texto_ para itálico):
+
+*${emoji} RESUMO DE ${titulo}*
+_${periodoTexto}_
+
+*📊 ALCANCE E MÉTRICAS*
+• Alcance total mencionado: X
+• Engajamento (DMs, comentários): X
+• Melhor conteúdo: descrever
+
+*🎬 PRODUÇÃO*
+• Posts/Reels/Stories produzidos
+• Status dos materiais
+
+*💡 INSIGHTS*
+• Liste os principais aprendizados
+
+*✅ AÇÕES DEFINIDAS*
+• Próximos passos mencionados
+
+_Resumo gerado com base em ${notes.length} anotações_
+
+IMPORTANTE:
+- Seja objetivo e direto
+- Consolide números quando possível
+- Use apenas dados que REALMENTE aparecem nas anotações
+- Se alguma informação não existe, não invente
+- Mantenha o formato WhatsApp com * para negrito`;
+      }
+      
+      console.log('🤖 [IA SUMMARY] Prompt gerado:', prompt.length, 'caracteres');
+      console.log('🤖 [IA SUMMARY] Prompt preview:', prompt.substring(0, 300) + '...');
+      
+      try {
+        const response = await callGeminiAPI(prompt);
+        if(response) {
+          console.log('🤖 [IA SUMMARY] Resposta recebida:', response.length, 'caracteres');
+          return response;
+        }
+        // Se a resposta for null, não usar fallback - retornar null para o caller tratar
+        console.warn('⚠️ Resposta da IA foi vazia');
+        return null;
+      } catch(err) {
+        console.error('Erro ao gerar resumo com IA:', err);
+        return null; // Retornar null em vez de fallback
+      }
+    }
+    
+    // Cache dos resumos gerados pela IA - separado por período
+    let cachedSummaries = {
+      trafego: {
+        semana: { text: null, savedAt: null },
+        mes: { text: null, savedAt: null }
+      },
+      conteudo: {
+        semana: { text: null, savedAt: null },
+        mes: { text: null, savedAt: null }
+      },
+      _loaded: false
+    };
+    
+    // Carregar resumos salvos do Firebase
+    async function loadSavedSummaries() {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) return;
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const summariesDoc = await getDoc(summariesDocRef);
+        
+        if(summariesDoc.exists()) {
+          const data = summariesDoc.data();
+          // Carregar trafego (semana e mês)
+          if(data.trafego_semana) {
+            cachedSummaries.trafego.semana = data.trafego_semana;
+          }
+          if(data.trafego_mes) {
+            cachedSummaries.trafego.mes = data.trafego_mes;
+          }
+          // Carregar conteudo (semana e mês)
+          if(data.conteudo_semana) {
+            cachedSummaries.conteudo.semana = data.conteudo_semana;
+          }
+          if(data.conteudo_mes) {
+            cachedSummaries.conteudo.mes = data.conteudo_mes;
+          }
+          console.log('📥 Resumos carregados do Firebase:', data);
+        }
+      } catch(err) {
+        console.warn('⚠️ Erro ao carregar resumos salvos:', err);
+      }
+    }
+    
+    // Salvar resumo no Firebase (por tipo E período)
+    async function saveSummaryToFirebase(type, filter, text) {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) {
+          console.warn('⚠️ Nenhum UID para salvar resumo');
+          return;
+        }
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const savedAt = new Date().toISOString();
+        
+        // Chave composta: tipo_periodo (ex: trafego_semana, conteudo_mes)
+        const key = `${type}_${filter}`;
+        const updateData = {};
+        updateData[key] = { text, savedAt };
+        
+        await setDoc(summariesDocRef, updateData, { merge: true });
+        
+        console.log('✅ Resumo salvo no Firebase:', key);
+        
+        // Atualizar cache local
+        cachedSummaries[type][filter] = { text, savedAt };
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar resumo:', err);
+      }
+    }
+
+    // Helper para converter WPP para HTML
+    function wppToHtml(wpp) {
+      return wpp
+        .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+        .replace(/_([^_]+)_/g, '<em style="color:#94a3b8">$1</em>')
+        .replace(/\n/g, '<br>')
+        .replace(/• /g, '&nbsp;&nbsp;• ');
+    }
+
+    // Função para mostrar botão de gerar resumo
+    function showGenerateButton(el, type, notesCount, periodo) {
+      const periodoLabel = periodo === 'semana' ? 'da semana' : 'do mês';
+      el.innerHTML = `
+        <div style="text-align: center; padding: 20px 0;">
+          <p style="color: #94a3b8; margin-bottom: 15px;">
+            <strong>${notesCount}</strong> anotações encontradas ${periodoLabel}
+          </p>
+          <button onclick="generateSummaryIA('${type}')" 
+                  style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); 
+                         color: white; 
+                         border: none; 
+                         padding: 12px 24px; 
+                         border-radius: 8px; 
+                         cursor: pointer; 
+                         font-weight: 600;
+                         display: inline-flex;
+                         align-items: center;
+                         gap: 8px;
+                         transition: transform 0.2s, box-shadow 0.2s;"
+                  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)';"
+                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+            <i class="fas fa-magic"></i> Gerar Resumo com IA
+          </button>
+        </div>
+      `;
+    }
+    
+    // Função para mostrar resumo com botão "Gerar Novamente"
+    function showSummaryWithRegenerateButton(el, type, wpp, savedAt) {
+      const savedDate = savedAt ? new Date(savedAt) : new Date();
+      const formattedDate = savedDate.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      el.innerHTML = `
+        <div>
+          <div style="margin-bottom: 12px;">
+            ${wppToHtml(wpp)}
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 12px;">
+            <span style="color: #64748b; font-size: 0.75rem;">
+              <i class="fas fa-clock"></i> Gerado em ${formattedDate}
+            </span>
+            <button onclick="generateSummaryIA('${type}')" 
+                    style="background: rgba(99,102,241,0.2); 
+                           color: #a5b4fc; 
+                           border: 1px solid rgba(99,102,241,0.4); 
+                           padding: 6px 12px; 
+                           border-radius: 6px; 
+                           cursor: pointer; 
+                           font-size: 0.8rem;
+                           display: inline-flex;
+                           align-items: center;
+                           gap: 6px;
+                           transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(99,102,241,0.3)'"
+                    onmouseout="this.style.background='rgba(99,102,241,0.2)'">
+              <i class="fas fa-sync-alt"></i> Gerar Novamente
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Função para gerar resumo com IA (chamada pelo botão)
+    async function generateSummaryIA(type) {
+      console.log('🤖 [IA] Iniciando geração de resumo para:', type);
+      
+      const column = type === 'trafego' ? 'trafego' : 'canais';
+      const notes = getNotesInPeriod(column, currentSummaryFilter);
+      const el = document.getElementById(type === 'trafego' ? 'summaryTrafegoContent' : 'summaryConteudoContent');
+      
+      if(!el || notes.length === 0) {
+        console.warn('🤖 [IA] Sem notas ou elemento não encontrado');
+        return;
+      }
+      
+      // Mostrar loading
+      el.innerHTML = '<p style="color: #60a5fa; margin: 0; text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Gerando resumo com IA...</p>';
+      
+      try {
+        const wpp = await generateAISummary(notes, type, currentSummaryFilter);
+        
+        // Se a IA falhou, mostrar erro e opção de tentar novamente
+        if(!wpp) {
+          console.error('🤖 [IA] Resumo retornou vazio');
+          el.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao conectar com a IA</p>
+              <button onclick="generateSummaryIA('${type}')" 
+                      style="background: rgba(239,68,68,0.2); 
+                             color: #ef4444; 
+                             border: 1px solid rgba(239,68,68,0.5); 
+                             padding: 10px 20px; 
+                             border-radius: 8px; 
+                             cursor: pointer; 
+                             font-weight: 600;">
+                🔄 Tentar Novamente
+              </button>
+            </div>
+          `;
+          mgToast('⚠️ Erro ao gerar resumo. Tente novamente.');
+          return;
+        }
+        
+        console.log('🤖 [IA] Resumo gerado com sucesso!');
+        
+        // Salvar no Firebase
+        await saveSummaryToFirebase(type, currentSummaryFilter, wpp);
+        
+        // Mostrar resumo com botão "Gerar Novamente"
+        showSummaryWithRegenerateButton(el, type, wpp);
+        
+        mgToast('✨ Resumo gerado e salvo!');
+      } catch(err) {
+        console.error('Erro ao gerar resumo:', err);
+        el.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao gerar resumo</p>
+            <button onclick="generateSummaryIA('${type}')" 
+                    style="background: rgba(239,68,68,0.2); 
+                           color: #ef4444; 
+                           border: 1px solid rgba(239,68,68,0.5); 
+                           padding: 10px 20px; 
+                           border-radius: 8px; 
+                           cursor: pointer; 
+                           font-weight: 600;">
+              🔄 Tentar Novamente
+            </button>
+          </div>
+        `;
+        mgToast('Erro ao gerar resumo');
+      }
+    }
+    window.generateSummaryIA = generateSummaryIA;
+
+    async function updateSummaries() {
+      console.log('🔄 [SUMMARY] updateSummaries chamado, filtro atual:', currentSummaryFilter);
+      
+      // Carregar resumos salvos do Firebase na primeira vez
+      if(!cachedSummaries._loaded) {
+        await loadSavedSummaries();
+        cachedSummaries._loaded = true;
+      }
+      
+      const trafegoNotes = getNotesInPeriod('trafego', currentSummaryFilter);
+      const conteudoNotes = getNotesInPeriod('canais', currentSummaryFilter);
+      
+      console.log('🔄 [SUMMARY] Notas encontradas - Tráfego:', trafegoNotes.length, 'Conteúdo:', conteudoNotes.length);
+      
+      const trafegoEl = document.getElementById('summaryTrafegoContent');
+      const conteudoEl = document.getElementById('summaryConteudoContent');
+      
+      // ========== TRÁFEGO ==========
+      if(trafegoEl) {
+        if(trafegoNotes.length === 0) {
+          console.log('🔄 [SUMMARY] TRÁFEGO: Nenhuma nota');
+          trafegoEl.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de tráfego no período.</p>';
+        } else if(currentSummaryFilter === 'dia') {
+          console.log('🔄 [SUMMARY] TRÁFEGO: Modo DIA - mostrando notas formatadas');
+          // DIÁRIO: Mostra as notas formatadas
+          const wpp = formatNotesForWpp(trafegoNotes, 'trafego');
+          trafegoEl.innerHTML = wppToHtml(wpp);
+        } else {
+          // SEMANAL/MENSAL: Verifica se tem cache do Firebase para ESTE período
+          const cached = cachedSummaries.trafego[currentSummaryFilter];
+          if(cached && cached.text) {
+            console.log('🔄 [SUMMARY] TRÁFEGO: Mostrando resumo SALVO do filtro', currentSummaryFilter);
+            showSummaryWithRegenerateButton(trafegoEl, 'trafego', cached.text, cached.savedAt);
+          } else {
+            console.log('🔄 [SUMMARY] TRÁFEGO: Mostrando BOTÃO para gerar IA, filtro:', currentSummaryFilter);
+            showGenerateButton(trafegoEl, 'trafego', trafegoNotes.length, currentSummaryFilter);
+          }
+        }
+      }
+      
+      // ========== CONTEÚDO ==========
+      if(conteudoEl) {
+        if(conteudoNotes.length === 0) {
+          console.log('🔄 [SUMMARY] CONTEÚDO: Nenhuma nota');
+          conteudoEl.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de conteúdo no período.</p>';
+        } else if(currentSummaryFilter === 'dia') {
+          console.log('🔄 [SUMMARY] CONTEÚDO: Modo DIA - mostrando notas formatadas');
+          // DIÁRIO: Mostra as notas formatadas
+          const wpp = formatNotesForWpp(conteudoNotes, 'conteudo');
+          conteudoEl.innerHTML = wppToHtml(wpp);
+        } else {
+          // SEMANAL/MENSAL: Verifica se tem cache do Firebase para ESTE período
+          const cached = cachedSummaries.conteudo[currentSummaryFilter];
+          if(cached && cached.text) {
+            console.log('🔄 [SUMMARY] CONTEÚDO: Mostrando resumo SALVO do filtro', currentSummaryFilter);
+            showSummaryWithRegenerateButton(conteudoEl, 'conteudo', cached.text, cached.savedAt);
+          } else {
+            console.log('🔄 [SUMMARY] CONTEÚDO: Mostrando BOTÃO para gerar IA, filtro:', currentSummaryFilter);
+            showGenerateButton(conteudoEl, 'conteudo', conteudoNotes.length, currentSummaryFilter);
+          }
+        }
+      }
+    }
+    window.updateSummaries = updateSummaries;
+    
+    async function copySummary(type) {
+      let wppText = '';
+      
+      if(type === 'trafego') {
+        const notes = getNotesInPeriod('trafego', currentSummaryFilter);
+        if(notes.length === 0) {
+          mgToast('Nenhuma nota de tráfego no período');
+          return;
+        }
+        // Usar cache se disponível (nova estrutura por período)
+        const cached = cachedSummaries.trafego[currentSummaryFilter];
+        if(cached && cached.text) {
+          wppText = cached.text;
+        } else if(currentSummaryFilter === 'dia') {
+          wppText = formatNotesForWpp(notes, 'trafego');
+        } else {
+          mgToast('⚠️ Clique em "Gerar Resumo com IA" primeiro');
+          return;
+        }
+      } else {
+        const notes = getNotesInPeriod('canais', currentSummaryFilter);
+        if(notes.length === 0) {
+          mgToast('Nenhuma nota de conteúdo no período');
+          return;
+        }
+        // Usar cache se disponível (nova estrutura por período)
+        const cached = cachedSummaries.conteudo[currentSummaryFilter];
+        if(cached && cached.text) {
+          wppText = cached.text;
+        } else if(currentSummaryFilter === 'dia') {
+          wppText = formatNotesForWpp(notes, 'conteudo');
+        } else {
+          mgToast('⚠️ Clique em "Gerar Resumo com IA" primeiro');
+          return;
+        }
+      }
+      
+      if(!wppText) {
+        mgToast('Nenhum dado para copiar');
+        return;
+      }
+      
+      try {
+        await mgCopyToClipboard(wppText);
+        mgToast('📋 Resumo copiado para WhatsApp!');
+      } catch(err) {
+        console.error('Erro ao copiar:', err);
+        mgToast('Erro ao copiar');
+      }
+    }
+    window.copySummary = copySummary;
+    
+    // ========== RESUMO CONSOLIDADO DO MÊS ==========
+    
+    // Gerar resumo consolidado do mês (todas as colunas)
+    async function generateMonthlyResume() {
+      console.log('🗓️ [MÊS] Iniciando geração de resumo consolidado do mês');
+      
+      const el = document.getElementById('monthlyResumeContent');
+      if(!el) {
+        console.error('🗓️ [MÊS] Elemento monthlyResumeContent não encontrado');
+        return;
+      }
+      
+      // Pegar todas as notas do mês de TODAS as colunas
+      const trafegoNotes = getNotesInPeriod('trafego', 'mes');
+      const canaisNotes = getNotesInPeriod('canais', 'mes');
+      const liderancaNotes = getNotesInPeriod('lideranca', 'mes');
+      const outrosNotes = getNotesInPeriod('outros', 'mes');
+      
+      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + outrosNotes.length;
+      
+      console.log('🗓️ [MÊS] Notas encontradas - Tráfego:', trafegoNotes.length, 
+                  'Canais:', canaisNotes.length, 
+                  'Liderança:', liderancaNotes.length, 
+                  'Outros:', outrosNotes.length);
+      
+      if(totalNotas === 0) {
+        el.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota registrada no mês.</p>';
+        mgToast('⚠️ Nenhuma nota no mês para consolidar');
+        return;
+      }
+      
+      // Mostrar loading
+      el.innerHTML = '<p style="color: #60a5fa; margin: 0; text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Gerando resumo consolidado do mês com IA...</p>';
+      
+      try {
+        const now = new Date();
+        const mesAtual = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        
+        // Preparar notas de cada coluna
+        function formatarNotas(notes, nomeColuna) {
+          if(!notes.length) return `${nomeColuna}: Sem anotações no período.\n`;
+          
+          return `${nomeColuna}:\n` + notes.map(note => {
+            const dateVal = note.createdAt || note.timestamp;
+            let noteDate = new Date();
+            if(dateVal) {
+              if(dateVal.seconds) noteDate = new Date(dateVal.seconds * 1000);
+              else if(dateVal.toDate) noteDate = dateVal.toDate();
+              else noteDate = new Date(dateVal);
+            }
+            const dataStr = noteDate.toLocaleDateString('pt-BR');
+            return `[${dataStr}] ${note.content || '(sem conteúdo)'}`;
+          }).join('\n') + '\n\n';
+        }
+        
+        let notasConsolidadas = '';
+        notasConsolidadas += formatarNotas(trafegoNotes, '📊 TRÁFEGO PAGO');
+        notasConsolidadas += formatarNotas(canaisNotes, '📱 CANAIS DE TRAÇÃO');
+        notasConsolidadas += formatarNotas(liderancaNotes, '👥 LIDERANÇA');
+        notasConsolidadas += formatarNotas(outrosNotes, '📝 OUTROS');
+        
+        console.log('🗓️ [MÊS] Texto consolidado preparado:', notasConsolidadas.length, 'caracteres');
+        
+        // Prompt para resumo consolidado
+        const prompt = `Você é um analista de marketing digital experiente.
+
+Analise as seguintes anotações CONSOLIDADAS de todas as áreas do mês de ${mesAtual} e gere um RESUMO EXECUTIVO formatado para WhatsApp.
+
+ANOTAÇÕES POR ÁREA:
+${notasConsolidadas}
+
+Gere um resumo no seguinte formato (use *texto* para negrito e _texto_ para itálico):
+
+*📅 RESUMO CONSOLIDADO DO MÊS*
+_${mesAtual}_
+
+*📊 Tráfego Pago:*
+• [Resuma os principais pontos de tráfego: investimentos, CPL, resultados]
+
+*📱 Canais de Tração:*
+• [Resuma engajamento, alcance, conteúdos que se destacaram]
+
+*👥 Liderança/Equipe:*
+• [Resuma pontos relevantes sobre equipe, processos, check-ins]
+
+*📝 Observações Gerais:*
+• [Outros pontos relevantes que não se encaixam acima]
+
+*🎯 Insights do Mês:*
+• [Liste 2-3 insights principais baseados nos dados]
+
+*📈 Próximos Passos Sugeridos:*
+• [Liste 2-3 ações recomendadas para o próximo período]
+
+---
+_Resumo gerado por IA em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}_
+_${totalNotas} anotação(ões) analisada(s)_
+
+IMPORTANTE:
+- Seja CONCISO e objetivo
+- Foque nos RESULTADOS e INSIGHTS, não em listar cada nota
+- Se uma área não tiver dados relevantes, mencione brevemente
+- Use linguagem profissional mas acessível
+- O resumo deve ter no máximo 25-30 linhas`;
+
+        console.log('🗓️ [MÊS] Chamando IA para gerar resumo consolidado...');
+        
+        const resumo = await callGeminiAPI(prompt, 2000);
+        
+        if(!resumo) {
+          console.error('🗓️ [MÊS] Resumo retornou vazio');
+          el.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao conectar com a IA</p>
+              <button onclick="generateMonthlyResume()" 
+                      style="background: rgba(239,68,68,0.2); 
+                             color: #ef4444; 
+                             border: 1px solid rgba(239,68,68,0.5); 
+                             padding: 10px 20px; 
+                             border-radius: 8px; 
+                             cursor: pointer; 
+                             font-weight: 600;">
+                🔄 Tentar Novamente
+              </button>
+            </div>
+          `;
+          mgToast('⚠️ Erro ao gerar resumo. Tente novamente.');
+          return;
+        }
+        
+        console.log('🗓️ [MÊS] Resumo consolidado gerado com sucesso!');
+        
+        // Salvar no Firebase
+        await saveMonthlySummaryToFirebase(resumo);
+        
+        // Mostrar resumo com botão "Gerar Novamente"
+        showMonthlySummaryWithButton(el, resumo);
+        
+        // Mostrar botão de copiar
+        const copyBtn = document.getElementById('copyMonthlyResumeBtn');
+        if(copyBtn) copyBtn.style.display = 'inline-flex';
+        
+        mgToast('✨ Resumo consolidado do mês gerado e salvo!');
+      } catch(err) {
+        console.error('🗓️ [MÊS] Erro ao gerar resumo:', err);
+        el.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao gerar resumo</p>
+            <button onclick="generateMonthlyResume()" 
+                    style="background: rgba(239,68,68,0.2); 
+                           color: #ef4444; 
+                           border: 1px solid rgba(239,68,68,0.5); 
+                           padding: 10px 20px; 
+                           border-radius: 8px; 
+                           cursor: pointer; 
+                           font-weight: 600;">
+              🔄 Tentar Novamente
+            </button>
+          </div>
+        `;
+        mgToast('Erro ao gerar resumo consolidado');
+      }
+    }
+    window.generateMonthlyResume = generateMonthlyResume;
+    
+    // Salvar resumo mensal no Firebase
+    async function saveMonthlySummaryToFirebase(text) {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) {
+          console.warn('⚠️ Nenhum UID para salvar resumo mensal');
+          return;
+        }
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const savedAt = new Date().toISOString();
+        const mesKey = new Date().toISOString().slice(0, 7); // ex: "2025-01"
+        
+        await setDoc(summariesDocRef, {
+          [`consolidado_${mesKey}`]: { text, savedAt }
+        }, { merge: true });
+        
+        console.log('✅ Resumo mensal consolidado salvo:', `consolidado_${mesKey}`);
+        
+        // Atualizar cache local
+        if(!cachedSummaries.consolidado) cachedSummaries.consolidado = {};
+        cachedSummaries.consolidado[mesKey] = { text, savedAt };
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar resumo mensal:', err);
+      }
+    }
+    
+    // Carregar resumo mensal salvo
+    async function loadMonthlySummary() {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) return null;
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const summariesDoc = await getDoc(summariesDocRef);
+        
+        if(summariesDoc.exists()) {
+          const data = summariesDoc.data();
+          const mesKey = new Date().toISOString().slice(0, 7);
+          
+          if(data[`consolidado_${mesKey}`]) {
+            console.log('📥 Resumo mensal carregado:', `consolidado_${mesKey}`);
+            return data[`consolidado_${mesKey}`];
+          }
+        }
+      } catch(err) {
+        console.warn('⚠️ Erro ao carregar resumo mensal:', err);
+      }
+      return null;
+    }
+    
+    // Mostrar resumo mensal com botão regenerar
+    function showMonthlySummaryWithButton(el, text, savedAt) {
+      const dataInfo = savedAt ? `<small style="color: #64748b; font-size: 11px; display: block; margin-top: 8px;">Salvo em: ${new Date(savedAt).toLocaleString('pt-BR')}</small>` : '';
+      
+      el.innerHTML = `
+        <div style="margin-bottom: 10px;">
+          ${wppToHtml(text)}
+          ${dataInfo}
+        </div>
+        <button onclick="generateMonthlyResume()" 
+                style="background: rgba(245,158,11,0.2); 
+                       color: #f59e0b; 
+                       border: 1px solid rgba(245,158,11,0.5); 
+                       padding: 8px 16px; 
+                       border-radius: 8px; 
+                       cursor: pointer; 
+                       font-weight: 600;
+                       font-size: 13px;">
+          🔄 Gerar Novamente
+        </button>
+      `;
+    }
+    
+    // Copiar resumo mensal
+    async function copyMonthlyResume() {
+      // Verificar se tem resumo salvo no cache
+      const mesKey = new Date().toISOString().slice(0, 7);
+      const cached = cachedSummaries.consolidado?.[mesKey];
+      
+      if(cached && cached.text) {
+        try {
+          await mgCopyToClipboard(cached.text);
+          mgToast('📋 Resumo do mês copiado para WhatsApp!');
+        } catch(err) {
+          console.error('Erro ao copiar:', err);
+          mgToast('Erro ao copiar');
+        }
+      } else {
+        mgToast('⚠️ Gere o resumo do mês primeiro');
+      }
+    }
+    window.copyMonthlyResume = copyMonthlyResume;
+    
+    // Inicializar bloco de resumo mensal
+    async function initMonthlySummaryBlock() {
+      const el = document.getElementById('monthlyResumeContent');
+      if(!el) return;
+      
+      // Atualizar label do mês
+      const labelEl = document.getElementById('monthlyResumeMonthLabel');
+      if(labelEl) {
+        const mesAtual = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        labelEl.textContent = `(${mesAtual})`;
+      }
+      
+      // Carregar resumo salvo do mês atual
+      const saved = await loadMonthlySummary();
+      
+      if(saved && saved.text) {
+        showMonthlySummaryWithButton(el, saved.text, saved.savedAt);
+        // Mostrar botão de copiar
+        const copyBtn = document.getElementById('copyMonthlyResumeBtn');
+        if(copyBtn) copyBtn.style.display = 'inline-flex';
+      } else {
+        el.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0; text-align: center;">Clique em "Gerar Resumo do Mês" para consolidar todas as anotações de Tráfego, Conteúdo, Liderança e Outros em um único resumo.</p>';
+      }
+    }
+    
+    // ========== RESUMO CONSOLIDADO DA SEMANA ==========
+    
+    // Gerar resumo consolidado da semana (todas as colunas)
+    async function generateWeeklyResume() {
+      console.log('📆 [SEMANA] Iniciando geração de resumo consolidado da semana');
+      
+      const el = document.getElementById('weeklyResumeContent');
+      if(!el) {
+        console.error('📆 [SEMANA] Elemento weeklyResumeContent não encontrado');
+        return;
+      }
+      
+      // Pegar todas as notas da semana de TODAS as colunas
+      const trafegoNotes = getNotesInPeriod('trafego', 'semana');
+      const canaisNotes = getNotesInPeriod('canais', 'semana');
+      const liderancaNotes = getNotesInPeriod('lideranca', 'semana');
+      const outrosNotes = getNotesInPeriod('outros', 'semana');
+      
+      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + outrosNotes.length;
+      
+      console.log('📆 [SEMANA] Notas encontradas - Tráfego:', trafegoNotes.length, 
+                  'Canais:', canaisNotes.length, 
+                  'Liderança:', liderancaNotes.length, 
+                  'Outros:', outrosNotes.length);
+      
+      if(totalNotas === 0) {
+        el.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota registrada na semana.</p>';
+        mgToast('⚠️ Nenhuma nota na semana para consolidar');
+        return;
+      }
+      
+      // Mostrar loading
+      el.innerHTML = '<p style="color: #60a5fa; margin: 0; text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Gerando resumo consolidado da semana com IA...</p>';
+      
+      try {
+        const now = new Date();
+        const inicioSemana = new Date(now);
+        inicioSemana.setDate(now.getDate() - 7);
+        const periodoSemana = `${inicioSemana.toLocaleDateString('pt-BR')} a ${now.toLocaleDateString('pt-BR')}`;
+        
+        // Preparar notas de cada coluna
+        function formatarNotas(notes, nomeColuna) {
+          if(!notes.length) return `${nomeColuna}: Sem anotações no período.\n`;
+          
+          return `${nomeColuna}:\n` + notes.map(note => {
+            const dateVal = note.createdAt || note.timestamp;
+            let noteDate = new Date();
+            if(dateVal) {
+              if(dateVal.seconds) noteDate = new Date(dateVal.seconds * 1000);
+              else if(dateVal.toDate) noteDate = dateVal.toDate();
+              else noteDate = new Date(dateVal);
+            }
+            const dataStr = noteDate.toLocaleDateString('pt-BR');
+            return `[${dataStr}] ${note.content || '(sem conteúdo)'}`;
+          }).join('\n') + '\n\n';
+        }
+        
+        let notasConsolidadas = '';
+        notasConsolidadas += formatarNotas(trafegoNotes, '📊 TRÁFEGO PAGO');
+        notasConsolidadas += formatarNotas(canaisNotes, '📱 CANAIS DE TRAÇÃO');
+        notasConsolidadas += formatarNotas(liderancaNotes, '👥 LIDERANÇA');
+        notasConsolidadas += formatarNotas(outrosNotes, '📝 OUTROS');
+        
+        console.log('📆 [SEMANA] Texto consolidado preparado:', notasConsolidadas.length, 'caracteres');
+        
+        // Prompt para resumo consolidado da semana
+        const prompt = `Você é um analista de marketing digital experiente.
+
+Analise as seguintes anotações CONSOLIDADAS de todas as áreas da semana (${periodoSemana}) e gere um RESUMO EXECUTIVO formatado para WhatsApp.
+
+ANOTAÇÕES POR ÁREA:
+${notasConsolidadas}
+
+Gere um resumo no seguinte formato (use *texto* para negrito e _texto_ para itálico):
+
+*📆 RESUMO CONSOLIDADO DA SEMANA*
+_${periodoSemana}_
+
+*📊 Tráfego Pago:*
+• [Resuma os principais pontos de tráfego: investimentos, CPL, resultados]
+
+*📱 Canais de Tração:*
+• [Resuma engajamento, alcance, conteúdos que se destacaram]
+
+*👥 Liderança/Equipe:*
+• [Resuma pontos relevantes sobre equipe, processos, check-ins]
+
+*📝 Observações Gerais:*
+• [Outros pontos relevantes que não se encaixam acima]
+
+*🎯 Destaques da Semana:*
+• [Liste 2-3 destaques principais baseados nos dados]
+
+*📈 Foco para Próxima Semana:*
+• [Liste 2-3 prioridades recomendadas]
+
+---
+_Resumo gerado por IA em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}_
+_${totalNotas} anotação(ões) analisada(s)_
+
+IMPORTANTE:
+- Seja CONCISO e objetivo
+- Foque nos RESULTADOS e INSIGHTS, não em listar cada nota
+- Se uma área não tiver dados relevantes, mencione brevemente
+- Use linguagem profissional mas acessível
+- O resumo deve ter no máximo 20-25 linhas`;
+
+        console.log('📆 [SEMANA] Chamando IA para gerar resumo consolidado...');
+        
+        const resumo = await callGeminiAPI(prompt, 2000);
+        
+        if(!resumo) {
+          console.error('📆 [SEMANA] Resumo retornou vazio');
+          el.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao conectar com a IA</p>
+              <button onclick="generateWeeklyResume()" 
+                      style="background: rgba(239,68,68,0.2); 
+                             color: #ef4444; 
+                             border: 1px solid rgba(239,68,68,0.5); 
+                             padding: 10px 20px; 
+                             border-radius: 8px; 
+                             cursor: pointer; 
+                             font-weight: 600;">
+                🔄 Tentar Novamente
+              </button>
+            </div>
+          `;
+          mgToast('⚠️ Erro ao gerar resumo. Tente novamente.');
+          return;
+        }
+        
+        console.log('📆 [SEMANA] Resumo consolidado gerado com sucesso!');
+        
+        // Salvar no Firebase
+        await saveWeeklySummaryToFirebase(resumo);
+        
+        // Mostrar resumo com botão "Gerar Novamente"
+        showWeeklySummaryWithButton(el, resumo);
+        
+        // Mostrar botão de copiar
+        const copyBtn = document.getElementById('copyWeeklyResumeBtn');
+        if(copyBtn) copyBtn.style.display = 'inline-flex';
+        
+        mgToast('✨ Resumo consolidado da semana gerado e salvo!');
+      } catch(err) {
+        console.error('📆 [SEMANA] Erro ao gerar resumo:', err);
+        el.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #ef4444; margin-bottom: 15px;">⚠️ Erro ao gerar resumo</p>
+            <button onclick="generateWeeklyResume()" 
+                    style="background: rgba(239,68,68,0.2); 
+                           color: #ef4444; 
+                           border: 1px solid rgba(239,68,68,0.5); 
+                           padding: 10px 20px; 
+                           border-radius: 8px; 
+                           cursor: pointer; 
+                           font-weight: 600;">
+              🔄 Tentar Novamente
+            </button>
+          </div>
+        `;
+        mgToast('Erro ao gerar resumo consolidado da semana');
+      }
+    }
+    window.generateWeeklyResume = generateWeeklyResume;
+    
+    // Salvar resumo semanal no Firebase
+    async function saveWeeklySummaryToFirebase(text) {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) {
+          console.warn('⚠️ Nenhum UID para salvar resumo semanal');
+          return;
+        }
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const savedAt = new Date().toISOString();
+        // Chave: semana do ano (ex: "2026-W04")
+        const now = new Date();
+        const oneJan = new Date(now.getFullYear(), 0, 1);
+        const weekNum = Math.ceil((((now - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+        const semanaKey = `${now.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+        
+        await setDoc(summariesDocRef, {
+          [`consolidado_semana_${semanaKey}`]: { text, savedAt }
+        }, { merge: true });
+        
+        console.log('✅ Resumo semanal consolidado salvo:', `consolidado_semana_${semanaKey}`);
+        
+        // Atualizar cache local
+        if(!cachedSummaries.consolidadoSemana) cachedSummaries.consolidadoSemana = {};
+        cachedSummaries.consolidadoSemana[semanaKey] = { text, savedAt };
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar resumo semanal:', err);
+      }
+    }
+    
+    // Carregar resumo semanal salvo
+    async function loadWeeklySummary() {
+      try {
+        const uid = getTeamNotesTargetUid();
+        if(!uid) return null;
+        
+        const summariesDocRef = doc(db, "usuarios", uid, "teamNotes", "summaries");
+        const summariesDoc = await getDoc(summariesDocRef);
+        
+        if(summariesDoc.exists()) {
+          const data = summariesDoc.data();
+          const now = new Date();
+          const oneJan = new Date(now.getFullYear(), 0, 1);
+          const weekNum = Math.ceil((((now - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+          const semanaKey = `${now.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+          
+          if(data[`consolidado_semana_${semanaKey}`]) {
+            console.log('📥 Resumo semanal carregado:', `consolidado_semana_${semanaKey}`);
+            return data[`consolidado_semana_${semanaKey}`];
+          }
+        }
+      } catch(err) {
+        console.warn('⚠️ Erro ao carregar resumo semanal:', err);
+      }
+      return null;
+    }
+    
+    // Mostrar resumo semanal com botão regenerar
+    function showWeeklySummaryWithButton(el, text, savedAt) {
+      const dataInfo = savedAt ? `<small style="color: #64748b; font-size: 11px; display: block; margin-top: 8px;">Salvo em: ${new Date(savedAt).toLocaleString('pt-BR')}</small>` : '';
+      
+      el.innerHTML = `
+        <div style="margin-bottom: 10px;">
+          ${wppToHtml(text)}
+          ${dataInfo}
+        </div>
+        <button onclick="generateWeeklyResume()" 
+                style="background: rgba(59,130,246,0.2); 
+                       color: #3b82f6; 
+                       border: 1px solid rgba(59,130,246,0.5); 
+                       padding: 8px 16px; 
+                       border-radius: 8px; 
+                       cursor: pointer; 
+                       font-weight: 600;
+                       font-size: 13px;">
+          🔄 Gerar Novamente
+        </button>
+      `;
+    }
+    
+    // Copiar resumo semanal
+    async function copyWeeklyResume() {
+      // Verificar se tem resumo salvo no cache
+      const now = new Date();
+      const oneJan = new Date(now.getFullYear(), 0, 1);
+      const weekNum = Math.ceil((((now - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+      const semanaKey = `${now.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+      const cached = cachedSummaries.consolidadoSemana?.[semanaKey];
+      
+      if(cached && cached.text) {
+        try {
+          await mgCopyToClipboard(cached.text);
+          mgToast('📋 Resumo da semana copiado para WhatsApp!');
+        } catch(err) {
+          console.error('Erro ao copiar:', err);
+          mgToast('Erro ao copiar');
+        }
+      } else {
+        mgToast('⚠️ Gere o resumo da semana primeiro');
+      }
+    }
+    window.copyWeeklyResume = copyWeeklyResume;
+    
+    // Inicializar bloco de resumo semanal
+    async function initWeeklySummaryBlock() {
+      const el = document.getElementById('weeklyResumeContent');
+      if(!el) return;
+      
+      // Atualizar label da semana
+      const labelEl = document.getElementById('weeklyResumeWeekLabel');
+      if(labelEl) {
+        const now = new Date();
+        const inicioSemana = new Date(now);
+        inicioSemana.setDate(now.getDate() - 7);
+        const periodoSemana = `${inicioSemana.toLocaleDateString('pt-BR')} a ${now.toLocaleDateString('pt-BR')}`;
+        labelEl.textContent = `(${periodoSemana})`;
+      }
+      
+      // Carregar resumo salvo da semana atual
+      const saved = await loadWeeklySummary();
+      
+      if(saved && saved.text) {
+        showWeeklySummaryWithButton(el, saved.text, saved.savedAt);
+        // Mostrar botão de copiar
+        const copyBtn = document.getElementById('copyWeeklyResumeBtn');
+        if(copyBtn) copyBtn.style.display = 'inline-flex';
+      } else {
+        el.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0; text-align: center;">Clique em "Gerar Resumo da Semana" para consolidar todas as anotações de Tráfego, Conteúdo, Liderança e Outros dos últimos 7 dias.</p>';
+      }
+    }
+    
+    // ========== FIM RESUMO CONSOLIDADO DA SEMANA ==========
+    
+    // ========== FIM RESUMO CONSOLIDADO DO MÊS ==========
+    
+    /* ========== FIM RESUMO AUTOMÁTICO DAS NOTAS ========== */
 
     /* ========= Relatório ========= */
   let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
@@ -26720,7 +28410,6 @@ async function sendIAQuestion(){
   let relatorioAnaliseIASection, relatorioAnaliseIASubtitle, relatorioIAContexto, relatorioIADiagnostico;
   let relatorioIAPontosFortes, relatorioIAOportunidades, relatorioIARecomendacoes, relatorioIAPrompt;
   let btnCopiarPromptIA, relatorioAnaliseIADesc;
-  
     
     function initRelatorio(){
       if(!relatorioMesInput){
@@ -46861,43 +48550,57 @@ ${escapeHtml(prompt)}
 
     // ===== NOVOS GRÁFICOS: DIAGNÓSTICO ESTRATÉGICO COMPLETO =====
     
-    // Função para chamar a API do Gemini via proxy backend (protege a API key)
+    // Função para chamar a IA via OpenRouter (aiProxy) - protege a API key no backend
     async function callGeminiAPI(prompt) {
-      const GEMINI_PROXY_URL = 'https://us-central1-mediagrowth-a5349.cloudfunctions.net/geminiProxy';
+      const AI_PROXY_URL = 'https://us-central1-mediagrowth-a5349.cloudfunctions.net/aiProxy';
       
       try {
-        // Obter userId para rate limiting
-        const user = firebase.auth().currentUser;
-        const userId = user ? user.uid : 'anonymous-' + Date.now();
+        // Obter userId para rate limiting (usa auth modular do Firebase)
+        const userId = (auth && auth.currentUser) ? auth.currentUser.uid : 'anonymous-' + Date.now();
         
-        const response = await fetch(GEMINI_PROXY_URL, {
+        console.log('🤖 [IA/OpenRouter] Enviando requisição para proxy...');
+        console.log('🤖 [IA/OpenRouter] userId:', userId);
+        console.log('🤖 [IA/OpenRouter] Tamanho do prompt:', prompt?.length || 0, 'caracteres');
+        
+        // OpenRouter usa formato de mensagens (compatível com OpenAI)
+        const response = await fetch(AI_PROXY_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            prompt: prompt,
+            model: 'google/gemini-2.5-flash', // Gemini via OpenRouter
+            messages: [
+              { role: 'user', content: prompt }
+            ],
             userId: userId,
             temperature: 0.3,
-            maxTokens: 8192
+            max_tokens: 8192
           })
         });
         
+        console.log('🤖 [IA/OpenRouter] Status da resposta:', response.status, response.statusText);
+        
         if (!response.ok) {
-          console.error('Gemini Proxy error:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('🤖 [IA/OpenRouter] Erro do proxy:', response.status, errorText);
           return null;
         }
         
         const data = await response.json();
         
-        if (data.text) {
-          return data.text;
+        // OpenRouter retorna no formato OpenAI: choices[0].message.content
+        const text = data?.choices?.[0]?.message?.content;
+        console.log('🤖 [IA/OpenRouter] Resposta recebida:', text ? 'Texto OK (' + text.length + ' chars)' : 'Sem texto');
+        
+        if (text) {
+          return text;
         }
         
-        console.warn('Resposta inesperada do Gemini Proxy:', data);
+        console.warn('🤖 [IA/OpenRouter] Resposta inesperada:', data);
         return null;
       } catch (error) {
-        console.error('Erro ao chamar Gemini Proxy:', error);
+        console.error('🤖 [IA/OpenRouter] Erro na requisição:', error);
         return null;
       }
     }
