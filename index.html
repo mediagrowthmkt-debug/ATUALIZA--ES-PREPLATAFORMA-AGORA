@@ -12813,6 +12813,13 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
         <input type="text" id="leadershipDecisaoObs" class="template-input" placeholder="O que vai manter/ajustar/escalar/corrigir? (opcional)" style="width: 100%; margin-top: 8px; display: none; font-size: 0.85rem;">
       </div>
 
+      <!-- Seção Ação Rápida (permite salvar apenas com esta ação) -->
+      <div class="template-section" style="background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1)); border: 2px solid rgba(34,197,94,0.4); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #22c55e; margin: 0 0 8px 0; font-size: 0.95rem;">⚡ Adicionar uma Ação</h4>
+        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 12px 0;">Preencha apenas esta ação para salvar rapidamente (não precisa preencher o resto do template)</p>
+        <textarea id="leadershipAcaoRapida" class="template-input" placeholder="Ex: Ligar para cliente X, Revisar campanha Y, Cobrar equipe sobre Z..." style="width: 100%; min-height: 80px; resize: vertical; font-size: 0.95rem;"></textarea>
+      </div>
+
     </div>
     <div class="team-notes-modal-footer">
       <button type="button" class="btn secondary" onclick="closeLeadershipTemplateModal()">Cancelar</button>
@@ -26982,6 +26989,9 @@ async function sendIAQuestion(){
         document.getElementById('leadershipStatusGeral').value = '';
         document.getElementById('leadershipInsight').value = '';
         document.getElementById('leadershipDecisao').value = '';
+        // Limpar campo de ação rápida
+        const acaoRapidaEl = document.getElementById('leadershipAcaoRapida');
+        if(acaoRapidaEl) acaoRapidaEl.value = '';
         // Limpar e ocultar campos de observação
         const obsFields = ['leadershipLeadsEntraramObs', 'leadershipLeadsAtendidosObs', 'leadershipCustoOkObs', 
                           'leadershipConteudoAtivoObs', 'leadershipMarcaVisivelObs', 'leadershipStatusGeralObs', 'leadershipDecisaoObs'];
@@ -27017,34 +27027,56 @@ async function sendIAQuestion(){
         const decisao = document.getElementById('leadershipDecisao').value;
         const decisaoObs = document.getElementById('leadershipDecisaoObs').value.trim();
         
-        // Validar campos obrigatórios
-        if(!leadsEntraram || !leadsAtendidos || !custoOk || !conteudoAtivo || !marcaVisivel || !statusGeral || !decisao) {
-          mgToast('⚠️ Preencha todos os campos obrigatórios');
+        // Pegar ação rápida
+        const acaoRapida = document.getElementById('leadershipAcaoRapida')?.value?.trim() || '';
+        
+        // Verificar se tem ação rápida OU campos completos
+        const temAcaoRapida = acaoRapida.length > 0;
+        const temCamposCompletos = leadsEntraram && leadsAtendidos && custoOk && conteudoAtivo && marcaVisivel && statusGeral && decisao;
+        
+        // Validar: precisa ter ação rápida OU todos os campos obrigatórios
+        if(!temAcaoRapida && !temCamposCompletos) {
+          mgToast('⚠️ Preencha todos os campos obrigatórios OU adicione uma ação rápida');
           return;
         }
         
         // Montar conteúdo formatado para WhatsApp
         const dataHoje = new Date().toLocaleDateString('pt-BR');
-        let conteudo = `🧭 *CHECK-IN DIÁRIO — VISÃO MACRO*\n`;
-        conteudo += `_${dataHoje}_\n\n`;
+        let conteudo = '';
         
-        conteudo += `*📋 STATUS DO DIA*\n`;
-        conteudo += `• Leads entraram? *${leadsEntraram}*${leadsEntraramObs ? ` — ${leadsEntraramObs}` : ''}\n`;
-        conteudo += `• Leads foram atendidos? *${leadsAtendidos}*${leadsAtendidosObs ? ` — ${leadsAtendidosObs}` : ''}\n`;
-        conteudo += `• Custo está ok? *${custoOk}*${custoOkObs ? ` — ${custoOkObs}` : ''}\n`;
-        conteudo += `• Conteúdo ativo? *${conteudoAtivo}*${conteudoAtivoObs ? ` — ${conteudoAtivoObs}` : ''}\n`;
-        conteudo += `• Marca visível hoje? *${marcaVisivel}*${marcaVisivelObs ? ` — ${marcaVisivelObs}` : ''}\n\n`;
-        
-        conteudo += `*🚦 STATUS GERAL*\n`;
-        conteudo += `${statusGeral}${statusGeralObs ? `\n_${statusGeralObs}_` : ''}\n\n`;
-        
-        if(insight) {
-          conteudo += `*💡 INSIGHT DO DIA*\n`;
-          conteudo += `${insight}\n\n`;
+        // Se apenas ação rápida foi preenchida
+        if(temAcaoRapida && !temCamposCompletos) {
+          conteudo = `⚡ *AÇÃO DE LIDERANÇA*\n`;
+          conteudo += `_${dataHoje}_\n\n`;
+          conteudo += `*📌 AÇÃO:*\n${acaoRapida}`;
+        } else {
+          // Check-in completo
+          conteudo = `🧭 *CHECK-IN DIÁRIO — VISÃO MACRO*\n`;
+          conteudo += `_${dataHoje}_\n\n`;
+          
+          conteudo += `*📋 STATUS DO DIA*\n`;
+          conteudo += `• Leads entraram? *${leadsEntraram}*${leadsEntraramObs ? ` — ${leadsEntraramObs}` : ''}\n`;
+          conteudo += `• Leads foram atendidos? *${leadsAtendidos}*${leadsAtendidosObs ? ` — ${leadsAtendidosObs}` : ''}\n`;
+          conteudo += `• Custo está ok? *${custoOk}*${custoOkObs ? ` — ${custoOkObs}` : ''}\n`;
+          conteudo += `• Conteúdo ativo? *${conteudoAtivo}*${conteudoAtivoObs ? ` — ${conteudoAtivoObs}` : ''}\n`;
+          conteudo += `• Marca visível hoje? *${marcaVisivel}*${marcaVisivelObs ? ` — ${marcaVisivelObs}` : ''}\n\n`;
+          
+          conteudo += `*🚦 STATUS GERAL*\n`;
+          conteudo += `${statusGeral}${statusGeralObs ? `\n_${statusGeralObs}_` : ''}\n\n`;
+          
+          if(insight) {
+            conteudo += `*💡 INSIGHT DO DIA*\n`;
+            conteudo += `${insight}\n\n`;
+          }
+          
+          conteudo += `*🎯 DECISÃO DE HOJE*\n`;
+          conteudo += `${decisao}${decisaoObs ? ` — ${decisaoObs}` : ''}`;
+          
+          // Se também tem ação rápida no check-in completo, adicionar
+          if(temAcaoRapida) {
+            conteudo += `\n\n*⚡ AÇÃO ADICIONAL:*\n${acaoRapida}`;
+          }
         }
-        
-        conteudo += `*🎯 DECISÃO DE HOJE*\n`;
-        conteudo += `${decisao}${decisaoObs ? ` — ${decisaoObs}` : ''}`;
         
         // Usar getCurrentUser para suportar sessão admin
         const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
@@ -27067,7 +27099,13 @@ async function sendIAQuestion(){
         await persistTeamNotes();
         closeLeadershipTemplateModal();
         renderTeamNotes();
-        mgToast('✅ Check-in diário salvo!');
+        
+        // Mensagem diferenciada dependendo do que foi salvo
+        if(temAcaoRapida && !temCamposCompletos) {
+          mgToast('✅ Ação de liderança salva!');
+        } else {
+          mgToast('✅ Check-in diário salvo!');
+        }
         
       } catch(err) {
         console.error('❌ Erro ao salvar check-in de liderança:', err);
