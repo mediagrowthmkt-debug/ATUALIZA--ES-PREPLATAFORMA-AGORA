@@ -156,6 +156,38 @@ service cloud.firestore {
         );
       }
 
+      /* ✅ ACESSOS CHUNKS: Subcoleção para salvar acessos em chunks (evita limite de 1MB) */
+      /* Cada chunk é salvo como documento separado: /usuarios/{userId}/accesses_chunks/{chunkId} */
+      match /accesses_chunks/{chunkId} {
+        // O dono pode ler e escrever seus próprios chunks de acessos
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
+      /* ✅ BACKUPS: Subcoleção para salvar backups de dados */
+      /* Cada backup é salvo como documento separado: /usuarios/{userId}/backups/{backupId} */
+      match /backups/{backupId} {
+        // O dono pode ler e escrever seus próprios backups
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ ANÁLISES: Subcoleção para salvar análises dos entregáveis (evita limite de 1MB) */
       /* Cada análise é salva como documento separado: /usuarios/{userId}/analises/{entregavelId} */
       match /analises/{entregavelId} {

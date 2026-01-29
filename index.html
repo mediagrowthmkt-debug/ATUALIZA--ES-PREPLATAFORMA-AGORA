@@ -9296,10 +9296,6 @@ function renderReviewNotes(post){
                   <label for="source-metas">🎯 Metas</label>
                 </div>
                 <div class="ia-source-option">
-                  <input type="checkbox" id="source-cac" data-source="cac" checked>
-                  <label for="source-cac">💰 CAC</label>
-                </div>
-                <div class="ia-source-option">
                   <input type="checkbox" id="source-leads" data-source="leads" checked>
                   <label for="source-leads">👥 Leads</label>
                 </div>
@@ -9353,15 +9349,6 @@ function renderReviewNotes(post){
     </section>
   </div>
 </div>
-<!-- CAC -->
-<style>
-  .cac-wrap .cac-tables{display:flex;flex-wrap:wrap;gap:20px;margin-top:10px}
-  .cac-wrap .cac-tables>div{flex:1}
-  .cac-table{width:100%;border-collapse:collapse}
-  .cac-table th,.cac-table td{border:1px solid var(--shell-border);padding:4px;font-size:.85rem}
-  .cac-table th{background:var(--title-bg)}
-  .cac-table input{width:100%;background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:4px;padding:4px}
-</style>
 <style>
   /* LEADS */
   .leads-wrap{
@@ -9899,77 +9886,6 @@ function renderReviewNotes(post){
     }
   }
 </style>
-<div aria-hidden="true" class="cac-wrap" id="cacWrap" style="display:none">
-  <div class="field">
-    <label for="cacMonth">Mês:</label>
-    <select id="cacMonth" class="input">
-      <option value="jan">Jan</option>
-      <option value="fev">Fev</option>
-      <option value="mar">Mar</option>
-      <option value="abr">Abr</option>
-      <option value="mai">Mai</option>
-      <option value="jun">Jun</option>
-      <option value="jul">Jul</option>
-      <option value="ago">Ago</option>
-      <option value="set">Set</option>
-      <option value="out">Out</option>
-      <option value="nov">Nov</option>
-      <option value="dez">Dez</option>
-    </select>
-  </div>
-  <div class="field">
-    <label for="cacCurrency">Moeda:</label>
-    <select id="cacCurrency" class="input">
-      <option value="BRL">Real</option>
-      <option value="USD">Dólar</option>
-    </select>
-  </div>
-    <div class="cac-tables">
-      <div>
-        <table class="cac-table">
-        <thead>
-          <tr><th>Descrição</th><th>Valor</th></tr>
-        </thead>
-        <tbody id="cacExpensesBody">
-          <tr><td>Equipe Marketing</td><td><input type="number" step="0.01" class="expense"></td></tr>
-          <tr><td>Equipe Vendas</td><td><input type="number" step="0.01" class="expense"></td></tr>
-          <tr><td>Softwares</td><td><input type="number" step="0.01" class="expense"></td></tr>
-          <tr><td>Verba de Tráfego</td><td><input type="number" step="0.01" class="expense" id="cacTraffic"></td></tr>
-          <tr><td>Outros</td><td><input type="number" step="0.01" class="expense"></td></tr>
-        </tbody>
-      </table>
-      <button class="btn small" id="addExpenseRow">Adicionar linha</button>
-    </div>
-    <div>
-      <table class="cac-table">
-        <thead>
-          <tr><th>Descrição</th><th>Valor</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Qtde de Vendas</td><td><input type="number" step="1" id="cacSales"></td></tr>
-          <tr><td>Total Receita</td><td><input type="number" step="0.01" id="cacRevenue"></td></tr>
-          <tr><td>Ticket Médio</td><td><span id="cacTicket">R$ 0,00</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <table class="cac-table">
-        <thead>
-          <tr><th>Descrição</th><th>Valor</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Qtde de Vendas (Tráfego)</td><td><input type="number" step="1" id="cacSalesAds"></td></tr>
-          <tr><td>Total Receita (Tráfego)</td><td><input type="number" step="0.01" id="cacRevenueAds"></td></tr>
-          <tr><td>Ticket Médio (Tráfego)</td><td><span id="cacTicketAds">R$ 0,00</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-    <div class="cac-results">
-      <p>CAC REAL: <span id="cacReal">R$ 0,00</span></p>
-      <p>CAC publicitários: <span id="cacAds">R$ 0,00</span></p>
-    </div>
-</div>
 <!-- LEADS -->
 <div aria-hidden="true" class="leads-wrap" id="leadsWrap" style="display:none">
   <div class="leads-toolbar">
@@ -10334,336 +10250,6 @@ function renderReviewNotes(post){
   </div>
 </div>
 
-<!-- TRÁFEGO -->
-<style id="trafego-css">
-  .trafego-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:16px}
-  .trafego-header{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .trafego-card{background:var(--panel);border:1px solid var(--shell-border);border-radius:16px;padding:16px;box-shadow:0 12px 28px rgba(0,0,0,.34);display:flex;flex-direction:column;gap:12px}
-  .trafego-card h3{margin:0;font-size:1rem;font-weight:800;color:#fff}
-  .trafego-card p{margin:0;font-size:.85rem;color:#94a3b8;line-height:1.4}
-  .trafego-card textarea,.trafego-card input[type="text"],.trafego-card input[type="number"],.trafego-card input[type="search"],.trafego-card select{background:#111827;border:1px solid #334155;border-radius:10px;color:#f8fafc;padding:10px;font-size:.9rem;font-weight:600}
-  .trafego-card textarea{resize:vertical;min-height:120px}
-  .trafego-columns{display:grid;grid-template-columns:1fr;gap:16px}
-  .trafego-columns .trafego-card{height:100%}
-  .trafego-table-wrap{overflow:auto;border-radius:12px;border:1px solid rgba(148,163,184,.25)}
-  .trafego-table{width:100%;border-collapse:collapse;min-width:720px;background:rgba(15,23,42,.55)}
-  .trafego-table th,.trafego-table td{border:1px solid rgba(148,163,184,.22);padding:8px;font-size:.85rem;color:#e2e8f0;text-align:left}
-  .trafego-table th{background:rgba(15,23,42,.75);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#cbd5f5}
-  .trafego-table input[type="date"],.trafego-table input[type="number"],.trafego-table input[type="text"]{width:100%;background:#0f172a;border:1px solid #1f2937;border-radius:8px;color:#f8fafc;padding:6px 8px;font-size:.85rem}
-  .trafego-table .trafego-roas,.trafego-table .trafego-cpl{font-weight:700;color:#38bdf8}
-  .trafego-table .trafego-roas.negative{color:#f87171}
-  .trafego-table .trafego-cpl{display:inline-flex;align-items:center;gap:6px}
-  .trafego-add-row{align-self:flex-start}
-  .trafego-add-row .btn{display:inline-flex;align-items:center;gap:6px}
-  .trafego-demandas-actions{display:flex;justify-content:flex-end}
-  .trafego-demandas-actions .btn{display:inline-flex;align-items:center;gap:6px}
-  .trafego-demandas-table{width:100%;border-collapse:collapse;background:rgba(15,23,42,.55);min-width:640px}
-  .trafego-demandas-table th,.trafego-demandas-table td{border:1px solid rgba(148,163,184,.22);padding:8px;font-size:.85rem;color:#e2e8f0}
-  .trafego-demandas-table th{background:rgba(15,23,42,.75);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#cbd5f5}
-  .trafego-demandas-table input,.trafego-demandas-table select{width:100%;background:#0f172a;border:1px solid #1f2937;border-radius:8px;color:#f8fafc;padding:6px 8px;font-size:.85rem}
-  .trafego-demandas-table .trafego-remove-demand{background:#431407;border:1px solid rgba(248,113,113,.45);color:#fecaca;border-radius:8px;padding:4px 8px;font-size:.78rem;font-weight:700;cursor:pointer}
-  .trafego-demandas-table .trafego-remove-demand:hover{background:#7f1d1d;color:#fff}
-  .trafego-routine{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-  .trafego-routine label{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;color:#e2e8f0}
-  .trafego-routine input{margin-top:2px}
-  .trafego-empty{font-size:.85rem;color:#94a3b8;background:rgba(148,163,184,.16);border:1px dashed rgba(148,163,184,.35);border-radius:12px;padding:12px;text-align:center}
-  .trafego-campaigns-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
-  .trafego-campaigns-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-  .trafego-control-group{display:flex;flex-direction:column;gap:6px}
-  .trafego-control-group label{font-size:.78rem;font-weight:700;color:#cbd5f5;text-transform:uppercase;letter-spacing:.06em}
-  .trafego-campaigns-table{width:100%;border-collapse:collapse;background:rgba(15,23,42,.55);min-width:820px}
-  .trafego-campaigns-table th,.trafego-campaigns-table td{border:1px solid rgba(148,163,184,.22);padding:8px;font-size:.85rem;color:#e2e8f0;text-align:left;vertical-align:top}
-  .trafego-campaigns-table th{background:rgba(15,23,42,.75);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#cbd5f5}
-  .trafego-campaigns-table textarea{width:100%;background:#0f172a;border:1px solid #1f2937;border-radius:8px;color:#f8fafc;padding:6px 8px;font-size:.85rem;resize:vertical;min-height:60px}
-  .trafego-campaigns-table input[type="text"],.trafego-campaigns-table input[type="search"],.trafego-campaigns-table input[type="number"],.trafego-campaigns-table select{width:100%;background:#0f172a;border:1px solid #1f2937;border-radius:8px;color:#f8fafc;padding:6px 8px;font-size:.85rem}
-  .trafego-campaigns-table select{min-width:150px}
-  .trafego-campaigns-empty{margin-top:10px}
-  .trafego-optimizations-card .trafego-table-wrap{margin-top:12px}
-  .trafego-optimizations-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
-  .trafego-optimizations-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-  .trafego-optimizations-table{width:100%;border-collapse:collapse;background:rgba(15,23,42,.55);min-width:880px}
-  .trafego-optimizations-table th,.trafego-optimizations-table td{border:1px solid rgba(148,163,184,.22);padding:8px;font-size:.85rem;color:#e2e8f0;text-align:left;vertical-align:top}
-  .trafego-optimizations-table th{background:rgba(15,23,42,.75);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#cbd5f5}
-  .trafego-optimizations-table input[type="text"],.trafego-optimizations-table input[type="search"],.trafego-optimizations-table input[type="number"],.trafego-optimizations-table input[type="date"],.trafego-optimizations-table select,.trafego-optimizations-table textarea{width:100%;background:#0f172a;border:1px solid #1f2937;border-radius:8px;color:#f8fafc;padding:6px 8px;font-size:.85rem}
-  .trafego-optimizations-table textarea{min-height:54px;resize:vertical}
-  .trafego-optimizations-table select[multiple]{min-height:54px;resize:vertical}
-  .trafego-history-card{gap:14px}
-  .trafego-history-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-  .trafego-history-table-wrap{max-height:260px;overflow:auto;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(15,23,42,.55)}
-  .trafego-history-table{width:100%;border-collapse:collapse;min-width:720px}
-  .trafego-history-table th,.trafego-history-table td{padding:8px 10px;font-size:.85rem;color:#e2e8f0;text-align:left;border-bottom:1px solid rgba(148,163,184,.18);vertical-align:top}
-  .trafego-history-table th{position:sticky;top:0;background:rgba(15,23,42,.92);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#cbd5f5;z-index:1}
-  .trafego-history-table tr:last-child td{border-bottom:none}
-  .trafego-history-table .trafego-history-meta{font-size:.75rem;color:#94a3b8;margin-top:4px}
-  .trafego-history-empty{margin-top:6px}
-  .trafego-progress{position:relative;height:28px;border-radius:10px;background:rgba(15,23,42,.65);overflow:hidden;border:1px solid rgba(148,163,184,.28);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#e2e8f0}
-  .trafego-progress-fill{position:absolute;inset:0;background:linear-gradient(120deg,rgba(59,130,246,.8),rgba(99,102,241,.85));background-size:200% 100%;animation:trafego-progress-stripes 1.2s linear infinite;transform-origin:left center;width:0%;transition:width .35s ease}
-  .trafego-progress-label{position:relative;z-index:1;text-shadow:0 1px 2px rgba(15,23,42,.8)}
-  .trafego-progress.is-due{border-color:rgba(248,113,113,.6);color:#fecaca}
-  .trafego-progress.is-due .trafego-progress-fill{background:linear-gradient(120deg,rgba(248,113,113,.85),rgba(239,68,68,.9))}
-  .trafego-progress.is-empty .trafego-progress-fill{animation:none}
-  .trafego-optimizations-table .trafego-actions-cell{text-align:center}
-  .trafego-optimizations-table tr.is-paused td{background:#3a3a3a}
-  .trafego-optimizations-table tr.is-paused input,
-  .trafego-optimizations-table tr.is-paused select,
-  .trafego-optimizations-table tr.is-paused textarea{
-    opacity:.6;
-    pointer-events:none;
-    background-color:#3a3a3a;
-    color:#bbb;
-    border-color:#555;
-    cursor:not-allowed;
-  }
-  .trafego-optimizations-table tr.is-paused button{
-    opacity:.5;
-    pointer-events:none;
-    cursor:not-allowed;
-    filter: grayscale(0.3);
-  }
-  /* Cores por plataforma - apenas nos selects da coluna Plataforma */
-  .trafego-optimizations-table select[data-field="platform"]{transition:background-color .2s ease, border-color .2s ease, color .2s ease}
-  .trafego-optimizations-table select[data-field="platform"].platform-meta{background:#1877f2;border-color:#1877f2;color:#fff}
-  .trafego-optimizations-table select[data-field="platform"].platform-google{
-    background:#FBBC05; /* amarelo Google */
-    border-color:#d4a106; /* amarelo um pouco mais escuro na borda */
-    color:#111; /* texto preto */
-    font-weight:700;
-  }
-  .trafego-optimizations-table select[data-field="platform"].platform-tiktok{background:linear-gradient(90deg,#25F4EE 0%, #000 50%, #FE2C55 100%);border-color:#6b7280;color:#fff}
-  .trafego-optimizations-table select[data-field="platform"].platform-linkedin{background:#0a66c2;border-color:#0a66c2;color:#fff}
-  .trafego-optimizations-table select[data-field="platform"].platform-pinterest{background:#e60023;border-color:#e60023;color:#fff}
-  .trafego-save-optimization{min-width:92px}
-  .trafego-save-optimization[disabled]{opacity:.7;cursor:wait}
-  .trafego-history-table .trafego-history-actions{text-align:center}
-  .trafego-history-remove{background:transparent;border:0;color:#fca5a5;cursor:pointer;font-size:1.05rem;line-height:1}
-  .trafego-history-remove:focus{outline:2px solid rgba(248,113,113,.6);outline-offset:2px}
-  .trafego-history-remove:hover{color:#f87171}
-  @keyframes trafego-progress-stripes{0%{background-position:0 0}100%{background-position:-200% 0}}
-  .trafego-optimizations-empty{margin-top:10px}
-  /* Tooltip simples para leitura do nome completo ao passar o mouse na célula */
-  .trafego-optimizations-table td[data-tooltip]{position:relative}
-  .trafego-optimizations-table td[data-tooltip]:hover::after{
-    content: attr(data-tooltip);
-    position:absolute;left:100%;top:50%;
-    transform: translateY(-50%);
-    margin-left:8px;max-width:480px;min-width:120px;
-    background:rgba(15,23,42,.95);color:#e2e8f0;
-    border:1px solid rgba(148,163,184,.28);
-    border-radius:8px;padding:8px 10px;font-size:.8rem;line-height:1.25;
-    box-shadow:0 8px 24px rgba(0,0,0,.35);
-    white-space:normal;z-index:30;pointer-events:none;
-  }
-  @media(max-width:1024px){
-    .trafego-columns{grid-template-columns:1fr;gap:14px}
-  }
-  @media(max-width:720px){
-    .trafego-table{min-width:620px}
-    .trafego-demandas-table{min-width:560px}
-    .trafego-campaigns-table{min-width:620px}
-  }
-</style>
-<div aria-hidden="true" class="trafego-wrap" id="trafegoWrap" style="display:none">
-  <div class="trafego-columns">
-    <div class="trafego-card trafego-optimizations-card">
-      <h3>Otimização</h3>
-      <p>Monitore quando cada campanha precisa ser otimizada novamente e acompanhe o avanço em relação ao intervalo definido.</p>
-      <div class="trafego-optimizations-controls">
-        <div class="trafego-optimizations-filters">
-          <div class="trafego-control-group">
-            <label for="trafegoOptimizationPlatformFilter">Plataforma</label>
-            <select id="trafegoOptimizationPlatformFilter">
-              <option value="all">Todas</option>
-              <option value="meta">Meta</option>
-              <option value="google">Google</option>
-              <option value="tiktok">TikTok</option>
-              <option value="linkedin">LinkedIn</option>
-              <option value="pinterest">Pinterest</option>
-            </select>
-          </div>
-          <div class="trafego-control-group">
-            <label for="trafegoOptimizationRecurrenceFilter">Recorrência</label>
-            <select id="trafegoOptimizationRecurrenceFilter">
-              <option value="all">Todas</option>
-              <option value="1-dia">1 dia</option>
-              <option value="2-dias">2 dias</option>
-              <option value="3-dias">3 dias</option>
-              <option value="4-dias">4 dias</option>
-              <option value="5-dias">5 dias</option>
-              <option value="7-dias">7 dias</option>
-              <option value="2-semanas">2 semanas</option>
-              <option value="3-semanas">3 semanas</option>
-              <option value="1-mes">1 mês</option>
-              <option value="2-meses">2 meses</option>
-            </select>
-          </div>
-          <div class="trafego-control-group">
-            <label for="trafegoOptimizationStatusFilter">Status</label>
-            <select id="trafegoOptimizationStatusFilter">
-              <option value="all">Todas</option>
-              <option value="active">Ativas</option>
-              <option value="paused">Pausadas</option>
-            </select>
-          </div>
-          <div class="trafego-control-group">
-            <label for="trafegoOptimizationSearch">Buscar campanha</label>
-            <input id="trafegoOptimizationSearch" placeholder="Buscar por nome" type="search">
-          </div>
-        </div>
-        <button class="btn small" id="trafegoAddOptimization" type="button">+ Nova linha</button>
-      </div>
-      <div class="trafego-table-wrap">
-        <table class="trafego-optimizations-table">
-          <thead>
-            <tr>
-              <th>Plataforma</th>
-              <th>Nome da campanha</th>
-              <th>Dias para próxima otimização</th>
-              <th>Observação</th>
-              <th>Última otimização</th>
-              <th>Data da última otimização</th>
-              <th>Recorrência</th>
-              <th>Próxima otimização</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="trafegoOptimizationsBody"></tbody>
-        </table>
-      </div>
-      <div class="trafego-empty trafego-optimizations-empty" id="trafegoOptimizationsEmpty" style="display:none">Cadastre otimizações para acompanhar os prazos de revisão.</div>
-    </div>
-  </div>
-  <div class="trafego-header">
-    <div class="trafego-card trafego-history-card">
-      <h3>Histórico de Otimizações</h3>
-      <p>Visualize automaticamente os ajustes realizados nas campanhas e mantenha um histórico centralizado.</p>
-      <div class="trafego-history-controls">
-        <div class="trafego-control-group">
-          <label for="trafegoHistoryPlatformFilter">Plataforma</label>
-          <select id="trafegoHistoryPlatformFilter">
-            <option value="all">Todas</option>
-            <option value="meta">Meta</option>
-            <option value="google">Google</option>
-            <option value="tiktok">TikTok</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="pinterest">Pinterest</option>
-          </select>
-        </div>
-        <div class="trafego-control-group">
-          <label for="trafegoHistorySearch">Buscar campanha</label>
-          <input id="trafegoHistorySearch" placeholder="Buscar por nome" type="search">
-        </div>
-      </div>
-      <div class="trafego-history-table-wrap">
-        <table class="trafego-history-table">
-          <thead>
-            <tr>
-              <th>Plataforma</th>
-              <th>Nome da campanha</th>
-              <th>Observação</th>
-              <th>Última otimização</th>
-              <th>Data da última atualização</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="trafegoHistoryBody"></tbody>
-        </table>
-      </div>
-      <div class="trafego-empty trafego-history-empty" id="trafegoHistoryEmpty" style="display:none">Nenhum registro no histórico ainda.</div>
-    </div>
-  </div>
-  <div class="trafego-columns">
-    <div class="trafego-card">
-      <h3>Demandas do time de tráfego</h3>
-      <p>Organize ajustes, lançamentos e itens críticos para manter a performance crescendo.</p>
-      <div class="trafego-table-wrap">
-        <table class="trafego-demandas-table">
-          <thead>
-            <tr>
-              <th>Campanha</th>
-              <th>Objetivo</th>
-              <th>Orçamento diário</th>
-              <th>Status</th>
-              <th>Observações</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="trafegoDemandasBody"></tbody>
-        </table>
-      </div>
-      <div class="trafego-demandas-actions">
-        <button class="btn small" id="trafegoAddDemanda" type="button">Adicionar demanda</button>
-      </div>
-    </div>
-  </div>
-  <div class="trafego-columns">
-    <div class="trafego-card">
-      <h3>Métricas diárias</h3>
-      <p>Controle o investimento, receita e ROAS para reagir rapidamente a oscilações.</p>
-      <div class="trafego-table-wrap">
-        <table class="trafego-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Investimento</th>
-              <th>Receita</th>
-              <th>ROAS</th>
-              <th>Leads/Vendas</th>
-              <th>CPL</th>
-              <th>Observações</th>
-            </tr>
-          </thead>
-          <tbody id="trafegoMetricsBody"></tbody>
-        </table>
-      </div>
-      <div class="trafego-add-row">
-        <button class="btn small" id="trafegoAddMetricRow" type="button">Adicionar linha</button>
-      </div>
-    </div>
-    <div class="trafego-card">
-      <h3>Ideias de Campanhas</h3>
-      <p>Mapeie propostas de campanhas com objetivos, públicos e status de validação.</p>
-      <div class="trafego-campaigns-controls">
-        <div class="trafego-campaigns-filters">
-          <div class="trafego-control-group">
-            <label for="trafegoCampaignStatusFilter">Status</label>
-            <select id="trafegoCampaignStatusFilter">
-              <option value="all">Todos</option>
-              <option value="nao-testada">Ainda não testada</option>
-              <option value="ja-testada">Já testada</option>
-              <option value="pausada">Pausada</option>
-              <option value="aprovado">Aprovado pelo cliente</option>
-              <option value="nao-aprovado">Não aprovado</option>
-            </select>
-          </div>
-          <div class="trafego-control-group">
-            <label for="trafegoCampaignSearch">Filtro rápido</label>
-            <input id="trafegoCampaignSearch" placeholder="Buscar por nome, público, copy..." type="search">
-          </div>
-        </div>
-        <button class="btn small" id="trafegoAddCampaign" type="button">Adicionar campanha</button>
-      </div>
-      <div class="trafego-table-wrap">
-        <table class="trafego-campaigns-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Orçamento</th>
-              <th>Formato</th>
-              <th>Observação</th>
-              <th>Público</th>
-              <th>Copy</th>
-              <th>Objetivo</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="trafegoCampaignsBody"></tbody>
-        </table>
-      </div>
-      <div class="trafego-empty trafego-campaigns-empty" id="trafegoCampaignsEmpty" style="display:none">Cadastre ideias de campanhas para organizar testes e alinhamentos com o cliente.</div>
-    </div>
-  </div>
-</div>
 <!-- ARQUIVOS -->
 <div aria-hidden="true" class="files-wrap" id="filesWrap" style="display:none">
   <div class="files-layout">
@@ -14490,15 +14076,17 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       statusBox.textContent = 'Faça login para continuar.';
     }
   const dashboard = $("dashboard"), totalScore = $("totalScore"), totalCard = $("totalCard"), macroActions = $("macroActions"), macroBadges = $("macroBadges");
-  const sectionTabs = $("sectionTabs"), widgetsGrid = $("widgetsGrid"), demandasWrap = $("demandasWrap"), notesWrap = $("notesWrap"), metasWrap = $("metasWrap"), iframeDica = $("iframedica"), filesWrap = $("filesWrap"), foldersList = $("foldersList"), filesPane = $("filesPane"), filesList = $("filesList"), fileInput = $("fileInput"), uploadFilesBtn = $("uploadFilesBtn"), newFolderBtn = $("newFolder"), filesBreadcrumb = $("filesBreadcrumb"), subfoldersGrid = $("subfoldersGrid"), filesEmpty = $("filesEmpty"), filesViewToggle = $("filesViewToggle"), viewAllFilesBtn = $("viewAllFilesBtn"), filePreviewModal = $("filePreviewModal"), filePreviewTitle = $("filePreviewTitle"), filePreviewContent = $("filePreviewContent"), filePreviewInfo = $("filePreviewInfo"), filePreviewClose = $("filePreviewClose"), uploadProgress = $("uploadProgress"), uploadProgressText = $("uploadProgressText"), uploadProgressBar = $("uploadProgressBar"), uploadProgressPercent = $("uploadProgressPercent"), storageUsage = $("storageUsage"), storageUsagePercent = $("storageUsagePercent"), storageUsageFill = $("storageUsageFill"), storageUsageSummary = $("storageUsageSummary"), storageUsageHint = $("storageUsageHint"), filesBulkBar = $("filesBulkBar"), filesBulkCount = $("filesBulkCount"), filesBulkStatus = $("filesBulkStatus"), filesBulkUndo = $("filesBulkUndo"), filesSelectAll = $("filesSelectAll"), trafegoWrap = $("trafegoWrap"), trafegoDemandasBody = $("trafegoDemandasBody"), trafegoAddDemanda = $("trafegoAddDemanda"), trafegoMetricsBody = $("trafegoMetricsBody"), trafegoAddMetricRow = $("trafegoAddMetricRow"), trafegoCampaignsBody = $("trafegoCampaignsBody"), trafegoAddCampaign = $("trafegoAddCampaign"), trafegoCampaignStatusFilter = $("trafegoCampaignStatusFilter"), trafegoCampaignSearch = $("trafegoCampaignSearch"), trafegoCampaignsEmpty = $("trafegoCampaignsEmpty"), trafegoOptimizationsBody = $("trafegoOptimizationsBody"), trafegoAddOptimization = $("trafegoAddOptimization"), trafegoOptimizationPlatformFilter = $("trafegoOptimizationPlatformFilter"), trafegoOptimizationRecurrenceFilter = $("trafegoOptimizationRecurrenceFilter"), trafegoOptimizationStatusFilter = $("trafegoOptimizationStatusFilter"), trafegoOptimizationSearch = $("trafegoOptimizationSearch"), trafegoOptimizationsEmpty = $("trafegoOptimizationsEmpty"), trafegoHistoryBody = $("trafegoHistoryBody"), trafegoHistoryPlatformFilter = $("trafegoHistoryPlatformFilter"), trafegoHistorySearch = $("trafegoHistorySearch"), trafegoHistoryEmpty = $("trafegoHistoryEmpty");
-    const trafegoCampaignsEmptyDefault = trafegoCampaignsEmpty ? trafegoCampaignsEmpty.textContent : '';
-    const trafegoOptimizationsEmptyDefault = trafegoOptimizationsEmpty ? trafegoOptimizationsEmpty.textContent : '';
+  const sectionTabs = $("sectionTabs"), widgetsGrid = $("widgetsGrid"), demandasWrap = $("demandasWrap"), notesWrap = $("notesWrap"), metasWrap = $("metasWrap"), iframeDica = $("iframedica"), filesWrap = $("filesWrap"), foldersList = $("foldersList"), filesPane = $("filesPane"), filesList = $("filesList"), fileInput = $("fileInput"), uploadFilesBtn = $("uploadFilesBtn"), newFolderBtn = $("newFolder"), filesBreadcrumb = $("filesBreadcrumb"), subfoldersGrid = $("subfoldersGrid"), filesEmpty = $("filesEmpty"), filesViewToggle = $("filesViewToggle"), viewAllFilesBtn = $("viewAllFilesBtn"), filePreviewModal = $("filePreviewModal"), filePreviewTitle = $("filePreviewTitle"), filePreviewContent = $("filePreviewContent"), filePreviewInfo = $("filePreviewInfo"), filePreviewClose = $("filePreviewClose"), uploadProgress = $("uploadProgress"), uploadProgressText = $("uploadProgressText"), uploadProgressBar = $("uploadProgressBar"), uploadProgressPercent = $("uploadProgressPercent"), storageUsage = $("storageUsage"), storageUsagePercent = $("storageUsagePercent"), storageUsageFill = $("storageUsageFill"), storageUsageSummary = $("storageUsageSummary"), storageUsageHint = $("storageUsageHint"), filesBulkBar = $("filesBulkBar"), filesBulkCount = $("filesBulkCount"), filesBulkStatus = $("filesBulkStatus"), filesBulkUndo = $("filesBulkUndo"), filesSelectAll = $("filesSelectAll");
+    // Variáveis de tráfego mantidas para compatibilidade (funcionalidade removida)
+    const trafegoWrap = null, trafegoDemandasBody = null, trafegoAddDemanda = null, trafegoMetricsBody = null, trafegoAddMetricRow = null, trafegoCampaignsBody = null, trafegoAddCampaign = null, trafegoCampaignStatusFilter = null, trafegoCampaignSearch = null, trafegoCampaignsEmpty = null, trafegoOptimizationsBody = null, trafegoAddOptimization = null, trafegoOptimizationPlatformFilter = null, trafegoOptimizationRecurrenceFilter = null, trafegoOptimizationSearch = null, trafegoOptimizationsEmpty = null, trafegoHistoryBody = null, trafegoHistoryPlatformFilter = null, trafegoHistorySearch = null, trafegoHistoryEmpty = null;
+    const trafegoCampaignsEmptyDefault = '';
+    const trafegoOptimizationsEmptyDefault = '';
     const estruturacaoWrap = $("estruturacaoWrap");
     let macroTabBadgeEl = null;
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = false; // Desativado - iniciar na aba estruturação
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
-    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), cacWrap = $("cacWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), teamNotesWrap = $("teamNotesWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
+    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), teamNotesWrap = $("teamNotesWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
     const newNoteBtn = $("newNoteBtn"), filterSector = $("filterSector"), filterFrom = $("filterFrom"), filterTo = $("filterTo");
     const applyFilter = $("applyFilter"), clearFilter = $("clearFilter"), scrollHint = $("scrollHint");
@@ -22903,9 +22491,7 @@ async function sendIAQuestion(){
       { id:"demandas",  name:"Planejamento" },
       { id:"ia",        name:"I.A" },
       { id:"calendar",  name:"Calendário" },
-      { id:"trafego",   name:"Tráfego Pago" },
       { id:"metas",     name:"Metas" },
-      { id:"cac",       name:"CAC" },
       { id:"leads",     name:"Leads" },
       { id:"notes",     name:"Anotações" },
       { id:"teamNotes", name:"Notas Time" },
@@ -23576,17 +23162,8 @@ async function sendIAQuestion(){
       competitorsWrap.style.display = concorrentes? "block":"none"; competitorsWrap.setAttribute("aria-hidden", concorrentes? "false":"true");
       if(estruturacaoWrap) { estruturacaoWrap.style.display = estruturacao? "flex":"none"; estruturacaoWrap.setAttribute("aria-hidden", estruturacao? "false":"true"); }
       refSocialWrap.style.display = refSocial? "block":"none"; refSocialWrap.setAttribute("aria-hidden", refSocial? "false":"true");
-      cacWrap.style.display = cac? "block":"none"; cacWrap.setAttribute("aria-hidden", cac? "false":"true");
       leadsWrap.style.display = leads? "block":"none"; leadsWrap.setAttribute("aria-hidden", leads? "false":"true");
       relatorioWrap.style.display = relatorio? "block":"none"; relatorioWrap.setAttribute("aria-hidden", relatorio? "false":"true");
-      if(trafegoWrap){
-        trafegoWrap.style.display = trafego? "flex":"none";
-        trafegoWrap.setAttribute("aria-hidden", trafego? "false":"true");
-        if(trafego){
-          const statusSel = document.getElementById('trafegoOptimizationStatusFilter');
-          if(statusSel){ statusSel.value = 'active'; }
-        }
-      }
     }
 
     const TRAFEGO_STATUS_OPTIONS = [
@@ -26052,15 +25629,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="metas"){
         setSectionVisibility({metas:true});
         renderMetas();
-      } else if(currentSection==="cac"){
-        setSectionVisibility({cac:true});
-        renderCAC();
       } else if(currentSection==="leads"){
         setSectionVisibility({leads:true});
         renderLeads();
-      } else if(currentSection==="trafego"){
-        setSectionVisibility({trafego:true});
-        renderTrafego();
       } else if(currentSection==="demandas"){
         setSectionVisibility({demandas:true});
         renderDemandas();
@@ -26082,9 +25653,13 @@ async function sendIAQuestion(){
       } else if(currentSection==="estruturacao"){
         setSectionVisibility({estruturacao:true});
         // Garantir que dados estão carregados antes de renderizar
-        if(Object.keys(ESTRUTURACAO_STATE).length === 0 && (estruturacaoUsesSubcollection || USER_DATA.estruturacaoUsesSubcollection)){
-          console.log('[Estruturação] Carregando dados das subcoleções antes de renderizar...');
+        if(Object.keys(ESTRUTURACAO_STATE).length === 0){
+          console.log('[Estruturação] ESTRUTURACAO_STATE vazio, tentando carregar dados...');
+          // Sempre tentar subcoleção primeiro quando não tem dados
           loadEstruturacaoFromSubcollections().then(() => {
+            renderEstruturacao();
+          }).catch(() => {
+            // Fallback final
             renderEstruturacao();
           });
         } else {
@@ -37323,7 +36898,84 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
     const accessWrap = $("accessWrap"), accessList = $("accessList"), accessForm = $("accessForm");
     let ACCESSES = []; // {id,name,url,user,pass,tags}
     let editingId = null;
-    function loadAccessesFromUserData(){ ACCESSES = Array.isArray(USER_DATA.accesses) ? USER_DATA.accesses : []; }
+    function loadAccessesFromUserData(){ 
+      console.log('🔐 [ACESSOS] loadAccessesFromUserData chamada');
+      console.log('🔐 [ACESSOS] USER_DATA todas as keys:', Object.keys(USER_DATA || {}));
+      console.log('🔐 [ACESSOS] USER_DATA.accesses:', USER_DATA?.accesses?.length || 0, 'itens');
+      console.log('🔐 [ACESSOS] typeof USER_DATA.accesses:', typeof USER_DATA?.accesses);
+      console.log('🔐 [ACESSOS] USER_DATA.accesses raw:', JSON.stringify(USER_DATA?.accesses || [], null, 2));
+      
+      // Verificar se accesses está em outro lugar
+      if(USER_DATA){
+        console.log('🔐 [ACESSOS] Verificando todos os campos do USER_DATA para encontrar acessos:');
+        for(const key of Object.keys(USER_DATA)){
+          const val = USER_DATA[key];
+          if(Array.isArray(val) && val.length > 0){
+            console.log(`🔐 [ACESSOS] Campo "${key}": ${val.length} itens, primeiro:`, val[0]);
+          }
+        }
+      }
+      
+      ACCESSES = Array.isArray(USER_DATA.accesses) ? USER_DATA.accesses : []; 
+      console.log('🔐 [ACESSOS] ACCESSES carregados:', ACCESSES.length, 'itens');
+    }
+    
+    // Função async para carregar acessos com fallback para subcoleção
+    async function loadAccessesFromUserDataAsync(){
+      loadAccessesFromUserData();
+      
+      // Se não houver acessos, tentar carregar da subcoleção accesses_backup
+      if(ACCESSES.length === 0){
+        console.log('🔄 [ACESSOS FALLBACK] Nenhum acesso encontrado, tentando subcoleção...');
+        try{
+          const uid = auth.currentUser?.uid || window._adminFakeUser?.uid;
+          if(!uid){
+            console.log('🔐 [ACESSOS FALLBACK] UID não disponível');
+            return;
+          }
+          
+          // Tentar carregar de subcoleção accesses_chunks (caso exista)
+          const chunksRef = collection(db, "usuarios", uid, "accesses_chunks");
+          const chunksSnap = await getDocs(chunksRef);
+          
+          if(!chunksSnap.empty){
+            console.log('📥 [ACESSOS FALLBACK] Encontrados', chunksSnap.size, 'chunks de acessos');
+            const allAccesses = [];
+            chunksSnap.forEach(docSnap => {
+              const data = docSnap.data();
+              if(Array.isArray(data.items)){
+                allAccesses.push(...data.items);
+              }
+            });
+            if(allAccesses.length > 0){
+              ACCESSES = allAccesses;
+              USER_DATA.accesses = ACCESSES;
+              console.log('✅ [ACESSOS FALLBACK] Carregados', ACCESSES.length, 'acessos da subcoleção');
+              return;
+            }
+          }
+          
+          // Tentar carregar do documento de backup
+          const backupRef = doc(db, "usuarios", uid, "backups", "accesses");
+          const backupSnap = await getDoc(backupRef);
+          
+          if(backupSnap.exists()){
+            const data = backupSnap.data();
+            if(Array.isArray(data.items)){
+              ACCESSES = data.items;
+              USER_DATA.accesses = ACCESSES;
+              console.log('✅ [ACESSOS FALLBACK] Carregados', ACCESSES.length, 'acessos do backup');
+              return;
+            }
+          }
+          
+          console.log('📭 [ACESSOS FALLBACK] Nenhuma fonte alternativa encontrada');
+        }catch(err){
+          console.error('❌ [ACESSOS FALLBACK] Erro ao buscar subcoleção:', err);
+        }
+      }
+    }
+    
     function saveAccessesToUserData(){ USER_DATA.accesses = ACCESSES; }
     async function persistAccesses(){ saveAccessesToUserData(); const uid=auth.currentUser?.uid; if(!uid) return; await setDoc(doc(db,"usuarios",uid), { accesses: ACCESSES }, { merge:true }); }
 
@@ -38511,7 +38163,18 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
         return;
       }
       
-      console.log('[Estruturação] Nenhum dado encontrado para carregar');
+      // NOVO FALLBACK: Se não encontrou dados no documento principal, tentar subcoleção
+      console.log('[Estruturação] Documento principal vazio, tentando subcoleção como fallback...');
+      loadEstruturacaoFromSubcollections().then(() => {
+        estruturacaoAlreadyLoaded = true;
+        // Depois de carregar, renderizar se estamos na aba estruturação
+        if(currentSection === 'estruturacao'){
+          renderEstruturacao();
+        }
+      }).catch(err => {
+        console.log('[Estruturação] Erro ao carregar subcoleção:', err);
+        console.log('[Estruturação] Nenhum dado encontrado para carregar');
+      });
     }
     
     // Carregar estruturação de subcoleções (quando documento principal excede limite)
@@ -58549,11 +58212,21 @@ FORMATO PADRÃO:
 
     // formatFileSize já definida globalmente - usar a existente
 
-    function renderAccesses(){
-      loadAccessesFromUserData();
+    async function renderAccesses(){
+      console.log('🔐 [ACESSOS] renderAccesses chamada');
+      
+      // Se ACCESSES está vazio, tentar carregar da async
+      if(ACCESSES.length === 0){
+        await loadAccessesFromUserDataAsync();
+      } else {
+        loadAccessesFromUserData();
+      }
+      
+      console.log('🔐 [ACESSOS] Após load, ACCESSES:', ACCESSES.length, 'itens');
       const list = $("accessList");
       const search = ($("accessSearch").value||"").toLowerCase().trim();
       let items = [...ACCESSES];
+      console.log('🔐 [ACESSOS] Items para renderizar:', items.length);
       if(search){
         items = items.filter(a => [a.name,a.url,a.user,(a.tags||"")].join(" ").toLowerCase().includes(search));
       }
@@ -62740,16 +62413,43 @@ FORMATO PADRÃO:
     async function loadDemandasFromUserData(){
       const uid = auth.currentUser?.uid;
       
+      // DEBUG: Verificar estado do USER_DATA
+      console.log('📋 [DEMANDAS] loadDemandasFromUserData chamada');
+      console.log('📋 [DEMANDAS] UID:', uid);
+      console.log('📋 [DEMANDAS] USER_DATA.demandas:', USER_DATA.demandas?.length || 0, 'itens');
+      console.log('📋 [DEMANDAS] USER_DATA.demandaMonthPlans keys:', Object.keys(USER_DATA.demandaMonthPlans || {}).length);
+      console.log('📋 [DEMANDAS] USER_DATA.usesSubcollection:', USER_DATA.usesSubcollection);
+      
       // Verificar se usa subcoleção
       if(uid && USER_DATA.usesSubcollection === true){
-        console.log('🔄 [LOAD] Detectado uso de subcoleção');
+        console.log('🔄 [LOAD] Detectado uso de subcoleção (flag ativa)');
         const subcolDemandas = await loadDemandasFromSubcollection(uid);
         DEMANDAS = subcolDemandas.length > 0 ? subcolDemandas.map(normalizeDemanda) : [];
       } else {
         DEMANDAS = Array.isArray(USER_DATA.demandas) ? USER_DATA.demandas.map(normalizeDemanda) : [];
       }
       
+      // FALLBACK: Se demandas vazias e uid disponível, tentar subcoleção
+      if(uid && DEMANDAS.length === 0){
+        console.log('🔄 [FALLBACK] Demandas vazias, tentando carregar da subcoleção...');
+        try {
+          const subcolDemandas = await loadDemandasFromSubcollection(uid);
+          if(subcolDemandas.length > 0){
+            DEMANDAS = subcolDemandas.map(normalizeDemanda);
+            console.log('✅ [FALLBACK] Demandas carregadas da subcoleção:', DEMANDAS.length, 'itens');
+          } else {
+            console.log('📋 [FALLBACK] Nenhuma demanda encontrada na subcoleção');
+          }
+        } catch(fallbackErr) {
+          console.error('❌ [FALLBACK] Erro ao carregar subcoleção:', fallbackErr);
+        }
+      }
+      
+      console.log('📋 [DEMANDAS] DEMANDAS após load:', DEMANDAS.length, 'itens');
+      
       DEMANDA_MONTH_PLANS = cloneMonthPlans(USER_DATA.demandaMonthPlans);
+      console.log('📋 [DEMANDAS] DEMANDA_MONTH_PLANS após clone:', Object.keys(DEMANDA_MONTH_PLANS || {}).length, 'meses');
+      
       Object.keys(DEMANDA_MONTH_PLANS || {}).forEach(monthKey=> normalizeMonthPlan(monthKey));
       if(DEMANDAS.length===0){ DEMANDAS.push(createDemanda()); }
       migrateDemandPlansToMonthPlans();
@@ -65969,7 +65669,16 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           catch(_err){ }
           $("userInfo").textContent=`Logado como: ${user.displayName||user.email} • Cliente: ${TENANT}`;
           const ref = doc(db,"usuarios",user.uid);
-          const snap=await getDoc(ref); USER_DATA=snap.exists()?snap.data():{}; window.USER_DATA = USER_DATA; syncStorageLimitFromProfile(); loadBriefFromUserData();
+          const snap=await getDoc(ref); USER_DATA=snap.exists()?snap.data():{}; window.USER_DATA = USER_DATA; 
+          
+          // DEBUG: Verificar o que veio do Firebase
+          console.log('🔥 [FIREBASE] USER_DATA carregado do Firebase');
+          console.log('🔥 [FIREBASE] Documento existe:', snap.exists());
+          console.log('🔥 [FIREBASE] USER_DATA.accesses existe:', !!USER_DATA.accesses);
+          console.log('🔥 [FIREBASE] USER_DATA.accesses:', USER_DATA.accesses);
+          console.log('🔥 [FIREBASE] Todas as keys do documento:', Object.keys(USER_DATA));
+          
+          syncStorageLimitFromProfile(); loadBriefFromUserData();
           await loadClientProfile();
           startClientAccountsListener();
           // Carrega membros do time para sincronizar com RESP_OPTIONS
@@ -65982,7 +65691,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           renderDashboard(USER_DATA); buildTabs(); initTabKeyNav();
           loadNotesFromUserData();
           loadNoteTemplatesFromUserData();
-          loadAccessesFromUserData();
+          await loadAccessesFromUserDataAsync();
           loadCACFromUserData();
           await loadDemandasFromUserData();
           loadTrafficMetricsFromUserData();
@@ -66180,7 +65889,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             initTabKeyNav();
             loadNotesFromUserData();
             loadNoteTemplatesFromUserData();
-            loadAccessesFromUserData();
+            await loadAccessesFromUserDataAsync();
             loadCACFromUserData();
             await loadDemandasFromUserData();
             loadTrafficMetricsFromUserData();
@@ -66257,7 +65966,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
               
               loadMetasFromUserData();
               renderMetas();
-              loadAccessesFromUserData();
+              await loadAccessesFromUserDataAsync();
               handleRemoteTrafficMetrics(data?.trafegoMetrics);
               loadCACFromUserData();
               if(renderCAC.refresh) renderCAC.refresh();
