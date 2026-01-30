@@ -8969,6 +8969,801 @@ function renderReviewNotes(post){
     }
   }
   /* ===================== FIM NOTAS TIME ===================== */
+
+  /* ===================== REUNIÕES ===================== */
+  .reunioes-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding:16px;
+    margin-left:var(--margin-left);
+    margin-right:var(--margin-right);
+  }
+  .reunioes-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.1));
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:12px;
+    padding:16px;
+  }
+  .reunioes-header h2{
+    margin:0;
+    font-size:1.2rem;
+    color:#e2e8f0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .reunioes-header p{
+    margin:4px 0 0;
+    color:#94a3b8;
+    font-size:0.85rem;
+  }
+  .reunioes-add-btn{
+    background:linear-gradient(135deg, #3b82f6, #6366f1);
+    border:none;
+    border-radius:8px;
+    padding:10px 20px;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:all 0.2s ease;
+  }
+  .reunioes-add-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 20px rgba(59,130,246,0.4);
+  }
+  .reunioes-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .reuniao-card{
+    flex:0 0 280px;
+    min-width:280px;
+    max-width:320px;
+    background:rgba(30,41,59,0.8);
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:12px;
+    padding:16px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .reuniao-card:hover{
+    background:rgba(30,41,59,1);
+    border-color:rgba(59,130,246,0.4);
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(0,0,0,0.3);
+  }
+  .reuniao-card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .reuniao-card-date{
+    font-size:0.8rem;
+    color:#60a5fa;
+    font-weight:600;
+    background:rgba(59,130,246,0.15);
+    padding:4px 10px;
+    border-radius:6px;
+  }
+  .reuniao-card-actions{
+    display:flex;
+    gap:6px;
+    opacity:0;
+    transition:opacity 0.2s ease;
+  }
+  .reuniao-card:hover .reuniao-card-actions{
+    opacity:1;
+  }
+  .reuniao-card-actions button{
+    background:rgba(255,255,255,0.1);
+    border:none;
+    border-radius:6px;
+    padding:4px 8px;
+    color:#94a3b8;
+    cursor:pointer;
+    font-size:0.8rem;
+    transition:all 0.15s ease;
+  }
+  .reuniao-card-actions button:hover{
+    background:rgba(255,255,255,0.2);
+    color:#fff;
+  }
+  .reuniao-card-actions button.delete:hover{
+    background:rgba(239,68,68,0.3);
+    color:#fca5a5;
+  }
+  .reuniao-card-objetivo{
+    font-size:0.95rem;
+    color:#e2e8f0;
+    font-weight:600;
+    line-height:1.4;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .reuniao-card-resumo{
+    font-size:0.85rem;
+    color:#94a3b8;
+    line-height:1.5;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    background:rgba(15,23,42,0.5);
+    padding:10px;
+    border-radius:8px;
+    border-left:3px solid rgba(59,130,246,0.4);
+  }
+  .reuniao-card-resumo.empty{
+    color:#64748b;
+    font-style:italic;
+    border-left-color:rgba(100,116,139,0.3);
+  }
+  .reuniao-card-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:auto;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .reuniao-view-btn{
+    background:rgba(59,130,246,0.2);
+    border:1px solid rgba(59,130,246,0.4);
+    border-radius:6px;
+    padding:6px 12px;
+    color:#60a5fa;
+    font-size:0.8rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:all 0.2s ease;
+  }
+  .reuniao-view-btn:hover{
+    background:rgba(59,130,246,0.3);
+    color:#fff;
+  }
+  /* Modal Reunião */
+  .reuniao-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100000;
+    padding:20px;
+  }
+  .reuniao-modal.show{
+    display:flex;
+  }
+  .reuniao-modal-content{
+    width:min(950px, 95vw);
+    max-height:92vh;
+    background:#1e293b;
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .reuniao-modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    background:rgba(15,23,42,0.6);
+    border-bottom:1px solid rgba(59,130,246,0.2);
+  }
+  .reuniao-modal-header h3{
+    margin:0;
+    color:#e2e8f0;
+    font-size:1.1rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .reuniao-modal-close{
+    background:transparent;
+    border:none;
+    color:#94a3b8;
+    font-size:1.5rem;
+    cursor:pointer;
+    padding:4px;
+    line-height:1;
+    transition:color 0.2s;
+  }
+  .reuniao-modal-close:hover{
+    color:#fff;
+  }
+  .reuniao-modal-body{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .reuniao-modal-body label{
+    display:block;
+    color:#cbd5e1;
+    font-size:0.85rem;
+    margin-bottom:6px;
+    font-weight:500;
+  }
+  .reuniao-modal-body input,
+  .reuniao-modal-body textarea{
+    width:100%;
+    background:rgba(15,23,42,0.6);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:8px;
+    padding:12px;
+    color:#e2e8f0;
+    font-size:0.95rem;
+    transition:border-color 0.2s;
+  }
+  .reuniao-modal-body input:focus,
+  .reuniao-modal-body textarea:focus{
+    outline:none;
+    border-color:rgba(59,130,246,0.6);
+  }
+  .reuniao-modal-body textarea{
+    min-height:200px;
+    resize:vertical;
+    font-family:inherit;
+    line-height:1.6;
+  }
+  .reuniao-modal-footer{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:12px;
+    padding:16px 20px;
+    background:rgba(15,23,42,0.4);
+    border-top:1px solid rgba(59,130,246,0.2);
+  }
+  /* Modal Ver Resumo */
+  .reuniao-resumo-section{
+    background:rgba(15,23,42,0.5);
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:10px;
+    padding:16px;
+  }
+  .reuniao-resumo-section h4{
+    margin:0 0 12px;
+    color:#60a5fa;
+    font-size:0.95rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .reuniao-resumo-content{
+    color:#e2e8f0;
+    font-size:0.9rem;
+    line-height:1.7;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .reuniao-transcricao-section{
+    background:rgba(15,23,42,0.3);
+    border:1px solid rgba(100,116,139,0.2);
+    border-radius:10px;
+    padding:16px;
+  }
+  .reuniao-transcricao-section h4{
+    margin:0 0 12px;
+    color:#94a3b8;
+    font-size:0.9rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .reuniao-transcricao-content{
+    color:#cbd5e1;
+    font-size:0.85rem;
+    line-height:1.6;
+    white-space:pre-wrap;
+    word-break:break-word;
+    max-height:300px;
+    overflow-y:auto;
+  }
+  .reuniao-generating{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:#60a5fa;
+    font-size:0.9rem;
+    padding:20px;
+  }
+  .reuniao-generating .spinner{
+    width:20px;
+    height:20px;
+    border:2px solid rgba(59,130,246,0.3);
+    border-top-color:#3b82f6;
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{
+    to{transform:rotate(360deg);}
+  }
+  .reuniao-empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:#64748b;
+  }
+  .reuniao-empty-state .icon{
+    font-size:3rem;
+    margin-bottom:16px;
+    opacity:0.5;
+  }
+  .reuniao-empty-state p{
+    margin:8px 0;
+    font-size:0.95rem;
+  }
+  @media(max-width:820px){
+    .reunioes-grid{
+      justify-content:center;
+    }
+    .reuniao-card{
+      flex:1 1 100%;
+      max-width:100%;
+    }
+    .reuniao-modal-content{
+      max-width:98vw;
+      max-height:95vh;
+    }
+  }
+  
+  /* ========== CHAT IA REUNIÕES - ESTILO CHATGPT ========== */
+  .reunioes-chat-section{
+    margin-top:32px;
+    background:#0f172a;
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:16px;
+    overflow:hidden;
+    display:flex;
+    height:700px;
+    min-height:600px;
+  }
+  /* Sidebar lateral estilo ChatGPT - SEMPRE VISÍVEL */
+  .reunioes-chat-sidebar{
+    width:280px;
+    background:#1e1e2e;
+    border-right:1px solid rgba(99,102,241,0.2);
+    display:flex;
+    flex-direction:column;
+    flex-shrink:0;
+  }
+  .reunioes-chat-sidebar-header{
+    padding:16px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    background:rgba(99,102,241,0.1);
+  }
+  .reunioes-chat-sidebar-header-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#e2e8f0;
+    font-size:0.95rem;
+    font-weight:500;
+    margin-bottom:12px;
+  }
+  .reunioes-chat-new-btn{
+    width:100%;
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:0.9rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:all 0.2s;
+  }
+  .reunioes-chat-new-btn:hover{
+    background:rgba(255,255,255,0.1);
+  }
+  .reunioes-chat-new-btn span{
+    font-size:1.1rem;
+    font-weight:300;
+  }
+  .reunioes-chat-sidebar-list{
+    flex:1;
+    overflow-y:auto;
+    padding:8px;
+  }
+  .reunioes-chat-sidebar-list::-webkit-scrollbar{
+    width:6px;
+  }
+  .reunioes-chat-sidebar-list::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,0.2);
+    border-radius:3px;
+  }
+  .reunioes-chat-history-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background 0.15s;
+    margin-bottom:2px;
+    position:relative;
+  }
+  .reunioes-chat-history-item:hover{
+    background:rgba(255,255,255,0.1);
+  }
+  .reunioes-chat-history-item.active{
+    background:rgba(99,102,241,0.3);
+  }
+  .reunioes-chat-history-item-icon{
+    font-size:1rem;
+    opacity:0.7;
+  }
+  .reunioes-chat-history-item-content{
+    flex:1;
+    min-width:0;
+  }
+  .reunioes-chat-history-item-title{
+    font-size:0.85rem;
+    color:#e2e8f0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .reunioes-chat-history-item-date{
+    font-size:0.7rem;
+    color:#64748b;
+    margin-top:2px;
+  }
+  .reunioes-chat-history-item-actions{
+    display:none;
+    gap:4px;
+  }
+  .reunioes-chat-history-item:hover .reunioes-chat-history-item-actions{
+    display:flex;
+  }
+  .reunioes-chat-history-item-btn{
+    background:transparent;
+    border:none;
+    color:#94a3b8;
+    cursor:pointer;
+    padding:4px;
+    border-radius:4px;
+    font-size:0.8rem;
+    transition:all 0.15s;
+  }
+  .reunioes-chat-history-item-btn:hover{
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+  }
+  .reunioes-chat-history-item-btn.delete:hover{
+    background:rgba(239,68,68,0.2);
+    color:#f87171;
+  }
+  .reunioes-chat-sidebar-footer{
+    padding:12px;
+    border-top:1px solid rgba(255,255,255,0.1);
+    font-size:0.8rem;
+    color:#64748b;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .reunioes-chat-sidebar-footer strong{
+    color:#a5b4fc;
+  }
+  .reunioes-chat-sidebar-empty{
+    text-align:center;
+    padding:40px 16px;
+    color:#64748b;
+  }
+  .reunioes-chat-sidebar-empty-icon{
+    font-size:2.5rem;
+    margin-bottom:12px;
+    opacity:0.5;
+  }
+  .reunioes-chat-sidebar-empty p{
+    margin:0;
+    font-size:0.85rem;
+  }
+  /* Área principal */
+  .reunioes-chat-main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    background:#0f172a;
+  }
+  .reunioes-chat-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 16px;
+    background:rgba(30,41,59,0.8);
+    border-bottom:1px solid rgba(99,102,241,0.2);
+  }
+  .reunioes-chat-menu-btn{
+    background:transparent;
+    border:none;
+    color:#94a3b8;
+    font-size:1.3rem;
+    cursor:pointer;
+    padding:8px;
+    border-radius:8px;
+    transition:all 0.15s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .reunioes-chat-menu-btn:hover{
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+  }
+  .reunioes-chat-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:1rem;
+    color:#e2e8f0;
+    font-weight:500;
+  }
+  .reunioes-chat-header-actions{
+    margin-left:auto;
+  }
+  .reunioes-chat-count-badge{
+    font-size:0.8rem;
+    color:#64748b;
+    background:rgba(30,41,59,0.8);
+    padding:6px 12px;
+    border-radius:20px;
+  }
+  .reunioes-chat-count-badge strong{
+    color:#a5b4fc;
+  }
+  /* Área de mensagens */
+  .reunioes-chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .reunioes-chat-messages::-webkit-scrollbar{
+    width:8px;
+  }
+  .reunioes-chat-messages::-webkit-scrollbar-thumb{
+    background:rgba(99,102,241,0.3);
+    border-radius:4px;
+  }
+  .reunioes-chat-message{
+    display:flex;
+    gap:16px;
+    max-width:100%;
+    padding:16px 20px;
+    border-radius:12px;
+  }
+  .reunioes-chat-message.user{
+    background:rgba(59,130,246,0.1);
+    flex-direction:row-reverse;
+  }
+  .reunioes-chat-message.assistant{
+    background:rgba(30,41,59,0.6);
+  }
+  .reunioes-chat-message-avatar{
+    width:32px;
+    height:32px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1rem;
+    flex-shrink:0;
+  }
+  .reunioes-chat-message.user .reunioes-chat-message-avatar{
+    background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  }
+  .reunioes-chat-message.assistant .reunioes-chat-message-avatar{
+    background:linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  }
+  .reunioes-chat-message-content{
+    flex:1;
+    color:#e2e8f0;
+    font-size:0.95rem;
+    line-height:1.7;
+    min-width:0;
+  }
+  .reunioes-chat-message-content p{
+    margin:0 0 12px;
+  }
+  .reunioes-chat-message-content p:last-child{
+    margin-bottom:0;
+  }
+  .reunioes-chat-message-content ul,
+  .reunioes-chat-message-content ol{
+    margin:12px 0;
+    padding-left:24px;
+  }
+  .reunioes-chat-message-content li{
+    margin:6px 0;
+  }
+  .reunioes-chat-message-content strong{
+    color:#60a5fa;
+  }
+  /* Input */
+  .reunioes-chat-input-container{
+    padding:16px 20px 20px;
+    background:rgba(15,23,42,0.8);
+    border-top:1px solid rgba(99,102,241,0.15);
+  }
+  .reunioes-chat-input-wrapper{
+    display:flex;
+    align-items:flex-end;
+    gap:12px;
+    background:rgba(30,41,59,0.8);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:16px;
+    padding:8px 8px 8px 16px;
+    transition:border-color 0.2s;
+  }
+  .reunioes-chat-input-wrapper:focus-within{
+    border-color:rgba(99,102,241,0.6);
+  }
+  .reunioes-chat-input-wrapper textarea{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:#e2e8f0;
+    font-size:0.95rem;
+    resize:none;
+    min-height:24px;
+    max-height:150px;
+    font-family:inherit;
+    line-height:1.5;
+    padding:4px 0;
+  }
+  .reunioes-chat-input-wrapper textarea:focus{
+    outline:none;
+  }
+  .reunioes-chat-input-wrapper textarea::placeholder{
+    color:#64748b;
+  }
+  .reunioes-chat-send-btn{
+    width:40px;
+    height:40px;
+    background:linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    border:none;
+    border-radius:10px;
+    color:#fff;
+    font-size:1.1rem;
+    cursor:pointer;
+    transition:all 0.2s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .reunioes-chat-send-btn:hover{
+    transform:scale(1.05);
+    box-shadow:0 4px 15px rgba(99,102,241,0.4);
+  }
+  .reunioes-chat-send-btn:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    transform:none;
+  }
+  /* Loading */
+  .reunioes-chat-loading{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#94a3b8;
+    font-size:0.85rem;
+    padding:16px 20px;
+    background:rgba(30,41,59,0.6);
+    border-radius:12px;
+  }
+  .reunioes-chat-loading .dot{
+    width:8px;
+    height:8px;
+    background:#6366f1;
+    border-radius:50%;
+    animation:chatDotPulse 1.4s ease-in-out infinite;
+  }
+  .reunioes-chat-loading .dot:nth-child(2){ animation-delay:0.2s; }
+  .reunioes-chat-loading .dot:nth-child(3){ animation-delay:0.4s; }
+  @keyframes chatDotPulse{
+    0%,80%,100%{ transform:scale(0.6); opacity:0.5; }
+    40%{ transform:scale(1); opacity:1; }
+  }
+  /* Welcome */
+  .reunioes-chat-welcome{
+    text-align:center;
+    padding:60px 20px;
+    color:#94a3b8;
+    max-width:600px;
+    margin:auto;
+  }
+  .reunioes-chat-welcome-icon{
+    font-size:4rem;
+    margin-bottom:20px;
+  }
+  .reunioes-chat-welcome h4{
+    color:#e2e8f0;
+    font-size:1.5rem;
+    margin:0 0 12px;
+    font-weight:600;
+  }
+  .reunioes-chat-welcome p{
+    margin:0 0 28px;
+    font-size:1rem;
+    color:#94a3b8;
+  }
+  .reunioes-chat-suggestions{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+  }
+  .reunioes-chat-suggestions button{
+    background:rgba(30,41,59,0.8);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:12px;
+    padding:14px 16px;
+    color:#e2e8f0;
+    font-size:0.9rem;
+    cursor:pointer;
+    transition:all 0.2s;
+    text-align:left;
+  }
+  .reunioes-chat-suggestions button:hover{
+    background:rgba(99,102,241,0.15);
+    border-color:rgba(99,102,241,0.5);
+    transform:translateY(-2px);
+  }
+  /* Responsivo */
+  @media(max-width:900px){
+    .reunioes-chat-section{
+      height:550px;
+      flex-direction:column;
+    }
+    .reunioes-chat-sidebar{
+      width:100%;
+      height:auto;
+      max-height:200px;
+      border-right:none;
+      border-bottom:1px solid rgba(99,102,241,0.3);
+    }
+    .reunioes-chat-sidebar-list{
+      max-height:100px;
+    }
+    .reunioes-chat-suggestions{
+      grid-template-columns:1fr;
+    }
+  }
+  /* ========== FIM CHAT IA REUNIÕES ========== */
+  
+  /* ===================== FIM REUNIÕES ===================== */
 </style>
 </meta></head>
 <body>
@@ -12432,6 +13227,160 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
   </div>
 </div>
 
+<!-- REUNIÕES -->
+<div aria-hidden="true" class="reunioes-wrap" id="reunioesWrap" style="display:none">
+  <div class="reunioes-header">
+    <div>
+      <h2>📅 Reuniões</h2>
+      <p>Adicione transcrições de reuniões e gere resumos automáticos com IA. Organize por data para fácil consulta.</p>
+    </div>
+    <button type="button" class="reunioes-add-btn" onclick="openReuniaoModal()">
+      <span>+</span> Nova Reunião
+    </button>
+  </div>
+  
+  <div class="reunioes-grid" id="reunioesGrid">
+    <!-- Cards de reuniões serão inseridos aqui dinamicamente -->
+  </div>
+  
+  <div class="reuniao-empty-state" id="reunioesEmptyState" style="display:none;">
+    <div class="icon">📅</div>
+    <p><strong>Nenhuma reunião registrada ainda</strong></p>
+    <p>Clique em "Nova Reunião" para adicionar a transcrição de uma reunião e gerar um resumo automático.</p>
+  </div>
+  
+  <!-- ========== CHAT IA PARA CONSULTAR REUNIÕES ========== -->
+  <div class="reunioes-chat-section" id="reunioesChatSection" style="display:none;">
+    <!-- Sidebar lateral - SEMPRE VISÍVEL -->
+    <div class="reunioes-chat-sidebar" id="reunioesChatSidebar">
+      <div class="reunioes-chat-sidebar-header">
+        <div class="reunioes-chat-sidebar-header-title">📂 Histórico de Conversas</div>
+        <button type="button" onclick="startNewReuniaoChat()" class="reunioes-chat-new-btn">
+          <span>+</span> Nova conversa
+        </button>
+      </div>
+      <div class="reunioes-chat-sidebar-list" id="reunioesChatHistoryList">
+        <!-- Lista de conversas -->
+      </div>
+      <div class="reunioes-chat-sidebar-footer">
+        <span>📊 <strong id="reunioesChatCountSidebar">0</strong> reuniões indexadas</span>
+      </div>
+    </div>
+    
+    <!-- Área principal do chat -->
+    <div class="reunioes-chat-main">
+      <div class="reunioes-chat-header">
+        <div class="reunioes-chat-title">
+          <span>🤖</span>
+          <span>Assistente de Reuniões</span>
+        </div>
+        <div class="reunioes-chat-header-actions">
+          <span class="reunioes-chat-count-badge"><strong id="reunioesChatCount">0</strong> reuniões</span>
+        </div>
+      </div>
+      
+      <div class="reunioes-chat-messages" id="reunioesChatMessages">
+        <div class="reunioes-chat-welcome">
+          <div class="reunioes-chat-welcome-icon">🤖</div>
+          <h4>Assistente de Reuniões</h4>
+          <p>Pergunte sobre qualquer assunto discutido nas suas reuniões</p>
+          <div class="reunioes-chat-suggestions">
+            <button onclick="askReuniaoSuggestion('Quais foram as principais decisões tomadas?')">📋 Principais decisões</button>
+            <button onclick="askReuniaoSuggestion('Quais tarefas ficaram pendentes?')">⏳ Tarefas pendentes</button>
+            <button onclick="askReuniaoSuggestion('Resuma os principais tópicos discutidos')">📌 Tópicos discutidos</button>
+            <button onclick="askReuniaoSuggestion('Quais problemas foram identificados?')">⚠️ Problemas</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="reunioes-chat-input-container">
+        <div class="reunioes-chat-input-wrapper">
+          <textarea 
+            id="reunioesChatInput" 
+            placeholder="Pergunte sobre as reuniões..."
+            rows="1"
+            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendReuniaoChat(); }"
+            oninput="this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 150) + 'px';"
+          ></textarea>
+          <button type="button" class="reunioes-chat-send-btn" onclick="sendReuniaoChat()" id="reunioesChatSendBtn">
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ========== FIM CHAT IA REUNIÕES ========== -->
+</div>
+
+<!-- Modal Nova/Editar Reunião -->
+<div class="reuniao-modal" id="reuniaoModal">
+  <div class="reuniao-modal-content">
+    <div class="reuniao-modal-header">
+      <h3 id="reuniaoModalTitle">📅 Nova Reunião</h3>
+      <button type="button" class="reuniao-modal-close" onclick="closeReuniaoModal()">✕</button>
+    </div>
+    <div class="reuniao-modal-body">
+      <div>
+        <label for="reuniaoData">Data da reunião</label>
+        <input type="date" id="reuniaoData" />
+      </div>
+      <div>
+        <label for="reuniaoObjetivo">Título / Objetivo da reunião <span style="font-size:0.75rem;color:#64748b;font-weight:normal;">(gerado automaticamente ao colar transcrição)</span></label>
+        <input type="text" id="reuniaoObjetivo" placeholder="Ex: Alinhamento de metas do mês, Revisão de campanhas, etc." />
+      </div>
+      <div>
+        <label for="reuniaoTranscricao">Transcrição da reunião</label>
+        <textarea id="reuniaoTranscricao" placeholder="Cole aqui a transcrição completa da conversa da reunião..."></textarea>
+      </div>
+    </div>
+    <div class="reuniao-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeReuniaoModal()">Cancelar</button>
+      <button type="button" class="btn" id="reuniaoSaveBtn" onclick="saveReuniao()">💾 Salvar e Gerar Resumo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Resumo da Reunião -->
+<div class="reuniao-modal" id="reuniaoViewModal">
+  <div class="reuniao-modal-content" style="max-width: 900px;">
+    <div class="reuniao-modal-header">
+      <h3 id="reuniaoViewModalTitle">📋 Resumo da Reunião</h3>
+      <button type="button" class="reuniao-modal-close" onclick="closeReuniaoViewModal()">✕</button>
+    </div>
+    <div class="reuniao-modal-body">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <span id="reuniaoViewData" class="reuniao-card-date" style="font-size: 0.9rem;"></span>
+        </div>
+        <div>
+          <strong id="reuniaoViewObjetivo" style="color: #e2e8f0; font-size: 1.1rem;"></strong>
+        </div>
+      </div>
+      
+      <div class="reuniao-resumo-section">
+        <h4>✨ Resumo Gerado por IA</h4>
+        <div id="reuniaoViewResumo" class="reuniao-resumo-content"></div>
+        <div id="reuniaoViewGenerating" class="reuniao-generating" style="display: none;">
+          <div class="spinner"></div>
+          <span>Gerando resumo com IA...</span>
+        </div>
+      </div>
+      
+      <details class="reuniao-transcricao-section" style="margin-top: 16px;">
+        <summary style="cursor: pointer; color: #94a3b8; font-size: 0.9rem; padding: 8px 0;">
+          📜 Ver Transcrição Completa
+        </summary>
+        <div id="reuniaoViewTranscricao" class="reuniao-transcricao-content" style="margin-top: 12px;"></div>
+      </details>
+    </div>
+    <div class="reuniao-modal-footer">
+      <button type="button" class="btn secondary" onclick="copyReuniaoResumo()" style="margin-right: auto;">📋 Copiar p/ WhatsApp</button>
+      <button type="button" class="btn secondary" onclick="regenerateReuniaoResumo()" id="regenerateResumoBtn">🔄 Regenerar Resumo</button>
+      <button type="button" class="btn" onclick="closeReuniaoViewModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- EmailJS SDK -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
@@ -13253,40 +14202,82 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     // A API key nunca é exposta no frontend
     // ================================================================
     window.callAIProxy = async function(model, messages, userId, maxTokens, temperature) {
-      // URL da Firebase Function (v2 - Cloud Run)
-      const AI_PROXY_URL = 'https://aiproxy-2uquufjjxa-uc.a.run.app';
+      // URLs dos proxies (tentará alternativas se uma falhar)
+      const AI_PROXY_URLS = [
+        'https://us-central1-mediagrowth-a5349.cloudfunctions.net/aiProxy',
+        'https://aiproxy-2uquufjjxa-uc.a.run.app'
+      ];
       
-      try {
-        const requestBody = {
-          model: model || window.IA_CONFIG.model,
-          messages: messages,
-          userId: userId || (auth.currentUser?.uid || 'anonymous'),
-          stream: false
-        };
-        
-        // Adicionar parâmetros opcionais se fornecidos
-        if (maxTokens) requestBody.max_tokens = maxTokens;
-        if (temperature !== undefined) requestBody.temperature = temperature;
-        
-        const response = await fetch(AI_PROXY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestBody)
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data?.error || `HTTP ${response.status}`);
+      let lastError = null;
+      
+      for (const AI_PROXY_URL of AI_PROXY_URLS) {
+        try {
+          const requestBody = {
+            model: model || window.IA_CONFIG.model,
+            messages: messages,
+            userId: userId || (auth.currentUser?.uid || 'anonymous'),
+            stream: false
+          };
+          
+          // Adicionar parâmetros opcionais se fornecidos
+          if (maxTokens) requestBody.max_tokens = maxTokens;
+          if (temperature !== undefined) requestBody.temperature = temperature;
+          
+          console.log('🤖 [AI Proxy] Tentando URL:', AI_PROXY_URL);
+          
+          const response = await fetch(AI_PROXY_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          });
+          
+          const data = await response.json();
+          
+          // Verificar erros específicos de API key
+          if (data?.error) {
+            const errorMsg = (data.error || '').toLowerCase();
+            // Erros de API key - não tentar outras URLs, reportar erro claro
+            if (errorMsg.includes('user not found') || 
+                errorMsg.includes('api key') || 
+                errorMsg.includes('unauthorized') ||
+                errorMsg.includes('invalid_api_key') ||
+                errorMsg.includes('not configured')) {
+              console.error('🔴 [AI Proxy] Erro de API Key:', data.error);
+              const errorDetalhado = new Error(
+                '⚠️ Serviço de I.A. temporariamente indisponível. ' +
+                'A chave de API precisa ser reconfigurada. ' +
+                'Por favor, entre em contato com o suporte técnico.'
+              );
+              errorDetalhado.isAPIKeyError = true;
+              errorDetalhado.originalError = data.error;
+              throw errorDetalhado;
+            }
+          }
+          
+          if (!response.ok) {
+            lastError = new Error(data?.error || `HTTP ${response.status}`);
+            console.warn('🟡 [AI Proxy] URL falhou, tentando próxima...', lastError.message);
+            continue; // Tentar próxima URL
+          }
+          
+          console.log('🟢 [AI Proxy] Sucesso via:', AI_PROXY_URL);
+          return data;
+          
+        } catch (error) {
+          lastError = error;
+          // Se for erro de API key, não tentar outras URLs
+          if (error.isAPIKeyError) {
+            throw error;
+          }
+          console.warn('🟡 [AI Proxy] Erro na URL, tentando próxima...', error.message);
         }
-        
-        return data;
-      } catch (error) {
-        console.error('callAIProxy error:', error);
-        throw error;
       }
+      
+      // Se chegou aqui, todas as URLs falharam
+      console.error('🔴 [AI Proxy] Todas as URLs falharam:', lastError);
+      throw lastError || new Error('Serviço de I.A. indisponível');
     };
     
     // Variável global para sessão admin fake
@@ -14086,7 +15077,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     let macroTabHasUpdate = false;
     let macroAutoOpenPending = false; // Desativado - iniciar na aba estruturação
     const tabsContainer = $("tabsContainer"), mainMenuToggle = $("mainMenuToggle");
-    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), teamNotesWrap = $("teamNotesWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
+    const calendarWrap = $("calendarWrap"), iaWrap = $("iaWrap"), competitorsWrap = $("competitorsWrap"), refSocialWrap = $("refSocialWrap"), leadsWrap = $("leadsWrap"), relatorioWrap = $("relatorioWrap"), teamNotesWrap = $("teamNotesWrap"), reunioesWrap = $("reunioesWrap"), refSocialList = $("refSocialList"), refSocialForm = $("refSocialForm"), refSocialFile = $("refSocialFile"), refSocialDetails = $("refSocialDetails"), refSocialCategory = $("refSocialCategory"), refSocialLinkInput = $("refSocialLinkInput"), refSocialLinkPreview = $("refSocialLinkPreview"), refSocialModeToggle = $("refSocialModeToggle");
     const notesList = $("notesList"), noteEditor = $("noteEditor"), noteSector = $("noteSector"), noteTitle = $("noteTitle"), noteDate = $("noteDate"), noteAutoSaveStatus = $("noteAutoSaveStatus"), noteTemplateSelect = $("noteTemplateSelect"), insertTemplateBtn = $("insertTemplateBtn"), saveTemplateBtn = $("saveTemplateBtn");
     const newNoteBtn = $("newNoteBtn"), filterSector = $("filterSector"), filterFrom = $("filterFrom"), filterTo = $("filterTo");
     const applyFilter = $("applyFilter"), clearFilter = $("clearFilter"), scrollHint = $("scrollHint");
@@ -22495,6 +23486,7 @@ async function sendIAQuestion(){
       { id:"leads",     name:"Leads" },
       { id:"notes",     name:"Anotações" },
       { id:"teamNotes", name:"Notas Time" },
+      { id:"reunioes",  name:"Reuniões" },
       { id:"access",    name:"Acessos" },
       { id:"arquivos",  name:"Arquivos" },
       { id:"relatorio", name:"Relatório" }
@@ -22977,6 +23969,11 @@ async function sendIAQuestion(){
     }
 
     async function loadClientProfile(){
+      // Resetar estado das reuniões ao mudar de cliente
+      if (typeof resetReunioesState === 'function') {
+        resetReunioesState();
+      }
+      
       if(!auth?.currentUser){
         CLIENT_PROFILE = {};
         if(window.googleCalendarIntegration){
@@ -23127,7 +24124,7 @@ async function sendIAQuestion(){
       uploadClientLogo(file);
     });
 
-    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false, estruturacao=false, teamNotes=false}){
+    function setSectionVisibility({widgets=false, demandas=false, notes=false, briefing=false, access=false, calendar=false, metas=false, trafego=false, files=false, ia=false, concorrentes=false, refSocial=false, cac=false, leads=false, relatorio=false, estruturacao=false, teamNotes=false, reunioes=false}){
       widgetsGrid.style.display = widgets? "flex":"none";
       iframeDica.style.display  = widgets? "block":"none";
       metasWrap.style.display = metas? "block":"none"; metasWrap.setAttribute("aria-hidden", metas? "false":"true");
@@ -23139,6 +24136,7 @@ async function sendIAQuestion(){
       filesWrap.style.display   = files? "flex":"none";  filesWrap.setAttribute("aria-hidden", files? "false":"true");
       iaWrap.style.display      = ia? "block":"none"; iaWrap.setAttribute("aria-hidden", ia? "false":"true");
       if(teamNotesWrap){ teamNotesWrap.style.display = teamNotes? "flex":"none"; teamNotesWrap.setAttribute("aria-hidden", teamNotes? "false":"true"); }
+      if(reunioesWrap){ reunioesWrap.style.display = reunioes? "flex":"none"; reunioesWrap.setAttribute("aria-hidden", reunioes? "false":"true"); }
       
       // Ao entrar na aba I.A, sempre usar a última conversa (mais recente)
       if(ia){
@@ -25671,6 +26669,9 @@ async function sendIAQuestion(){
       } else if(currentSection==="teamNotes"){
         setSectionVisibility({teamNotes:true});
         renderTeamNotes();
+      } else if(currentSection==="reunioes"){
+        setSectionVisibility({reunioes:true});
+        renderReunioes();
       } else {
         setSectionVisibility({widgets:true});
         if(widgetsRenderedSection !== currentSection){
@@ -28002,6 +29003,1188 @@ IMPORTANTE:
     // ========== FIM RESUMO CONSOLIDADO DO MÊS ==========
     
     /* ========== FIM RESUMO AUTOMÁTICO DAS NOTAS ========== */
+
+    /* ========= REUNIÕES ========= */
+    let REUNIOES = [];
+    let currentEditingReuniao = null;
+    let currentViewingReuniao = null;
+    let reunioesInitialLoadDone = false; // Flag para indicar se o carregamento inicial foi feito
+    let reunioesPersistLock = false; // Lock para evitar condições de corrida
+    
+    // Função para resetar estado das reuniões (usado quando muda de cliente)
+    function resetReunioesState() {
+      REUNIOES = [];
+      currentEditingReuniao = null;
+      currentViewingReuniao = null;
+      reunioesInitialLoadDone = false;
+      reunioesPersistLock = false;
+      console.log('🔄 Estado de reuniões resetado');
+    }
+    window.resetReunioesState = resetReunioesState;
+
+    async function loadReunioesFromData(forceReload = false){
+      // Se já foi carregado e não é forçado, usar dados locais
+      if (reunioesInitialLoadDone && !forceReload) {
+        console.log('📋 Usando dados locais de reuniões:', REUNIOES.length);
+        return;
+      }
+      
+      // Aguardar se houver uma persistência em andamento
+      if (reunioesPersistLock) {
+        console.log('⏳ Aguardando persistência de reuniões terminar...');
+        await new Promise(resolve => {
+          const checkLock = setInterval(() => {
+            if (!reunioesPersistLock) {
+              clearInterval(checkLock);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+      
+      const uid = getReunioesTargetUid();
+      if(!uid) {
+        console.warn('⚠️ Nenhum UID disponível para carregar reuniões');
+        REUNIOES = [];
+        return;
+      }
+      
+      try {
+        const reunioesDocRef = doc(db, "usuarios", uid, "reunioes", "data");
+        const reunioesDoc = await getDoc(reunioesDocRef);
+        
+        if(reunioesDoc.exists()){
+          const data = reunioesDoc.data();
+          REUNIOES = Array.isArray(data.reunioes) ? data.reunioes : [];
+          console.log('✅ Reuniões carregadas do Firebase:', REUNIOES.length);
+        } else {
+          REUNIOES = [];
+          console.log('📋 Nenhuma reunião encontrada no Firebase');
+        }
+        
+        reunioesInitialLoadDone = true;
+        
+        // Atualizar stats do chat
+        if (typeof updateReunioesChatStats === 'function') {
+          updateReunioesChatStats();
+        }
+      } catch(err) {
+        console.error('❌ Erro ao carregar reuniões:', err);
+        // Não resetar REUNIOES em caso de erro se já temos dados locais
+        if (!reunioesInitialLoadDone) {
+          REUNIOES = [];
+        }
+      }
+    }
+
+    function getReunioesTargetUid(){
+      if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+        return clientDocPathParts[1];
+      }
+      const currentUser = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+      return currentUser?.uid;
+    }
+
+    async function persistReunioes(){
+      const uid = getReunioesTargetUid();
+      if(!uid) {
+        console.error('❌ Sem UID para persistir reuniões');
+        return;
+      }
+      
+      // Ativar lock
+      reunioesPersistLock = true;
+      
+      try {
+        const reunioesDocRef = doc(db, "usuarios", uid, "reunioes", "data");
+        await setDoc(reunioesDocRef, {
+          reunioes: REUNIOES,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        console.log('✅ Reuniões persistidas no Firebase:', REUNIOES.length);
+      } catch(err) {
+        console.error('❌ Erro ao persistir reuniões:', err);
+        throw err;
+      } finally {
+        // Sempre liberar o lock
+        reunioesPersistLock = false;
+      }
+    }
+
+    function renderReunioes(skipLoad = false){
+      const doRender = () => {
+        const grid = document.getElementById('reunioesGrid');
+        const emptyState = document.getElementById('reunioesEmptyState');
+        
+        if(!grid) return;
+        
+        if(REUNIOES.length === 0){
+          grid.innerHTML = '';
+          if(emptyState) emptyState.style.display = 'block';
+          return;
+        }
+        
+        if(emptyState) emptyState.style.display = 'none';
+        
+        // Ordenar por data (mais recente primeiro)
+        const sorted = [...REUNIOES].sort((a, b) => {
+          const dateA = new Date(a.data || 0);
+          const dateB = new Date(b.data || 0);
+          return dateB - dateA;
+        });
+        
+        const frag = document.createDocumentFragment();
+        
+        sorted.forEach(reuniao => {
+          const card = document.createElement('div');
+          card.className = 'reuniao-card';
+          card.onclick = () => viewReuniao(reuniao.id);
+          
+          const dataFormatada = reuniao.data ? new Date(reuniao.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          }) : 'Sem data';
+          
+          const resumoPreview = reuniao.resumo 
+            ? reuniao.resumo.substring(0, 150) + (reuniao.resumo.length > 150 ? '...' : '')
+            : '';
+          
+          card.innerHTML = `
+            <div class="reuniao-card-header">
+              <span class="reuniao-card-date">📅 ${dataFormatada}</span>
+              <div class="reuniao-card-actions">
+                <button onclick="event.stopPropagation(); editReuniao('${reuniao.id}')" title="Editar">✏️</button>
+                <button class="delete" onclick="event.stopPropagation(); deleteReuniao('${reuniao.id}')" title="Excluir">🗑️</button>
+              </div>
+            </div>
+            <div class="reuniao-card-objetivo">${escapeHtml(reuniao.objetivo || 'Sem objetivo definido')}</div>
+            <div class="reuniao-card-resumo ${!reuniao.resumo ? 'empty' : ''}">
+              ${reuniao.resumo ? escapeHtml(resumoPreview) : '📝 Resumo ainda não gerado'}
+            </div>
+            <div class="reuniao-card-footer">
+              <button class="reuniao-view-btn" onclick="event.stopPropagation(); viewReuniao('${reuniao.id}')">
+                🔍 Ver Resumo
+              </button>
+            </div>
+          `;
+          
+          frag.appendChild(card);
+        });
+        
+        grid.replaceChildren(frag);
+      };
+      
+      // Se skipLoad é true ou já temos dados locais, renderizar direto
+      if (skipLoad || reunioesInitialLoadDone) {
+        doRender();
+      } else {
+        // Primeiro acesso: carregar do Firebase
+        loadReunioesFromData().then(doRender);
+      }
+    }
+    window.renderReunioes = renderReunioes;
+
+    function openReuniaoModal(reuniaoId = null){
+      const modal = document.getElementById('reuniaoModal');
+      const titleEl = document.getElementById('reuniaoModalTitle');
+      const dataInput = document.getElementById('reuniaoData');
+      const objetivoInput = document.getElementById('reuniaoObjetivo');
+      const transcricaoInput = document.getElementById('reuniaoTranscricao');
+      
+      if(!modal) return;
+      
+      if(reuniaoId){
+        const reuniao = REUNIOES.find(r => r.id === reuniaoId);
+        if(reuniao){
+          currentEditingReuniao = reuniao;
+          titleEl.textContent = '✏️ Editar Reunião';
+          dataInput.value = reuniao.data || '';
+          objetivoInput.value = reuniao.objetivo || '';
+          transcricaoInput.value = reuniao.transcricao || '';
+        }
+      } else {
+        currentEditingReuniao = null;
+        titleEl.textContent = '📅 Nova Reunião';
+        dataInput.value = new Date().toISOString().split('T')[0];
+        objetivoInput.value = '';
+        transcricaoInput.value = '';
+      }
+      
+      modal.classList.add('show');
+    }
+    window.openReuniaoModal = openReuniaoModal;
+
+    function closeReuniaoModal(){
+      const modal = document.getElementById('reuniaoModal');
+      if(modal) modal.classList.remove('show');
+      currentEditingReuniao = null;
+    }
+    window.closeReuniaoModal = closeReuniaoModal;
+
+    // ========== GERAÇÃO AUTOMÁTICA DE TÍTULO DA REUNIÃO ==========
+    let tituloGeracaoTimeout = null;
+    let ultimaTranscricaoProcessada = '';
+    
+    async function gerarTituloReuniaoIA(transcricao) {
+      if (!transcricao || transcricao.length < 50) return null;
+      if (typeof window.callAIProxy !== 'function') return null;
+      
+      try {
+        const userId = auth?.currentUser?.uid || 'anonymous-' + Date.now();
+        
+        const messages = [
+          { 
+            role: 'system', 
+            content: 'Você gera títulos curtos e descritivos para reuniões. Responda APENAS com o título, sem aspas, sem explicações.' 
+          },
+          { 
+            role: 'user', 
+            content: `Leia o início desta transcrição de reunião e gere um TÍTULO CURTO (máximo 6 palavras) que descreva o assunto principal.
+
+Transcrição (início):
+${transcricao.substring(0, 1500)}
+
+Responda APENAS com o título. Exemplos de bons títulos:
+- Alinhamento de Campanhas Google Ads
+- Revisão de Metas Mensais
+- Planejamento de Conteúdo Janeiro
+- Feedback de Performance do Site
+- Definição de Estratégia de Tráfego` 
+          }
+        ];
+        
+        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 50, 0.3);
+        const titulo = data?.choices?.[0]?.message?.content?.trim();
+        
+        if (titulo && titulo.length > 3 && titulo.length < 80) {
+          // Limpar título de possíveis aspas ou prefixos
+          return titulo.replace(/^["']|["']$/g, '').replace(/^(título:|title:)/i, '').trim();
+        }
+        return null;
+      } catch (err) {
+        console.warn('Erro ao gerar título:', err);
+        return null;
+      }
+    }
+    
+    function setupTranscricaoAutoTitle() {
+      const transcricaoInput = document.getElementById('reuniaoTranscricao');
+      const objetivoInput = document.getElementById('reuniaoObjetivo');
+      
+      if (!transcricaoInput || !objetivoInput) return;
+      
+      // Listener para quando colar ou digitar no campo de transcrição
+      const handleTranscricaoChange = async (e) => {
+        const transcricao = transcricaoInput.value?.trim();
+        
+        // Só gera título se:
+        // 1. O campo objetivo estiver vazio
+        // 2. A transcrição tiver mais de 50 caracteres
+        // 3. A transcrição for diferente da última processada
+        if (objetivoInput.value?.trim() || !transcricao || transcricao.length < 50) return;
+        if (transcricao === ultimaTranscricaoProcessada) return;
+        
+        // Debounce para evitar chamadas excessivas
+        if (tituloGeracaoTimeout) clearTimeout(tituloGeracaoTimeout);
+        
+        tituloGeracaoTimeout = setTimeout(async () => {
+          ultimaTranscricaoProcessada = transcricao;
+          
+          // Mostrar indicador de loading
+          objetivoInput.placeholder = '🤖 Gerando título automaticamente...';
+          objetivoInput.style.opacity = '0.7';
+          
+          try {
+            const titulo = await gerarTituloReuniaoIA(transcricao);
+            
+            if (titulo && !objetivoInput.value?.trim()) {
+              objetivoInput.value = titulo;
+              objetivoInput.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+              setTimeout(() => {
+                objetivoInput.style.borderColor = '';
+              }, 2000);
+              mgToast('✨ Título gerado automaticamente!', 'success');
+            }
+          } catch (err) {
+            console.warn('Erro ao gerar título:', err);
+          } finally {
+            objetivoInput.placeholder = 'Ex: Alinhamento de metas do mês, Revisão de campanhas, etc.';
+            objetivoInput.style.opacity = '1';
+          }
+        }, 800); // Aguarda 800ms após parar de digitar/colar
+      };
+      
+      // Evento de paste (colar) - ação mais comum
+      transcricaoInput.addEventListener('paste', (e) => {
+        // Pequeno delay para o valor ser atualizado após o paste
+        setTimeout(() => handleTranscricaoChange(e), 100);
+      });
+      
+      // Evento de input para quando digitar
+      transcricaoInput.addEventListener('input', handleTranscricaoChange);
+    }
+    
+    // Inicializar quando a página carregar
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupTranscricaoAutoTitle);
+    } else {
+      setTimeout(setupTranscricaoAutoTitle, 500);
+    }
+    // ========== FIM - GERAÇÃO AUTOMÁTICA DE TÍTULO ==========
+
+    async function saveReuniao(){
+      const dataInput = document.getElementById('reuniaoData');
+      const objetivoInput = document.getElementById('reuniaoObjetivo');
+      const transcricaoInput = document.getElementById('reuniaoTranscricao');
+      const saveBtn = document.getElementById('reuniaoSaveBtn');
+      
+      const data = dataInput?.value?.trim();
+      const objetivo = objetivoInput?.value?.trim();
+      const transcricao = transcricaoInput?.value?.trim();
+      
+      if(!data){
+        mgToast('⚠️ Informe a data da reunião');
+        return;
+      }
+      
+      if(!objetivo){
+        mgToast('⚠️ Informe o objetivo da reunião');
+        return;
+      }
+      
+      if(!transcricao){
+        mgToast('⚠️ Cole a transcrição da reunião');
+        return;
+      }
+      
+      try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;margin-right:8px;"></div> Gerando resumo...';
+        
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
+        
+        // Gerar resumo com IA
+        let resumo = '';
+        try {
+          resumo = await generateReuniaoResumoIA(transcricao, objetivo);
+        } catch(err) {
+          console.error('Erro ao gerar resumo:', err);
+          mgToast('⚠️ Erro ao gerar resumo, mas a reunião será salva');
+        }
+        
+        if(currentEditingReuniao){
+          // Atualizar existente
+          const idx = REUNIOES.findIndex(r => r.id === currentEditingReuniao.id);
+          if(idx !== -1){
+            REUNIOES[idx] = {
+              ...REUNIOES[idx],
+              data,
+              objetivo,
+              transcricao,
+              resumo: resumo || REUNIOES[idx].resumo,
+              updatedAt: now
+            };
+          }
+        } else {
+          // Criar nova
+          const newReuniao = {
+            id: uuid(),
+            data,
+            objetivo,
+            transcricao,
+            resumo,
+            authorId: user?.uid || '',
+            authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+            createdAt: now,
+            updatedAt: now
+          };
+          REUNIOES.push(newReuniao);
+        }
+        
+        await persistReunioes();
+        closeReuniaoModal();
+        renderReunioes(true); // skipLoad = true para usar dados locais
+        mgToast('✅ Reunião salva com sucesso!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar reunião:', err);
+        mgToast('Erro ao salvar reunião: ' + (err.message || 'Erro desconhecido'));
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '💾 Salvar e Gerar Resumo';
+      }
+    }
+    window.saveReuniao = saveReuniao;
+
+    async function generateReuniaoResumoIA(transcricao, objetivo){
+      // Usar EXATAMENTE o mesmo método que funciona na aba de IA
+      if(typeof window.callAIProxy !== 'function'){
+        throw new Error('Função callAIProxy não disponível');
+      }
+      
+      const promptContent = `Você é um assistente ESPECIALISTA em documentar reuniões de negócios.
+
+Crie um RESUMO EXECUTIVO COMPLETO da reunião abaixo. O resumo deve ser claro, bem organizado e permitir que qualquer pessoa entenda o que foi discutido.
+
+**OBJETIVO DA REUNIÃO:** ${objetivo}
+
+**TRANSCRIÇÃO:**
+${transcricao.substring(0, 12000)}
+
+---
+
+GERE O RESUMO seguindo esta estrutura. Use formatação SIMPLES e LIMPA (sem headers ####, apenas negrito para títulos de seção):
+
+**📋 RESUMO GERAL**
+Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal.
+
+**📌 TÓPICOS DISCUTIDOS**
+Liste cada tópico abordado com uma breve descrição do que foi conversado. Use bullet points simples:
+- **Nome do tópico:** Descrição do que foi discutido sobre este ponto.
+- **Outro tópico:** Descrição...
+
+**✅ DECISÕES TOMADAS**
+Liste as decisões acordadas de forma clara:
+- Decisão 1 (responsável, se mencionado)
+- Decisão 2
+
+**📋 TAREFAS E RESPONSÁVEIS**
+Liste as ações definidas:
+- **Tarefa:** Descrição | Responsável: Nome | Prazo: Data (se definido)
+- **Tarefa:** Descrição | Responsável: Nome | Prazo: Data
+
+**📊 DADOS MENCIONADOS**
+Liste números, métricas ou valores citados:
+- Dado 1: valor/contexto
+- Dado 2: valor/contexto
+(Se não houver dados, escreva "Nenhum dado numérico mencionado")
+
+**⚠️ PROBLEMAS IDENTIFICADOS**
+- Problema ou desafio mencionado
+(Se não houver, escreva "Nenhum problema específico levantado")
+
+**💡 INSIGHTS IMPORTANTES**
+- Observações relevantes da conversa
+- Sugestões ou recomendações feitas
+
+**❓ PENDÊNCIAS**
+- Questões que ficaram em aberto
+- Pontos que precisam de follow-up
+
+**📅 PRÓXIMOS PASSOS**
+- Próximas ações ou reuniões definidas
+
+---
+
+REGRAS DE FORMATAÇÃO:
+1. NÃO use ### ou #### - apenas **texto em negrito** para títulos
+2. Use bullet points simples (-)
+3. Seja direto e objetivo
+4. Mantenha parágrafos curtos
+5. Se uma seção não tiver informação, escreva brevemente "Não mencionado"
+6. O resultado deve parecer um documento profissional e fácil de ler`;
+
+      // Formato de mensagens igual à aba de IA (OpenRouter/OpenAI format)
+      const messages = [
+        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais. Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
+        { role: 'user', content: promptContent }
+      ];
+      
+      // Determinar userId para a API:
+      // 1. Tentar auth.currentUser (usuário real logado)
+      // 2. Se não existir, usar userId do parent window (para iframes)
+      // 3. Como último recurso, usar 'rate-limit-only'
+      let userId = null;
+      
+      // Tentar obter do auth local
+      if (auth && auth.currentUser && auth.currentUser.uid) {
+        userId = auth.currentUser.uid;
+        console.log('🤖 [Reunião/IA] userId do auth.currentUser:', userId);
+      }
+      // Tentar obter do parent (modo iframe admin)
+      else if (window.parent && window.parent !== window) {
+        try {
+          const parentAuth = window.parent.auth;
+          if (parentAuth && parentAuth.currentUser) {
+            userId = parentAuth.currentUser.uid;
+            console.log('🤖 [Reunião/IA] userId do parent.auth:', userId);
+          }
+        } catch(e) {
+          console.log('🤖 [Reunião/IA] Não conseguiu acessar parent auth');
+        }
+      }
+      
+      // Fallback para rate-limit-only (backend aceita para rate limiting)
+      if (!userId) {
+        userId = 'anonymous-' + Date.now();
+        console.log('🤖 [Reunião/IA] Usando userId fallback:', userId);
+      }
+      
+      console.log('🤖 [Reunião/IA] Chamando callAIProxy com userId:', userId);
+      
+      // CHAMADA COM MAX_TOKENS AUMENTADO para resumo detalhado
+      // max_tokens: 4096 permite resumos bem mais longos e detalhados
+      const data = await window.callAIProxy(window.IA_CONFIG.model, messages, userId, 4096, 0.3);
+      
+      console.log('🤖 [Reunião/IA] Resposta recebida:', data);
+      
+      // Extrair resposta no formato OpenRouter/OpenAI
+      const resumo = data?.choices?.[0]?.message?.content;
+      
+      if(resumo){
+        console.log('🤖 [Reunião/IA] Resumo gerado com sucesso! (' + resumo.length + ' chars)');
+        return resumo;
+      }
+      
+      throw new Error('Resposta inválida da IA');
+    }
+
+    function viewReuniao(reuniaoId){
+      const reuniao = REUNIOES.find(r => r.id === reuniaoId);
+      if(!reuniao) return;
+      
+      currentViewingReuniao = reuniao;
+      
+      const modal = document.getElementById('reuniaoViewModal');
+      const dataEl = document.getElementById('reuniaoViewData');
+      const objetivoEl = document.getElementById('reuniaoViewObjetivo');
+      const resumoEl = document.getElementById('reuniaoViewResumo');
+      const transcricaoEl = document.getElementById('reuniaoViewTranscricao');
+      const generatingEl = document.getElementById('reuniaoViewGenerating');
+      
+      if(!modal) return;
+      
+      const dataFormatada = reuniao.data ? new Date(reuniao.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }) : 'Sem data';
+      
+      dataEl.textContent = dataFormatada;
+      objetivoEl.textContent = reuniao.objetivo || 'Sem objetivo definido';
+      
+      if(reuniao.resumo){
+        resumoEl.innerHTML = formatResumoForDisplay(reuniao.resumo);
+        generatingEl.style.display = 'none';
+        resumoEl.style.display = 'block';
+      } else {
+        resumoEl.style.display = 'none';
+        generatingEl.style.display = 'flex';
+        
+        // Gerar resumo automaticamente se não existir
+        generateReuniaoResumoIA(reuniao.transcricao, reuniao.objetivo).then(resumo => {
+          const idx = REUNIOES.findIndex(r => r.id === reuniaoId);
+          if(idx !== -1){
+            REUNIOES[idx].resumo = resumo;
+            REUNIOES[idx].updatedAt = new Date().toISOString();
+            persistReunioes();
+          }
+          resumoEl.innerHTML = formatResumoForDisplay(resumo);
+          generatingEl.style.display = 'none';
+          resumoEl.style.display = 'block';
+          renderReunioes(true); // skipLoad = true após persistir
+        }).catch(err => {
+          console.error('Erro ao gerar resumo:', err);
+          resumoEl.innerHTML = '<p style="color:#ef4444;">Erro ao gerar resumo. Tente novamente.</p>';
+          generatingEl.style.display = 'none';
+          resumoEl.style.display = 'block';
+        });
+      }
+      
+      transcricaoEl.textContent = reuniao.transcricao || 'Transcrição não disponível';
+      
+      modal.classList.add('show');
+    }
+    window.viewReuniao = viewReuniao;
+
+    function formatResumoForDisplay(resumo){
+      if(!resumo) return '';
+      
+      // Converter markdown para HTML formatado - formatação limpa e profissional
+      let html = resumo
+        // Remover headers #### e ### - converter para negrito simples
+        .replace(/^#{1,4}\s*(.*?)$/gm, '<strong style="color:#60a5fa;display:block;margin:16px 0 8px;font-size:1rem;">$1</strong>')
+        // Bold **text** - títulos de seção com emoji ficam destacados
+        .replace(/\*\*(📋|📌|✅|📊|⚠️|💡|❓|📅|💼)(.*?)\*\*/g, '<div style="color:#60a5fa;font-weight:600;margin:20px 0 10px;font-size:1.02rem;border-bottom:1px solid rgba(96,165,250,0.2);padding-bottom:6px;">$1$2</div>')
+        // Bold **text** normal
+        .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#f1f5f9;">$1</strong>')
+        // Italic *text*
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Bullet points - text
+        .replace(/^- (.*?)$/gm, '<div style="display:flex;align-items:flex-start;gap:8px;margin:5px 0;padding-left:4px;"><span style="color:#60a5fa;">•</span><span>$1</span></div>')
+        // Indented bullet points (2+ spaces)
+        .replace(/^\s{2,}- (.*?)$/gm, '<div style="display:flex;align-items:flex-start;gap:8px;margin:3px 0;padding-left:20px;"><span style="color:#94a3b8;">◦</span><span style="color:#cbd5e1;font-size:0.92em;">$1</span></div>')
+        // Double newlines = paragraph break
+        .replace(/\n\n/g, '<div style="margin:10px 0;"></div>')
+        // Single newlines
+        .replace(/\n/g, '<br>');
+      
+      // Wrap in container
+      html = '<div style="line-height:1.75;color:#e2e8f0;">' + html + '</div>';
+      
+      return html;
+    }
+
+    function closeReuniaoViewModal(){
+      const modal = document.getElementById('reuniaoViewModal');
+      if(modal) modal.classList.remove('show');
+      currentViewingReuniao = null;
+    }
+    window.closeReuniaoViewModal = closeReuniaoViewModal;
+
+    async function regenerateReuniaoResumo(){
+      if(!currentViewingReuniao) return;
+      
+      const btn = document.getElementById('regenerateResumoBtn');
+      const resumoEl = document.getElementById('reuniaoViewResumo');
+      const generatingEl = document.getElementById('reuniaoViewGenerating');
+      
+      try {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Regenerando...';
+        resumoEl.style.display = 'none';
+        generatingEl.style.display = 'flex';
+        
+        const resumo = await generateReuniaoResumoIA(
+          currentViewingReuniao.transcricao, 
+          currentViewingReuniao.objetivo
+        );
+        
+        const idx = REUNIOES.findIndex(r => r.id === currentViewingReuniao.id);
+        if(idx !== -1){
+          REUNIOES[idx].resumo = resumo;
+          REUNIOES[idx].updatedAt = new Date().toISOString();
+          await persistReunioes();
+        }
+        
+        resumoEl.innerHTML = formatResumoForDisplay(resumo);
+        generatingEl.style.display = 'none';
+        resumoEl.style.display = 'block';
+        renderReunioes(true); // skipLoad = true após persistir
+        mgToast('✅ Resumo regenerado!');
+        
+      } catch(err) {
+        console.error('Erro ao regenerar resumo:', err);
+        mgToast('Erro ao regenerar resumo');
+        generatingEl.style.display = 'none';
+        resumoEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔄 Regenerar Resumo';
+      }
+    }
+    window.regenerateReuniaoResumo = regenerateReuniaoResumo;
+
+    // ========== CONVERSÃO PARA FORMATO WHATSAPP ==========
+    function converterParaFormatoWhatsApp(texto) {
+      if (!texto) return '';
+      
+      let wpp = texto
+        // Remover headers markdown (##, ###, ####) e converter para negrito WhatsApp
+        .replace(/^#{1,4}\s*(.+)$/gm, '*$1*')
+        
+        // Converter **texto** (negrito markdown) para *texto* (negrito WhatsApp)
+        .replace(/\*\*(.+?)\*\*/g, '*$1*')
+        
+        // Manter emojis de seção em negrito
+        .replace(/^\*(📋|📌|✅|📊|⚠️|💡|❓|📅|💼)(.+?)\*$/gm, '*$1$2*')
+        
+        // Converter _texto_ ou *texto* (itálico markdown) para _texto_ (itálico WhatsApp)
+        // Cuidado para não converter negrito já convertido
+        .replace(/(?<!\*)_(.+?)_(?!\*)/g, '_$1_')
+        
+        // Converter listas com - para • (mais visual no WhatsApp)
+        .replace(/^[\s]*[-•]\s*/gm, '• ')
+        
+        // Converter sublistas com espaços para indentação visual
+        .replace(/^(\s{2,})•\s*/gm, '   ◦ ')
+        
+        // Limpar espaços extras no início das linhas
+        .replace(/^\s+(?=\S)/gm, '');
+      
+      // GARANTIR ESPAÇAMENTO ANTES DOS TÍTULOS DE SEÇÃO (emojis)
+      // Adiciona linha em branco ANTES de cada título com emoji
+      wpp = wpp.replace(/([^\n])\n(\*[📋📌✅📊⚠️💡❓📅💼])/g, '$1\n\n$2');
+      
+      // Garantir espaçamento DEPOIS dos títulos de seção
+      wpp = wpp.replace(/(\*[📋📌✅📊⚠️💡❓📅💼][^*]+\*)\n(?!\n)/g, '$1\n');
+      
+      // Remover múltiplas quebras de linha (máximo 2)
+      wpp = wpp.replace(/\n{3,}/g, '\n\n');
+      
+      return wpp.trim();
+    }
+
+    function copyReuniaoResumo(){
+      if(!currentViewingReuniao?.resumo) {
+        mgToast('⚠️ Nenhum resumo para copiar');
+        return;
+      }
+      
+      // Montar texto base
+      const textoBase = `📅 *RESUMO DA REUNIÃO*\n\n` +
+        `*Data:* ${currentViewingReuniao.data ? new Date(currentViewingReuniao.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não definida'}\n` +
+        `*Título:* ${currentViewingReuniao.objetivo || 'Não definido'}\n\n` +
+        `${currentViewingReuniao.resumo}`;
+      
+      // Converter para formato WhatsApp
+      const textoWhatsApp = converterParaFormatoWhatsApp(textoBase);
+      
+      navigator.clipboard.writeText(textoWhatsApp).then(() => {
+        mgToast('✅ Resumo copiado no formato WhatsApp!');
+      }).catch(() => {
+        mgToast('Erro ao copiar');
+      });
+    }
+    window.copyReuniaoResumo = copyReuniaoResumo;
+
+    function editReuniao(reuniaoId){
+      openReuniaoModal(reuniaoId);
+    }
+    window.editReuniao = editReuniao;
+
+    async function deleteReuniao(reuniaoId){
+      if(!confirm('Tem certeza que deseja excluir esta reunião?')) return;
+      
+      try {
+        REUNIOES = REUNIOES.filter(r => r.id !== reuniaoId);
+        await persistReunioes();
+        renderReunioes(true); // skipLoad = true após persistir
+        mgToast('✅ Reunião excluída');
+      } catch(err) {
+        console.error('Erro ao excluir reunião:', err);
+        mgToast('Erro ao excluir reunião');
+      }
+    }
+    window.deleteReuniao = deleteReuniao;
+
+    // ========== CHAT IA PARA CONSULTAR REUNIÕES ==========
+    let reunioesChatHistory = [];
+    let reunioesAllChats = []; // Array de todas as conversas salvas
+    let reunioesCurrentChatId = null; // ID da conversa atual
+    
+    function updateReunioesChatStats() {
+      // Atualizar contadores
+      const countEl = document.getElementById('reunioesChatCount');
+      const countSidebarEl = document.getElementById('reunioesChatCountSidebar');
+      if (countEl) countEl.textContent = REUNIOES.length;
+      if (countSidebarEl) countSidebarEl.textContent = REUNIOES.length;
+      
+      // Mostrar/ocultar seção de chat baseado em se há reuniões
+      const chatSection = document.getElementById('reunioesChatSection');
+      if (chatSection) {
+        chatSection.style.display = REUNIOES.length > 0 ? 'flex' : 'none';
+      }
+      
+      // Carregar conversas salvas
+      loadReunioesChatsFromStorage();
+    }
+    
+    function loadReunioesChatsFromStorage() {
+      try {
+        const saved = localStorage.getItem('reunioesChats');
+        if (saved) {
+          reunioesAllChats = JSON.parse(saved);
+          renderReunioesChatHistoryList();
+        } else {
+          renderReunioesChatHistoryList();
+        }
+      } catch(e) {
+        console.error('Erro ao carregar histórico de chats:', e);
+        renderReunioesChatHistoryList();
+      }
+    }
+    
+    function saveReunioesChatsToStorage() {
+      try {
+        localStorage.setItem('reunioesChats', JSON.stringify(reunioesAllChats));
+      } catch(e) {
+        console.error('Erro ao salvar histórico de chats:', e);
+      }
+    }
+    
+    function renderReunioesChatHistoryList() {
+      const listEl = document.getElementById('reunioesChatHistoryList');
+      if (!listEl) return;
+      
+      if (reunioesAllChats.length === 0) {
+        listEl.innerHTML = `
+          <div class="reunioes-chat-sidebar-empty">
+            <div class="reunioes-chat-sidebar-empty-icon">💬</div>
+            <p>Suas conversas aparecerão aqui</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Ordenar por data (mais recentes primeiro)
+      const sortedChats = [...reunioesAllChats].sort((a, b) => b.updatedAt - a.updatedAt);
+      
+      listEl.innerHTML = sortedChats.map(chat => {
+        const date = new Date(chat.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const isActive = chat.id === reunioesCurrentChatId;
+        return `
+          <div class="reunioes-chat-history-item ${isActive ? 'active' : ''}" onclick="loadReuniaoChat('${chat.id}')">
+            <span class="reunioes-chat-history-item-icon">💬</span>
+            <div class="reunioes-chat-history-item-content">
+              <div class="reunioes-chat-history-item-title">${chat.title || 'Nova conversa'}</div>
+              <div class="reunioes-chat-history-item-date">${date}</div>
+            </div>
+            <div class="reunioes-chat-history-item-actions">
+              <button type="button" class="reunioes-chat-history-item-btn delete" onclick="event.stopPropagation(); deleteReuniaoChat('${chat.id}')" title="Excluir">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function toggleReunioesChatSidebar() {
+      const sidebar = document.getElementById('reunioesChatSidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('collapsed');
+        // Em mobile, usar classe open
+        if (window.innerWidth <= 768) {
+          sidebar.classList.toggle('open');
+        }
+      }
+    }
+    window.toggleReunioesChatSidebar = toggleReunioesChatSidebar;
+    
+    function startNewReuniaoChat() {
+      // Salvar conversa atual se tiver mensagens
+      if (reunioesChatHistory.length > 0) {
+        saveCurrentReuniaoChat();
+      }
+      
+      // Criar nova conversa
+      reunioesCurrentChatId = 'chat_' + Date.now();
+      reunioesChatHistory = [];
+      
+      // Resetar UI
+      const messagesEl = document.getElementById('reunioesChatMessages');
+      if (messagesEl) {
+        messagesEl.innerHTML = `
+          <div class="reunioes-chat-welcome">
+            <div class="reunioes-chat-welcome-icon">🤖</div>
+            <h4>Assistente de Reuniões</h4>
+            <p>Pergunte sobre qualquer assunto discutido nas suas reuniões</p>
+            <div class="reunioes-chat-suggestions">
+              <button onclick="askReuniaoSuggestion('Quais foram as principais decisões tomadas?')">📋 Principais decisões</button>
+              <button onclick="askReuniaoSuggestion('Quais tarefas ficaram pendentes?')">⏳ Tarefas pendentes</button>
+              <button onclick="askReuniaoSuggestion('Resuma os principais tópicos discutidos')">📌 Tópicos discutidos</button>
+              <button onclick="askReuniaoSuggestion('Quais problemas foram identificados?')">⚠️ Problemas</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Atualizar lista para remover seleção ativa
+      renderReunioesChatHistoryList();
+      
+      // Fechar sidebar em mobile
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('reunioesChatSidebar');
+        if (sidebar) sidebar.classList.remove('open');
+      }
+    }
+    window.startNewReuniaoChat = startNewReuniaoChat;
+    
+    function saveCurrentReuniaoChat() {
+      if (reunioesChatHistory.length === 0) return;
+      
+      // Gerar título baseado na primeira pergunta
+      const firstUserMsg = reunioesChatHistory.find(m => m.role === 'user');
+      const title = firstUserMsg ? firstUserMsg.content.substring(0, 40) + (firstUserMsg.content.length > 40 ? '...' : '') : 'Nova conversa';
+      
+      // Verificar se já existe
+      const existingIndex = reunioesAllChats.findIndex(c => c.id === reunioesCurrentChatId);
+      
+      const chatData = {
+        id: reunioesCurrentChatId || 'chat_' + Date.now(),
+        title: title,
+        messages: [...reunioesChatHistory],
+        createdAt: existingIndex >= 0 ? reunioesAllChats[existingIndex].createdAt : Date.now(),
+        updatedAt: Date.now()
+      };
+      
+      if (existingIndex >= 0) {
+        reunioesAllChats[existingIndex] = chatData;
+      } else {
+        reunioesAllChats.unshift(chatData); // Adicionar no início
+      }
+      
+      // Limitar a 30 conversas
+      if (reunioesAllChats.length > 30) {
+        reunioesAllChats = reunioesAllChats.slice(0, 30);
+      }
+      
+      saveReunioesChatsToStorage();
+      renderReunioesChatHistoryList();
+    }
+    
+    function loadReuniaoChat(chatId) {
+      // Salvar conversa atual primeiro
+      if (reunioesChatHistory.length > 0) {
+        saveCurrentReuniaoChat();
+      }
+      
+      const chat = reunioesAllChats.find(c => c.id === chatId);
+      if (!chat) {
+        mgToast('❌ Conversa não encontrada');
+        return;
+      }
+      
+      reunioesCurrentChatId = chatId;
+      reunioesChatHistory = [...chat.messages];
+      
+      // Renderizar mensagens
+      const messagesEl = document.getElementById('reunioesChatMessages');
+      if (messagesEl) {
+        messagesEl.innerHTML = '';
+        chat.messages.forEach(msg => {
+          renderReunioesChatMessage(msg.role, msg.content);
+        });
+      }
+      
+      // Atualizar lista para mostrar item ativo
+      renderReunioesChatHistoryList();
+      
+      // Fechar sidebar em mobile
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('reunioesChatSidebar');
+        if (sidebar) sidebar.classList.remove('open');
+      }
+    }
+    window.loadReuniaoChat = loadReuniaoChat;
+    
+    function deleteReuniaoChat(chatId) {
+      if (!confirm('Excluir esta conversa?')) return;
+      
+      reunioesAllChats = reunioesAllChats.filter(c => c.id !== chatId);
+      saveReunioesChatsToStorage();
+      renderReunioesChatHistoryList();
+      
+      // Se deletou a conversa atual, iniciar nova
+      if (chatId === reunioesCurrentChatId) {
+        reunioesCurrentChatId = null;
+        reunioesChatHistory = [];
+        startNewReuniaoChat();
+      }
+      
+      mgToast('🗑️ Conversa excluída');
+    }
+    window.deleteReuniaoChat = deleteReuniaoChat;
+    
+    function buildReunioesContext() {
+      if (!REUNIOES || REUNIOES.length === 0) {
+        return 'Não há reuniões registradas.';
+      }
+      
+      // Ordenar por data (mais recentes primeiro)
+      const reunioesOrdenadas = [...REUNIOES].sort((a, b) => {
+        return new Date(b.data || 0) - new Date(a.data || 0);
+      });
+      
+      // Construir contexto com todas as transcrições
+      let contexto = `BANCO DE DADOS DE REUNIÕES (${REUNIOES.length} reuniões):\n\n`;
+      
+      reunioesOrdenadas.forEach((r, idx) => {
+        const dataFormatada = r.data ? new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+        contexto += `═══════════════════════════════════════\n`;
+        contexto += `📅 REUNIÃO ${idx + 1}: ${r.objetivo || 'Sem título'}\n`;
+        contexto += `Data: ${dataFormatada}\n`;
+        contexto += `───────────────────────────────────────\n`;
+        contexto += `TRANSCRIÇÃO COMPLETA:\n${r.transcricao || 'Sem transcrição'}\n`;
+        if (r.resumo) {
+          contexto += `───────────────────────────────────────\n`;
+          contexto += `RESUMO GERADO:\n${r.resumo}\n`;
+        }
+        contexto += `\n`;
+      });
+      
+      return contexto;
+    }
+    
+    function renderReunioesChatMessage(role, content) {
+      const messagesEl = document.getElementById('reunioesChatMessages');
+      if (!messagesEl) return;
+      
+      // Remover welcome se existir
+      const welcome = messagesEl.querySelector('.reunioes-chat-welcome');
+      if (welcome) welcome.remove();
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `reunioes-chat-message ${role}`;
+      
+      const avatar = role === 'user' ? '👤' : '🤖';
+      
+      // Formatar conteúdo (converter markdown básico)
+      let formattedContent = content
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      
+      formattedContent = '<p>' + formattedContent + '</p>';
+      
+      messageDiv.innerHTML = `
+        <div class="reunioes-chat-message-avatar">${avatar}</div>
+        <div class="reunioes-chat-message-content">${formattedContent}</div>
+      `;
+      
+      messagesEl.appendChild(messageDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    
+    function showReunioesChatLoading() {
+      const messagesEl = document.getElementById('reunioesChatMessages');
+      if (!messagesEl) return;
+      
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'reunioes-chat-loading';
+      loadingDiv.id = 'reunioesChatLoading';
+      loadingDiv.innerHTML = `
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span>Analisando reuniões...</span>
+      `;
+      messagesEl.appendChild(loadingDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    
+    function hideReunioesChatLoading() {
+      const loading = document.getElementById('reunioesChatLoading');
+      if (loading) loading.remove();
+    }
+    
+    async function sendReuniaoChat() {
+      const input = document.getElementById('reunioesChatInput');
+      const sendBtn = document.getElementById('reunioesChatSendBtn');
+      
+      const pergunta = input?.value?.trim();
+      if (!pergunta) return;
+      
+      if (REUNIOES.length === 0) {
+        mgToast('⚠️ Nenhuma reunião registrada para consultar');
+        return;
+      }
+      
+      if (typeof window.callAIProxy !== 'function') {
+        mgToast('❌ Serviço de IA não disponível');
+        return;
+      }
+      
+      // Renderizar pergunta do usuário
+      renderReunioesChatMessage('user', pergunta);
+      
+      // Limpar input e desabilitar
+      input.value = '';
+      input.disabled = true;
+      sendBtn.disabled = true;
+      
+      // Mostrar loading
+      showReunioesChatLoading();
+      
+      try {
+        const userId = auth?.currentUser?.uid || 'anonymous-' + Date.now();
+        
+        // Construir contexto com todas as transcrições
+        const contextoReunioes = buildReunioesContext();
+        
+        // Construir histórico de conversa (últimas 6 mensagens)
+        const historicoRecente = reunioesChatHistory.slice(-6);
+        
+        const messages = [
+          {
+            role: 'system',
+            content: `Você é um assistente especializado em analisar reuniões de negócios. 
+            
+Você tem acesso a um banco de dados com TODAS as transcrições das reuniões registradas. Use essas informações para responder às perguntas do usuário.
+
+REGRAS:
+1. Baseie suas respostas EXCLUSIVAMENTE nas informações das reuniões fornecidas
+2. Cite datas e contextos específicos quando possível
+3. Se a informação não estiver nas reuniões, diga claramente
+4. Seja objetivo e organize as respostas com bullet points quando apropriado
+5. Use negrito para destacar pontos importantes
+
+${contextoReunioes}`
+          },
+          ...historicoRecente,
+          {
+            role: 'user',
+            content: pergunta
+          }
+        ];
+        
+        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 2048, 0.3);
+        const resposta = data?.choices?.[0]?.message?.content;
+        
+        hideReunioesChatLoading();
+        
+        if (resposta) {
+          renderReunioesChatMessage('assistant', resposta);
+          
+          // Salvar no histórico
+          reunioesChatHistory.push({ role: 'user', content: pergunta });
+          reunioesChatHistory.push({ role: 'assistant', content: resposta });
+          
+          // Manter histórico limitado
+          if (reunioesChatHistory.length > 40) {
+            reunioesChatHistory = reunioesChatHistory.slice(-40);
+          }
+          
+          // Salvar conversa automaticamente
+          saveCurrentReuniaoChat();
+        } else {
+          renderReunioesChatMessage('assistant', 'Desculpe, não consegui processar sua pergunta. Tente novamente.');
+        }
+        
+      } catch (err) {
+        console.error('Erro no chat de reuniões:', err);
+        hideReunioesChatLoading();
+        renderReunioesChatMessage('assistant', '❌ Erro ao processar sua pergunta. Verifique sua conexão e tente novamente.');
+      } finally {
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+    window.sendReuniaoChat = sendReuniaoChat;
+    
+    function askReuniaoSuggestion(pergunta) {
+      const input = document.getElementById('reunioesChatInput');
+      if (input) {
+        input.value = pergunta;
+        sendReuniaoChat();
+      }
+    }
+    window.askReuniaoSuggestion = askReuniaoSuggestion;
+    
+    function clearReunioesChatHistory() {
+      // Salvar conversa atual antes de limpar
+      saveCurrentReuniaoChat();
+      
+      // Iniciar nova conversa
+      startNewReuniaoChat();
+    }
+    window.clearReunioesChatHistory = clearReunioesChatHistory;
+    
+    // Atualizar stats quando renderizar reuniões
+    const originalRenderReunioes = window.renderReunioes;
+    window.renderReunioes = function(skipLoad) {
+      if (originalRenderReunioes) originalRenderReunioes(skipLoad);
+      updateReunioesChatStats();
+    };
+    // ========== FIM CHAT IA REUNIÕES ==========
+
+    /* ========= FIM REUNIÕES ========= */
 
     /* ========= Relatório ========= */
   let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
@@ -48252,43 +50435,24 @@ ${escapeHtml(prompt)}
     // ===== NOVOS GRÁFICOS: DIAGNÓSTICO ESTRATÉGICO COMPLETO =====
     
     // Função para chamar a IA via OpenRouter (aiProxy) - protege a API key no backend
+    // Agora usa window.callAIProxy que tem fallback automático
     async function callGeminiAPI(prompt) {
-      const AI_PROXY_URL = 'https://us-central1-mediagrowth-a5349.cloudfunctions.net/aiProxy';
-      
       try {
         // Obter userId para rate limiting (usa auth modular do Firebase)
         const userId = (auth && auth.currentUser) ? auth.currentUser.uid : 'anonymous-' + Date.now();
         
-        console.log('🤖 [IA/OpenRouter] Enviando requisição para proxy...');
+        console.log('🤖 [IA/OpenRouter] Enviando requisição via callAIProxy...');
         console.log('🤖 [IA/OpenRouter] userId:', userId);
         console.log('🤖 [IA/OpenRouter] Tamanho do prompt:', prompt?.length || 0, 'caracteres');
         
-        // OpenRouter usa formato de mensagens (compatível com OpenAI)
-        const response = await fetch(AI_PROXY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash', // Gemini via OpenRouter
-            messages: [
-              { role: 'user', content: prompt }
-            ],
-            userId: userId,
-            temperature: 0.3,
-            max_tokens: 8192
-          })
-        });
-        
-        console.log('🤖 [IA/OpenRouter] Status da resposta:', response.status, response.statusText);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('🤖 [IA/OpenRouter] Erro do proxy:', response.status, errorText);
-          return null;
-        }
-        
-        const data = await response.json();
+        // Usar callAIProxy que tem fallback para múltiplas URLs
+        const data = await window.callAIProxy(
+          'google/gemini-2.5-flash',
+          [{ role: 'user', content: prompt }],
+          userId,
+          8192,
+          0.3
+        );
         
         // OpenRouter retorna no formato OpenAI: choices[0].message.content
         const text = data?.choices?.[0]?.message?.content;
@@ -48302,6 +50466,10 @@ ${escapeHtml(prompt)}
         return null;
       } catch (error) {
         console.error('🤖 [IA/OpenRouter] Erro na requisição:', error);
+        // Mostrar toast com mensagem amigável se for erro de API key
+        if (error.isAPIKeyError && typeof mgToast === 'function') {
+          mgToast(error.message, 'error');
+        }
         return null;
       }
     }

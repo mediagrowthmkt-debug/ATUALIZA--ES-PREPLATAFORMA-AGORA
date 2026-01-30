@@ -252,6 +252,22 @@ service cloud.firestore {
         );
       }
 
+      /* ✅ REUNIÕES: Subcoleção para salvar reuniões com transcrições e resumos IA */
+      /* Documento único: /usuarios/{userId}/reunioes/data */
+      match /reunioes/{docId} {
+        // O dono pode ler e escrever suas próprias reuniões
+        allow read, write: if isOwner(userId);
+        
+        // Admin também tem acesso total
+        allow read, write: if isAdmin();
+        
+        // Agências podem acessar se tiverem o mesmo agencyId
+        allow read, write: if isAgency() && (
+          (exists(resource) && 'agencyId' in resource.data && sameAgencyData(resource.data)) ||
+          ('agencyId' in request.resource.data && sameAgencyReq(request.resource.data))
+        );
+      }
+
       /* ✅ TIME (global): /usuarios/{userId}/team/{memberId} */
       match /team/{memberId} {
         allow read: if isOwner(userId)
