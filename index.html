@@ -29858,10 +29858,13 @@ REGRAS DE FORMATAÇÃO:
       // Converter para formato WhatsApp
       const textoWhatsApp = converterParaFormatoWhatsApp(textoBase);
       
-      navigator.clipboard.writeText(textoWhatsApp).then(() => {
-        mgToast('✅ Resumo copiado no formato WhatsApp!');
-      }).catch(() => {
-        mgToast('Erro ao copiar');
+      // Usar mgCopyToClipboard para suporte a iframe
+      mgCopyToClipboard(textoWhatsApp).then(success => {
+        if (success) {
+          mgToast('✅ Resumo copiado no formato WhatsApp!');
+        } else {
+          mgToast('Erro ao copiar');
+        }
       });
     }
     window.copyReuniaoResumo = copyReuniaoResumo;
@@ -30516,25 +30519,27 @@ TÍTULO:` }];
       
       const whatsappText = convertToWhatsAppFormat(originalContent);
       
-      navigator.clipboard.writeText(whatsappText).then(() => {
-        mgToast('✅ Copiado para WhatsApp!');
-        
-        // Feedback visual no botão
-        const btn = messageDiv.querySelector('.reunioes-chat-copy-btn');
-        if (btn) {
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '✅ Copiado!';
-          btn.style.background = 'rgba(34, 197, 94, 0.2)';
-          btn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.background = '';
-            btn.style.borderColor = '';
-          }, 2000);
+      // Usar mgCopyToClipboard para suporte a iframe
+      mgCopyToClipboard(whatsappText).then(success => {
+        if (success) {
+          mgToast('✅ Copiado para WhatsApp!');
+          
+          // Feedback visual no botão
+          const btn = messageDiv.querySelector('.reunioes-chat-copy-btn');
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado!';
+            btn.style.background = 'rgba(34, 197, 94, 0.2)';
+            btn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.style.background = '';
+              btn.style.borderColor = '';
+            }, 2000);
+          }
+        } else {
+          mgToast('❌ Erro ao copiar');
         }
-      }).catch(err => {
-        console.error('Erro ao copiar:', err);
-        mgToast('❌ Erro ao copiar');
       });
     }
     window.copyReunioesChatMessage = copyReunioesChatMessage;
@@ -30555,23 +30560,25 @@ TÍTULO:` }];
       
       const whatsappText = convertToWhatsAppFormat(blockContent);
       
-      navigator.clipboard.writeText(whatsappText).then(() => {
-        mgToast('✅ Trecho copiado!');
-        
-        // Feedback visual no botão
-        const btn = blockDiv.querySelector('.reunioes-chat-copy-line-btn');
-        if (btn) {
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '✅';
-          btn.style.background = 'rgba(34, 197, 94, 0.3)';
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.background = '';
-          }, 1500);
+      // Usar mgCopyToClipboard para suporte a iframe
+      mgCopyToClipboard(whatsappText).then(success => {
+        if (success) {
+          mgToast('✅ Trecho copiado!');
+          
+          // Feedback visual no botão
+          const btn = blockDiv.querySelector('.reunioes-chat-copy-line-btn');
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅';
+            btn.style.background = 'rgba(34, 197, 94, 0.3)';
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.style.background = '';
+            }, 1500);
+          }
+        } else {
+          mgToast('❌ Erro ao copiar');
         }
-      }).catch(err => {
-        console.error('Erro ao copiar:', err);
-        mgToast('❌ Erro ao copiar');
       });
     }
     window.copyReunioesChatLine = copyReunioesChatLine;
