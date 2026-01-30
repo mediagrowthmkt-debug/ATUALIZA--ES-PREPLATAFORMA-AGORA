@@ -9425,11 +9425,14 @@ function renderReviewNotes(post){
     min-width:0;
   }
   .reunioes-chat-history-item-title{
-    font-size:0.85rem;
+    font-size:0.82rem;
     color:#e2e8f0;
-    white-space:nowrap;
+    line-height:1.3;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
     overflow:hidden;
-    text-overflow:ellipsis;
+    word-break:break-word;
   }
   .reunioes-chat-history-item-date{
     font-size:0.7rem;
@@ -9611,11 +9614,115 @@ function renderReviewNotes(post){
   .reunioes-chat-message-content strong{
     color:#60a5fa;
   }
+  /* Botão Copiar - Tudo */
+  .reunioes-chat-copy-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:12px;
+    padding:8px 14px;
+    background:rgba(99,102,241,0.1);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:8px;
+    color:#94a3b8;
+    font-size:0.8rem;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .reunioes-chat-copy-btn:hover{
+    background:rgba(99,102,241,0.2);
+    border-color:rgba(99,102,241,0.5);
+    color:#e2e8f0;
+  }
+  /* Bloco de resposta com botão copiar */
+  .reunioes-chat-block{
+    position:relative;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:8px 10px;
+    margin:4px -10px;
+    border-radius:8px;
+    transition:background 0.2s;
+  }
+  .reunioes-chat-block:hover{
+    background:rgba(99,102,241,0.08);
+  }
+  .reunioes-chat-block-content{
+    flex:1;
+  }
+  .reunioes-chat-block-content p{ margin:0; }
+  .reunioes-chat-block-content ul{ margin:4px 0; padding-left:20px; }
+  .reunioes-chat-block-content li{ margin:2px 0; }
+  /* Botão copiar linha */
+  .reunioes-chat-copy-line-btn{
+    flex-shrink:0;
+    padding:4px 6px;
+    background:rgba(99,102,241,0.15);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:6px;
+    color:#94a3b8;
+    font-size:0.7rem;
+    cursor:pointer;
+    transition:all 0.2s;
+    opacity:0.4;
+  }
+  .reunioes-chat-block:hover .reunioes-chat-copy-line-btn{
+    opacity:1;
+  }
+  .reunioes-chat-copy-line-btn:hover{
+    background:rgba(99,102,241,0.3);
+    border-color:rgba(99,102,241,0.5);
+    color:#e2e8f0;
+    transform:scale(1.05);
+  }
+  /* Container copiar tudo */
+  .reunioes-chat-copy-all{
+    margin-top:16px;
+    padding-top:12px;
+    border-top:1px solid rgba(99,102,241,0.15);
+  }
   /* Input */
   .reunioes-chat-input-container{
-    padding:16px 20px 20px;
+    padding:12px 20px 20px;
     background:rgba(15,23,42,0.8);
     border-top:1px solid rgba(99,102,241,0.15);
+  }
+  .reunioes-chat-filter-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+    padding:0 4px;
+  }
+  .reunioes-chat-filter-row label{
+    font-size:0.8rem;
+    color:#94a3b8;
+    white-space:nowrap;
+  }
+  .reunioes-chat-filter-row select{
+    flex:1;
+    background:rgba(30,41,59,0.9);
+    border:1px solid rgba(99,102,241,0.3);
+    border-radius:8px;
+    padding:8px 12px;
+    color:#e2e8f0;
+    font-size:0.85rem;
+    cursor:pointer;
+    transition:all 0.2s;
+    max-width:400px;
+  }
+  .reunioes-chat-filter-row select:hover{
+    border-color:rgba(99,102,241,0.5);
+  }
+  .reunioes-chat-filter-row select:focus{
+    outline:none;
+    border-color:#6366f1;
+  }
+  .reunioes-chat-filter-row select option{
+    background:#1e293b;
+    color:#e2e8f0;
+    padding:8px;
   }
   .reunioes-chat-input-wrapper{
     display:flex;
@@ -9722,16 +9829,18 @@ function renderReviewNotes(post){
   }
   .reunioes-chat-suggestions{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:repeat(3, 1fr);
     gap:10px;
+    max-width:700px;
+    margin:0 auto;
   }
   .reunioes-chat-suggestions button{
     background:rgba(30,41,59,0.8);
     border:1px solid rgba(99,102,241,0.3);
     border-radius:12px;
-    padding:14px 16px;
+    padding:12px 14px;
     color:#e2e8f0;
-    font-size:0.9rem;
+    font-size:0.85rem;
     cursor:pointer;
     transition:all 0.2s;
     text-align:left;
@@ -9757,6 +9866,11 @@ function renderReviewNotes(post){
     .reunioes-chat-sidebar-list{
       max-height:100px;
     }
+    .reunioes-chat-suggestions{
+      grid-template-columns:repeat(2, 1fr);
+    }
+  }
+  @media(max-width:600px){
     .reunioes-chat-suggestions{
       grid-template-columns:1fr;
     }
@@ -13289,11 +13403,22 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
             <button onclick="askReuniaoSuggestion('Quais tarefas ficaram pendentes?')">⏳ Tarefas pendentes</button>
             <button onclick="askReuniaoSuggestion('Resuma os principais tópicos discutidos')">📌 Tópicos discutidos</button>
             <button onclick="askReuniaoSuggestion('Quais problemas foram identificados?')">⚠️ Problemas</button>
+            <button onclick="askReuniaoSuggestion('Quem ficou responsável por cada tarefa?')">👤 Responsáveis</button>
+            <button onclick="askReuniaoSuggestion('Quais foram os prazos definidos?')">📅 Prazos</button>
+            <button onclick="askReuniaoSuggestion('O que foi discutido sobre metas e resultados?')">🎯 Metas e Resultados</button>
+            <button onclick="askReuniaoSuggestion('Houve algum próximo passo ou ação combinada?')">➡️ Próximos passos</button>
+            <button onclick="askReuniaoSuggestion('Faça um resumo geral de todas as reuniões')">📊 Resumo geral</button>
           </div>
         </div>
       </div>
       
       <div class="reunioes-chat-input-container">
+        <div class="reunioes-chat-filter-row">
+          <label for="reunioesChatFilter">🔍 Filtrar por reunião:</label>
+          <select id="reunioesChatFilter" onchange="updateReunioesChatFilter()">
+            <option value="">📂 Todas as reuniões</option>
+          </select>
+        </div>
         <div class="reunioes-chat-input-wrapper">
           <textarea 
             id="reunioesChatInput" 
@@ -29779,28 +29904,111 @@ REGRAS DE FORMATAÇÃO:
         chatSection.style.display = REUNIOES.length > 0 ? 'flex' : 'none';
       }
       
-      // Carregar conversas salvas
+      // Atualizar opções do filtro de reuniões
+      if (typeof updateReunioesChatFilterOptions === 'function') {
+        updateReunioesChatFilterOptions();
+      }
+      
+      // Resetar conversa atual ao trocar de cliente/recarregar
+      reunioesCurrentChatId = null;
+      reunioesChatHistory = [];
+      
+      // Resetar UI do chat
+      const messagesEl = document.getElementById('reunioesChatMessages');
+      if (messagesEl) {
+        messagesEl.innerHTML = `
+          <div class="reunioes-chat-welcome">
+            <div class="reunioes-chat-welcome-icon">🤖</div>
+            <h4>Assistente de Reuniões</h4>
+            <p>Pergunte sobre qualquer assunto discutido nas suas reuniões</p>
+            <div class="reunioes-chat-suggestions">
+              <button onclick="askReuniaoSuggestion('Quais foram as principais decisões tomadas?')">📋 Principais decisões</button>
+              <button onclick="askReuniaoSuggestion('Quais tarefas ficaram pendentes?')">⏳ Tarefas pendentes</button>
+              <button onclick="askReuniaoSuggestion('Resuma os principais tópicos discutidos')">📌 Tópicos discutidos</button>
+              <button onclick="askReuniaoSuggestion('Quais problemas foram identificados?')">⚠️ Problemas</button>
+              <button onclick="askReuniaoSuggestion('Quem ficou responsável por cada tarefa?')">👤 Responsáveis</button>
+              <button onclick="askReuniaoSuggestion('Quais foram os prazos definidos?')">📅 Prazos</button>
+              <button onclick="askReuniaoSuggestion('O que foi discutido sobre metas e resultados?')">🎯 Metas e Resultados</button>
+              <button onclick="askReuniaoSuggestion('Houve algum próximo passo ou ação combinada?')">➡️ Próximos passos</button>
+              <button onclick="askReuniaoSuggestion('Faça um resumo geral de todas as reuniões')">📊 Resumo geral</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Carregar conversas salvas do cliente atual
       loadReunioesChatsFromStorage();
     }
     
     function loadReunioesChatsFromStorage() {
+      // Carregar do Firebase para o usuário atual E cliente selecionado
+      const uid = getReunioesTargetUid();
+      const clientKey = typeof getClientKey === 'function' ? getClientKey() : null;
+      
+      if (!uid) {
+        console.warn('[ReunioesChats] Usuário não logado, não é possível carregar chats');
+        reunioesAllChats = [];
+        renderReunioesChatHistoryList();
+        return;
+      }
+      
+      if (!clientKey || clientKey === 'no-client') {
+        console.warn('[ReunioesChats] Nenhum cliente selecionado, não é possível carregar chats');
+        reunioesAllChats = [];
+        renderReunioesChatHistoryList();
+        return;
+      }
+      
       try {
-        const saved = localStorage.getItem('reunioesChats');
-        if (saved) {
-          reunioesAllChats = JSON.parse(saved);
+        // Buscar do Firebase - separado por uid E clientKey
+        const chatsRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'reunioesChats', 'data');
+        getDoc(chatsRef).then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            reunioesAllChats = data.chats || [];
+            console.log('[ReunioesChats] Carregado do Firebase para cliente', clientKey, ':', reunioesAllChats.length, 'conversas');
+          } else {
+            reunioesAllChats = [];
+            console.log('[ReunioesChats] Nenhum histórico encontrado para cliente', clientKey);
+          }
           renderReunioesChatHistoryList();
-        } else {
+        }).catch(err => {
+          console.error('[ReunioesChats] Erro ao carregar do Firebase:', err);
+          reunioesAllChats = [];
           renderReunioesChatHistoryList();
-        }
+        });
       } catch(e) {
         console.error('Erro ao carregar histórico de chats:', e);
+        reunioesAllChats = [];
         renderReunioesChatHistoryList();
       }
     }
     
     function saveReunioesChatsToStorage() {
+      // Salvar no Firebase para o usuário atual E cliente selecionado
+      const uid = getReunioesTargetUid();
+      const clientKey = typeof getClientKey === 'function' ? getClientKey() : null;
+      
+      if (!uid) {
+        console.warn('[ReunioesChats] Usuário não logado, não é possível salvar chats');
+        return;
+      }
+      
+      if (!clientKey || clientKey === 'no-client') {
+        console.warn('[ReunioesChats] Nenhum cliente selecionado, não é possível salvar chats');
+        return;
+      }
+      
       try {
-        localStorage.setItem('reunioesChats', JSON.stringify(reunioesAllChats));
+        const chatsRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'reunioesChats', 'data');
+        setDoc(chatsRef, {
+          chats: reunioesAllChats,
+          updatedAt: Date.now()
+        }, { merge: true }).then(() => {
+          console.log('[ReunioesChats] Salvo no Firebase para cliente', clientKey, ':', reunioesAllChats.length, 'conversas');
+        }).catch(err => {
+          console.error('[ReunioesChats] Erro ao salvar no Firebase:', err);
+        });
       } catch(e) {
         console.error('Erro ao salvar histórico de chats:', e);
       }
@@ -29853,10 +30061,10 @@ REGRAS DE FORMATAÇÃO:
     }
     window.toggleReunioesChatSidebar = toggleReunioesChatSidebar;
     
-    function startNewReuniaoChat() {
+    async function startNewReuniaoChat() {
       // Salvar conversa atual se tiver mensagens
       if (reunioesChatHistory.length > 0) {
-        saveCurrentReuniaoChat();
+        await saveCurrentReuniaoChat();
       }
       
       // Criar nova conversa
@@ -29876,6 +30084,11 @@ REGRAS DE FORMATAÇÃO:
               <button onclick="askReuniaoSuggestion('Quais tarefas ficaram pendentes?')">⏳ Tarefas pendentes</button>
               <button onclick="askReuniaoSuggestion('Resuma os principais tópicos discutidos')">📌 Tópicos discutidos</button>
               <button onclick="askReuniaoSuggestion('Quais problemas foram identificados?')">⚠️ Problemas</button>
+              <button onclick="askReuniaoSuggestion('Quem ficou responsável por cada tarefa?')">👤 Responsáveis</button>
+              <button onclick="askReuniaoSuggestion('Quais foram os prazos definidos?')">📅 Prazos</button>
+              <button onclick="askReuniaoSuggestion('O que foi discutido sobre metas e resultados?')">🎯 Metas e Resultados</button>
+              <button onclick="askReuniaoSuggestion('Houve algum próximo passo ou ação combinada?')">➡️ Próximos passos</button>
+              <button onclick="askReuniaoSuggestion('Faça um resumo geral de todas as reuniões')">📊 Resumo geral</button>
             </div>
           </div>
         `;
@@ -29892,15 +30105,105 @@ REGRAS DE FORMATAÇÃO:
     }
     window.startNewReuniaoChat = startNewReuniaoChat;
     
-    function saveCurrentReuniaoChat() {
-      if (reunioesChatHistory.length === 0) return;
+    // Gerar título descritivo com IA (5-6 palavras)
+    async function generateChatTitleIA(messages) {
+      if (!messages || messages.length === 0) {
+        console.log('⚠️ generateChatTitleIA: Sem mensagens');
+        return null;
+      }
+      if (typeof window.callAIProxy !== 'function') {
+        console.log('⚠️ generateChatTitleIA: callAIProxy não disponível');
+        return null;
+      }
       
-      // Gerar título baseado na primeira pergunta
-      const firstUserMsg = reunioesChatHistory.find(m => m.role === 'user');
-      const title = firstUserMsg ? firstUserMsg.content.substring(0, 40) + (firstUserMsg.content.length > 40 ? '...' : '') : 'Nova conversa';
+      try {
+        // Pegar a pergunta do usuário e a resposta da IA
+        const userMsg = messages.find(m => m.role === 'user');
+        const assistantMsg = messages.find(m => m.role === 'assistant');
+        
+        const pergunta = userMsg?.content?.substring(0, 300) || '';
+        const resposta = assistantMsg?.content?.substring(0, 500) || '';
+        
+        console.log('🤖 Chamando IA para gerar título...');
+        
+        const userId = auth?.currentUser?.uid || 'anonymous';
+        const aiMessages = [{ role: 'user', content: `Crie um TÍTULO CURTO de 5-6 palavras que descreva esta conversa sobre reuniões.
+
+O título deve resumir O QUE FOI PERGUNTADO e O QUE FOI RESPONDIDO.
+
+PERGUNTA DO USUÁRIO:
+${pergunta}
+
+RESPOSTA DO ASSISTENTE:
+${resposta}
+
+REGRAS:
+- Use entre 5 e 6 palavras
+- Seja direto e descritivo
+- Sem pontuação
+- Sem aspas
+- Apenas o título
+
+TÍTULO:` }];
+        
+        // Usando a assinatura correta: callAIProxy(model, messages, userId, maxTokens, temperature)
+        const data = await window.callAIProxy('google/gemini-2.5-flash', aiMessages, userId, 50, 0.3);
+        const content = data?.choices?.[0]?.message?.content;
+        
+        console.log('🤖 Resposta da IA:', content);
+        
+        if (content) {
+          // Limpar e pegar até 6 palavras
+          const cleaned = content.trim()
+            .replace(/["'`]/g, '')
+            .replace(/[^\w\sáàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ-]/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          const words = cleaned.split(' ').filter(w => w.length > 0).slice(0, 6);
+          console.log('🤖 Palavras extraídas:', words);
+          if (words.length >= 3) {
+            const title = words.join(' ');
+            console.log('✅ Título final:', title);
+            return title;
+          }
+        }
+      } catch (err) {
+        console.error('❌ Erro ao gerar título IA:', err);
+      }
+      return null;
+    }
+    
+    async function saveCurrentReuniaoChat() {
+      if (reunioesChatHistory.length === 0) return;
       
       // Verificar se já existe
       const existingIndex = reunioesAllChats.findIndex(c => c.id === reunioesCurrentChatId);
+      
+      // Verificar se já tem um título válido gerado por IA (sem "...")
+      const existingTitle = existingIndex >= 0 ? reunioesAllChats[existingIndex].title : null;
+      const isValidIATitle = existingTitle && 
+                            !existingTitle.includes('...') && 
+                            !existingTitle.startsWith('Nova conversa') &&
+                            existingTitle.split(' ').length >= 3;
+      
+      let title;
+      if (isValidIATitle) {
+        // Já tem título válido gerado, manter
+        title = existingTitle;
+        console.log('📝 Mantendo título existente:', title);
+      } else {
+        // Gerar título com IA (5-6 palavras)
+        console.log('🤖 Gerando título com IA...');
+        title = await generateChatTitleIA(reunioesChatHistory);
+        console.log('🤖 Título gerado:', title);
+        
+        if (!title) {
+          // Fallback: usar início da primeira pergunta
+          const firstUserMsg = reunioesChatHistory.find(m => m.role === 'user');
+          title = firstUserMsg ? firstUserMsg.content.substring(0, 30) + '...' : 'Nova conversa';
+          console.log('⚠️ Usando fallback:', title);
+        }
+      }
       
       const chatData = {
         id: reunioesCurrentChatId || 'chat_' + Date.now(),
@@ -29925,10 +30228,10 @@ REGRAS DE FORMATAÇÃO:
       renderReunioesChatHistoryList();
     }
     
-    function loadReuniaoChat(chatId) {
+    async function loadReuniaoChat(chatId) {
       // Salvar conversa atual primeiro
       if (reunioesChatHistory.length > 0) {
-        saveCurrentReuniaoChat();
+        await saveCurrentReuniaoChat();
       }
       
       const chat = reunioesAllChats.find(c => c.id === chatId);
@@ -29978,32 +30281,114 @@ REGRAS DE FORMATAÇÃO:
     }
     window.deleteReuniaoChat = deleteReuniaoChat;
     
-    function buildReunioesContext() {
-      if (!REUNIOES || REUNIOES.length === 0) {
-        return 'Não há reuniões registradas.';
-      }
+    // Variável para armazenar o filtro de reunião selecionada
+    let reunioesChatFilterId = ''; // Vazio = todas as reuniões
+    
+    // Atualizar select de filtro com as reuniões disponíveis
+    function updateReunioesChatFilterOptions() {
+      const select = document.getElementById('reunioesChatFilter');
+      if (!select) return;
+      
+      // Manter o valor selecionado
+      const currentValue = select.value;
+      
+      // Limpar opções existentes (exceto a primeira)
+      select.innerHTML = '<option value="">📂 Todas as reuniões</option>';
+      
+      if (!REUNIOES || REUNIOES.length === 0) return;
       
       // Ordenar por data (mais recentes primeiro)
       const reunioesOrdenadas = [...REUNIOES].sort((a, b) => {
         return new Date(b.data || 0) - new Date(a.data || 0);
       });
       
-      // Construir contexto com todas as transcrições
-      let contexto = `BANCO DE DADOS DE REUNIÕES (${REUNIOES.length} reuniões):\n\n`;
-      
-      reunioesOrdenadas.forEach((r, idx) => {
+      reunioesOrdenadas.forEach(r => {
         const dataFormatada = r.data ? new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
-        contexto += `═══════════════════════════════════════\n`;
-        contexto += `📅 REUNIÃO ${idx + 1}: ${r.objetivo || 'Sem título'}\n`;
-        contexto += `Data: ${dataFormatada}\n`;
-        contexto += `───────────────────────────────────────\n`;
+        const titulo = r.objetivo || 'Sem título';
+        const option = document.createElement('option');
+        option.value = r.id;
+        option.textContent = `📅 ${titulo} (${dataFormatada})`;
+        select.appendChild(option);
+      });
+      
+      // Restaurar seleção se ainda existir
+      if (currentValue && reunioesOrdenadas.find(r => r.id === currentValue)) {
+        select.value = currentValue;
+      } else {
+        select.value = '';
+        reunioesChatFilterId = '';
+      }
+    }
+    window.updateReunioesChatFilterOptions = updateReunioesChatFilterOptions;
+    
+    // Quando o usuário muda o filtro
+    function updateReunioesChatFilter() {
+      const select = document.getElementById('reunioesChatFilter');
+      reunioesChatFilterId = select?.value || '';
+      
+      // Atualizar placeholder do input
+      const input = document.getElementById('reunioesChatInput');
+      if (input) {
+        if (reunioesChatFilterId) {
+          const reuniao = REUNIOES.find(r => r.id === reunioesChatFilterId);
+          const titulo = reuniao?.objetivo || 'reunião selecionada';
+          input.placeholder = `Pergunte sobre "${titulo}"...`;
+        } else {
+          input.placeholder = 'Pergunte sobre as reuniões...';
+        }
+      }
+      
+      console.log('🔍 Filtro de reunião:', reunioesChatFilterId || 'Todas');
+    }
+    window.updateReunioesChatFilter = updateReunioesChatFilter;
+    
+    function buildReunioesContext() {
+      if (!REUNIOES || REUNIOES.length === 0) {
+        return 'Não há reuniões registradas.';
+      }
+      
+      // Filtrar reuniões se houver filtro selecionado
+      let reunioesParaContexto = [...REUNIOES];
+      
+      if (reunioesChatFilterId) {
+        reunioesParaContexto = REUNIOES.filter(r => r.id === reunioesChatFilterId);
+        if (reunioesParaContexto.length === 0) {
+          return 'Reunião selecionada não encontrada.';
+        }
+      }
+      
+      // Ordenar por data (mais recentes primeiro)
+      const reunioesOrdenadas = reunioesParaContexto.sort((a, b) => {
+        return new Date(b.data || 0) - new Date(a.data || 0);
+      });
+      
+      // Construir contexto
+      let contexto;
+      if (reunioesChatFilterId) {
+        const r = reunioesOrdenadas[0];
+        const dataFormatada = r.data ? new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+        contexto = `REUNIÃO SELECIONADA: ${r.objetivo || 'Sem título'} (${dataFormatada})\n\n`;
         contexto += `TRANSCRIÇÃO COMPLETA:\n${r.transcricao || 'Sem transcrição'}\n`;
         if (r.resumo) {
-          contexto += `───────────────────────────────────────\n`;
-          contexto += `RESUMO GERADO:\n${r.resumo}\n`;
+          contexto += `\nRESUMO GERADO:\n${r.resumo}\n`;
         }
-        contexto += `\n`;
-      });
+      } else {
+        contexto = `BANCO DE DADOS DE REUNIÕES (${REUNIOES.length} reuniões):\n\n`;
+        
+        reunioesOrdenadas.forEach((r) => {
+          const dataFormatada = r.data ? new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+          const titulo = r.objetivo || 'Sem título';
+          contexto += `═══════════════════════════════════════\n`;
+          contexto += `📅 ${titulo} (${dataFormatada})\n`;
+          contexto += `───────────────────────────────────────\n`;
+          contexto += `TRANSCRIÇÃO COMPLETA:\n${r.transcricao || 'Sem transcrição'}\n`;
+          if (r.resumo) {
+            contexto += `───────────────────────────────────────\n`;
+            contexto += `RESUMO GERADO:\n${r.resumo}\n`;
+          }
+          contexto += `\n`;
+        });
+      }
       
       return contexto;
     }
@@ -30020,26 +30405,176 @@ REGRAS DE FORMATAÇÃO:
       messageDiv.className = `reunioes-chat-message ${role}`;
       
       const avatar = role === 'user' ? '👤' : '🤖';
+      const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
-      // Formatar conteúdo (converter markdown básico)
-      let formattedContent = content
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/^- (.+)$/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>');
+      let formattedContent;
       
-      formattedContent = '<p>' + formattedContent + '</p>';
+      if (role === 'assistant') {
+        // Para respostas da IA: dividir em blocos e adicionar botão de copiar em cada um
+        const blocks = content.split(/\n\n+/).filter(b => b.trim());
+        
+        formattedContent = blocks.map((block, idx) => {
+          const blockId = `${messageId}_block_${idx}`;
+          
+          // Formatar o bloco
+          let formatted = block
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/^- (.+)$/gm, '<li>$1</li>')
+            .replace(/\n/g, '<br>');
+          
+          // Verificar se tem lista
+          if (formatted.includes('<li>')) {
+            formatted = formatted.replace(/(<li>.*)/s, '<ul>$1</ul>');
+          }
+          
+          return `
+            <div class="reunioes-chat-block" data-block-id="${blockId}" data-block-content="${encodeURIComponent(block)}">
+              <div class="reunioes-chat-block-content">${formatted}</div>
+              <button class="reunioes-chat-copy-line-btn" onclick="copyReunioesChatLine('${blockId}')" title="Copiar este trecho">📋</button>
+            </div>
+          `;
+        }).join('');
+        
+        // Botão de copiar tudo no final
+        formattedContent += `
+          <div class="reunioes-chat-copy-all">
+            <button class="reunioes-chat-copy-btn" onclick="copyReunioesChatMessage('${messageId}')" title="Copiar resposta completa">
+              📋 Copiar Tudo
+            </button>
+          </div>
+        `;
+      } else {
+        // Para mensagens do usuário: formatação simples
+        formattedContent = content
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+        formattedContent = '<p>' + formattedContent + '</p>';
+      }
       
       messageDiv.innerHTML = `
         <div class="reunioes-chat-message-avatar">${avatar}</div>
-        <div class="reunioes-chat-message-content">${formattedContent}</div>
+        <div class="reunioes-chat-message-content">
+          ${formattedContent}
+        </div>
       `;
+      
+      // Armazenar conteúdo original para copiar
+      if (role === 'assistant') {
+        messageDiv.dataset.messageId = messageId;
+        messageDiv.dataset.originalContent = content;
+      }
       
       messagesEl.appendChild(messageDiv);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
+    
+    // Converter texto para formato WhatsApp
+    function convertToWhatsAppFormat(text) {
+      if (!text) return '';
+      
+      let wpp = text
+        // Remover markdown de código
+        .replace(/```[\s\S]*?```/g, (match) => match.replace(/```/g, ''))
+        // Manter negrito **texto** → *texto*
+        .replace(/\*\*(.+?)\*\*/g, '*$1*')
+        // Headers ### → *TÍTULO*
+        .replace(/^#{1,4}\s*(.+)$/gm, '*$1*')
+        // Bullet points com hífen
+        .replace(/^[\s]*[-•]\s*/gm, '• ')
+        // Numeração
+        .replace(/^(\d+)\.\s+/gm, '$1. ')
+        // Citações
+        .replace(/^>\s*(.+)$/gm, '> $1')
+        // Remover múltiplos espaços
+        .replace(/[ \t]+/g, ' ')
+        // Limpar linhas
+        .replace(/^\s+/gm, '')
+        // Espaçamento antes de títulos com emoji
+        .replace(/([^\n])\n(\*[📋📌✅📊⚠️💡❓📅💼🎯👤➡️])/g, '$1\n\n$2')
+        // Máximo 2 quebras de linha
+        .replace(/\n{3,}/g, '\n\n');
+      
+      return wpp.trim();
+    }
+    
+    // Copiar mensagem do chat para WhatsApp
+    function copyReunioesChatMessage(messageId) {
+      const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+      if (!messageDiv) {
+        mgToast('❌ Mensagem não encontrada');
+        return;
+      }
+      
+      const originalContent = messageDiv.dataset.originalContent;
+      if (!originalContent) {
+        mgToast('❌ Conteúdo não disponível');
+        return;
+      }
+      
+      const whatsappText = convertToWhatsAppFormat(originalContent);
+      
+      navigator.clipboard.writeText(whatsappText).then(() => {
+        mgToast('✅ Copiado para WhatsApp!');
+        
+        // Feedback visual no botão
+        const btn = messageDiv.querySelector('.reunioes-chat-copy-btn');
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '✅ Copiado!';
+          btn.style.background = 'rgba(34, 197, 94, 0.2)';
+          btn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+            btn.style.borderColor = '';
+          }, 2000);
+        }
+      }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        mgToast('❌ Erro ao copiar');
+      });
+    }
+    window.copyReunioesChatMessage = copyReunioesChatMessage;
+    
+    // Função para copiar uma linha/bloco individual
+    function copyReunioesChatLine(blockId) {
+      const blockDiv = document.querySelector(`[data-block-id="${blockId}"]`);
+      if (!blockDiv) {
+        mgToast('❌ Trecho não encontrado');
+        return;
+      }
+      
+      const blockContent = decodeURIComponent(blockDiv.dataset.blockContent || '');
+      if (!blockContent) {
+        mgToast('❌ Conteúdo não disponível');
+        return;
+      }
+      
+      const whatsappText = convertToWhatsAppFormat(blockContent);
+      
+      navigator.clipboard.writeText(whatsappText).then(() => {
+        mgToast('✅ Trecho copiado!');
+        
+        // Feedback visual no botão
+        const btn = blockDiv.querySelector('.reunioes-chat-copy-line-btn');
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '✅';
+          btn.style.background = 'rgba(34, 197, 94, 0.3)';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+          }, 1500);
+        }
+      }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        mgToast('❌ Erro ao copiar');
+      });
+    }
+    window.copyReunioesChatLine = copyReunioesChatLine;
     
     function showReunioesChatLoading() {
       const messagesEl = document.getElementById('reunioesChatMessages');
@@ -30080,6 +30615,12 @@ REGRAS DE FORMATAÇÃO:
         return;
       }
       
+      // Garantir que temos um ID de conversa
+      if (!reunioesCurrentChatId) {
+        reunioesCurrentChatId = 'chat_' + Date.now();
+        console.log('📝 Novo chat criado:', reunioesCurrentChatId);
+      }
+      
       // Renderizar pergunta do usuário
       renderReunioesChatMessage('user', pergunta);
       
@@ -30100,10 +30641,26 @@ REGRAS DE FORMATAÇÃO:
         // Construir histórico de conversa (últimas 6 mensagens)
         const historicoRecente = reunioesChatHistory.slice(-6);
         
-        const messages = [
-          {
-            role: 'system',
-            content: `Você é um assistente especializado em analisar reuniões de negócios. 
+        // Construir prompt do sistema baseado no filtro
+        let systemPrompt;
+        if (reunioesChatFilterId) {
+          const reuniaoFiltrada = REUNIOES.find(r => r.id === reunioesChatFilterId);
+          const nomeReuniao = reuniaoFiltrada?.objetivo || 'Reunião selecionada';
+          systemPrompt = `Você é um assistente especializado em analisar reuniões de negócios. 
+
+O usuário está consultando UMA REUNIÃO ESPECÍFICA: "${nomeReuniao}"
+
+Responda APENAS com base nas informações DESSA reunião específica fornecida abaixo.
+
+REGRAS:
+1. Baseie suas respostas EXCLUSIVAMENTE nas informações da reunião fornecida
+2. Seja objetivo e organize as respostas com bullet points quando apropriado
+3. Use negrito para destacar pontos importantes
+4. Se algo não foi discutido nesta reunião, diga claramente
+
+${contextoReunioes}`;
+        } else {
+          systemPrompt = `Você é um assistente especializado em analisar reuniões de negócios. 
             
 Você tem acesso a um banco de dados com TODAS as transcrições das reuniões registradas. Use essas informações para responder às perguntas do usuário.
 
@@ -30113,8 +30670,18 @@ REGRAS:
 3. Se a informação não estiver nas reuniões, diga claramente
 4. Seja objetivo e organize as respostas com bullet points quando apropriado
 5. Use negrito para destacar pontos importantes
+6. Ao referenciar reuniões, use APENAS o formato: **Nome da Reunião (DD/MM/AAAA)** - NÃO use "Reunião 1", "Reunião 2", etc.
 
-${contextoReunioes}`
+Exemplo correto: **Estratégia de Redes Sociais (28/01/2026)**
+Exemplo errado: Reunião 1: Estratégia de Redes Sociais
+
+${contextoReunioes}`;
+        }
+        
+        const messages = [
+          {
+            role: 'system',
+            content: systemPrompt
           },
           ...historicoRecente,
           {
@@ -30167,12 +30734,12 @@ ${contextoReunioes}`
     }
     window.askReuniaoSuggestion = askReuniaoSuggestion;
     
-    function clearReunioesChatHistory() {
+    async function clearReunioesChatHistory() {
       // Salvar conversa atual antes de limpar
-      saveCurrentReuniaoChat();
+      await saveCurrentReuniaoChat();
       
       // Iniciar nova conversa
-      startNewReuniaoChat();
+      await startNewReuniaoChat();
     }
     window.clearReunioesChatHistory = clearReunioesChatHistory;
     
