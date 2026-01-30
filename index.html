@@ -9678,9 +9678,14 @@ function renderReviewNotes(post){
   }
   /* Container copiar tudo */
   .reunioes-chat-copy-all{
+    display:flex;
+    gap:8px;
     margin-top:16px;
     padding-top:12px;
     border-top:1px solid rgba(99,102,241,0.15);
+  }
+  .reunioes-chat-copy-all .reunioes-chat-copy-btn{
+    flex:1;
   }
   /* Input */
   .reunioes-chat-input-container{
@@ -13500,6 +13505,7 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     </div>
     <div class="reuniao-modal-footer">
       <button type="button" class="btn secondary" onclick="copyReuniaoResumo()" style="margin-right: auto;">📋 Copiar p/ WhatsApp</button>
+      <button type="button" class="btn secondary" onclick="copyReuniaoResumoTexto()">📄 Copiar Texto</button>
       <button type="button" class="btn secondary" onclick="regenerateReuniaoResumo()" id="regenerateResumoBtn">🔄 Regenerar Resumo</button>
       <button type="button" class="btn" onclick="closeReuniaoViewModal()">Fechar</button>
     </div>
@@ -13628,6 +13634,81 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     
     // Expor globalmente para uso em qualquer contexto
     window.mgCopyToClipboard = mgCopyToClipboard;
+
+    /**
+     * Copia texto formatado (HTML) para clipboard - Google Docs reconhece a formatação
+     * @param {string} html - HTML formatado
+     * @param {string} plainText - Texto plano (fallback)
+     * @returns {Promise<boolean>}
+     */
+    async function mgCopyFormattedToClipboard(html, plainText) {
+      if (!html && !plainText) return false;
+      
+      let copiado = false;
+      
+      // Método 1: Clipboard API com suporte a múltiplos formatos (HTML + texto)
+      if (navigator?.clipboard?.write) {
+        try {
+          const blob = new Blob([html], { type: 'text/html' });
+          const textBlob = new Blob([plainText || html.replace(/<[^>]*>/g, '')], { type: 'text/plain' });
+          
+          const clipboardItem = new ClipboardItem({
+            'text/html': blob,
+            'text/plain': textBlob
+          });
+          
+          await navigator.clipboard.write([clipboardItem]);
+          copiado = true;
+          console.log('[mgCopyFormattedToClipboard] Copiado com formatação HTML');
+        } catch(err) {
+          console.warn('[mgCopyFormattedToClipboard] Clipboard API falhou:', err);
+        }
+      }
+      
+      // Método 2: Fallback usando div contenteditable + execCommand
+      if (!copiado) {
+        try {
+          const container = document.createElement('div');
+          container.contentEditable = 'true';
+          container.innerHTML = html;
+          container.style.position = 'fixed';
+          container.style.left = '-9999px';
+          container.style.top = '-9999px';
+          container.style.opacity = '0';
+          container.style.pointerEvents = 'none';
+          
+          document.body.appendChild(container);
+          
+          // Selecionar todo o conteúdo
+          const range = document.createRange();
+          range.selectNodeContents(container);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Copiar
+          const sucesso = document.execCommand('copy');
+          if (sucesso) copiado = true;
+          
+          // Limpar
+          selection.removeAllRanges();
+          document.body.removeChild(container);
+          
+          console.log('[mgCopyFormattedToClipboard] Copiado com execCommand');
+        } catch(err) {
+          console.error('[mgCopyFormattedToClipboard] execCommand falhou:', err);
+        }
+      }
+      
+      // Método 3: Fallback para texto plano se HTML não funcionar
+      if (!copiado && plainText) {
+        copiado = await mgCopyToClipboard(plainText);
+      }
+      
+      return copiado;
+    }
+    
+    window.mgCopyFormattedToClipboard = mgCopyFormattedToClipboard;
 
     const __scriptLoadCache = new Map();
     function loadExternalScript(src, check){
@@ -29843,6 +29924,173 @@ REGRAS DE FORMATAÇÃO:
       return wpp.trim();
     }
 
+    // ========== CONVERSÃO PARA FORMATO ESTRUTURADO (Google Docs style) ==========
+    function converterParaFormatoEstruturado(texto) {
+      if (!texto) return '';
+      
+      let estruturado = texto;
+      
+      // Primeiro, remover toda a marcação markdown de headers mas manter o texto
+      // #### Texto → Texto (mantém como está, será identificado pela posição)
+      estruturado = estruturado.replace(/^#{1,4}\s+(.+)$/gm, '$1');
+      
+      // Converter **negrito** markdown removendo os asteriscos
+      estruturado = estruturado.replace(/\*\*(.+?)\*\*/g, '$1');
+      
+      // Converter _itálico_ ou *itálico* markdown removendo marcadores
+      estruturado = estruturado.replace(/(?<!\*)[_*](.+?)[_*](?!\*)/g, '$1');
+      
+      // Processar listas: converter - ou * no início da linha para •
+      // Detectar nível de indentação e aplicar o bullet apropriado
+      estruturado = estruturado.replace(/^(\s*)[-*]\s+(.+)$/gm, (match, spaces, content) => {
+        const indentLevel = spaces.length;
+        if (indentLevel === 0) {
+          return `• ${content}`;
+        } else if (indentLevel <= 2) {
+          return `\t◦ ${content}`;
+        } else {
+          return `\t\t▪ ${content}`;
+        }
+      });
+      
+      // Adicionar linha em branco ANTES de títulos de seção (linhas com emoji no início)
+      estruturado = estruturado.replace(/([^\n])\n([📋📌✅📊⚠️💡❓📅💼🎯🔍📈💰🚀⏰👥🗂️📝🔄📱💻🎨🎬📸📹🎥🎯])/g, '$1\n\n$2');
+      
+      // Adicionar linha em branco DEPOIS de títulos de seção (linhas com emoji)
+      estruturado = estruturado.replace(/^([📋📌✅📊⚠️💡❓📅💼🎯🔍📈💰🚀⏰👥🗂️📝🔄📱💻🎨🎬📸📹🎥].+)$/gm, '$1\n');
+      
+      // Adicionar linha em branco ANTES de linhas que terminam com ":"
+      estruturado = estruturado.replace(/([^\n])\n([^•◦▪\n\t].+:)$/gm, '$1\n\n$2');
+      
+      // Adicionar linha em branco DEPOIS de linhas que terminam com ":"
+      estruturado = estruturado.replace(/^([^•◦▪\n].+:)$/gm, '$1\n');
+      
+      // Adicionar quebra de linha ANTES do primeiro item de cada lista
+      estruturado = estruturado.replace(/([^\n•◦▪])\n(•)/g, '$1\n\n$2');
+      
+      // Adicionar quebra de linha DEPOIS do último item de lista (quando próxima linha não é lista)
+      estruturado = estruturado.replace(/(^[•◦▪\t].+)$\n([^•◦▪\t\n])/gm, '$1\n\n$2');
+      
+      // Limpar múltiplas quebras de linha (máximo 2)
+      estruturado = estruturado.replace(/\n{3,}/g, '\n\n');
+      
+      // Limpar espaços no final das linhas
+      estruturado = estruturado.replace(/[ \t]+$/gm, '');
+      
+      // Limpar linhas vazias no início e fim
+      estruturado = estruturado.trim();
+      
+      return estruturado;
+    }
+
+    /**
+     * Converte markdown para HTML formatado (para Google Docs)
+     * @param {string} texto - Texto em markdown
+     * @returns {string} HTML formatado
+     */
+    function converterMarkdownParaHTML(texto) {
+      if (!texto) return '';
+      
+      let linhas = texto.split('\n');
+      let resultado = [];
+      let dentroLista = false;
+      
+      for (let i = 0; i < linhas.length; i++) {
+        let linha = linhas[i];
+        
+        // Pular linhas vazias completamente
+        if (linha.trim() === '') {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          continue;
+        }
+        
+        // Converter **negrito** e *itálico* PRIMEIRO (antes de processar tags)
+        linha = linha.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+        linha = linha.replace(/(?<!\*)[_*](.+?)[_*](?!\*)/g, '<i>$1</i>');
+        
+        // Detectar headers markdown EXPLÍCITOS
+        if (linha.match(/^# (.+)$/)) {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          const conteudo = linha.replace(/^# /, '');
+          resultado.push(`<h1 style="text-align: left;">${conteudo}</h1>`);
+        } 
+        else if (linha.match(/^## (.+)$/)) {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          const conteudo = linha.replace(/^## /, '');
+          resultado.push(`<h2 style="text-align: left;">${conteudo}</h2>`);
+        } 
+        else if (linha.match(/^### (.+)$/)) {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          const conteudo = linha.replace(/^### /, '');
+          resultado.push(`<h3 style="text-align: left;">${conteudo}</h3>`);
+        } 
+        else if (linha.match(/^#### (.+)$/)) {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          const conteudo = linha.replace(/^#### /, '');
+          resultado.push(`<h4 style="text-align: left;">${conteudo}</h4>`);
+        }
+        // Detectar títulos por emoji no INÍCIO
+        else if (linha.match(/^([📋📌✅📊⚠️💡❓📅💼🎯🔍📈💰🚀⏰👥🗂️📝🔄📱💻🎨🎬📸📹🎥])/)) {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          resultado.push(`<h2 style="text-align: left;">${linha}</h2>`);
+        }
+        // Detectar títulos por ":" no final (linha não indentada, não é lista)
+        else if (linha.match(/^[^•◦▪\-\*\s].+:$/) && !dentroLista) {
+          if (linha.match(/\d{2}\/\d{2}\/\d{4}/) || linha.match(/Slide|Reunião|Discussão/i)) {
+            resultado.push(`<h2 style="text-align: left;">${linha}</h2>`);
+          } else {
+            resultado.push(`<h3 style="text-align: left;">${linha}</h3>`);
+          }
+        }
+        // Detectar listas
+        else if (linha.match(/^(\s*)[-*•]\s+(.+)$/)) {
+          const match = linha.match(/^(\s*)[-*•]\s+(.+)$/);
+          const conteudo = match[2];
+          
+          if (!dentroLista) {
+            resultado.push('<ul style="text-align: left;">');
+            dentroLista = true;
+          }
+          
+          resultado.push(`<li>${conteudo}</li>`);
+        }
+        // Texto normal - parágrafo
+        else {
+          if (dentroLista) {
+            resultado.push('</ul>');
+            dentroLista = false;
+          }
+          resultado.push(`<p style="text-align: left;">${linha}</p>`);
+        }
+      }
+      
+      // Fechar lista se ainda estiver aberta
+      if (dentroLista) {
+        resultado.push('</ul>');
+      }
+      
+      // Retornar HTML sem wrapper - cada elemento já tem seu próprio text-align
+      return resultado.join('');
+    }
+
     function copyReuniaoResumo(){
       if(!currentViewingReuniao?.resumo) {
         mgToast('⚠️ Nenhum resumo para copiar');
@@ -29868,6 +30116,35 @@ REGRAS DE FORMATAÇÃO:
       });
     }
     window.copyReuniaoResumo = copyReuniaoResumo;
+
+    function copyReuniaoResumoTexto(){
+      if(!currentViewingReuniao?.resumo) {
+        mgToast('⚠️ Nenhum resumo para copiar');
+        return;
+      }
+      
+      // Montar texto com estrutura
+      const textoBase = `# RESUMO DA REUNIÃO\n\n` +
+        `**Data:** ${currentViewingReuniao.data ? new Date(currentViewingReuniao.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não definida'}\n` +
+        `**Título:** ${currentViewingReuniao.objetivo || 'Não definido'}\n\n` +
+        `${currentViewingReuniao.resumo}`;
+      
+      // Converter para HTML formatado
+      const htmlFormatado = converterMarkdownParaHTML(textoBase);
+      
+      // Texto plano como fallback
+      const textoPlano = converterParaFormatoEstruturado(textoBase);
+      
+      // Usar mgCopyFormattedToClipboard para copiar com formatação HTML
+      mgCopyFormattedToClipboard(htmlFormatado, textoPlano).then(success => {
+        if (success) {
+          mgToast('✅ Resumo copiado com formatação!');
+        } else {
+          mgToast('Erro ao copiar');
+        }
+      });
+    }
+    window.copyReuniaoResumoTexto = copyReuniaoResumoTexto;
 
     function editReuniao(reuniaoId){
       openReuniaoModal(reuniaoId);
@@ -30439,11 +30716,14 @@ TÍTULO:` }];
           `;
         }).join('');
         
-        // Botão de copiar tudo no final
+        // Botões de copiar tudo no final
         formattedContent += `
           <div class="reunioes-chat-copy-all">
-            <button class="reunioes-chat-copy-btn" onclick="copyReunioesChatMessage('${messageId}')" title="Copiar resposta completa">
-              📋 Copiar Tudo
+            <button class="reunioes-chat-copy-btn" onclick="copyReunioesChatMessage('${messageId}')" title="Copiar resposta completa em formato WhatsApp">
+              📋 Copiar p/ WhatsApp
+            </button>
+            <button class="reunioes-chat-copy-btn" onclick="copyReunioesChatMessageTexto('${messageId}')" title="Copiar resposta completa em texto normal">
+              📄 Copiar Texto
             </button>
           </div>
         `;
@@ -30543,6 +30823,52 @@ TÍTULO:` }];
       });
     }
     window.copyReunioesChatMessage = copyReunioesChatMessage;
+    
+    // Copiar mensagem do chat em formato texto estruturado (Google Docs style)
+    function copyReunioesChatMessageTexto(messageId) {
+      const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+      if (!messageDiv) {
+        mgToast('❌ Mensagem não encontrada');
+        return;
+      }
+      
+      const originalContent = messageDiv.dataset.originalContent;
+      if (!originalContent) {
+        mgToast('❌ Conteúdo não disponível');
+        return;
+      }
+      
+      // Converter para HTML formatado (Google Docs reconhece)
+      const htmlFormatado = converterMarkdownParaHTML(originalContent);
+      
+      // Texto plano como fallback
+      const textoPlano = converterParaFormatoEstruturado(originalContent);
+      
+      // Usar mgCopyFormattedToClipboard para copiar com formatação HTML
+      mgCopyFormattedToClipboard(htmlFormatado, textoPlano).then(success => {
+        if (success) {
+          mgToast('✅ Texto copiado com formatação!');
+          
+          // Feedback visual no botão
+          const buttons = messageDiv.querySelectorAll('.reunioes-chat-copy-btn');
+          const btn = Array.from(buttons).find(b => b.textContent.includes('Texto'));
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado!';
+            btn.style.background = 'rgba(34, 197, 94, 0.2)';
+            btn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.style.background = '';
+              btn.style.borderColor = '';
+            }, 2000);
+          }
+        } else {
+          mgToast('❌ Erro ao copiar');
+        }
+      });
+    }
+    window.copyReunioesChatMessageTexto = copyReunioesChatMessageTexto;
     
     // Função para copiar uma linha/bloco individual
     function copyReunioesChatLine(blockId) {
