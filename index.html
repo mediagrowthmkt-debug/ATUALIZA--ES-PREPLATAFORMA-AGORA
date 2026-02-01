@@ -5683,7 +5683,17 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .ia-msg-edit-save:hover{background:#2563eb;transform:translateY(-1px)}
     .ia-msg-edit-cancel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff}
     .ia-msg-edit-cancel:hover{background:rgba(255,255,255,.16)}
-    .ia-empty{position:absolute;inset:80px 18px 90px 18px;border:1px dashed rgba(255,255,255,.18);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:rgba(255,255,255,.6);font-size:.9rem;pointer-events:none}
+    .ia-empty{position:absolute;inset:80px 18px 90px 18px;border:1px dashed rgba(255,255,255,.18);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:rgba(255,255,255,.6);font-size:.9rem;pointer-events:auto;overflow-y:auto}
+    .ia-welcome-container{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:700px;width:100%;padding:20px}
+    .ia-welcome-icon{font-size:3rem;animation:float 3s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .ia-welcome-title{font-size:1.4rem;font-weight:700;color:#fff;margin:0}
+    .ia-welcome-subtitle{font-size:.9rem;color:rgba(255,255,255,.6);margin:0}
+    .ia-quick-prompts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;width:100%;margin-top:12px}
+    .ia-quick-btn{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s ease;text-align:left;pointer-events:auto}
+    .ia-quick-btn:hover{background:rgba(255,102,0,.15);border-color:rgba(255,102,0,.4);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,102,0,.2)}
+    .ia-quick-btn:active{transform:translateY(0)}
+    @media(max-width:600px){.ia-quick-prompts{grid-template-columns:1fr}.ia-quick-btn{font-size:.8rem;padding:10px 14px}}
     .ia-composer{position:sticky;bottom:0;display:flex;gap:10px;padding:14px 18px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;align-items:flex-end}
     .ia-composer-top{display:flex;gap:12px;align-items:flex-start;width:100%;margin-bottom:8px;flex-wrap:wrap}
     .ia-response-size{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -10085,7 +10095,52 @@ function renderReviewNotes(post){
         </div>
       </header>
       <div class="ia-history" id="iaHistory"></div>
-      <div class="ia-empty" id="iaEmptyState">Comece uma nova conversa ou escolha uma existente ao lado.</div>
+      <div class="ia-empty" id="iaEmptyState">
+        <div class="ia-welcome-container">
+          <div class="ia-welcome-icon">🤖</div>
+          <h3 class="ia-welcome-title">Assistente de Marketing</h3>
+          <p class="ia-welcome-subtitle">Escolha uma pergunta rápida ou digite sua dúvida abaixo</p>
+          
+          <div class="ia-quick-prompts">
+            <button type="button" class="ia-quick-btn" data-prompt="Qual o status atual do marketing? Resuma as campanhas ativas, resultados recentes e pontos de atenção.">
+              📊 Status do Marketing
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Quais são as metas atuais e como está o progresso de cada uma? Liste metas anuais e mensais com percentuais.">
+              🎯 Metas e Progresso
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Faça um resumo sobre a empresa/cliente: nicho, público-alvo, diferenciais, ticket médio e principais desafios.">
+              🏢 Sobre a Empresa
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Como estão os leads? Mostre quantidade, qualidade, origem e taxa de conversão dos últimos períodos.">
+              👥 Análise de Leads
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Qual o planejamento atual? Liste as demandas em andamento, prazos e responsáveis.">
+              📋 Planejamento Atual
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="O que está programado no calendário? Mostre posts, campanhas e entregas dos próximos dias.">
+              📅 Calendário da Semana
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Quais são os principais riscos e pontos de atenção? Identifique gargalos, atrasos e problemas potenciais.">
+              ⚠️ Riscos e Alertas
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Quais os pontos positivos e negativos do último período? Faça uma análise SWOT rápida baseada nos dados.">
+              ⚖️ Pontos Fortes/Fracos
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="O que foi discutido nas últimas reuniões com o cliente? Resuma decisões, acordos e pendências.">
+              🤝 Resumo de Reuniões
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Sugira 3 ações prioritárias para melhorar os resultados este mês, baseado em todos os dados disponíveis.">
+              💡 Próximos Passos
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Qual o ROI atual das campanhas? Analise investimento vs retorno, custo por lead, custo por aquisição e sugira otimizações de verba.">
+              📈 ROI e Investimento
+            </button>
+            <button type="button" class="ia-quick-btn" data-prompt="Identifique 3 oportunidades de crescimento não exploradas baseado nos dados. Considere novos canais, públicos, formatos de conteúdo ou estratégias.">
+              🔥 Oportunidades
+            </button>
+          </div>
+        </div>
+      </div>
       <form class="ia-composer" id="iaComposer">
         <div class="ia-composer-top">
           <div class="ia-response-size">
@@ -10099,7 +10154,7 @@ function renderReviewNotes(post){
             <span id="iaCostBadge" class="ia-cost-badge" style="display:none;">💰 $0.0000</span>
             <div class="ia-sources-dropdown">
               <button type="button" class="ia-sources-btn" id="iaSourcesBtn">
-                <span id="iaSourcesText">Todas as Abas (32)</span>
+                <span id="iaSourcesText">Todas as Abas (34)</span>
                 <span>▾</span>
               </button>
               <div class="ia-sources-menu" id="iaSourcesMenu">
@@ -10236,6 +10291,14 @@ function renderReviewNotes(post){
                 <div class="ia-source-option">
                   <input type="checkbox" id="source-demandas" data-source="demandas" checked>
                   <label for="source-demandas">✅ Demandas</label>
+                </div>
+                <div class="ia-source-option">
+                  <input type="checkbox" id="source-reunioes" data-source="reunioes" checked>
+                  <label for="source-reunioes">🤝 Reuniões (Transcrições e Resumos)</label>
+                </div>
+                <div class="ia-source-option">
+                  <input type="checkbox" id="source-notasTime" data-source="notasTime" checked>
+                  <label for="source-notasTime">📋 Notas Time (Marketing Atual)</label>
                 </div>
                 
                 <div class="ia-sources-actions">
@@ -16977,7 +17040,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       planejamento: 4000,          // Reduzido de 8k - Planejamento atual
       arquivos: 1000,              // Reduzido de 2k - Estrutura mínima
       calendario: 2500,            // Reduzido de 5k - Eventos próximos
-      iframes: 1500                // Reduzido de 3k - Widgets ativos
+      iframes: 1500,               // Reduzido de 3k - Widgets ativos
+      reunioes: 8000,              // Resumos das reuniões com clientes - IMPORTANTE para contexto
+      notasTime: 6000              // Notas do Time (Marketing atual) - informações diárias de marketing
     };
     
     // Cache de contexto comprimido para evitar reprocessamento
@@ -20211,6 +20276,178 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         : '';
     }
     
+    // 🤝 FUNÇÃO PARA EXTRAIR CONTEXTO DAS REUNIÕES COM CLIENTES
+    // Prioriza os resumos (mais importantes) e transcrições para dar contexto à IA
+    function buildReunioesDetail(){
+      // Usa a variável global REUNIOES que é carregada do Firebase
+      if(!Array.isArray(REUNIOES) || REUNIOES.length === 0){
+        console.log('📋 buildReunioesDetail: Nenhuma reunião encontrada');
+        return '';
+      }
+      
+      console.log(`🤝 buildReunioesDetail: Processando ${REUNIOES.length} reunião(ões)`);
+      
+      // Ordenar por data (mais recentes primeiro)
+      const reunioesOrdenadas = [...REUNIOES].sort((a, b) => {
+        const dateA = new Date(a.data || a.createdAt || 0);
+        const dateB = new Date(b.data || b.createdAt || 0);
+        return dateB - dateA;
+      });
+      
+      // Limitar a 15 reuniões mais recentes para não sobrecarregar o contexto
+      const reunioesLimitadas = reunioesOrdenadas.slice(0, 15);
+      
+      const parts = [];
+      parts.push('🤝 REUNIÕES COM CLIENTES (Transcrições e Resumos)');
+      parts.push('=' .repeat(50));
+      parts.push(`📊 Total de ${REUNIOES.length} reunião(ões) registradas. Mostrando as ${reunioesLimitadas.length} mais recentes.\n`);
+      parts.push('⚠️ IMPORTANTE: Estas são conversas DIRETAS com o cliente. Use estas informações para contextualizar suas respostas e entender melhor as necessidades, preocupações e preferências do cliente.\n');
+      
+      reunioesLimitadas.forEach((reuniao, idx) => {
+        const dataFormatada = reuniao.data 
+          ? new Date(reuniao.data).toLocaleDateString('pt-BR', { 
+              day: '2-digit', 
+              month: 'long', 
+              year: 'numeric' 
+            })
+          : 'Data não informada';
+        
+        parts.push(`\n--- REUNIÃO ${idx + 1} ---`);
+        parts.push(`📅 Data: ${dataFormatada}`);
+        
+        if(reuniao.objetivo){
+          parts.push(`🎯 Objetivo: ${reuniao.objetivo}`);
+        }
+        
+        // RESUMO é PRIORITÁRIO - contém pontos principais, decisões, ações
+        if(reuniao.resumo){
+          parts.push(`\n📝 RESUMO DA REUNIÃO:`);
+          // Limitar resumo a 2000 chars por reunião
+          const resumoLimitado = reuniao.resumo.length > 2000 
+            ? reuniao.resumo.substring(0, 2000) + '...[resumo truncado]'
+            : reuniao.resumo;
+          parts.push(resumoLimitado);
+        }
+        
+        // Transcrição (trecho) - para contexto adicional
+        if(reuniao.transcricao){
+          parts.push(`\n💬 TRECHO DA TRANSCRIÇÃO (conversa direta com cliente):`);
+          // Limitar transcrição a 1500 chars por reunião para dar contexto sem sobrecarregar
+          const transcricaoLimitada = reuniao.transcricao.length > 1500
+            ? reuniao.transcricao.substring(0, 1500) + '...[transcrição completa disponível na aba Reuniões]'
+            : reuniao.transcricao;
+          parts.push(transcricaoLimitada);
+        }
+        
+        // Metadados úteis
+        if(reuniao.authorName){
+          parts.push(`\n👤 Registrado por: ${reuniao.authorName}`);
+        }
+      });
+      
+      // Adicionar dica para a IA
+      parts.push('\n\n💡 DICA: As reuniões contêm informações valiosas sobre:');
+      parts.push('• Preocupações e objeções do cliente');
+      parts.push('• Decisões já tomadas em conjunto');
+      parts.push('• Preferências de comunicação e estilo');
+      parts.push('• Prazos e compromissos acordados');
+      parts.push('• Histórico de discussões anteriores');
+      
+      const result = parts.join('\n');
+      console.log(`✅ buildReunioesDetail: Gerado ${result.length} caracteres de contexto`);
+      return result;
+    }
+    
+    // 📋 FUNÇÃO PARA EXTRAIR CONTEXTO DAS NOTAS DO TIME (Marketing Atual)
+    // Contém informações diárias sobre o status do marketing
+    function buildNotasTimeDetail(){
+      // Usa a variável global TEAM_NOTES que é carregada do Firebase
+      if(!Array.isArray(TEAM_NOTES) || TEAM_NOTES.length === 0){
+        console.log('📋 buildNotasTimeDetail: Nenhuma nota do time encontrada');
+        return '';
+      }
+      
+      console.log(`📋 buildNotasTimeDetail: Processando ${TEAM_NOTES.length} nota(s) do time`);
+      
+      // Definição das colunas
+      const columnNames = {
+        trafego: '🎯 Tráfego Pago',
+        canais: '📢 Canais de Tração',
+        lideranca: '👔 Liderança',
+        outros: '📌 Outros'
+      };
+      
+      // Ordenar por data (mais recentes primeiro)
+      const notasOrdenadas = [...TEAM_NOTES].sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA;
+      });
+      
+      // Limitar a 30 notas mais recentes para não sobrecarregar o contexto
+      const notasLimitadas = notasOrdenadas.slice(0, 30);
+      
+      const parts = [];
+      parts.push('📋 NOTAS DO TIME - STATUS ATUAL DO MARKETING');
+      parts.push('=' .repeat(50));
+      parts.push(`📊 Total de ${TEAM_NOTES.length} nota(s) registradas. Mostrando as ${notasLimitadas.length} mais recentes.\n`);
+      parts.push('⚠️ IMPORTANTE: Estas notas contêm informações ATUAIS sobre o marketing do cliente.');
+      parts.push('Use para entender o status das campanhas, canais ativos, decisões da liderança e outras informações relevantes.\n');
+      
+      // Agrupar notas por coluna
+      const notasPorColuna = {};
+      Object.keys(columnNames).forEach(col => notasPorColuna[col] = []);
+      
+      notasLimitadas.forEach(nota => {
+        const coluna = nota.column || 'outros';
+        if(notasPorColuna[coluna]){
+          notasPorColuna[coluna].push(nota);
+        } else {
+          notasPorColuna['outros'].push(nota);
+        }
+      });
+      
+      // Renderizar notas por categoria
+      Object.keys(columnNames).forEach(coluna => {
+        const notas = notasPorColuna[coluna];
+        if(notas.length === 0) return;
+        
+        parts.push(`\n--- ${columnNames[coluna]} (${notas.length} nota(s)) ---`);
+        
+        notas.forEach((nota, idx) => {
+          const dataFormatada = nota.createdAt 
+            ? new Date(nota.createdAt).toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : 'Data não informada';
+          
+          // Limitar conteúdo da nota a 500 chars
+          const conteudoLimitado = nota.content && nota.content.length > 500
+            ? nota.content.substring(0, 500) + '...'
+            : (nota.content || 'Sem conteúdo');
+          
+          parts.push(`\n📝 [${dataFormatada}] ${nota.authorName || 'Anônimo'}:`);
+          parts.push(conteudoLimitado);
+        });
+      });
+      
+      // Adicionar dica para a IA
+      parts.push('\n\n💡 DICA: As Notas do Time contêm informações valiosas sobre:');
+      parts.push('• Status atual das campanhas de tráfego pago');
+      parts.push('• Canais de marketing ativos e seu desempenho');
+      parts.push('• Decisões e direcionamentos da liderança');
+      parts.push('• Problemas identificados e soluções em andamento');
+      parts.push('• Atualizações diárias sobre o marketing');
+      
+      const result = parts.join('\n');
+      console.log(`✅ buildNotasTimeDetail: Gerado ${result.length} caracteres de contexto`);
+      return result;
+    }
+    
     async function buildIAContextMessages(){
       // Verificar quais fontes estão selecionadas
       const searchAll = IA_SELECTED_SOURCES.includes('all');
@@ -20416,6 +20653,42 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         ? compressContextText(buildArquivosDetail(contextData?.firebase), IA_LIMITS.arquivos) 
         : '';
       
+      // 🤝 NOVO: Extrair contexto das Reuniões com Clientes
+      // IMPORTANTE: Priorizar reuniões pois contém conversas diretas com o cliente
+      let reunioesDetail = '';
+      if(shouldInclude('reunioes')){
+        try {
+          // Garantir que as reuniões estejam carregadas
+          if(typeof loadReunioesFromData === 'function' && (!Array.isArray(REUNIOES) || REUNIOES.length === 0)){
+            await loadReunioesFromData();
+          }
+          reunioesDetail = compressContextText(buildReunioesDetail(), IA_LIMITS.reunioes);
+          if(reunioesDetail){
+            console.log('✅ Contexto de reuniões carregado:', reunioesDetail.length, 'chars');
+          }
+        } catch(err) {
+          console.warn('⚠️ Erro ao carregar reuniões para contexto IA:', err);
+        }
+      }
+      
+      // 📋 NOVO: Extrair contexto das Notas do Time (Marketing Atual)
+      // IMPORTANTE: Contém informações diárias sobre o status atual do marketing
+      let notasTimeDetail = '';
+      if(shouldInclude('notasTime')){
+        try {
+          // Garantir que as notas do time estejam carregadas
+          if(typeof loadTeamNotesFromData === 'function' && (!Array.isArray(TEAM_NOTES) || TEAM_NOTES.length === 0)){
+            await loadTeamNotesFromData();
+          }
+          notasTimeDetail = compressContextText(buildNotasTimeDetail(), IA_LIMITS.notasTime);
+          if(notasTimeDetail){
+            console.log('✅ Contexto de Notas do Time carregado:', notasTimeDetail.length, 'chars');
+          }
+        } catch(err) {
+          console.warn('⚠️ Erro ao carregar Notas do Time para contexto IA:', err);
+        }
+      }
+      
       const sources = [];
       
       // 🎯 OTIMIZAÇÃO: PROMPT DO SISTEMA REDUZIDO (~60% menor)
@@ -20428,16 +20701,19 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
 ❌ NÃO PODE: Inventar números, métricas ou dados não fornecidos.
 
 📋 PRIORIDADE DE FONTES:
-1. ESTRUTURAÇÃO: Informações do negócio, semanas, blocos, análises salvas
-2. METAS/CAC: Números oficiais e objetivos
-3. MACRO/CALENDÁRIO/DEMANDAS: Dados operacionais
-4. DOCUMENTOS: Base de conhecimento do usuário
+1. 🤝 REUNIÕES: Conversas diretas com o cliente - USE para entender contexto, preferências e decisões já tomadas
+2. 📋 NOTAS TIME: Status ATUAL do marketing - campanhas em andamento, problemas, resultados diários
+3. ESTRUTURAÇÃO: Informações do negócio, semanas, blocos, análises salvas
+4. METAS/CAC: Números oficiais e objetivos
+5. MACRO/CALENDÁRIO/DEMANDAS: Dados operacionais
+6. DOCUMENTOS: Base de conhecimento do usuário
 
 ⚠️ PROTOCOLO:
 • Leia TODO o contexto antes de responder
-• Busque em TODAS as mensagens de sistema (📊, �, 📋, 🔬)
+• PRIORIZE informações das REUNIÕES e NOTAS TIME - dados diretos e atuais
+• Busque em TODAS as mensagens de sistema (📊, 🤝, 📋, 🔬)
 • Se não encontrar dados, diga claramente e sugira onde adicionar
-• Cite a fonte quando usar dados: "Segundo a Estruturação..."
+• Cite a fonte quando usar dados: "Segundo a reunião de..." ou "Nas notas do time..."
 
 💡 ESTILO: Profissional, acionável, use bullets e exemplos práticos.`
       }];
@@ -20476,7 +20752,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           'acessos': 'Acessos',
           'arquivos': 'Arquivos',
           'relatorio': 'Relatório',
-          'demandas': 'Demandas'
+          'demandas': 'Demandas',
+          'reunioes': 'Reuniões (Transcrições e Resumos)',
+          'notasTime': 'Notas Time (Marketing Atual)'
         };
         const selectedNames = IA_SELECTED_SOURCES.map(s => sourceNames[s] || s).join(', ');
         const focusedMessage = `⚠️ BUSCA FOCADA: O usuário selecionou apenas as seguintes abas para consulta: ${selectedNames}. Utilize APENAS os dados dessas fontes específicas. Se a informação não estiver nessas abas, informe que não está disponível na busca atual e sugira incluir outras abas se necessário.`;
@@ -20568,6 +20846,22 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       if(arquivosDetail){
         messages.push({ role: 'system', content: arquivosDetail });
         sources.push('Estrutura de Arquivos');
+      }
+      
+      // 🤝 NOVO: Adicionar contexto das Reuniões com Clientes
+      // PRIORIDADE ALTA: Contém conversas diretas com o cliente
+      if(reunioesDetail){
+        messages.push({ role: 'system', content: reunioesDetail });
+        sources.push('Reuniões com Clientes (Transcrições e Resumos)');
+        console.log('✅ Contexto de reuniões adicionado às mensagens da IA');
+      }
+      
+      // 📋 NOVO: Adicionar contexto das Notas do Time (Marketing Atual)
+      // PRIORIDADE ALTA: Contém informações diárias sobre o status do marketing
+      if(notasTimeDetail){
+        messages.push({ role: 'system', content: notasTimeDetail });
+        sources.push('Notas do Time (Marketing Atual)');
+        console.log('✅ Contexto de Notas do Time adicionado às mensagens da IA');
       }
       
       if(IA_DOCS.length){
@@ -21027,6 +21321,27 @@ async function sendIAQuestion(){
     iaQuestion?.addEventListener('input', autoResizeComposer);
     iaChatSearch?.addEventListener('input', ()=>{ renderIAChatList(); });
     
+    // 🚀 Event listener para botões de perguntas rápidas
+    document.addEventListener('click', (e) => {
+      const quickBtn = e.target.closest('.ia-quick-btn');
+      if(quickBtn){
+        const prompt = quickBtn.dataset.prompt;
+        if(prompt && iaQuestion){
+          // Iniciar nova conversa se necessário
+          if(!CURRENT_CHAT) newIAChat();
+          
+          // Preencher o campo com o prompt
+          iaQuestion.value = prompt;
+          autoResizeComposer();
+          
+          // Enviar automaticamente
+          sendIAQuestion();
+          
+          console.log('🚀 Pergunta rápida enviada:', prompt.substring(0, 50) + '...');
+        }
+      }
+    });
+    
     // Event listener para colar imagem (Ctrl+V ou Cmd+V)
     iaQuestion?.addEventListener('paste', async (e) => {
       const items = e.clipboardData?.items;
@@ -21187,7 +21502,7 @@ async function sendIAQuestion(){
       const textEl = document.getElementById('iaSourcesText');
       if (textEl) {
         if (IA_SELECTED_SOURCES.includes('all')) {
-          textEl.textContent = 'Todas as Abas (32)';
+          textEl.textContent = 'Todas as Abas (34)';
         } else if (IA_SELECTED_SOURCES.length === 1) {
           const names = {
             'estruturacao': '📝 Notas das 6 Semanas',
@@ -21213,7 +21528,9 @@ async function sendIAQuestion(){
             'macro': '� Macro', 'planejamento': '📋 Planejamento',
             'calendario': '📅 Calendário', 'posts': '📸 Posts', 'metas': '🎯 Metas',
             'cac': '💰 CAC', 'leads': '👥 Leads', 'anotacoes': '📝 Anotações',
-            'acessos': '� Acessos', 'arquivos': '📁 Arquivos', 'relatorio': '📊 Relatório', 'demandas': '✅ Demandas'
+            'acessos': '� Acessos', 'arquivos': '📁 Arquivos', 'relatorio': '📊 Relatório', 'demandas': '✅ Demandas',
+            'reunioes': '🤝 Reuniões',
+            'notasTime': '📋 Notas Time'
           };
           textEl.textContent = names[IA_SELECTED_SOURCES[0]] || '1 Aba';
         } else {
