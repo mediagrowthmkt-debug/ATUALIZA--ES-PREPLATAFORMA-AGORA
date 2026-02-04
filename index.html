@@ -5663,15 +5663,17 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .ia-line-add-btn:active{transform:scale(.95)}
     .ia-code{background:#090909;border:1px solid #222;border-radius:10px;padding:12px;font-family:"Fira Code",monospace;font-size:.8rem;overflow:auto}
     .ia-msg-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
-    .ia-copy-btn,.ia-add-all-planning-btn,.ia-add-metas-btn,.ia-edit-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;transition:background .2s ease,transform .1s ease}
-    .ia-copy-btn:hover,.ia-add-all-planning-btn:hover,.ia-add-metas-btn:hover,.ia-edit-btn:hover{background:rgba(255,255,255,.16)}
-    .ia-copy-btn:active,.ia-add-all-planning-btn:active,.ia-add-metas-btn:active,.ia-edit-btn:active{transform:scale(.97)}
+    .ia-copy-btn,.ia-add-all-planning-btn,.ia-add-metas-btn,.ia-edit-btn,.ia-copy-wpp-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;transition:background .2s ease,transform .1s ease}
+    .ia-copy-btn:hover,.ia-add-all-planning-btn:hover,.ia-add-metas-btn:hover,.ia-edit-btn:hover,.ia-copy-wpp-btn:hover{background:rgba(255,255,255,.16)}
+    .ia-copy-btn:active,.ia-add-all-planning-btn:active,.ia-add-metas-btn:active,.ia-edit-btn:active,.ia-copy-wpp-btn:active{transform:scale(.97)}
     .ia-add-all-planning-btn{background:rgba(255,102,0,.12);border-color:rgba(255,102,0,.3);color:var(--accent)}
     .ia-add-all-planning-btn:hover{background:rgba(255,102,0,.2)}
     .ia-add-metas-btn{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:#10b981}
     .ia-add-metas-btn:hover{background:rgba(16,185,129,.2)}
     .ia-edit-btn{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#3b82f6}
     .ia-edit-btn:hover{background:rgba(59,130,246,.2)}
+    .ia-copy-wpp-btn{background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.3);color:#25D366}
+    .ia-copy-wpp-btn:hover{background:rgba(37,211,102,.2)}
     .ia-msg-editing .ia-msg-content{display:none}
     .ia-msg-edit-area{display:none;width:100%;margin-bottom:10px}
     .ia-msg-editing .ia-msg-edit-area{display:block}
@@ -12780,6 +12782,18 @@ document.addEventListener('DOMContentLoaded', function(){
       </button>
     </div>
     
+    <!-- Coluna Automações e Tec -->
+    <div class="team-notes-column" data-column="automacoes">
+      <div class="team-notes-column-header">
+        <h3 class="team-notes-column-title"><span class="column-icon">⚙️</span> Automações e Tec</h3>
+        <span class="team-notes-column-count" id="teamNotesCountAutomacoes">0</span>
+      </div>
+      <div class="team-notes-column-cards" id="teamNotesCardsAutomacoes"></div>
+      <button type="button" class="team-notes-add-btn" data-column="automacoes" onclick="openAutomationTemplateModal()">
+        <span>📋</span> Template Automações
+      </button>
+    </div>
+    
     <!-- Coluna Outros -->
     <div class="team-notes-column" data-column="outros">
       <div class="team-notes-column-header">
@@ -12840,6 +12854,21 @@ document.addEventListener('DOMContentLoaded', function(){
         </div>
         <div id="summaryConteudoContent" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; max-height: 200px; overflow-y: auto;">
           <p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de conteúdo no período selecionado.</p>
+        </div>
+      </div>
+      
+      <!-- Card Resumo Automações -->
+      <div class="summary-card" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(168,85,247,0.3); border-radius: 10px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="color: #a855f7; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span>⚙️</span> Automações
+          </h4>
+          <button type="button" onclick="copySummary('automacoes')" style="background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); border-radius: 6px; padding: 4px 10px; color: #a855f7; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            📋 Copiar
+          </button>
+        </div>
+        <div id="summaryAutomacoesContent" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; max-height: 200px; overflow-y: auto;">
+          <p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de automações no período selecionado.</p>
         </div>
       </div>
     </div>
@@ -13387,6 +13416,147 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     <div class="team-notes-modal-footer">
       <button type="button" class="btn secondary" onclick="closeLeadershipTemplateModal()">Cancelar</button>
       <button type="button" class="btn" onclick="saveLeadershipTemplate()" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">💾 Salvar Check-in</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Template Automações -->
+<div class="team-notes-modal traffic-template-modal" id="automationTemplateModal">
+  <div class="team-notes-modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+    <div class="team-notes-modal-header">
+      <h3>⚙️ Relatório Diário de Automações e Tec</h3>
+      <button type="button" class="team-notes-modal-close" onclick="closeAutomationTemplateModal()">✕</button>
+    </div>
+    <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+      
+      <!-- 1. Status geral das automações -->
+      <div class="template-question">
+        <label class="template-label">🔄 As automações ativas estão rodando corretamente?</label>
+        <select id="autoStatusAutomacoes" class="template-select" onchange="if(this.value==='PARCIAL' || this.value==='NAO'){ document.getElementById('autoStatusAutomacoesDetails').style.display='block'; } else { document.getElementById('autoStatusAutomacoesDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="SIM">✅ SIM, todas funcionando</option>
+          <option value="PARCIAL">⚠️ PARCIAL, alguma com atraso ou erro</option>
+          <option value="NAO">❌ NÃO, automações paradas</option>
+        </select>
+        <input type="text" id="autoStatusAutomacoesDetails" class="template-input" placeholder="Qual automação? Detalhe o problema..." style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 2. Entrada de leads no CRM -->
+      <div class="template-question">
+        <label class="template-label">📥 Leads das LPs e sites estão caindo corretamente no CRM?</label>
+        <select id="autoEntradaLeads" class="template-select" onchange="if(this.value==='PARCIAL' || this.value==='NAO'){ document.getElementById('autoEntradaLeadsDetails').style.display='block'; } else { document.getElementById('autoEntradaLeadsDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="SIM">✅ SIM, todos os pontos de entrada ok</option>
+          <option value="PARCIAL">⚠️ PARCIAL, algum ponto específico com falha</option>
+          <option value="NAO">❌ NÃO, leads não estão entrando</option>
+        </select>
+        <select id="autoEntradaLeadsOrigem" class="template-select" style="margin-top: 8px; display: none;">
+          <option value="">Origem com problema...</option>
+          <option value="LP">🎯 LP</option>
+          <option value="Website">🌐 Website</option>
+          <option value="Meta Form">📱 Meta Form</option>
+          <option value="Google">🔍 Google</option>
+          <option value="Outro">➕ Outro</option>
+        </select>
+        <input type="text" id="autoEntradaLeadsDetails" class="template-input" placeholder="Detalhes adicionais..." style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 3. Disparos e campanhas automatizadas -->
+      <div class="template-question">
+        <label class="template-label">📨 Existe algum disparo, campanha ou sequência em andamento hoje?</label>
+        <select id="autoDisparos" class="template-select" onchange="if(this.value==='SIM'){ document.getElementById('autoDisparosDetails').style.display='block'; } else { document.getElementById('autoDisparosDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="NAO">❌ NÃO, nenhum disparo hoje</option>
+          <option value="SIM">✅ SIM, disparo ativo</option>
+        </select>
+        <div id="autoDisparosDetails" style="display: none; margin-top: 8px;">
+          <select id="autoDisparosTipo" class="template-select">
+            <option value="">Tipo de disparo...</option>
+            <option value="WhatsApp">💬 WhatsApp</option>
+            <option value="Email">📧 Email</option>
+            <option value="SMS">📱 SMS</option>
+          </select>
+          <input type="text" id="autoDisparosCliente" class="template-input" placeholder="Cliente ou funil impactado..." style="margin-top: 8px;">
+        </div>
+      </div>
+
+      <!-- 4. IA e automações inteligentes -->
+      <div class="template-question">
+        <label class="template-label">🤖 Alguma IA está ativa e funcionando corretamente hoje?</label>
+        <select id="autoIA" class="template-select" onchange="if(this.value!==''){ document.getElementById('autoIADetails').style.display='block'; } else { document.getElementById('autoIADetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="SIM">✅ SIM, funcionando normalmente</option>
+          <option value="PARCIAL">⚠️ PARCIAL, IA ativa mas com limitações</option>
+          <option value="NAO">❌ NÃO, IA inativa ou com erro</option>
+        </select>
+        <select id="autoIATipo" class="template-select" style="margin-top: 8px; display: none;">
+          <option value="">Tipo de IA...</option>
+          <option value="IA de atendimento">💬 IA de atendimento</option>
+          <option value="IA de qualificação">🎯 IA de qualificação</option>
+          <option value="IA de follow-up">📞 IA de follow-up</option>
+          <option value="Outra">➕ Outra</option>
+        </select>
+        <input type="text" id="autoIADetails" class="template-input" placeholder="Detalhes adicionais..." style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 5. Impacto no time comercial -->
+      <div class="template-question">
+        <label class="template-label">💼 As automações estão ajudando o vendedor hoje?</label>
+        <select id="autoImpactoComercial" class="template-select" onchange="if(this.value==='NAO' || this.value==='NEUTRO'){ document.getElementById('autoImpactoComercialDetails').style.display='block'; } else { document.getElementById('autoImpactoComercialDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="SIM">✅ SIM, facilitando follow-ups e respostas</option>
+          <option value="NEUTRO">➖ NEUTRO, não ajudou nem atrapalhou</option>
+          <option value="NAO">❌ NÃO, está atrapalhando ou confusa</option>
+        </select>
+        <input type="text" id="autoImpactoComercialDetails" class="template-input" placeholder="Por quê? O que aconteceu?" style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 6. Integrações e infraestrutura -->
+      <div class="template-question">
+        <label class="template-label">🔗 Integrações e parte técnica estão estáveis?</label>
+        <select id="autoIntegracoes" class="template-select" onchange="if(this.value!=='SIM'){ document.getElementById('autoIntegracoesDetails').style.display='block'; } else { document.getElementById('autoIntegracoesDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="SIM">✅ SIM, tudo estável</option>
+          <option value="PARCIAL">⚠️ PARCIAL, instabilidade pontual</option>
+          <option value="NAO">❌ NÃO, problema técnico ativo</option>
+        </select>
+        <div id="autoIntegracoesDetails" style="display: none; margin-top: 8px;">
+          <select id="autoIntegracoesTipo" class="template-select">
+            <option value="">Qual integração?</option>
+            <option value="Meta">📱 Meta</option>
+            <option value="Google">🔍 Google</option>
+            <option value="WhatsApp">💬 WhatsApp</option>
+            <option value="Domínio">🌐 Domínio</option>
+            <option value="Webhook">🔗 Webhook</option>
+            <option value="API externa">🔌 API externa</option>
+          </select>
+          <input type="text" id="autoIntegracoesObservacao" class="template-input" placeholder="Detalhes do problema..." style="margin-top: 8px;">
+        </div>
+      </div>
+
+      <!-- 7. Alertas ou riscos identificados -->
+      <div class="template-question">
+        <label class="template-label">⚠️ Existe algum risco técnico ou gargalo identificado hoje?</label>
+        <select id="autoRiscos" class="template-select" onchange="if(this.value!=='NAO'){ document.getElementById('autoRiscosDetails').style.display='block'; } else { document.getElementById('autoRiscosDetails').style.display='none'; }">
+          <option value="">Selecione...</option>
+          <option value="NAO">✅ NÃO, nenhum risco</option>
+          <option value="BAIXO">🟡 SIM, risco baixo</option>
+          <option value="MEDIO">🟠 SIM, risco médio</option>
+          <option value="ALTO">🔴 SIM, risco alto</option>
+        </select>
+        <input type="text" id="autoRiscosDetails" class="template-input" placeholder="Qual risco? Detalhe..." style="margin-top: 8px; display: none;">
+      </div>
+
+      <!-- 8. Observação geral -->
+      <div class="template-question">
+        <label class="template-label">📝 Observações gerais do dia</label>
+        <textarea id="autoObservacoes" class="template-input" placeholder="Campo livre, curto e direto..." style="min-height: 80px; resize: vertical;"></textarea>
+      </div>
+
+    </div>
+    <div class="team-notes-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeAutomationTemplateModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveAutomationTemplate()">💾 Salvar Relatório</button>
     </div>
   </div>
 </div>
@@ -17275,6 +17445,41 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         return;
       }
 
+      // Botão Copiar para WhatsApp
+      const copyWppBtn = event.target.closest('.ia-copy-wpp-btn');
+      if(copyWppBtn){
+        const index = Number(copyWppBtn.dataset.msgIndex);
+        if(!CURRENT_CHAT || !Array.isArray(CURRENT_CHAT.messages)) return;
+        if(Number.isNaN(index) || index < 0 || index >= CURRENT_CHAT.messages.length) return;
+        const targetMsg = CURRENT_CHAT.messages[index];
+        const text = typeof targetMsg?.content === 'string' ? targetMsg.content : '';
+        
+        // Converter para formato WhatsApp
+        const wppText = convertMarkdownToWhatsApp(text);
+        
+        try{
+          const copiado = await mgCopyToClipboard(wppText);
+          if(copiado && typeof mgToast === 'function'){ 
+            mgToast('📱 Copiado para WhatsApp!'); 
+            // Feedback visual no botão
+            const originalText = copyWppBtn.innerHTML;
+            copyWppBtn.innerHTML = '✅ Copiado!';
+            copyWppBtn.style.background = 'rgba(34, 197, 94, 0.2)';
+            copyWppBtn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+            setTimeout(() => {
+              copyWppBtn.innerHTML = originalText;
+              copyWppBtn.style.background = '';
+              copyWppBtn.style.borderColor = '';
+            }, 2000);
+          }
+          else if(!copiado && typeof mgToast === 'function'){ mgToast('Não foi possível copiar.'); }
+        }catch(err){
+          console.error('copy ia message to whatsapp', err);
+          if(typeof mgToast === 'function'){ mgToast('Não foi possível copiar.'); }
+        }
+        return;
+      }
+
       // Botão Adicionar todas as linhas ao Planejamento
       const planningAllBtn = event.target.closest('.ia-add-all-planning-btn');
       if(planningAllBtn){
@@ -19010,6 +19215,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           ? `<div class="ia-msg-actions">
               <button type="button" class="ia-edit-btn" data-msg-index="${idx}">✏️ Editar</button>
               <button type="button" class="ia-copy-btn" data-msg-index="${idx}">Copiar</button>
+              <button type="button" class="ia-copy-wpp-btn" data-msg-index="${idx}">📱 Copiar p/ WhatsApp</button>
               <button type="button" class="ia-add-all-planning-btn" data-msg-index="${idx}">📋 Adicionar todas as linhas ao planejamento</button>
               <button type="button" class="ia-add-metas-btn" data-msg-index="${idx}">📈 Adicionar às Metas</button>
             </div>`
@@ -27212,6 +27418,7 @@ async function sendIAQuestion(){
       trafego: { name: 'Tráfego', icon: '🎯' },
       canais: { name: 'Canais de Tração', icon: '📢' },
       lideranca: { name: 'Liderança', icon: '👔' },
+      automacoes: { name: 'Automações e Tec', icon: '⚙️' },
       outros: { name: 'Outros', icon: '📌' }
     };
     let currentEditingTeamNote = null;
@@ -28213,6 +28420,172 @@ async function sendIAQuestion(){
     }
     window.saveLeadershipTemplate = saveLeadershipTemplate;
     /* ========== FIM TEMPLATE DE LIDERANÇA ========== */
+    
+    /* ========== TEMPLATE DE AUTOMAÇÕES ========== */
+    function openAutomationTemplateModal(){
+      const modal = document.getElementById('automationTemplateModal');
+      if(!modal) return;
+      
+      // Limpar todos os campos
+      document.getElementById('autoStatusAutomacoes').value = '';
+      document.getElementById('autoStatusAutomacoesDetails').value = '';
+      document.getElementById('autoStatusAutomacoesDetails').style.display = 'none';
+      
+      document.getElementById('autoEntradaLeads').value = '';
+      document.getElementById('autoEntradaLeadsOrigem').value = '';
+      document.getElementById('autoEntradaLeadsDetails').value = '';
+      document.getElementById('autoEntradaLeadsOrigem').style.display = 'none';
+      document.getElementById('autoEntradaLeadsDetails').style.display = 'none';
+      
+      document.getElementById('autoDisparos').value = '';
+      document.getElementById('autoDisparosTipo').value = '';
+      document.getElementById('autoDisparosCliente').value = '';
+      document.getElementById('autoDisparosDetails').style.display = 'none';
+      
+      document.getElementById('autoIA').value = '';
+      document.getElementById('autoIATipo').value = '';
+      document.getElementById('autoIADetails').value = '';
+      document.getElementById('autoIATipo').style.display = 'none';
+      document.getElementById('autoIADetails').style.display = 'none';
+      
+      document.getElementById('autoImpactoComercial').value = '';
+      document.getElementById('autoImpactoComercialDetails').value = '';
+      document.getElementById('autoImpactoComercialDetails').style.display = 'none';
+      
+      document.getElementById('autoIntegracoes').value = '';
+      document.getElementById('autoIntegracoesTipo').value = '';
+      document.getElementById('autoIntegracoesObservacao').value = '';
+      document.getElementById('autoIntegracoesDetails').style.display = 'none';
+      
+      document.getElementById('autoRiscos').value = '';
+      document.getElementById('autoRiscosDetails').value = '';
+      document.getElementById('autoRiscosDetails').style.display = 'none';
+      
+      document.getElementById('autoObservacoes').value = '';
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    window.openAutomationTemplateModal = openAutomationTemplateModal;
+    
+    function closeAutomationTemplateModal(){
+      const modal = document.getElementById('automationTemplateModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    window.closeAutomationTemplateModal = closeAutomationTemplateModal;
+    
+    async function saveAutomationTemplate(){
+      try {
+        // Coletar valores
+        let statusAutomacoes = document.getElementById('autoStatusAutomacoes').value;
+        if(statusAutomacoes === 'PARCIAL' || statusAutomacoes === 'NAO'){
+          const details = document.getElementById('autoStatusAutomacoesDetails').value.trim();
+          if(details) statusAutomacoes += ` - ${details}`;
+        }
+        
+        let entradaLeads = document.getElementById('autoEntradaLeads').value;
+        if(entradaLeads === 'PARCIAL' || entradaLeads === 'NAO'){
+          const origem = document.getElementById('autoEntradaLeadsOrigem').value;
+          const details = document.getElementById('autoEntradaLeadsDetails').value.trim();
+          if(origem) entradaLeads += ` (${origem})`;
+          if(details) entradaLeads += ` - ${details}`;
+        }
+        
+        let disparos = document.getElementById('autoDisparos').value;
+        if(disparos === 'SIM'){
+          const tipo = document.getElementById('autoDisparosTipo').value;
+          const cliente = document.getElementById('autoDisparosCliente').value.trim();
+          if(tipo) disparos += ` - ${tipo}`;
+          if(cliente) disparos += ` (${cliente})`;
+        }
+        
+        let ia = document.getElementById('autoIA').value;
+        if(ia){
+          const tipo = document.getElementById('autoIATipo').value;
+          const details = document.getElementById('autoIADetails').value.trim();
+          if(tipo) ia += ` - ${tipo}`;
+          if(details) ia += ` - ${details}`;
+        }
+        
+        let impactoComercial = document.getElementById('autoImpactoComercial').value;
+        if(impactoComercial === 'NAO' || impactoComercial === 'NEUTRO'){
+          const details = document.getElementById('autoImpactoComercialDetails').value.trim();
+          if(details) impactoComercial += ` - ${details}`;
+        }
+        
+        let integracoes = document.getElementById('autoIntegracoes').value;
+        if(integracoes !== 'SIM'){
+          const tipo = document.getElementById('autoIntegracoesTipo').value;
+          const obs = document.getElementById('autoIntegracoesObservacao').value.trim();
+          if(tipo) integracoes += ` - ${tipo}`;
+          if(obs) integracoes += ` - ${obs}`;
+        }
+        
+        let riscos = document.getElementById('autoRiscos').value;
+        if(riscos !== 'NAO'){
+          const details = document.getElementById('autoRiscosDetails').value.trim();
+          if(details) riscos += ` - ${details}`;
+        }
+        
+        const observacoes = document.getElementById('autoObservacoes').value.trim();
+        
+        // Montar conteúdo formatado
+        let content = '⚙️ **Relatório Diário de Automações**\n\n';
+        
+        if(statusAutomacoes) content += `🔄 **Status das Automações:** ${statusAutomacoes}\n\n`;
+        if(entradaLeads) content += `📥 **Entrada de Leads:** ${entradaLeads}\n\n`;
+        if(disparos) content += `📨 **Disparos Ativos:** ${disparos}\n\n`;
+        if(ia) content += `🤖 **IA Ativa:** ${ia}\n\n`;
+        if(impactoComercial) content += `💼 **Impacto Comercial:** ${impactoComercial}\n\n`;
+        if(integracoes) content += `🔗 **Integrações:** ${integracoes}\n\n`;
+        if(riscos) content += `⚠️ **Riscos Identificados:** ${riscos}\n\n`;
+        if(observacoes) content += `📝 **Observações:** ${observacoes}\n\n`;
+        
+        if(!content || content === '⚙️ **Relatório Diário de Automações**\n\n'){
+          mgToast('⚠️ Preencha pelo menos um campo', 'warning');
+          return;
+        }
+        
+        // Verificar UID
+        const uid = getTeamNotesTargetUid();
+        if(!uid){
+          console.error('❌ Nenhum UID encontrado para salvar nota');
+          mgToast('Erro: Usuário não identificado. Faça login novamente.');
+          return;
+        }
+        
+        // Usar getCurrentUser para suportar sessão admin
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : auth.currentUser;
+        const now = new Date().toISOString();
+        
+        // Criar nova nota
+        const newNote = {
+          id: uuid(),
+          column: 'automacoes',
+          content: content,
+          attachments: [],
+          authorId: user?.uid || '',
+          authorName: user?.displayName || user?.email?.split('@')[0] || 'Anônimo',
+          authorPhoto: user?.photoURL || '',
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        TEAM_NOTES.push(newNote);
+        await persistTeamNotes();
+        closeAutomationTemplateModal();
+        renderTeamNotes();
+        mgToast('✅ Relatório de automações salvo com sucesso!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao salvar relatório de automações:', err);
+        mgToast('Erro ao salvar relatório: ' + (err.message || 'Erro desconhecido'));
+      }
+    }
+    window.saveAutomationTemplate = saveAutomationTemplate;
+    /* ========== FIM TEMPLATE DE AUTOMAÇÕES ========== */
     /* ========== FIM TEMPLATE DE CONTEÚDO/CANAIS ========== */
 
     /* ========== RESUMO AUTOMÁTICO DAS NOTAS ========== */
@@ -28606,6 +28979,10 @@ IMPORTANTE:
         semana: { text: null, savedAt: null },
         mes: { text: null, savedAt: null }
       },
+      automacoes: {
+        semana: { text: null, savedAt: null },
+        mes: { text: null, savedAt: null }
+      },
       _loaded: false
     };
     
@@ -28830,11 +29207,13 @@ IMPORTANTE:
       
       const trafegoNotes = getNotesInPeriod('trafego', currentSummaryFilter);
       const conteudoNotes = getNotesInPeriod('canais', currentSummaryFilter);
+      const automacoesNotes = getNotesInPeriod('automacoes', currentSummaryFilter);
       
-      console.log('🔄 [SUMMARY] Notas encontradas - Tráfego:', trafegoNotes.length, 'Conteúdo:', conteudoNotes.length);
+      console.log('🔄 [SUMMARY] Notas encontradas - Tráfego:', trafegoNotes.length, 'Conteúdo:', conteudoNotes.length, 'Automações:', automacoesNotes.length);
       
       const trafegoEl = document.getElementById('summaryTrafegoContent');
       const conteudoEl = document.getElementById('summaryConteudoContent');
+      const automacoesEl = document.getElementById('summaryAutomacoesContent');
       
       // ========== TRÁFEGO ==========
       if(trafegoEl) {
@@ -28881,6 +29260,29 @@ IMPORTANTE:
           }
         }
       }
+      
+      // ========== AUTOMAÇÕES ==========
+      if(automacoesEl) {
+        if(automacoesNotes.length === 0) {
+          console.log('🔄 [SUMMARY] AUTOMAÇÕES: Nenhuma nota');
+          automacoesEl.innerHTML = '<p style="color: #64748b; font-style: italic; margin: 0;">Nenhuma nota de automações no período.</p>';
+        } else if(currentSummaryFilter === 'dia') {
+          console.log('🔄 [SUMMARY] AUTOMAÇÕES: Modo DIA - mostrando notas formatadas');
+          // DIÁRIO: Mostra as notas formatadas
+          const wpp = formatNotesForWpp(automacoesNotes, 'automacoes');
+          automacoesEl.innerHTML = wppToHtml(wpp);
+        } else {
+          // SEMANAL/MENSAL: Verifica se tem cache do Firebase para ESTE período
+          const cached = cachedSummaries.automacoes ? cachedSummaries.automacoes[currentSummaryFilter] : null;
+          if(cached && cached.text) {
+            console.log('🔄 [SUMMARY] AUTOMAÇÕES: Mostrando resumo SALVO do filtro', currentSummaryFilter);
+            showSummaryWithRegenerateButton(automacoesEl, 'automacoes', cached.text, cached.savedAt);
+          } else {
+            console.log('🔄 [SUMMARY] AUTOMAÇÕES: Mostrando BOTÃO para gerar IA, filtro:', currentSummaryFilter);
+            showGenerateButton(automacoesEl, 'automacoes', automacoesNotes.length, currentSummaryFilter);
+          }
+        }
+      }
     }
     window.updateSummaries = updateSummaries;
     
@@ -28903,7 +29305,7 @@ IMPORTANTE:
           mgToast('⚠️ Clique em "Gerar Resumo com IA" primeiro');
           return;
         }
-      } else {
+      } else if(type === 'conteudo') {
         const notes = getNotesInPeriod('canais', currentSummaryFilter);
         if(notes.length === 0) {
           mgToast('Nenhuma nota de conteúdo no período');
@@ -28915,6 +29317,22 @@ IMPORTANTE:
           wppText = cached.text;
         } else if(currentSummaryFilter === 'dia') {
           wppText = formatNotesForWpp(notes, 'conteudo');
+        } else {
+          mgToast('⚠️ Clique em "Gerar Resumo com IA" primeiro');
+          return;
+        }
+      } else if(type === 'automacoes') {
+        const notes = getNotesInPeriod('automacoes', currentSummaryFilter);
+        if(notes.length === 0) {
+          mgToast('Nenhuma nota de automações no período');
+          return;
+        }
+        // Usar cache se disponível (nova estrutura por período)
+        const cached = cachedSummaries.automacoes ? cachedSummaries.automacoes[currentSummaryFilter] : null;
+        if(cached && cached.text) {
+          wppText = cached.text;
+        } else if(currentSummaryFilter === 'dia') {
+          wppText = formatNotesForWpp(notes, 'automacoes');
         } else {
           mgToast('⚠️ Clique em "Gerar Resumo com IA" primeiro');
           return;
@@ -28952,13 +29370,15 @@ IMPORTANTE:
       const trafegoNotes = getNotesInPeriod('trafego', 'mes');
       const canaisNotes = getNotesInPeriod('canais', 'mes');
       const liderancaNotes = getNotesInPeriod('lideranca', 'mes');
+      const automacoesNotes = getNotesInPeriod('automacoes', 'mes');
       const outrosNotes = getNotesInPeriod('outros', 'mes');
       
-      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + outrosNotes.length;
+      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + automacoesNotes.length + outrosNotes.length;
       
       console.log('🗓️ [MÊS] Notas encontradas - Tráfego:', trafegoNotes.length, 
                   'Canais:', canaisNotes.length, 
                   'Liderança:', liderancaNotes.length, 
+                  'Automações:', automacoesNotes.length,
                   'Outros:', outrosNotes.length);
       
       if(totalNotas === 0) {
@@ -28995,6 +29415,7 @@ IMPORTANTE:
         notasConsolidadas += formatarNotas(trafegoNotes, '📊 TRÁFEGO PAGO');
         notasConsolidadas += formatarNotas(canaisNotes, '📱 CANAIS DE TRAÇÃO');
         notasConsolidadas += formatarNotas(liderancaNotes, '👥 LIDERANÇA');
+        notasConsolidadas += formatarNotas(automacoesNotes, '⚙️ AUTOMAÇÕES E TEC');
         notasConsolidadas += formatarNotas(outrosNotes, '📝 OUTROS');
         
         console.log('🗓️ [MÊS] Texto consolidado preparado:', notasConsolidadas.length, 'caracteres');
@@ -29020,6 +29441,9 @@ _${mesAtual}_
 
 *👥 Liderança/Equipe:*
 • [Resuma pontos relevantes sobre equipe, processos, check-ins]
+
+*⚙️ Automações e Tec:*
+• [Resuma status técnico, automações, integrações, IAs ativas]
 
 *📝 Observações Gerais:*
 • [Outros pontos relevantes que não se encaixam acima]
@@ -29237,13 +29661,15 @@ IMPORTANTE:
       const trafegoNotes = getNotesInPeriod('trafego', 'semana');
       const canaisNotes = getNotesInPeriod('canais', 'semana');
       const liderancaNotes = getNotesInPeriod('lideranca', 'semana');
+      const automacoesNotes = getNotesInPeriod('automacoes', 'semana');
       const outrosNotes = getNotesInPeriod('outros', 'semana');
       
-      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + outrosNotes.length;
+      const totalNotas = trafegoNotes.length + canaisNotes.length + liderancaNotes.length + automacoesNotes.length + outrosNotes.length;
       
       console.log('📆 [SEMANA] Notas encontradas - Tráfego:', trafegoNotes.length, 
                   'Canais:', canaisNotes.length, 
                   'Liderança:', liderancaNotes.length, 
+                  'Automações:', automacoesNotes.length,
                   'Outros:', outrosNotes.length);
       
       if(totalNotas === 0) {
@@ -29282,6 +29708,7 @@ IMPORTANTE:
         notasConsolidadas += formatarNotas(trafegoNotes, '📊 TRÁFEGO PAGO');
         notasConsolidadas += formatarNotas(canaisNotes, '📱 CANAIS DE TRAÇÃO');
         notasConsolidadas += formatarNotas(liderancaNotes, '👥 LIDERANÇA');
+        notasConsolidadas += formatarNotas(automacoesNotes, '⚙️ AUTOMAÇÕES E TEC');
         notasConsolidadas += formatarNotas(outrosNotes, '📝 OUTROS');
         
         console.log('📆 [SEMANA] Texto consolidado preparado:', notasConsolidadas.length, 'caracteres');
@@ -29307,6 +29734,9 @@ _${periodoSemana}_
 
 *👥 Liderança/Equipe:*
 • [Resuma pontos relevantes sobre equipe, processos, check-ins]
+
+*⚙️ Automações e Tec:*
+• [Resuma status técnico, automações, integrações, IAs ativas]
 
 *📝 Observações Gerais:*
 • [Outros pontos relevantes que não se encaixam acima]
@@ -31070,6 +31500,87 @@ TÍTULO:` }];
       messagesEl.appendChild(messageDiv);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
+    
+    // Converter Markdown para formato WhatsApp (para aba I.A.)
+    // Formatação WhatsApp: *negrito*, _itálico_, ~tachado~, ```monoespaçado```, > citação
+    // Listas: • texto, 1. texto
+    function convertMarkdownToWhatsApp(text) {
+      if (!text) return '';
+      
+      let wpp = text;
+      
+      // 1. Proteger blocos de código
+      const codeBlocks = [];
+      wpp = wpp.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
+        codeBlocks.push(code ? code.trim() : '');
+        return '⟦CODE' + (codeBlocks.length - 1) + '⟧';
+      });
+      
+      // 2. Proteger código inline
+      const inlineCode = [];
+      wpp = wpp.replace(/`([^`]+)`/g, (match, code) => {
+        inlineCode.push(code);
+        return '⟦INLINE' + (inlineCode.length - 1) + '⟧';
+      });
+      
+      // 3. TRATAMENTO DE NEGRITO/ITÁLICO COMBINADOS
+      // Todas as variações de negrito+itálico → apenas negrito WhatsApp *texto*
+      wpp = wpp.replace(/\*\*\*([^*]+)\*\*\*/g, '*$1*');           // ***texto***
+      wpp = wpp.replace(/\*\*_([^_]+)_\*\*/g, '*$1*');             // **_texto_**
+      wpp = wpp.replace(/_\*\*([^*]+)\*\*_/g, '*$1*');             // _**texto**_
+      wpp = wpp.replace(/\*_([^_]+)_\*/g, '*$1*');                 // *_texto_*
+      wpp = wpp.replace(/_\*([^*]+)\*_/g, '*$1*');                 // _*texto*_
+      
+      // 4. NEGRITO SIMPLES **texto** → *texto*
+      wpp = wpp.replace(/\*\*([^*\n]+)\*\*/g, '*$1*');
+      
+      // 5. ITÁLICO _texto_ → mantém (já é WhatsApp)
+      
+      // 6. TACHADO ~~texto~~ → ~texto~
+      wpp = wpp.replace(/~~([^~]+)~~/g, '~$1~');
+      
+      // 7. HEADERS ### Título → *Título*
+      wpp = wpp.replace(/^#{1,6}\s*(.+)$/gm, '*$1*');
+      
+      // 8. LISTAS
+      wpp = wpp.replace(/^\*\s+/gm, '• ');   // * item
+      wpp = wpp.replace(/^-\s+/gm, '• ');    // - item
+      
+      // 9. CITAÇÕES
+      wpp = wpp.replace(/^>\s*(.+)$/gm, '> $1');
+      
+      // 10. LINKS [texto](url) → texto (url)
+      wpp = wpp.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
+      
+      // 11. IMAGENS - remover
+      wpp = wpp.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
+      
+      // 12. LINHAS HORIZONTAIS
+      wpp = wpp.replace(/^[-]{3,}$/gm, '───────────────');
+      
+      // 13. Restaurar código inline
+      inlineCode.forEach((code, i) => {
+        wpp = wpp.replace('⟦INLINE' + i + '⟧', '```' + code + '```');
+      });
+      
+      // 14. Restaurar blocos de código
+      codeBlocks.forEach((code, i) => {
+        wpp = wpp.replace('⟦CODE' + i + '⟧', '```' + code + '```');
+      });
+      
+      // 15. LIMPEZA FINAL
+      wpp = wpp
+        .replace(/_ _/g, '')           // Underscores órfãos
+        .replace(/_\s+_/g, '')         // Underscores com espaço
+        .replace(/\*_/g, '*')          // *_ → *
+        .replace(/_\*/g, '*')          // _* → *
+        .replace(/^[ \t]+/gm, '')      // Espaços no início
+        .replace(/\n{3,}/g, '\n\n')    // Máximo 2 quebras
+        .trim();
+      
+      return wpp;
+    }
+    window.convertMarkdownToWhatsApp = convertMarkdownToWhatsApp;
     
     // Converter texto para formato WhatsApp
     function convertToWhatsAppFormat(text) {
