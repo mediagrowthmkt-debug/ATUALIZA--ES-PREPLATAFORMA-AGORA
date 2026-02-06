@@ -117,6 +117,31 @@
 
 html, body{ -webkit-text-size-adjust: 100%; }
 
+/* Scroll global para modo mobile do DevTools */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Forçar scroll no modo DevTools Mobile */
+@media (hover: none) and (pointer: coarse), (max-width: 900px) {
+  html {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+  }
+  body {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+  #userArea {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
 /* mg-toast */
 .mg-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);z-index:100000;font-weight:800}
 
@@ -990,7 +1015,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover" name="viewport">
 <title>📊 Saúde do Marketing — v4.9.1 (isolação de abas + IDs estáveis)</title>
 <style>
     :root{ --accent:#ff6600; --bg:#000; --panel:#111; --input:#1a1a1a; --border:#333; --muted:#bbb;
@@ -1008,9 +1033,9 @@ html, body{ -webkit-text-size-adjust: 100%; }
       }
     }
     *{box-sizing:border-box}
-    html,body{min-height=100%}
-    html{background:linear-gradient(135deg,var(--bg),#1a1a1a 40%,var(--accent) 120%);background-attachment:fixed}
-    body{margin:0;color:#fff;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;min-height:100vh;width:100%;overflow-x:hidden}
+    html,body{min-height:100%;height:100%}
+    html{background:linear-gradient(135deg,var(--bg),#1a1a1a 40%,var(--accent) 120%);background-attachment:fixed;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+    body{margin:0;color:#fff;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;min-height:100vh;width:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
     h1{margin:16px 0;text-align:center;font-size:1.35rem}
     h1.site-logo{display:flex;align-items:center;justify-content:center}
     h1.site-logo img{height:clamp(40px,8vw,50px);width:auto;max-width:100%}
@@ -1029,7 +1054,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .link{color:#ffb366;text-decoration:underline;cursor:pointer;font-size:.9rem}
     .divider{height:2px;background:#ddd;opacity:.4;margin:8px 0 14px}
 
-    #userArea{display:none;padding:16px}
+    #userArea{display:none;padding:16px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;width:100%}
     .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:14px;margin-bottom:8px}
     .topbar-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
     .user-info{font-weight:700;font-size:.85rem;color:#f5f5f5;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -9208,6 +9233,9 @@ function renderReviewNotes(post){
   .reuniao-modal-body{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:20px;
     display:flex;
     flex-direction:column;
@@ -9295,6 +9323,9 @@ function renderReviewNotes(post){
     word-break:break-word;
     max-height:300px;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
   }
   .reuniao-generating{
     display:flex;
@@ -9354,6 +9385,7 @@ function renderReviewNotes(post){
     display:flex;
     height:700px;
     min-height:600px;
+    position:relative;
   }
   /* Sidebar lateral estilo ChatGPT - SEMPRE VISÍVEL */
   .reunioes-chat-sidebar{
@@ -9402,6 +9434,9 @@ function renderReviewNotes(post){
   .reunioes-chat-sidebar-list{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:8px;
   }
   .reunioes-chat-sidebar-list::-webkit-scrollbar{
@@ -9510,6 +9545,10 @@ function renderReviewNotes(post){
     min-width:0;
     background:#0f172a;
   }
+  /* Overlay para mobile */
+  .reunioes-chat-overlay{
+    display:none;
+  }
   .reunioes-chat-header{
     display:flex;
     align-items:center;
@@ -9527,7 +9566,7 @@ function renderReviewNotes(post){
     padding:8px;
     border-radius:8px;
     transition:all 0.15s;
-    display:flex;
+    display:none;
     align-items:center;
     justify-content:center;
   }
@@ -9560,6 +9599,9 @@ function renderReviewNotes(post){
   .reunioes-chat-messages{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:20px;
     display:flex;
     flex-direction:column;
@@ -9867,29 +9909,321 @@ function renderReviewNotes(post){
     border-color:rgba(99,102,241,0.5);
     transform:translateY(-2px);
   }
-  /* Responsivo */
+  /* Responsivo Mobile - OTIMIZADO PARA MOBILE */
   @media(max-width:900px){
-    .reunioes-chat-section{
-      height:550px;
-      flex-direction:column;
+    .reunioes-wrap{
+      padding:12px 8px;
+      margin-left:8px;
+      margin-right:8px;
     }
-    .reunioes-chat-sidebar{
+    .reunioes-header{
+      flex-direction:column;
+      align-items:flex-start;
+      padding:12px;
+    }
+    .reunioes-header h2{
+      font-size:1rem;
+    }
+    .reunioes-header p{
+      font-size:0.8rem;
+    }
+    .reunioes-add-btn{
       width:100%;
-      height:auto;
-      max-height:200px;
-      border-right:none;
-      border-bottom:1px solid rgba(99,102,241,0.3);
+      justify-content:center;
+      padding:12px;
+    }
+    .reuniao-card{
+      flex:1 1 100%;
+      max-width:100%;
+      min-width:100%;
+    }
+    /* Chat IA - Otimizado para Mobile */
+    .reunioes-chat-section{
+      height:calc(100vh - 180px);
+      min-height:500px;
+      margin-top:16px;
+      border-radius:12px;
+      position:relative;
+      overflow:hidden;
+    }
+    /* Sidebar colapsável no mobile */
+    .reunioes-chat-sidebar{
+      position:fixed;
+      top:0;
+      left:0;
+      width:85%;
+      max-width:300px;
+      height:100vh;
+      z-index:100001;
+      transform:translateX(-100%);
+      transition:transform 0.3s ease;
+      box-shadow:2px 0 10px rgba(0,0,0,0.3);
+    }
+    .reunioes-chat-sidebar.show{
+      transform:translateX(0);
     }
     .reunioes-chat-sidebar-list{
-      max-height:100px;
+      max-height:none;
+      flex:1;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    /* Overlay para fechar sidebar */
+    .reunioes-chat-overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.6);
+      z-index:100000;
+    }
+    .reunioes-chat-overlay.show{
+      display:block;
+    }
+    /* Botão menu sempre visível no mobile */
+    .reunioes-chat-menu-btn{
+      display:flex !important;
+    }
+    .reunioes-chat-main{
+      width:100%;
+    }
+    .reunioes-chat-header{
+      padding:10px 12px;
+    }
+    .reunioes-chat-title{
+      font-size:0.9rem;
+    }
+    .reunioes-chat-count-badge{
+      font-size:0.75rem;
+      padding:4px 8px;
+    }
+    .reunioes-chat-messages{
+      padding:12px;
+      gap:16px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    .reunioes-chat-message{
+      padding:12px 14px;
+      gap:12px;
+    }
+    .reunioes-chat-message-avatar{
+      width:28px;
+      height:28px;
+      font-size:0.9rem;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.9rem;
+      line-height:1.6;
+    }
+    .reunioes-chat-welcome{
+      padding:40px 16px;
+    }
+    .reunioes-chat-welcome-icon{
+      font-size:3rem;
+    }
+    .reunioes-chat-welcome h4{
+      font-size:1.2rem;
+    }
+    .reunioes-chat-welcome p{
+      font-size:0.9rem;
     }
     .reunioes-chat-suggestions{
-      grid-template-columns:repeat(2, 1fr);
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+    .reunioes-chat-suggestions button{
+      padding:12px;
+      font-size:0.85rem;
+      text-align:center;
+    }
+    .reunioes-chat-input-container{
+      padding:10px 12px 12px;
+    }
+    .reunioes-chat-filter-row{
+      flex-direction:column;
+      align-items:stretch;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    .reunioes-chat-filter-row label{
+      font-size:0.75rem;
+    }
+    .reunioes-chat-filter-row select{
+      max-width:100%;
+      font-size:0.8rem;
+      padding:8px 10px;
+    }
+    .reunioes-chat-input-wrapper{
+      padding:8px;
+    }
+    .reunioes-chat-input-wrapper textarea{
+      font-size:0.9rem;
+    }
+    .reunioes-chat-send-btn{
+      width:36px;
+      height:36px;
+      font-size:1rem;
+    }
+    /* Modais otimizados para mobile */
+    .reuniao-modal{
+      padding:10px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    .reuniao-modal-content{
+      max-width:100%;
+      max-height:95vh;
+      border-radius:12px;
+    }
+    .reuniao-modal-header{
+      padding:12px 16px;
+    }
+    .reuniao-modal-header h3{
+      font-size:1rem;
+    }
+    .reuniao-modal-body{
+      padding:16px;
+      gap:12px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    .reuniao-modal-body label{
+      font-size:0.8rem;
+    }
+    .reuniao-modal-body input,
+    .reuniao-modal-body textarea{
+      padding:10px;
+      font-size:0.9rem;
+    }
+    .reuniao-modal-body textarea{
+      min-height:150px;
+    }
+    .reuniao-modal-footer{
+      padding:12px 16px;
+      flex-wrap:wrap;
+    }
+    .reuniao-modal-footer button{
+      flex:1 1 auto;
+      min-width:120px;
+    }
+    .reuniao-resumo-section,
+    .reuniao-transcricao-section{
+      padding:12px;
+    }
+    .reuniao-resumo-section h4{
+      font-size:0.85rem;
+    }
+    .reuniao-resumo-content{
+      font-size:0.85rem;
+      line-height:1.6;
+    }
+    .reuniao-transcricao-content{
+      font-size:0.8rem;
+      max-height:200px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    /* Botões copiar otimizados */
+    .reunioes-chat-copy-btn{
+      padding:8px 12px;
+      font-size:0.75rem;
+    }
+    .reunioes-chat-copy-line-btn{
+      padding:4px 6px;
+      font-size:0.65rem;
     }
   }
   @media(max-width:600px){
-    .reunioes-chat-suggestions{
-      grid-template-columns:1fr;
+    .reunioes-wrap{
+      padding:8px 4px;
+      margin-left:4px;
+      margin-right:4px;
+    }
+    .reunioes-header{
+      padding:10px;
+    }
+    .reunioes-chat-section{
+      height:calc(100vh - 160px);
+      min-height:450px;
+      margin-top:12px;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .reunioes-chat-sidebar{
+      width:90%;
+      max-width:280px;
+    }
+    .reunioes-chat-messages{
+      padding:10px;
+      gap:12px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+    }
+    .reunioes-chat-message{
+      padding:10px 12px;
+      gap:10px;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-welcome{
+      padding:30px 12px;
+    }
+    .reunioes-chat-welcome-icon{
+      font-size:2.5rem;
+    }
+    .reunioes-chat-welcome h4{
+      font-size:1.1rem;
+    }
+    .reunioes-chat-welcome p{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-input-container{
+      padding:8px 10px 10px;
+    }
+    .reuniao-modal-footer{
+      gap:8px;
+    }
+    .reuniao-modal-footer button{
+      font-size:0.85rem;
+      padding:10px 12px;
+    }
+  }
+  /* Ajustes para telas muito pequenas */
+  @media(max-width:400px){
+    .reunioes-chat-section{
+      height:calc(100vh - 140px);
+      overflow:hidden;
+    }
+    .reunioes-chat-message-avatar{
+      width:24px;
+      height:24px;
+      font-size:0.8rem;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.8rem;
+    }
+    .reunioes-chat-input-wrapper textarea{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-send-btn{
+      width:32px;
+      height:32px;
+      font-size:0.9rem;
+    }
+    .reunioes-chat-messages{
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
     }
   }
   /* ========== FIM CHAT IA REUNIÕES ========== */
@@ -9898,6 +10232,50 @@ function renderReviewNotes(post){
 </style>
 </meta></head>
 <body>
+<script>
+// Fix para scroll no modo mobile do DevTools
+(function() {
+  'use strict';
+  
+  // Garantir que html e body tenham scroll habilitado
+  function enableScroll() {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    if (html) {
+      html.style.overflowY = 'auto';
+      html.style.overflowX = 'hidden';
+      html.style.height = '100%';
+      html.style.webkitOverflowScrolling = 'touch';
+    }
+    
+    if (body) {
+      body.style.overflowY = 'auto';
+      body.style.overflowX = 'hidden';
+      body.style.minHeight = '100vh';
+      body.style.webkitOverflowScrolling = 'touch';
+    }
+  }
+  
+  // Executar imediatamente
+  enableScroll();
+  
+  // Garantir após DOM carregar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enableScroll);
+  }
+  
+  // Verificar periodicamente nos primeiros 2 segundos (para casos extremos)
+  let checks = 0;
+  const intervalId = setInterval(() => {
+    enableScroll();
+    checks++;
+    if (checks >= 5) {
+      clearInterval(intervalId);
+    }
+  }, 400);
+})();
+</script>
 <div id="loadingScreen"><div class="loader"></div></div>
 <button id="refreshBtn" title="Atualizar" onclick="location.reload()">⟳</button>
 <h1 class="site-logo"><img src="./logosite.svg" alt="Saúde do Marketing" loading="lazy"/></h1>
@@ -13603,6 +13981,9 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
   
   <!-- ========== CHAT IA PARA CONSULTAR REUNIÕES ========== -->
   <div class="reunioes-chat-section" id="reunioesChatSection" style="display:none;">
+    <!-- Overlay para fechar sidebar no mobile -->
+    <div class="reunioes-chat-overlay" id="reunioesChatOverlay" onclick="toggleReunioesChatSidebar()"></div>
+    
     <!-- Sidebar lateral - SEMPRE VISÍVEL -->
     <div class="reunioes-chat-sidebar" id="reunioesChatSidebar">
       <div class="reunioes-chat-sidebar-header">
@@ -13622,6 +14003,9 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     <!-- Área principal do chat -->
     <div class="reunioes-chat-main">
       <div class="reunioes-chat-header">
+        <button type="button" class="reunioes-chat-menu-btn" onclick="toggleReunioesChatSidebar()" title="Menu">
+          ☰
+        </button>
         <div class="reunioes-chat-title">
           <span>🤖</span>
           <span>Assistente de Reuniões</span>
@@ -30377,25 +30761,31 @@ Responda APENAS com o título. Exemplos de bons títulos:
         throw new Error('Função callAIProxy não disponível');
       }
       
-      const promptContent = `Você é um assistente ESPECIALISTA em documentar reuniões de negócios.
+      const promptContent = `Você é um assistente ESPECIALISTA em documentar reuniões de negócios e estratégia empresarial.
 
 Crie um RESUMO EXECUTIVO COMPLETO da reunião abaixo. O resumo deve ser claro, bem organizado e permitir que qualquer pessoa entenda o que foi discutido.
 
+**IMPORTANTE:** 
+- Analise TODA a transcrição fornecida (não apenas o início)
+- Foque APENAS em assuntos relevantes para estratégia de negócios, marketing, vendas, operações, metas e decisões empresariais
+- IGNORE conversas paralelas, piadas, assuntos pessoais ou tópicos que não agregam valor à estratégia da empresa
+- Se houver muito conteúdo irrelevante, simplifique para destacar apenas o que importa
+
 **OBJETIVO DA REUNIÃO:** ${objetivo}
 
-**TRANSCRIÇÃO:**
-${transcricao.substring(0, 12000)}
+**TRANSCRIÇÃO COMPLETA:**
+${transcricao}
 
 ---
 
 GERE O RESUMO seguindo esta estrutura. Use formatação SIMPLES e LIMPA (sem headers ####, apenas negrito para títulos de seção):
 
 **📋 RESUMO GERAL**
-Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal.
+Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal. Destaque apenas o que é relevante para o negócio.
 
 **📌 TÓPICOS DISCUTIDOS**
-Liste cada tópico abordado com uma breve descrição do que foi conversado. Use bullet points simples:
-- **Nome do tópico:** Descrição do que foi discutido sobre este ponto.
+Liste APENAS os tópicos relevantes para estratégia/negócios. Use bullet points simples:
+- **Nome do tópico:** Descrição do que foi discutido sobre este ponto (foque no impacto para o negócio)
 - **Outro tópico:** Descrição...
 
 **✅ DECISÕES TOMADAS**
@@ -30409,21 +30799,21 @@ Liste as ações definidas:
 - **Tarefa:** Descrição | Responsável: Nome | Prazo: Data
 
 **📊 DADOS MENCIONADOS**
-Liste números, métricas ou valores citados:
+Liste números, métricas ou valores citados (CPL, ROI, faturamento, leads, conversão, etc):
 - Dado 1: valor/contexto
 - Dado 2: valor/contexto
 (Se não houver dados, escreva "Nenhum dado numérico mencionado")
 
 **⚠️ PROBLEMAS IDENTIFICADOS**
-- Problema ou desafio mencionado
+- Problema ou desafio mencionado que impacta o negócio
 (Se não houver, escreva "Nenhum problema específico levantado")
 
 **💡 INSIGHTS IMPORTANTES**
-- Observações relevantes da conversa
-- Sugestões ou recomendações feitas
+- Observações relevantes para a estratégia da empresa
+- Sugestões ou recomendações feitas que agregam valor
 
 **❓ PENDÊNCIAS**
-- Questões que ficaram em aberto
+- Questões que ficaram em aberto e precisam ser resolvidas
 - Pontos que precisam de follow-up
 
 **📅 PRÓXIMOS PASSOS**
@@ -30436,12 +30826,14 @@ REGRAS DE FORMATAÇÃO:
 2. Use bullet points simples (-)
 3. Seja direto e objetivo
 4. Mantenha parágrafos curtos
-5. Se uma seção não tiver informação, escreva brevemente "Não mencionado"
-6. O resultado deve parecer um documento profissional e fácil de ler`;
+5. Se uma seção não tiver informação relevante, escreva brevemente "Não mencionado"
+6. O resultado deve parecer um documento profissional e fácil de ler
+7. PRIORIZE QUALIDADE sobre quantidade - melhor ter menos informação relevante do que muito conteúdo irrelevante
+8. Leia TODA a transcrição antes de resumir, não apenas o começo`;
 
       // Formato de mensagens igual à aba de IA (OpenRouter/OpenAI format)
       const messages = [
-        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais. Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
+        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais focados em estratégia empresarial. Analise TODA a transcrição fornecida. Ignore conversas paralelas e foque apenas em assuntos relevantes para o negócio (metas, vendas, marketing, operações, decisões estratégicas). Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
         { role: 'user', content: promptContent }
       ];
       
@@ -30476,6 +30868,7 @@ REGRAS DE FORMATAÇÃO:
       }
       
       console.log('🤖 [Reunião/IA] Chamando callAIProxy com userId:', userId);
+      console.log('🤖 [Reunião/IA] Tamanho da transcrição:', transcricao.length, 'caracteres');
       
       // CHAMADA COM MAX_TOKENS AUMENTADO para resumo detalhado
       // max_tokens: 4096 permite resumos bem mais longos e detalhados
@@ -31078,12 +31471,27 @@ REGRAS DE FORMATAÇÃO:
     
     function toggleReunioesChatSidebar() {
       const sidebar = document.getElementById('reunioesChatSidebar');
-      if (sidebar) {
+      const overlay = document.getElementById('reunioesChatOverlay');
+      
+      if (!sidebar) return;
+      
+      // Desktop
+      if (window.innerWidth > 900) {
         sidebar.classList.toggle('collapsed');
-        // Em mobile, usar classe open
-        if (window.innerWidth <= 768) {
-          sidebar.classList.toggle('open');
-        }
+        return;
+      }
+      
+      // Mobile
+      const isOpen = sidebar.classList.contains('show');
+      
+      if (isOpen) {
+        // Fechar
+        sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
+      } else {
+        // Abrir
+        sidebar.classList.add('show');
+        if (overlay) overlay.classList.add('show');
       }
     }
     window.toggleReunioesChatSidebar = toggleReunioesChatSidebar;
@@ -31125,9 +31533,11 @@ REGRAS DE FORMATAÇÃO:
       renderReunioesChatHistoryList();
       
       // Fechar sidebar em mobile
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 900) {
         const sidebar = document.getElementById('reunioesChatSidebar');
-        if (sidebar) sidebar.classList.remove('open');
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (sidebar) sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
       }
     }
     window.startNewReuniaoChat = startNewReuniaoChat;
@@ -31283,9 +31693,11 @@ TÍTULO:` }];
       renderReunioesChatHistoryList();
       
       // Fechar sidebar em mobile
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 900) {
         const sidebar = document.getElementById('reunioesChatSidebar');
-        if (sidebar) sidebar.classList.remove('open');
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (sidebar) sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
       }
     }
     window.loadReuniaoChat = loadReuniaoChat;
