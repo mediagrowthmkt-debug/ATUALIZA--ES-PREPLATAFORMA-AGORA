@@ -1392,11 +1392,11 @@ html, body{ -webkit-text-size-adjust: 100%; }
 
     @media (max-width: 820px){
       .tabs-container{align-items:stretch;gap:0}
-      .menu-toggle{display:flex;width:min(260px,100%);margin:0 auto}
-      .tabs{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;flex-wrap:nowrap;background:rgba(15,23,42,.95);border:1px solid var(--shell-border);border-radius:12px;padding:12px;max-width:min(340px,calc(100vw - 32px));box-shadow:0 18px 32px rgba(0,0,0,.45);z-index:999}
+      .menu-toggle{display:flex;width:min(260px,100%);margin:0 auto;min-height:48px;touch-action:manipulation}
+      .tabs{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;flex-wrap:nowrap;background:rgba(15,23,42,.95);border:1px solid var(--shell-border);border-radius:12px;padding:12px;max-width:min(340px,calc(100vw - 32px));box-shadow:0 18px 32px rgba(0,0,0,.45);z-index:999;touch-action:pan-y}
       .tabs-container.menu-open .tabs{display:flex}
       .tabs-container.menu-open .menu-toggle{background:linear-gradient(135deg,#ff8a2b,#ff613a);color:#fff;box-shadow:0 12px 24px rgba(255,82,40,.4),0 0 0 1px rgba(255,255,255,.12) inset}
-      .tabs .tab-btn{width:100%;text-align:left}
+      .tabs .tab-btn{width:100%;text-align:left;min-height:48px;padding:12px 16px;touch-action:manipulation;font-size:1rem}
     }
 
     /* iframes list */
@@ -10632,38 +10632,106 @@ function renderReviewNotes(post){
 })();
 </script>
 
-<!-- 🔧 BOTÃO DEBUG SCROLL MOBILE -->
-<button id="debugScrollBtn" style="position: fixed; bottom: 80px; right: 20px; z-index: 999999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: 3px solid #fff; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); display: none; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s;" title="Debug Scroll Mobile">
-  🔍
-</button>
-
+<!-- 🎯 OTIMIZAÇÃO GLOBAL MOBILE - GARANTIR CLIQUES E SCROLL -->
 <script>
-// Mostrar botão debug apenas em mobile
 (function() {
-  const debugBtn = document.getElementById('debugScrollBtn');
+  'use strict';
+  
   const isMobile = window.innerWidth <= 900;
   
-  if (isMobile && debugBtn) {
-    debugBtn.style.display = 'flex';
+  if (isMobile) {
+    console.log('%c📱 OTIMIZAÇÃO MOBILE GLOBAL ATIVADA', 'background: #6366f1; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
     
-    debugBtn.onclick = function() {
-      console.clear();
-      console.log('%c════════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 16px');
-      console.log('%c   🔍 DEBUG MANUAL ATIVADO', 'color: #667eea; font-weight: bold; font-size: 16px');
-      console.log('%c════════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 16px');
+    // 1. GARANTIR SCROLL GLOBAL DO BODY
+    function ensureBodyScroll() {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      document.body.style.overflowY = 'scroll';
+      document.body.style.overflowX = 'hidden';
+      document.body.style.webkitOverflowScrolling = 'touch';
+      document.body.style.touchAction = 'pan-y pan-x pinch-zoom';
+      document.body.style.overscrollBehavior = 'contain';
+    }
+    
+    // 2. GARANTIR QUE TODOS OS BOTÕES E LINKS SEJAM CLICÁVEIS
+    function ensureClickableElements() {
+      // Adicionar touch-action em todos elementos clicáveis
+      const clickables = document.querySelectorAll('button, a, .tab-btn, .menu-toggle, [onclick], [role="button"]');
+      clickables.forEach(el => {
+        el.style.touchAction = 'manipulation';
+        el.style.webkitTapHighlightColor = 'rgba(255,255,255,0.1)';
+      });
+      console.log(`✅ ${clickables.length} elementos clicáveis otimizados`);
+    }
+    
+    // 3. GARANTIR QUE MENU MOBILE FUNCIONE
+    function ensureMenuWorks() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const tabsContainer = document.querySelector('.tabs-container');
       
-      if (typeof window.debugScroll === 'function') {
-        window.debugScroll();
-      } else {
-        console.error('❌ Função debugScroll() não encontrada');
+      if (menuToggle && tabsContainer) {
+        menuToggle.style.minHeight = '48px';
+        menuToggle.style.touchAction = 'manipulation';
+        
+        // Garantir que clique funcione
+        menuToggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          tabsContainer.classList.toggle('menu-open');
+          console.log('📱 Menu toggled:', tabsContainer.classList.contains('menu-open'));
+        }, { passive: false });
+        
+        // Fechar menu ao clicar em um item
+        const tabBtns = document.querySelectorAll('.tabs .tab-btn');
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', function() {
+            setTimeout(() => {
+              tabsContainer.classList.remove('menu-open');
+            }, 100);
+          });
+        });
+        
+        console.log('✅ Menu mobile configurado');
       }
-      
-      // Feedback visual
-      debugBtn.textContent = '✅';
-      setTimeout(() => {
-        debugBtn.textContent = '🔍';
-      }, 1000);
-    };
+    }
+    
+    // 4. PREVENIR ZOOM NO iOS
+    function preventIOSZoom() {
+      const meta = document.querySelector('meta[name="viewport"]');
+      if (meta) {
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+      console.log('✅ Zoom iOS prevenido');
+    }
+    
+    // 5. EXECUTAR OTIMIZAÇÕES
+    function runOptimizations() {
+      ensureBodyScroll();
+      ensureClickableElements();
+      ensureMenuWorks();
+      preventIOSZoom();
+      console.log('%c✅ OTIMIZAÇÃO MOBILE COMPLETA', 'background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+    }
+    
+    // Executar na carga
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runOptimizations);
+    } else {
+      runOptimizations();
+    }
+    
+    // Re-executar periodicamente para garantir
+    setInterval(runOptimizations, 5000);
+    
+    // Re-executar ao mudar de aba
+    document.addEventListener('click', function(e) {
+      const tabBtn = e.target.closest('.tab-btn');
+      if (tabBtn) {
+        setTimeout(() => {
+          ensureBodyScroll();
+          ensureClickableElements();
+        }, 200);
+      }
+    });
   }
 })();
 </script>
