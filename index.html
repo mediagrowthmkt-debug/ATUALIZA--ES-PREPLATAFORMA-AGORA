@@ -122,23 +122,37 @@ html, body{ -webkit-text-size-adjust: 100%; }
   -webkit-overflow-scrolling: touch;
 }
 
-/* Forçar scroll no modo DevTools Mobile */
+/* 🔧 FIX: Scroll funcionando em qualquer área do app (Desktop modo mobile) */
 @media (hover: none) and (pointer: coarse), (max-width: 900px) {
   html {
-    overflow-y: scroll !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
     height: 100% !important;
+    width: 100% !important;
+    position: static !important;
   }
   body {
+    overflow: auto !important;
     overflow-y: scroll !important;
     overflow-x: hidden !important;
-    height: auto !important;
-    min-height: 100% !important;
+    height: 100vh !important;
+    width: 100% !important;
+    position: static !important;
+    touch-action: pan-y pan-x pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
   }
   #userArea {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow: visible !important;
     -webkit-overflow-scrolling: touch !important;
+    touch-action: inherit !important;
+  }
+  
+  /* Garantir que todos os elementos filhos permitam eventos de scroll */
+  body > * {
+    touch-action: inherit !important;
+    pointer-events: auto !important;
   }
 }
 
@@ -9931,6 +9945,8 @@ function renderReviewNotes(post){
       width:100%;
       justify-content:center;
       padding:12px;
+      min-height:44px;
+      touch-action:manipulation;
     }
     .reuniao-card{
       flex:1 1 100%;
@@ -9945,6 +9961,7 @@ function renderReviewNotes(post){
       border-radius:12px;
       position:relative;
       overflow:hidden;
+      touch-action:pan-y pan-x;
     }
     /* Sidebar colapsável no mobile */
     .reunioes-chat-sidebar{
@@ -9954,10 +9971,13 @@ function renderReviewNotes(post){
       width:85%;
       max-width:300px;
       height:100vh;
+      height:100dvh; /* Dynamic viewport height for mobile browsers */
       z-index:100001;
       transform:translateX(-100%);
       transition:transform 0.3s ease;
       box-shadow:2px 0 10px rgba(0,0,0,0.3);
+      touch-action:pan-y;
+      will-change:transform;
     }
     .reunioes-chat-sidebar.show{
       transform:translateX(0);
@@ -9969,6 +9989,7 @@ function renderReviewNotes(post){
       overflow-x:hidden;
       -webkit-overflow-scrolling:touch;
       overscroll-behavior:contain;
+      touch-action:pan-y;
     }
     /* Overlay para fechar sidebar */
     .reunioes-chat-overlay{
@@ -9977,6 +9998,7 @@ function renderReviewNotes(post){
       inset:0;
       background:rgba(0,0,0,0.6);
       z-index:100000;
+      touch-action:none;
     }
     .reunioes-chat-overlay.show{
       display:block;
@@ -9984,12 +10006,18 @@ function renderReviewNotes(post){
     /* Botão menu sempre visível no mobile */
     .reunioes-chat-menu-btn{
       display:flex !important;
+      min-width:44px;
+      min-height:44px;
+      touch-action:manipulation;
     }
     .reunioes-chat-main{
       width:100%;
+      touch-action:pan-y;
     }
     .reunioes-chat-header{
       padding:10px 12px;
+      min-height:56px;
+      touch-action:manipulation;
     }
     .reunioes-chat-title{
       font-size:0.9rem;
@@ -10001,14 +10029,17 @@ function renderReviewNotes(post){
     .reunioes-chat-messages{
       padding:12px;
       gap:16px;
-      overflow-y:auto;
-      overflow-x:hidden;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior:contain;
+      overflow-y:auto !important;
+      overflow-x:hidden !important;
+      -webkit-overflow-scrolling:touch !important;
+      overscroll-behavior:contain !important;
+      touch-action:pan-y !important;
+      position:relative;
     }
     .reunioes-chat-message{
       padding:12px 14px;
       gap:12px;
+      touch-action:pan-y;
     }
     .reunioes-chat-message-avatar{
       width:28px;
@@ -10018,6 +10049,8 @@ function renderReviewNotes(post){
     .reunioes-chat-message-content{
       font-size:0.9rem;
       line-height:1.6;
+      word-wrap:break-word;
+      overflow-wrap:break-word;
     }
     .reunioes-chat-welcome{
       padding:40px 16px;
@@ -10033,15 +10066,20 @@ function renderReviewNotes(post){
     }
     .reunioes-chat-suggestions{
       grid-template-columns:1fr;
-      gap:8px;
+      gap:10px;
     }
     .reunioes-chat-suggestions button{
-      padding:12px;
-      font-size:0.85rem;
+      padding:14px 16px;
+      font-size:0.9rem;
       text-align:center;
+      min-height:48px;
+      touch-action:manipulation;
+      line-height:1.4;
     }
     .reunioes-chat-input-container{
       padding:10px 12px 12px;
+      background:rgba(15,23,42,0.95);
+      touch-action:manipulation;
     }
     .reunioes-chat-filter-row{
       flex-direction:column;
@@ -10054,20 +10092,65 @@ function renderReviewNotes(post){
     }
     .reunioes-chat-filter-row select{
       max-width:100%;
-      font-size:0.8rem;
-      padding:8px 10px;
+      font-size:0.85rem;
+      padding:10px 12px;
+      min-height:44px;
+      touch-action:manipulation;
     }
     .reunioes-chat-input-wrapper{
-      padding:8px;
+      padding:10px;
     }
     .reunioes-chat-input-wrapper textarea{
-      font-size:0.9rem;
+      font-size:0.95rem;
+      padding:6px 4px;
+      touch-action:manipulation;
     }
     .reunioes-chat-send-btn{
-      width:36px;
-      height:36px;
-      font-size:1rem;
+      width:44px;
+      height:44px;
+      font-size:1.1rem;
+      touch-action:manipulation;
     }
+    /* Botões de ação do histórico */
+    .reunioes-chat-history-item-btn{
+      min-width:32px;
+      min-height:32px;
+      touch-action:manipulation;
+    }
+    /* Botão nova conversa */
+    .reunioes-chat-new-btn{
+      min-height:44px;
+      touch-action:manipulation;
+    }
+    /* Botões de copiar */
+    .reunioes-chat-copy-btn{
+      min-height:40px;
+      padding:10px 16px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-copy-line-btn{
+      min-width:36px;
+      min-height:36px;
+      padding:6px 8px;
+      touch-action:manipulation;
+    }
+    /* Item do histórico */
+    .reunioes-chat-history-item{
+      min-height:60px;
+      padding:12px;
+      touch-action:manipulation;
+    }
+    /* Otimização para iOS Safari */
+    @supports (-webkit-touch-callout: none) {
+      .reunioes-chat-section{
+        height:-webkit-fill-available;
+        min-height:-webkit-fill-available;
+      }
+      .reunioes-chat-sidebar{
+        height:-webkit-fill-available;
+      }
+    }
+  }
     /* Modais otimizados para mobile */
     .reuniao-modal{
       padding:10px;
@@ -10233,49 +10316,358 @@ function renderReviewNotes(post){
 </meta></head>
 <body>
 <script>
-// Fix para scroll no modo mobile do DevTools
+// 🔧 🔧 🔧 FIX SCROLL MOBILE - DEBUG COMPLETO 🔧 🔧 🔧
 (function() {
   'use strict';
   
-  // Garantir que html e body tenham scroll habilitado
+  console.log('%c╔════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  🔧 INICIANDO DIAGNÓSTICO DE SCROLL MOBILE               ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c╚════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-weight: bold');
+  
+  // === FUNÇÃO DE DEBUG DETALHADO ===
+  function debugScrollState(label) {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    console.group(`🔍 ${label}`);
+    
+    // Info do viewport
+    console.log('📐 Viewport:', {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio
+    });
+    
+    // Info do HTML
+    if (html) {
+      const htmlComputed = window.getComputedStyle(html);
+      console.log('📄 HTML:', {
+        overflow: htmlComputed.overflow,
+        overflowY: htmlComputed.overflowY,
+        overflowX: htmlComputed.overflowX,
+        position: htmlComputed.position,
+        height: htmlComputed.height,
+        touchAction: htmlComputed.touchAction,
+        style_overflow: html.style.overflow,
+        style_overflowY: html.style.overflowY
+      });
+    }
+    
+    // Info do BODY
+    if (body) {
+      const bodyComputed = window.getComputedStyle(body);
+      console.log('🧑 BODY:', {
+        overflow: bodyComputed.overflow,
+        overflowY: bodyComputed.overflowY,
+        overflowX: bodyComputed.overflowX,
+        position: bodyComputed.position,
+        height: bodyComputed.height,
+        minHeight: bodyComputed.minHeight,
+        touchAction: bodyComputed.touchAction,
+        style_overflow: body.style.overflow,
+        style_overflowY: body.style.overflowY
+      });
+      
+      // Altura do conteúdo
+      console.log('� Dimensões BODY:', {
+        clientHeight: body.clientHeight,
+        scrollHeight: body.scrollHeight,
+        offsetHeight: body.offsetHeight,
+        scrollTop: body.scrollTop,
+        podeRolar: body.scrollHeight > body.clientHeight
+      });
+    }
+    
+    // Detecção de mobile
+    const userAgent = navigator.userAgent;
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isMobileWidth = window.innerWidth <= 900;
+    const isMobileMedia = matchMedia('(hover: none) and (pointer: coarse)').matches;
+    
+    console.log('📱 Detecção Mobile:', {
+      userAgent: userAgent.substring(0, 60) + '...',
+      isMobileUA,
+      isMobileWidth,
+      isMobileMedia,
+      isMobile: isMobileUA || isMobileWidth || isMobileMedia
+    });
+    
+    // Eventos de scroll/touch
+    console.log('🎯 Event Listeners:', {
+      'body.onscroll': body?.onscroll ? 'definido' : 'não definido',
+      'body.ontouchmove': body?.ontouchmove ? 'definido' : 'não definido',
+      'window.onscroll': window.onscroll ? 'definido' : 'não definido'
+    });
+    
+    console.groupEnd();
+  }
+  
+  // === DEBUG INICIAL ===
+  debugScrollState('ESTADO INICIAL');
+  
+  // === FUNÇÃO PARA HABILITAR SCROLL ===
   function enableScroll() {
     const html = document.documentElement;
     const body = document.body;
     
+    console.log('🔧 [APLICANDO FIX] Forçando scroll em qualquer área...');
+    
     if (html) {
-      html.style.overflowY = 'auto';
-      html.style.overflowX = 'hidden';
-      html.style.height = '100%';
-      html.style.webkitOverflowScrolling = 'touch';
+      // Remover qualquer classe que possa estar bloqueando
+      html.classList.remove('no-scroll', 'overflow-hidden');
+      
+      // HTML: visível, permite que o body tenha área de scroll
+      html.style.setProperty('overflow', 'visible', 'important');
+      html.style.setProperty('overflow-y', 'visible', 'important');
+      html.style.setProperty('overflow-x', 'hidden', 'important');
+      html.style.setProperty('height', '100%', 'important');
+      html.style.setProperty('width', '100%', 'important');
+      html.style.setProperty('position', 'static', 'important');
+      
+      console.log('✅ HTML configurado - overflow: visible, height: 100%');
     }
     
     if (body) {
-      body.style.overflowY = 'auto';
-      body.style.overflowX = 'hidden';
-      body.style.minHeight = '100vh';
-      body.style.webkitOverflowScrolling = 'touch';
+      // Remover qualquer classe que possa estar bloqueando
+      body.classList.remove('no-scroll', 'overflow-hidden');
+      
+      // BODY: scroll ativo, altura fixa na viewport para criar área rolável
+      body.style.setProperty('overflow', 'auto', 'important');
+      body.style.setProperty('overflow-y', 'scroll', 'important');
+      body.style.setProperty('overflow-x', 'hidden', 'important');
+      body.style.setProperty('height', '100vh', 'important');
+      body.style.setProperty('width', '100%', 'important');
+      body.style.setProperty('position', 'static', 'important');
+      body.style.setProperty('touch-action', 'pan-y pan-x pinch-zoom', 'important');
+      body.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+      body.style.setProperty('overscroll-behavior', 'contain', 'important');
+      
+      console.log('✅ BODY configurado - overflow: scroll, height: 100vh, touch-action: pan-y pan-x pinch-zoom');
     }
+    
+    // Garantir que elementos filhos não bloqueiem eventos de scroll
+    const allElements = document.querySelectorAll('body > *');
+    let blockedCount = 0;
+    allElements.forEach(el => {
+      const computedStyle = window.getComputedStyle(el);
+      if (computedStyle.pointerEvents === 'none' || computedStyle.touchAction === 'none') {
+        el.style.setProperty('pointer-events', 'auto', 'important');
+        el.style.setProperty('touch-action', 'inherit', 'important');
+        blockedCount++;
+      }
+    });
+    
+    if (blockedCount > 0) {
+      console.log(`🔓 Desbloqueados ${blockedCount} elementos que impediam scroll`);
+    }
+    
+    // Debug após aplicar fix
+    setTimeout(() => {
+      debugScrollState('APÓS APLICAR FIX');
+      
+      // Verificação de scroll disponível
+      const canScroll = document.body.scrollHeight > document.body.clientHeight;
+      console.log('');
+      console.log('%c═══════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+      
+      if (canScroll) {
+        console.log('%c✅ SCROLL DISPONÍVEL!', 'background: #4CAF50; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 14px');
+        console.log('%c📊 scrollHeight:', document.body.scrollHeight + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c📊 clientHeight:', document.body.clientHeight + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c� Espaço para rolar:', (document.body.scrollHeight - document.body.clientHeight) + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c💡 Agora você pode rolar em QUALQUER LUGAR da página!', 'color: #4CAF50; font-weight: bold');
+      } else {
+        console.log('%c⚠️ ATENÇÃO: Conteúdo cabe na tela', 'background: #FF9800; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 14px');
+        console.log('%c📊 scrollHeight:', document.body.scrollHeight + 'px (altura do conteúdo)', 'color: #FF9800');
+        console.log('%c📊 clientHeight:', document.body.clientHeight + 'px (altura da viewport)', 'color: #FF9800');
+        console.log('%c💡 SOLUÇÃO: Adicione mais conteúdo ou diminua a altura da viewport', 'color: #FF9800; font-weight: bold');
+      }
+      
+      console.log('%c═══════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+      console.log('');
+    }, 100);
   }
   
-  // Executar imediatamente
+  // Detectar modo mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (window.innerWidth <= 900) ||
+                   (matchMedia('(hover: none) and (pointer: coarse)').matches);
+  
+  if (isMobile) {
+    console.log('%c📱 MODO MOBILE DETECTADO', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+  } else {
+    console.log('%c🖥️ MODO DESKTOP DETECTADO', 'background: #2196F3; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+  }
+  
+  // Aplicar fix imediatamente
   enableScroll();
   
-  // Garantir após DOM carregar
+  // Aplicar após DOM carregar
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', enableScroll);
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 [DOM CARREGADO] Reaplicando scroll...');
+      enableScroll();
+    });
   }
   
-  // Verificar periodicamente nos primeiros 2 segundos (para casos extremos)
+  // Verificações periódicas
   let checks = 0;
   const intervalId = setInterval(() => {
+    console.log(`⏱️ [CHECK ${checks + 1}/5] Verificando scroll...`);
     enableScroll();
     checks++;
     if (checks >= 5) {
       clearInterval(intervalId);
+      console.log('%c✅ VERIFICAÇÕES CONCLUÍDAS', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+      debugScrollState('ESTADO FINAL');
     }
   }, 400);
+  
+  // Listener para resize
+  window.addEventListener('resize', () => {
+    console.log('🔄 [RESIZE] Redimensionamento detectado');
+    debugScrollState('DURANTE RESIZE');
+    enableScroll();
+  });
+  
+  // Listener para scroll (debug)
+  let lastScrollTop = 0;
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (Math.abs(currentScroll - lastScrollTop) > 10) {
+      console.log(`📜 SCROLL DETECTADO: ${currentScroll}px`);
+      lastScrollTop = currentScroll;
+    }
+  }, { passive: true });
+  
+  // 🖱️ LISTENER PARA WHEEL (SCROLL DO MOUSE/TRACKPAD) - CRÍTICO PARA DESKTOP MODO MOBILE
+  let lastWheelLog = 0;
+  document.addEventListener('wheel', (e) => {
+    const now = Date.now();
+    if (now - lastWheelLog > 500) {
+      console.log('🖱️ WHEEL EVENT: Scroll do mouse/trackpad detectado');
+      console.log('   deltaY:', e.deltaY, '(negativo = para cima, positivo = para baixo)');
+      lastWheelLog = now;
+    }
+    
+    // Garantir que o scroll funcione mesmo que o evento seja em um elemento filho
+    if (document.body.style.overflow !== 'auto') {
+      console.warn('⚠️ Body overflow não está como "auto" - corrigindo...');
+      document.body.style.setProperty('overflow-y', 'scroll', 'important');
+    }
+  }, { passive: true });
+  
+  // 🖱️ FORÇAR PROPAGAÇÃO DE EVENTOS DE WHEEL PARA O BODY
+  document.body.addEventListener('wheel', (e) => {
+    // Este listener garante que o body processe eventos de wheel
+    const now = Date.now();
+    if (now - lastWheelLog > 500) {
+      console.log('✅ Wheel event capturado pelo BODY - scroll funcionando!');
+      lastWheelLog = now;
+    }
+  }, { passive: true, capture: false });
+  
+  // Listener para touch events
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    console.log(`👆 TOUCH START: Y=${touchStartY}`);
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', (e) => {
+    const touchCurrentY = e.touches[0].clientY;
+    const diff = touchStartY - touchCurrentY;
+    console.log(`👆 TOUCH MOVE: Y=${touchCurrentY}, diff=${diff}`);
+  }, { passive: true });
+  
+  document.addEventListener('touchend', () => {
+    console.log('👆 TOUCH END');
+  }, { passive: true });
+  
+  // Observer para mudanças no body
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && 
+          mutation.attributeName === 'style' && 
+          mutation.target === document.body) {
+        const currentOverflow = document.body.style.overflow;
+        console.log(`⚠️ BODY STYLE ALTERADO: overflow="${currentOverflow}"`);
+        
+        if (currentOverflow === 'hidden') {
+          const hasVisibleModal = document.querySelector('.modal.show, .settings-panel[style*="display: flex"], .estruturacao-lightbox[style*="display: flex"]');
+          console.log(`🔍 Modal visível: ${hasVisibleModal ? 'SIM' : 'NÃO'}`);
+          
+          if (!hasVisibleModal && isMobile) {
+            setTimeout(() => {
+              document.body.style.overflowY = 'auto';
+              console.log('🔧 Scroll restaurado!');
+            }, 10);
+          }
+        }
+      }
+    });
+  });
+  
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['style', 'class']
+  });
+  
+  // Comando global para debug manual
+  window.debugScroll = function() {
+    debugScrollState('DEBUG MANUAL');
+    return {
+      message: 'Use console para ver detalhes',
+      tentarForcar: () => {
+        enableScroll();
+        console.log('✅ Fix forçado novamente');
+      }
+    };
+  };
+  
+  console.log('%c╔════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  ✅ SISTEMA DE MONITORAMENTO ATIVADO                     ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  💡 Digite debugScroll() para debug manual               ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c╚════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-weight: bold');
 })();
 </script>
+
+<!-- 🔧 BOTÃO DEBUG SCROLL MOBILE -->
+<button id="debugScrollBtn" style="position: fixed; bottom: 80px; right: 20px; z-index: 999999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: 3px solid #fff; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); display: none; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s;" title="Debug Scroll Mobile">
+  🔍
+</button>
+
+<script>
+// Mostrar botão debug apenas em mobile
+(function() {
+  const debugBtn = document.getElementById('debugScrollBtn');
+  const isMobile = window.innerWidth <= 900;
+  
+  if (isMobile && debugBtn) {
+    debugBtn.style.display = 'flex';
+    
+    debugBtn.onclick = function() {
+      console.clear();
+      console.log('%c════════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 16px');
+      console.log('%c   🔍 DEBUG MANUAL ATIVADO', 'color: #667eea; font-weight: bold; font-size: 16px');
+      console.log('%c════════════════════════════════════════', 'color: #667eea; font-weight: bold; font-size: 16px');
+      
+      if (typeof window.debugScroll === 'function') {
+        window.debugScroll();
+      } else {
+        console.error('❌ Função debugScroll() não encontrada');
+      }
+      
+      // Feedback visual
+      debugBtn.textContent = '✅';
+      setTimeout(() => {
+        debugBtn.textContent = '🔍';
+      }, 1000);
+    };
+  }
+})();
+</script>
+
 <div id="loadingScreen"><div class="loader"></div></div>
 <button id="refreshBtn" title="Atualizar" onclick="location.reload()">⟳</button>
 <h1 class="site-logo"><img src="./logosite.svg" alt="Saúde do Marketing" loading="lazy"/></h1>
@@ -31488,10 +31880,14 @@ REGRAS DE FORMATAÇÃO:
         // Fechar
         sidebar.classList.remove('show');
         if (overlay) overlay.classList.remove('show');
+        // Re-enable scroll on body
+        document.body.style.overflow = '';
       } else {
         // Abrir
         sidebar.classList.add('show');
         if (overlay) overlay.classList.add('show');
+        // Prevent background scroll when sidebar is open
+        document.body.style.overflow = 'hidden';
       }
     }
     window.toggleReunioesChatSidebar = toggleReunioesChatSidebar;
@@ -32297,6 +32693,165 @@ ${contextoReunioes}`;
       }
     }
     window.sendReuniaoChat = sendReuniaoChat;
+    
+    // ========== OTIMIZAÇÃO MOBILE - ASSISTENTE DE REUNIÕES ==========
+    function initMobileOptimizationReunioes() {
+      if (typeof window === 'undefined') return;
+      
+      const isMobile = window.innerWidth <= 900;
+      
+      if (isMobile) {
+        console.log('%c📱 MOBILE OPTIMIZATION - Assistente de Reuniões', 'background: #6366f1; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+        
+        // 1. Otimizar área de mensagens do chat
+        const messagesContainer = document.getElementById('reunioesChatMessages');
+        if (messagesContainer) {
+          messagesContainer.style.cssText += `
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
+            will-change: scroll-position;
+          `;
+          
+          // Adicionar listeners para melhor experiência de scroll
+          let scrollTimeout;
+          messagesContainer.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+              // Scroll ended - could add logic here if needed
+            }, 150);
+          }, { passive: true });
+          
+          console.log('✅ Chat messages container otimizado para mobile');
+        }
+        
+        // 2. Otimizar sidebar list
+        const sidebarList = document.getElementById('reunioesChatHistoryList');
+        if (sidebarList) {
+          sidebarList.style.cssText += `
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
+          `;
+          console.log('✅ Sidebar list otimizada para mobile');
+        }
+        
+        // 3. Otimizar textarea do input
+        const chatInput = document.getElementById('reunioesChatInput');
+        if (chatInput) {
+          chatInput.style.cssText += `
+            touch-action: manipulation !important;
+          `;
+          
+          // Prevenir zoom no iOS ao focar
+          chatInput.style.fontSize = '16px';
+          
+          // Auto-scroll para input quando o teclado abrir
+          chatInput.addEventListener('focus', function() {
+            setTimeout(() => {
+              this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+          }, { passive: true });
+          
+          console.log('✅ Chat input otimizado para mobile');
+        }
+        
+        // 4. Otimizar botões de sugestão
+        const suggestionButtons = document.querySelectorAll('.reunioes-chat-suggestions button');
+        suggestionButtons.forEach(btn => {
+          btn.style.cssText += `
+            touch-action: manipulation !important;
+            min-height: 48px !important;
+          `;
+        });
+        if (suggestionButtons.length > 0) {
+          console.log(`✅ ${suggestionButtons.length} botões de sugestão otimizados`);
+        }
+        
+        // 5. Garantir que overlay funcione corretamente
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (overlay) {
+          overlay.style.cssText += `
+            touch-action: none !important;
+          `;
+          console.log('✅ Overlay otimizado');
+        }
+        
+        // 6. Prevenir bounce scroll no iOS Safari
+        document.body.style.overscrollBehavior = 'none';
+        
+        // 7. Fechar sidebar automaticamente ao clicar em um item (mobile)
+        const sidebar = document.getElementById('reunioesChatSidebar');
+        if (sidebar) {
+          sidebar.addEventListener('click', function(e) {
+            const historyItem = e.target.closest('.reunioes-chat-history-item');
+            if (historyItem && window.innerWidth <= 900) {
+              // Pequeno delay para permitir a seleção antes de fechar
+              setTimeout(() => {
+                toggleReunioesChatSidebar();
+              }, 100);
+            }
+          });
+          console.log('✅ Auto-close sidebar configurado');
+        }
+        
+        // 8. Garantir que a seção chat tenha altura correta
+        const chatSection = document.getElementById('reunioesChatSection');
+        if (chatSection) {
+          chatSection.style.cssText += `
+            touch-action: pan-y pan-x !important;
+            height: calc(100vh - 180px) !important;
+            min-height: 500px !important;
+          `;
+          console.log('✅ Chat section altura otimizada');
+        }
+        
+        console.log('%c✅ MOBILE OPTIMIZATION COMPLETA', 'background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+      }
+    }
+    
+    // Executar otimização quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileOptimizationReunioes);
+    } else {
+      initMobileOptimizationReunioes();
+    }
+    
+    // Re-executar ao redimensionar (transição mobile <-> desktop)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(initMobileOptimizationReunioes, 300);
+    });
+    
+    // Re-executar quando a aba de Reuniões for aberta
+    const originalShowReunioes = window.showReunioes;
+    if (originalShowReunioes) {
+      window.showReunioes = function() {
+        originalShowReunioes();
+        setTimeout(initMobileOptimizationReunioes, 100);
+        
+        // Garantir que body tenha scroll ativo
+        setTimeout(() => {
+          // Remover qualquer overflow: hidden do body
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          
+          console.log('%c✅ Scroll global ativado para aba Reuniões', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+          console.log('📊 Body scroll:', {
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            bodyScrollable: document.body.scrollHeight > document.body.clientHeight,
+            bodyOverflow: getComputedStyle(document.body).overflowY
+          });
+        }, 150);
+      };
+    }
+    // ========== FIM OTIMIZAÇÃO MOBILE ==========
     
     function askReuniaoSuggestion(pergunta) {
       const input = document.getElementById('reunioesChatInput');
