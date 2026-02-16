@@ -6475,6 +6475,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
             desc: d.desc||"",
             mediaUrls: d.mediaUrls||[],
             thumbUrl: d.thumbUrl||"",
+            videoThumbUrl: d.videoThumbUrl||"", // 🔥 NOVO: Thumbnail de vídeo salva
             type: d.type||"",
             status: d.status||"pendente",
             target: d.target||"feed",
@@ -7720,8 +7721,18 @@ function renderReviewNotes(post){
   }
 </style>
 <style id="metas-css">
-  .metas-wrap{margin-left:var(--margin-left);margin-right:var(--margin-right);display:flex;flex-direction:column;gap:8px;overflow-x:auto;padding-bottom:16px}
-  .metas-toolbar{display:flex;gap:6px;align-items:center;background:var(--title-bg);border:1px solid var(--shell-border);padding:8px;border-radius:10px;flex-wrap:wrap}
+  .metas-wrap{
+    margin-left:var(--margin-left);
+    margin-right:var(--margin-right);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:visible !important; /* ✅ SEM LIMITE DE ALTURA - SCROLL DO CONTAINER PAI */
+    padding-bottom:80px; /* ✅ ESPAÇO EXTRA NO FINAL */
+    position:relative;
+  }
+  .metas-toolbar{display:flex;gap:6px;align-items:center;background:var(--title-bg);border:1px solid var(--shell-border);padding:8px;border-radius:10px;flex-wrap:wrap;position:sticky;top:0;z-index:10;margin-bottom:8px}
   .metas-year-selector{display:flex;align-items:center;gap:8px;margin-right:auto;padding:4px 8px;background:rgba(59,130,246,.1);border-radius:8px;border:1px solid rgba(59,130,246,.3)}
   .metas-year-selector label{margin:0;white-space:nowrap}
   .metas-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:8px}
@@ -7737,14 +7748,15 @@ function renderReviewNotes(post){
   .metas-table col.meta-col-total{width:90px}
   .metas-table th,.metas-table td{border:1px solid var(--shell-border);padding:1px;text-align:center;white-space:nowrap;vertical-align:middle}
   .metas-table th.meta-name{background:#333;color:#fff;width:220px}
-  .metas-table td.meta-info{background:#333;color:#fff;text-align:left;vertical-align:top;min-width:220px;width:220px;white-space:normal;font-weight:600}
+  .metas-table td.meta-info{background:#333;color:#fff;text-align:left;vertical-align:middle;min-width:220px;width:220px;white-space:normal;font-weight:600;padding:2px 4px !important;line-height:1.2}
   .metas-table th:not(.meta-name),.metas-table td:not(.meta-info){min-width:80px}
   .metas-table tr.projetado td{background:#d1d5db;color:#000}
   .metas-table tr.realizado td{background:#fff;color:#000}
   .metas-table tr.conclusao td{font-weight:700}
   .metas-table tr.evolucao td{background:#111;color:#fff}
-  .metas-table td.meta-info input,.metas-table td.meta-info select{width:100%;margin-bottom:2px;background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:4px;padding:2px}
-  .metas-table td.meta-info .actions{display:flex;gap:2px;margin-top:2px}
+  .metas-table td.meta-info input,.metas-table td.meta-info select{width:100%;margin:0 0 1px 0;background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:3px;padding:1px 2px;font-size:0.68rem;height:18px;line-height:1}
+  .metas-table td.meta-info .actions{display:flex;gap:1px;margin-top:1px;flex-wrap:nowrap}
+  .metas-table td.meta-info .actions button{font-size:0.6rem;padding:1px 3px;height:16px;line-height:1;white-space:nowrap}
   .metas-table td.meta-info .actions button.paste-values{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:#60a5fa}
   .metas-table td.meta-info .actions button.paste-values:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
   .metas-table td.meta-info .actions button.auto-fill{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#34d399;font-weight:600}
@@ -7768,6 +7780,49 @@ function renderReviewNotes(post){
   .metas-table td:not(.meta-info) input{width:100%;text-align:center}
   .metas-table tr.meta-inactive td,.metas-table tr.meta-inactive th{background:#374151!important;color:#cbd5f5!important}
   .metas-table tr.meta-inactive td.meta-info{background:#1f2937!important;color:#cbd5f5!important}
+  
+  /* ✅ AJUSTES DE LARGURA E CENTRALIZAÇÃO DOS INPUTS DAS METAS */
+  #categoria-trafego_pago .metas-table tbody .meta-data-row td input[type=text],
+  .meta-setor.trafego_pago .metas-table tbody tr td input[type=text]{
+    width: 90% !important;
+    min-width: 70px !important;
+    text-align: center !important;
+    padding: 6px 8px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    font-size: 0.85rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Aplicar para todas as categorias de metas */
+  .meta-setor .metas-table tbody tr:not(.meta-title-row) td:not(.meta-info) input[type=text]{
+    width: 90% !important;
+    min-width: 70px !important;
+    text-align: center !important;
+    padding: 6px 8px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    font-size: 0.85rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* ✅ ALINHAMENTO VERTICAL - INPUTS NA MESMA LINHA DAS METAS */
+  .meta-setor .metas-table tbody tr:not(.meta-title-row) td:not(.meta-info){
+    vertical-align: middle !important;
+    padding: 2px !important;
+    height: 100% !important;
+  }
+  
+  /* Garantir que todas as células da linha tenham a mesma altura */
+  .meta-setor .metas-table tbody tr:not(.meta-title-row){
+    height: auto !important;
+  }
+  
+  /* Forçar alinhamento da coluna meta-info também */
+  .meta-setor .metas-table tbody tr:not(.meta-title-row) td.meta-info{
+    vertical-align: middle !important;
+    padding: 8px !important;
+  }
   .metas-table tr.meta-inactive td input,.metas-table tr.meta-inactive td select{background:#1f2937;color:#cbd5f5;border-color:#4b5563}
   .metas-table tr.meta-inactive td .meta-bulk-btn{background:#1f2937;color:#e2e8f0;border-color:#4b5563}
   .meta-cell{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px}
@@ -7817,13 +7872,37 @@ function renderReviewNotes(post){
   .concl-vermelho{background:#dc2626;color:#fff}
   .meta-setor{margin-bottom:8px}
   .meta-setor h3{margin:0 0 4px}
+  
+  /* ✅ CORES POR CATEGORIA DE META */
+  .meta-setor.trafego_pago h3{color:#C34B09;border-left-color:#C34B09 !important}
+  .meta-setor.canais h3{color:#005B81;border-left-color:#005B81 !important}
+  .meta-setor.crm_automacoes h3{color:#007E41;border-left-color:#007E41 !important}
+  .meta-setor.outros h3{color:#9900FF;border-left-color:#9900FF !important}
+  .meta-setor.lideranca h3{color:#7F6001;border-left-color:#7F6001 !important}
+  
+  .meta-setor.trafego_pago .metas-table th.meta-name,
+  .meta-setor.trafego_pago .metas-table td.meta-info{background:#C34B09;color:#fff}
+  .meta-setor.canais .metas-table th.meta-name,
+  .meta-setor.canais .metas-table td.meta-info{background:#005B81;color:#fff}
+  .meta-setor.crm_automacoes .metas-table th.meta-name,
+  .meta-setor.crm_automacoes .metas-table td.meta-info{background:#007E41;color:#fff}
+  .meta-setor.outros .metas-table th.meta-name,
+  .meta-setor.outros .metas-table td.meta-info{background:#9900FF;color:#fff}
+  .meta-setor.lideranca .metas-table th.meta-name,
+  .meta-setor.lideranca .metas-table td.meta-info{background:#7F6001;color:#fff}
+  
+  /* Regras antigas (mantidas para compatibilidade) */
   .meta-setor.marketing h3{color:purple}
   .meta-setor.comercial h3{color:blue}
   .meta-setor.marketing .metas-table th.meta-name,
   .meta-setor.marketing .metas-table td.meta-info{background:purple;color:#fff}
   .meta-setor.comercial .metas-table th.meta-name,
   .meta-setor.comercial .metas-table td.meta-info{background:blue;color:#fff}
-  .metas-table .meta-title-spacer{border:none;background:transparent;width:220px}
+  
+  /* ✅ REMOVIDO: spacers não são mais necessários com rowSpan=2 */
+  .metas-table .meta-title-spacer,
+  .metas-table .meta-info-spacer{display:none !important}
+  
   .metas-table tr.meta-title-row td.meta-title-cell{background:#f59e0b;color:#000;font-weight:700;text-align:center}
   .metas-table tr.meta-months-row td{background:#1f2937;color:#fff;font-weight:700}
   .metas-table tr.meta-gap td{border:none;height:4px;padding:0;background:transparent}
@@ -12521,9 +12600,18 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
     
     <div class="relatorio-filters">
-      <div class="relatorio-filter-group">
-        <label for="relatorioMes">📅 Selecione o Mês:</label>
-        <input type="month" id="relatorioMes" class="input" />
+      <div class="relatorio-filter-group" style="flex: 1;">
+        <label for="relatorioMesInicio">📅 Período do Relatório:</label>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px; display: block;">De:</label>
+            <input type="month" id="relatorioMesInicio" class="input" placeholder="Mês inicial" />
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <label style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px; display: block;">Até:</label>
+            <input type="month" id="relatorioMesFim" class="input" placeholder="Mês final" />
+          </div>
+        </div>
       </div>
       <button type="button" id="relatorioGerar" class="btn">📊 Gerar Relatório</button>
       <button type="button" id="relatorioExportar" class="btn secondary">⬇ Exportar PDF</button>
@@ -12607,34 +12695,67 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 
   <!-- Relatório de Metas do mês -->
-  <div class="relatorio-container" id="relatorioMetasSection" style="display:none">
+  <!-- Relatório de Performance Visual -->
+  <div class="relatorio-container" id="relatorioPerformanceSection" style="display:none">
     <div class="relatorio-header">
-      <h2>📈 Metas do mês</h2>
-      <p class="relatorio-subtitle" id="relatorioMetasSubtitle">Metas ativas (aba Metas) no mês selecionado</p>
+      <h2>Relatório de Performance</h2>
+      <p class="relatorio-subtitle" id="relatorioPerformanceSubtitle">Visão completa das métricas de crescimento</p>
     </div>
 
-    <div class="relatorio-goals-summary">
-      <div class="goal-pill goal-done" id="relatorioMetasAchievedPill">Atingidas: <strong>-</strong></div>
-      <div class="goal-pill goal-progress" id="relatorioMetasProgressPill">Em andamento: <strong>-</strong></div>
-      <div class="goal-pill goal-todo" id="relatorioMetasMissingPill">Precisa colocar: <strong>-</strong></div>
-      <button type="button" class="btn small secondary" id="relatorioMetasClearFilter">Limpar filtro</button>
+    <!-- TRÁFEGO PAGO -->
+    <div class="performance-category">
+      <h3 class="performance-category-title" style="background: linear-gradient(135deg, #C34B09, #E05A0F); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="adsGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#adsGradientTitle)" d="M18.5,1.15C17.97,1.15 17.46,1.34 17.07,1.73L11.26,7.55L16.91,13.2L22.73,7.39C23.5,6.61 23.5,5.35 22.73,4.56L19.89,1.73C19.5,1.34 19,1.15 18.5,1.15M10.3,8.5L4.34,14.46C3.56,15.24 3.56,16.5 4.36,17.31L11.69,24.64C12.5,25.44 13.76,25.44 14.56,24.64L20.5,18.7L14.84,13.05L10.3,8.5M2.86,15.94L1.15,17.65C0.734,18.07 0.734,18.74 1.15,19.15L4.93,22.93C5.34,23.35 6,23.35 6.42,22.93L8.13,21.22L2.86,15.94Z" /></svg>
+        TRÁFEGO PAGO
+      </h3>
+      <div class="performance-grid" id="relatorioTrafegoGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(195, 75, 9, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(195, 75, 9, 0.2);">
+        <!-- Cards serão inseridos aqui -->
+      </div>
     </div>
 
-    <div class="goals-columns" id="relatorioMetasColumns">
-      <div class="goals-col" data-status="concluido">
-        <h3>Atingidas</h3>
-        <div class="goals-list" id="relatorioMetasAchieved"></div>
-      </div>
-      <div class="goals-col" data-status="em-andamento">
-        <h3>Em andamento</h3>
-        <div class="goals-list" id="relatorioMetasProgress"></div>
-      </div>
-      <div class="goals-col" data-status="nao-iniciado">
-        <h3>Precisa colocar</h3>
-        <div class="goals-list" id="relatorioMetasMissing"></div>
+    <!-- CANAIS -->
+    <div class="performance-category" style="margin-top: 24px;">
+      <h3 class="performance-category-title" style="background: linear-gradient(135deg, #005B81, #007AA8); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="analyticsGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#analyticsGradientTitle)" d="M7,2H9A2,2 0 0,1 11,4V20A2,2 0 0,1 9,22H7A2,2 0 0,1 5,20V4A2,2 0 0,1 7,2M15,8H17A2,2 0 0,1 19,10V20A2,2 0 0,1 17,22H15A2,2 0 0,1 13,20V10A2,2 0 0,1 15,8Z" /></svg>
+        CANAIS
+      </h3>
+      <div class="performance-grid" id="relatorioCanaisGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(0, 91, 129, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(0, 91, 129, 0.2);">
+        <!-- Cards serão inseridos aqui -->
       </div>
     </div>
-    <p class="relatorio-desc" id="relatorioMetasDesc"></p>
+
+    <!-- CRM E AUTOMAÇÕES -->
+    <div class="performance-category" style="margin-top: 24px;">
+      <h3 class="performance-category-title" style="background: linear-gradient(135deg, #007E41, #00A055); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="crmGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#crmGradientTitle)" d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" /></svg>
+        CRM E AUTOMAÇÕES
+      </h3>
+      <div class="performance-grid" id="relatorioCRMGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(0, 126, 65, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(0, 126, 65, 0.2);">
+        <!-- Cards serão inseridos aqui -->
+      </div>
+    </div>
+
+    <!-- LIDERANÇA -->
+    <div class="performance-category" style="margin-top: 24px;">
+      <h3 class="performance-category-title" style="background: linear-gradient(135deg, #7F6001, #A67C00); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="emailGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#emailGradientTitle)" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z" /></svg>
+        LIDERANÇA
+      </h3>
+      <div class="performance-grid" id="relatorioLiderancaGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(127, 96, 1, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(127, 96, 1, 0.2);">
+        <!-- Cards serão inseridos aqui -->
+      </div>
+    </div>
+
+    <!-- OUTROS -->
+    <div class="performance-category" style="margin-top: 24px;">
+      <h3 class="performance-category-title" style="background: linear-gradient(135deg, #9900FF, #BB33FF); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="automationGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#automationGradientTitle)" d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z" /></svg>
+        OUTROS
+      </h3>
+      <div class="performance-grid" id="relatorioOutrosGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(153, 0, 255, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(153, 0, 255, 0.2);">
+        <!-- Cards serão inseridos aqui -->
+      </div>
+    </div>
     
   </div>
   
@@ -15525,6 +15646,17 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
             btnVideo = $("btnVideo"), btnVideoLink = $("btnVideoLink"), videoInput = $("videoInput");
 
     const calendarWebhookInput = $("calendarWebhook"), demandasWebhookInput = $("demandasWebhook");
+
+    // Handler global para capturar erros de promises não tratadas
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('🚨 [UNHANDLED PROMISE REJECTION]', {
+        reason: event.reason,
+        promise: event.promise,
+        stack: event.reason?.stack
+      });
+      // Prevenir que o erro quebre a aplicação
+      event.preventDefault();
+    });
 
     const SETTINGS_SECTIONS = {
       general: {
@@ -21731,10 +21863,10 @@ async function sendIAQuestion(){
             'website': '1️⃣6️⃣ Website',
             'visual': '1️⃣7️⃣ Padronização Visual',
             'plataforma': '1️⃣8️⃣ Plataforma Mediagrowth',
-            'macro': '� Macro', 'planejamento': '📋 Planejamento',
-            'calendario': '📅 Calendário', 'posts': '📸 Posts', 'metas': '🎯 Metas',
+            'macro': '📊 Macro', 'planejamento': '📋 Planejamento',
+            'calendario': '📅 Calendário', 'posts': '📸 Posts', 'metas': '📊 Resultados',
             'cac': '💰 CAC', 'leads': '👥 Leads', 'anotacoes': '📝 Anotações',
-            'acessos': '� Acessos', 'arquivos': '📁 Arquivos', 'relatorio': '📊 Relatório', 'demandas': '✅ Demandas',
+            'acessos': '🔐 Acessos', 'arquivos': '📁 Arquivos', 'relatorio': '📊 Relatório', 'demandas': '✅ Demandas',
             'reunioes': '🤝 Reuniões',
             'notasTime': '📋 Notas Time'
           };
@@ -22189,7 +22321,7 @@ async function sendIAQuestion(){
     /* ========= cartões ========= */
     const MACRO_COMPONENTS = [
       { key: "planejamento", icon: "🗂️", title: "Planejamento", sub: "Demandas e planos em andamento", gradient: "linear-gradient(135deg,#2563eb,#7c3aed)" },
-      { key: "metas", icon: "🎯", title: "Metas", sub: "Objetivos e resultados", gradient: "linear-gradient(135deg,#16a34a,#65a30d)" },
+      { key: "metas", icon: "📊", title: "Resultados", sub: "Objetivos e resultados", gradient: "linear-gradient(135deg,#16a34a,#65a30d)" },
       { key: "posts", icon: "📣", title: "Posts", sub: "Publicações e aprovações", gradient: "linear-gradient(135deg,#f97316,#facc15)" }
     ];
     const HISTORY_COLORS = ['#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4'];
@@ -24211,7 +24343,7 @@ async function sendIAQuestion(){
       { id:"demandas",  name:"Planejamento" },
       { id:"ia",        name:"I.A" },
       { id:"calendar",  name:"Calendário" },
-      { id:"metas",     name:"Metas" },
+      { id:"metas",     name:"Resultados" },
       { id:"leads",     name:"Leads" },
       { id:"notes",     name:"Anotações" },
       { id:"teamNotes", name:"Notas Time" },
@@ -27293,8 +27425,20 @@ async function sendIAQuestion(){
     }
 
     function buildTabs(){
+      console.log('🔧 buildTabs() chamada', { 
+        sectionTabs, 
+        sectionTabsExists: !!sectionTabs,
+        SECTIONS: SECTIONS.length,
+        sectionsArray: SECTIONS.map(s => s.id)
+      });
+      if(!sectionTabs){
+        console.error('❌ Elemento sectionTabs não encontrado!');
+        return;
+      }
+      console.log('🔧 sectionTabs HTML antes de limpar:', sectionTabs.innerHTML);
       sectionTabs.innerHTML="";
-      SECTIONS.forEach(s=>{
+      console.log('🔧 Construindo', SECTIONS.length, 'botões de abas...');
+      SECTIONS.forEach((s, idx)=>{
         const b=document.createElement("button");
         b.className="tab-btn"+(s.id===currentSection?" active":"");
         b.setAttribute("role","tab"); b.setAttribute("aria-selected",s.id===currentSection?"true":"false");
@@ -27308,7 +27452,10 @@ async function sendIAQuestion(){
         }
         b.addEventListener("click",()=>{ if(currentSection===s.id) return; setActiveTab(s.id); });
         sectionTabs.appendChild(b);
+        console.log(`  ✅ Botão ${idx + 1}/${SECTIONS.length} adicionado:`, s.id, '(', s.name, ')');
       });
+      console.log('🔧 sectionTabs HTML depois de construir:', sectionTabs.innerHTML.substring(0, 200) + '...');
+      console.log('🔧 Total de botões criados:', sectionTabs.children.length);
     }
 
     let tabKeyNavBound=false;
@@ -31915,19 +32062,17 @@ ${contextoReunioes}`;
     /* ========= FIM REUNIÕES ========= */
 
     /* ========= Relatório ========= */
-  let relatorioMesInput, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
+  let relatorioMesInicio, relatorioMesFim, relatorioGerarBtn, relatorioExportarBtn, relatorioPreview;
   let relatorioStoriesSection, relatorioStoriesGrid, relatorioStoriesPrev, relatorioStoriesNext, relatorioStoriesSubtitle;
   let relatorioPostsSection, relatorioPostsGrid, relatorioPostsPrev, relatorioPostsNext, relatorioPostsSubtitle;
   let relatorioGoalsSection, relatorioGoalsSubtitle, relatorioGoalsDonePill, relatorioGoalsProgressPill, relatorioGoalsTodoPill, relatorioGoalsClearFilter;
   let relatorioGoalsDone, relatorioGoalsProgress, relatorioGoalsTodo;
-  let relatorioMetasSection, relatorioMetasSubtitle, relatorioMetasAchievedPill, relatorioMetasProgressPill, relatorioMetasMissingPill, relatorioMetasClearFilter;
-  let relatorioMetasAchieved, relatorioMetasProgress, relatorioMetasMissing;
   let relatorioGoalsNotesSimple, relatorioGoalsNotesSimpleStatus;
   // Leads gerados
   let relatorioLeadsSection, relatorioLeadsSubtitle, relatorioLeadsCount, relatorioLeadsDesc;
   // Redes trabalhadas
   let relatorioRedesSection, relatorioRedesGrid, relatorioRedesDesc, relatorioRedesSubtitle;
-  let relatorioStoriesDesc, relatorioPostsDesc, relatorioGoalsDesc, relatorioMetasDesc;
+  let relatorioStoriesDesc, relatorioPostsDesc, relatorioGoalsDesc;
   // Resumo em texto
   let relatorioResumoTextoSection, relatorioResumoTextoContent, btnCopiarResumo;
   // Análise Estratégica IA
@@ -31936,8 +32081,9 @@ ${contextoReunioes}`;
   let btnCopiarPromptIA, relatorioAnaliseIADesc;
     
     function initRelatorio(){
-      if(!relatorioMesInput){
-        relatorioMesInput = $("relatorioMes");
+      if(!relatorioMesInicio){
+        relatorioMesInicio = $("relatorioMesInicio");
+        relatorioMesFim = $("relatorioMesFim");
         relatorioGerarBtn = $("relatorioGerar");
         relatorioExportarBtn = $("relatorioExportar");
         relatorioPreview = $("relatorioPreview");
@@ -31963,16 +32109,6 @@ ${contextoReunioes}`;
   relatorioGoalsProgress = $("relatorioGoalsProgress");
   relatorioGoalsTodo = $("relatorioGoalsTodo");
   relatorioGoalsDesc = $("relatorioGoalsDesc");
-  relatorioMetasSection = $("relatorioMetasSection");
-  relatorioMetasSubtitle = $("relatorioMetasSubtitle");
-  relatorioMetasAchievedPill = $("relatorioMetasAchievedPill");
-  relatorioMetasProgressPill = $("relatorioMetasProgressPill");
-  relatorioMetasMissingPill = $("relatorioMetasMissingPill");
-  relatorioMetasClearFilter = $("relatorioMetasClearFilter");
-  relatorioMetasAchieved = $("relatorioMetasAchieved");
-  relatorioMetasProgress = $("relatorioMetasProgress");
-  relatorioMetasMissing = $("relatorioMetasMissing");
-  relatorioMetasDesc = $("relatorioMetasDesc");
   relatorioGoalsNotesSimple = $("relatorioGoalsNotesSimple");
   relatorioGoalsNotesSimpleStatus = $("relatorioGoalsNotesSimpleStatus");
   // Leads
@@ -32008,8 +32144,11 @@ ${contextoReunioes}`;
         if(relatorioExportarBtn){
           relatorioExportarBtn.addEventListener('click', exportarRelatorioPDF);
         }
-        if(relatorioMesInput){
-          relatorioMesInput.addEventListener('change', onRelatorioMesChange);
+        if(relatorioMesInicio){
+          relatorioMesInicio.addEventListener('change', onRelatorioMesChange);
+        }
+        if(relatorioMesFim){
+          relatorioMesFim.addEventListener('change', onRelatorioMesChange);
         }
         if(relatorioStoriesPrev && relatorioStoriesGrid){
           relatorioStoriesPrev.addEventListener('click', ()=> relatorioStoriesGrid.scrollBy({left:-200, behavior:'smooth'}));
@@ -32027,10 +32166,6 @@ ${contextoReunioes}`;
         if(relatorioGoalsProgressPill){ relatorioGoalsProgressPill.addEventListener('click', ()=> filterGoals('em-andamento')); }
         if(relatorioGoalsTodoPill){ relatorioGoalsTodoPill.addEventListener('click', ()=> filterGoals('nao-iniciado')); }
         if(relatorioGoalsClearFilter){ relatorioGoalsClearFilter.addEventListener('click', ()=> filterGoals('')); }
-        if(relatorioMetasAchievedPill){ relatorioMetasAchievedPill.addEventListener('click', ()=> filterMetas('concluido')); }
-        if(relatorioMetasProgressPill){ relatorioMetasProgressPill.addEventListener('click', ()=> filterMetas('em-andamento')); }
-        if(relatorioMetasMissingPill){ relatorioMetasMissingPill.addEventListener('click', ()=> filterMetas('nao-iniciado')); }
-        if(relatorioMetasClearFilter){ relatorioMetasClearFilter.addEventListener('click', ()=> filterMetas('')); }
         if(relatorioGoalsNotesSimple){ relatorioGoalsNotesSimple.addEventListener('input', saveRelatorioGoalsNoteLocal); }
         // Captura dos elementos de Redes trabalhadas
         relatorioRedesSection = $("relatorioRedesSection");
@@ -32068,25 +32203,35 @@ ${contextoReunioes}`;
     }
     
     function onRelatorioMesChange(){
-      if(!relatorioMesInput || !relatorioMesInput.value) return;
-      renderRelatorioStories(relatorioMesInput.value);
-      renderRelatorioPosts(relatorioMesInput.value);
-      renderRelatorioGoals(relatorioMesInput.value);
-  renderRelatorioMetas(relatorioMesInput.value);
-  loadRelatorioGoalsNoteLocal(relatorioMesInput.value);
-  // Atualiza também o bloco de redes trabalhadas (independente do mês, mas mantém consistência visual)
-  renderRelatorioRedes(relatorioMesInput.value);
+      const mesInicio = relatorioMesInicio?.value;
+      const mesFim = relatorioMesFim?.value;
+      
+      if(!mesInicio && !mesFim) return;
+      
+      // Se apenas um mês for selecionado, usar ele como período único
+      const periodoInicio = mesInicio || mesFim;
+      const periodoFim = mesFim || mesInicio;
+      
+      renderRelatorioStories(periodoInicio, periodoFim);
+      renderRelatorioPosts(periodoInicio, periodoFim);
+      renderRelatorioGoals(periodoInicio, periodoFim);
+      renderRelatorioPerformance(periodoInicio, periodoFim);
+      loadRelatorioGoalsNoteLocal(periodoInicio);
+      renderRelatorioRedes(periodoInicio, periodoFim);
     }
     
-  function renderRelatorioStories(mesISO){
-      if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesISO) return;
+  function renderRelatorioStories(mesInicioISO, mesFimISO = null){
+      if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesInicioISO) return;
       
-      const [ano, mes] = mesISO.split('-');
+      // Se não houver mesFim, usar mesInicio como período único
+      const inicio = mesInicioISO;
+      const fim = mesFimISO || mesInicioISO;
+      
       const stories = POSTS.filter(p => {
         if((p.target || 'feed') !== 'stories') return false;
         if(!p.dateISO) return false;
-        const [pAno, pMes] = p.dateISO.split('-');
-        return pAno === ano && pMes === mes;
+        // Filtrar por período
+        return p.dateISO >= inicio && p.dateISO <= (fim + '-31'); // Adiciona dia máximo para incluir todo o mês final
       });
       
       if(stories.length === 0){
@@ -32097,9 +32242,28 @@ ${contextoReunioes}`;
       relatorioStoriesSection.style.display = 'block';
       
       const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[parseInt(mes)-1] || mes;
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      if(inicio === fim){
+        const [ano, mes] = inicio.split('-');
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome} de ${ano}`;
+      } else {
+        const [anoInicio, mesInicio] = inicio.split('-');
+        const [anoFim, mesFim] = fim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+        const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} de ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
+      
       if(relatorioStoriesSubtitle){
-        relatorioStoriesSubtitle.textContent = `${stories.length} ${stories.length===1?'story':'stories'} produzido${stories.length===1?'':'s'} em ${mesNome} de ${ano}`;
+        relatorioStoriesSubtitle.textContent = `${stories.length} ${stories.length===1?'story':'stories'} produzido${stories.length===1?'':'s'} em ${periodoTexto}`;
       }
 
       // Descrição resumida abaixo do bloco
@@ -32109,10 +32273,17 @@ ${contextoReunioes}`;
         const revisar = stories.filter(p=> (p.status||'')==='revisar').length;
         const pendentes = Math.max(0, total - aprovados - revisar);
         const rate = total>0 ? Math.round((aprovados/total)*100) : 0;
-        const diasMes = Math.max(1, new Date(parseInt(ano,10), parseInt(mes,10), 0).getDate());
-        const mediaDia = (total/diasMes).toFixed(1);
+        
+        // Calcular número de dias no período
+        const dataInicio = new Date(inicio + '-01');
+        const [anoFim, mesFim] = fim.split('-');
+        const diasNoMesFim = new Date(parseInt(anoFim,10), parseInt(mesFim,10), 0).getDate();
+        const dataFim = new Date(fim + '-' + diasNoMesFim);
+        const diasPeriodo = Math.max(1, Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24)) + 1);
+        
+        const mediaDia = (total/diasPeriodo).toFixed(1);
         relatorioStoriesDesc.style.display = 'block';
-        relatorioStoriesDesc.textContent = `✨ ${mesNome} de ${ano}: ${total} ${total===1?'story':'stories'} produzid${total===1?'o':'os'} • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Excelente consistência de publicações para reforçar a presença da marca.`;
+        relatorioStoriesDesc.textContent = `✨ ${periodoTexto}: ${total} ${total===1?'story':'stories'} produzid${total===1?'o':'os'} • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Excelente consistência de publicações para reforçar a presença da marca.`;
       }
       
       stories.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
@@ -32189,15 +32360,16 @@ ${contextoReunioes}`;
       setTimeout(() => { try{ applyVideoThumbnails(); }catch(_e){ try{ window.applyVideoThumbnails && window.applyVideoThumbnails(); }catch(__){} } }, 120);
     }
 
-    function renderRelatorioPosts(mesISO){
-      if(!relatorioPostsGrid || !relatorioPostsSection || !mesISO) return;
+    function renderRelatorioPosts(mesInicioISO, mesFimISO = null){
+      if(!relatorioPostsGrid || !relatorioPostsSection || !mesInicioISO) return;
 
-      const [ano, mes] = mesISO.split('-');
+      const inicio = mesInicioISO;
+      const fim = mesFimISO || mesInicioISO;
+      
       const posts = POSTS.filter(p => {
         if((p.target || 'feed') !== 'feed') return false;
         if(!p.dateISO) return false;
-        const [pAno, pMes] = p.dateISO.split('-');
-        return pAno === ano && pMes === mes;
+        return p.dateISO >= inicio && p.dateISO <= (fim + '-31');
       });
 
       if(posts.length === 0){
@@ -32208,9 +32380,28 @@ ${contextoReunioes}`;
       relatorioPostsSection.style.display = 'block';
 
       const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[parseInt(mes)-1] || mes;
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      if(inicio === fim){
+        const [ano, mes] = inicio.split('-');
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome} de ${ano}`;
+      } else {
+        const [anoInicio, mesInicio] = inicio.split('-');
+        const [anoFim, mesFim] = fim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+        const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} de ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
+      
       if(relatorioPostsSubtitle){
-        relatorioPostsSubtitle.textContent = `${posts.length} ${posts.length===1?'post':'posts'} produzido${posts.length===1?'':'s'} em ${mesNome} de ${ano}`;
+        relatorioPostsSubtitle.textContent = `${posts.length} ${posts.length===1?'post':'posts'} produzido${posts.length===1?'':'s'} em ${periodoTexto}`;
       }
 
       // Descrição resumida abaixo do bloco
@@ -32220,18 +32411,37 @@ ${contextoReunioes}`;
         const revisar = posts.filter(p=> (p.status||'')==='revisar').length;
         const pendentes = Math.max(0, total - aprovados - revisar);
         const rate = total>0 ? Math.round((aprovados/total)*100) : 0;
-        const diasMes = Math.max(1, new Date(parseInt(ano,10), parseInt(mes,10), 0).getDate());
-        const mediaDia = (total/diasMes).toFixed(1);
+        
+        // Calcular número de dias no período
+        const dataInicio = new Date(inicio + '-01');
+        const [anoFim, mesFim] = fim.split('-');
+        const diasNoMesFim = new Date(parseInt(anoFim,10), parseInt(mesFim,10), 0).getDate();
+        const dataFim = new Date(fim + '-' + diasNoMesFim);
+        const diasPeriodo = Math.max(1, Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24)) + 1);
+        
+        const mediaDia = (total/diasPeriodo).toFixed(1);
         relatorioPostsDesc.style.display = 'block';
-        relatorioPostsDesc.textContent = `✨ ${mesNome} de ${ano}: ${total} ${total===1?'post':'posts'} no feed • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Conteúdo consistente para ampliar alcance e engajamento.`;
+        relatorioPostsDesc.textContent = `✨ ${periodoTexto}: ${total} ${total===1?'post':'posts'} no feed • ${aprovados} aprovados (${rate}%), ${revisar} para revisar, ${pendentes} pendentes • Ritmo médio: ${mediaDia}/dia. Conteúdo consistente para ampliar alcance e engajamento.`;
       }
 
       posts.sort((a,b)=> (a.dateISO<b.dateISO?-1:a.dateISO>b.dateISO?1:0));
 
+      console.log('[renderRelatorioPosts] 📊 Total de posts:', posts.length);
+      console.log('[renderRelatorioPosts] 📋 Primeiro post (exemplo):', posts[0]);
+      
       relatorioPostsGrid.innerHTML = posts.map(p=>{
         const firstMedia = p.mediaUrls?.[0] || "";
         const ext = firstMedia.split("?")[0].split(".").pop().toLowerCase();
         const isVideo = ["mp4","mov","webm","m4v","avi"].includes(ext);
+        
+        console.log(`[renderRelatorioPosts] Post ${p.dateISO}:`, {
+          id: p.id,
+          mediaUrls: p.mediaUrls,
+          firstMedia,
+          ext,
+          isVideo,
+          thumbUrl: p.thumbUrl
+        });
 
         let cls = "relatorio-story-item"; // reaproveita estilos
         if(p.status === "aprovado"){
@@ -32248,6 +32458,17 @@ ${contextoReunioes}`;
 
         const hasCustomCover = p.thumbUrl && !/\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(p.thumbUrl);
         if(isVideo){
+          // Se já tem thumbnail salva do vídeo, usa ela IMEDIATAMENTE
+          if(p.videoThumbUrl && p.videoThumbUrl.startsWith('data:image')){
+            return `
+              <div class="${cls}" data-id="${p.id}">
+                <img src="${p.videoThumbUrl}" alt="Post ${dateLabel}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+                <div class="relatorio-story-status"></div>
+                <div class="relatorio-story-date">${dateLabel}</div>
+              </div>
+            `;
+          }
+          // Se tem capa customizada, usa ela
           if(hasCustomCover){
             return `
               <div class="${cls}" data-id="${p.id}">
@@ -32257,6 +32478,7 @@ ${contextoReunioes}`;
               </div>
             `;
           }
+          // Se não tem thumbnail salva, marca para gerar depois
           if(firstMedia){
             return `
               <div class="${cls}" data-id="${p.id}" data-video-url="${firstMedia}">
@@ -32292,8 +32514,171 @@ ${contextoReunioes}`;
           if(post && typeof openPostModal === 'function') openPostModal(post);
         });
       });
-      // Agendar geração das thumbnails de vídeo
-      setTimeout(() => { try{ applyVideoThumbnails(); }catch(_e){ try{ window.applyVideoThumbnails && window.applyVideoThumbnails(); }catch(__){} } }, 120);
+      
+      console.log('[renderRelatorioPosts] ✅ Posts renderizados. HTML length:', relatorioPostsGrid.innerHTML.length);
+      console.log('[renderRelatorioPosts] 🎬 Elementos com data-video-url:', relatorioPostsGrid.querySelectorAll('[data-video-url]').length);
+      
+      // Cache global de thumbnails (persiste entre relatórios)
+      const VIDEO_THUMB_CACHE = window.VIDEO_THUMB_CACHE || new Map();
+      window.VIDEO_THUMB_CACHE = VIDEO_THUMB_CACHE;
+      
+      // Função otimizada para gerar thumbnail ULTRA-RÁPIDO
+      const generateFastThumbnail = (videoUrl, postId) => {
+        return new Promise((resolve) => {
+          // 1. Verifica cache em memória primeiro (INSTANTÂNEO)
+          if(VIDEO_THUMB_CACHE.has(videoUrl)){
+            console.log('[Fast Thumb] ⚡ Cache hit:', videoUrl.substring(0, 30));
+            resolve(VIDEO_THUMB_CACHE.get(videoUrl));
+            return;
+          }
+          
+          // 2. Verifica se já existe no post (thumbnail salva anteriormente)
+          const post = POSTS.find(p => p.id === postId);
+          if(post && post.videoThumbUrl && post.videoThumbUrl.startsWith('data:image')){
+            console.log('[Fast Thumb] 💾 Thumbnail salva encontrada no post:', postId);
+            VIDEO_THUMB_CACHE.set(videoUrl, post.videoThumbUrl);
+            resolve(post.videoThumbUrl);
+            return;
+          }
+          
+          // 3. Gera nova thumbnail
+          const video = document.createElement('video');
+          video.crossOrigin = 'anonymous';
+          video.preload = 'metadata';
+          video.muted = true;
+          video.playsInline = true;
+          video.volume = 0;
+          
+          const timeout = setTimeout(() => {
+            cleanup();
+            resolve(null);
+          }, 1500); // Timeout MUITO rápido: 1.5s
+          
+          const cleanup = () => {
+            clearTimeout(timeout);
+            try { video.pause(); video.src = ''; video.load(); } catch(_){}
+          };
+          
+          video.onloadedmetadata = () => {
+            video.currentTime = 0.01; // Primeiro frame ULTRA-RÁPIDO
+          };
+          
+          video.onseeked = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              
+              // Proporção correta (sem distorção)
+              const aspectRatio = video.videoWidth / video.videoHeight;
+              canvas.width = 480; // Otimizado para velocidade + qualidade
+              canvas.height = Math.round(480 / aspectRatio);
+              
+              const ctx = canvas.getContext('2d', { 
+                alpha: false, 
+                desynchronized: true,
+                willReadFrequently: false
+              });
+              
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const thumb = canvas.toDataURL('image/jpeg', 0.8);
+              
+              // Salva no cache E no post para persistência
+              VIDEO_THUMB_CACHE.set(videoUrl, thumb);
+              
+              // 🔥 SALVA NO POST para persistir no Firebase
+              if(post){
+                post.videoThumbUrl = thumb;
+                console.log('[Fast Thumb] 💾 Thumbnail salva no post:', postId);
+                
+                // Salva no Firebase (async, não bloqueia)
+                setTimeout(async () => {
+                  try {
+                    const clientKey = getClientKeySafe();
+                    if(clientKey && post.id){
+                      const postRef = doc(db, 'clients', clientKey, 'posts', post.id);
+                      await setDoc(postRef, { videoThumbUrl: thumb }, { merge: true });
+                      console.log('[Fast Thumb] ✅ Thumbnail persistida no Firebase:', postId);
+                    }
+                  } catch(saveErr) {
+                    console.error('[Fast Thumb] ⚠️ Erro ao salvar no Firebase:', saveErr);
+                  }
+                }, 100);
+              }
+              
+              cleanup();
+              resolve(thumb);
+            } catch(e) {
+              cleanup();
+              resolve(null);
+            }
+          };
+          
+          video.onerror = () => {
+            cleanup();
+            resolve(null);
+          };
+          
+          video.src = videoUrl;
+        });
+      };
+      
+      // Processa thumbnails em LOTES MENORES = MAIS RÁPIDO
+      const applyThumbnailsBatch = async () => {
+        const videoContainers = Array.from(relatorioPostsGrid.querySelectorAll('[data-video-url]'));
+        const total = videoContainers.length;
+        
+        if(total === 0){
+          console.log('[Fast Thumbs] ✅ Nenhum vídeo para processar');
+          return;
+        }
+        
+        console.log('[Fast Thumbs] 🚀 Processando', total, 'vídeos...');
+        
+        const BATCH_SIZE = 4; // Lotes menores = mais rápido
+        const batches = [];
+        
+        for(let i = 0; i < videoContainers.length; i += BATCH_SIZE){
+          batches.push(videoContainers.slice(i, i + BATCH_SIZE));
+        }
+        
+        let processed = 0;
+        const startTime = Date.now();
+        
+        for(const batch of batches){
+          await Promise.all(batch.map(async (container) => {
+            const videoUrl = container.getAttribute('data-video-url');
+            const postId = container.getAttribute('data-id');
+            
+            if(!videoUrl || container.querySelector('img')) return;
+            
+            const thumbUrl = await generateFastThumbnail(videoUrl, postId);
+            
+            if(thumbUrl && container.getAttribute('data-video-url') === videoUrl){
+              const img = document.createElement('img');
+              img.src = thumbUrl;
+              img.alt = 'Video preview';
+              img.style.width = '100%';
+              img.style.height = '100%';
+              img.style.objectFit = 'cover';
+              img.style.borderRadius = '8px';
+              img.loading = 'lazy';
+              
+              const span = container.querySelector('span');
+              if(span) span.remove();
+              container.appendChild(img);
+              
+              processed++;
+            }
+          }));
+        }
+        
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`[Fast Thumbs] 🎉 Concluído! ${processed}/${total} vídeos em ${elapsed}s`);
+      };
+      
+      // Executa IMEDIATAMENTE
+      applyThumbnailsBatch().catch(err => {
+        console.error('[Fast Thumbs] ❌ Erro:', err);
+      });
     }
 
     function mapDemandaToStatusKey(status){
@@ -32313,14 +32698,22 @@ ${contextoReunioes}`;
       });
     }
 
-    function renderRelatorioGoals(mesISO){
+    function renderRelatorioGoals(mesInicioISO, mesFimISO = null){
       if(!relatorioGoalsSection) return;
-      const [ano, mes] = (mesISO||'').split('-');
-      const monthKey = `${ano}-${mes}`;
+      
+      const inicio = mesInicioISO;
+      const fim = mesFimISO || mesInicioISO;
+      
       const list = Array.isArray(DEMANDAS) ? DEMANDAS : [];
       const inMonth = list.filter(d=> {
-        try{ return Array.isArray(getDemandMonthKeys(d)) && getDemandMonthKeys(d).includes(monthKey); }catch(_){ return false; }
+        try{ 
+          const demandKeys = getDemandMonthKeys(d);
+          if(!Array.isArray(demandKeys)) return false;
+          // Verificar se alguma chave está no período
+          return demandKeys.some(key => key >= inicio && key <= fim);
+        }catch(_){ return false; }
       });
+      
       // Sempre mostrar a seção para exibir o bloco de notas, mesmo sem objetivos
       relatorioGoalsSection.style.display='block';
 
@@ -32328,9 +32721,28 @@ ${contextoReunioes}`;
       inMonth.forEach(d=>{ groups[mapDemandaToStatusKey(d.status)].push(d); });
 
       const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[(parseInt(mes)||1)-1] || mes;
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      if(inicio === fim){
+        const [ano, mes] = inicio.split('-');
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome} de ${ano}`;
+      } else {
+        const [anoInicio, mesInicio] = inicio.split('-');
+        const [anoFim, mesFim] = fim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+        const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} de ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
+      
       if(relatorioGoalsSubtitle){
-        relatorioGoalsSubtitle.textContent = `Resumo de ${inMonth.length} objetivo${inMonth.length===1?'':'s'} em ${mesNome} de ${ano}`;
+        relatorioGoalsSubtitle.textContent = `Resumo de ${inMonth.length} objetivo${inMonth.length===1?'':'s'} em ${periodoTexto}`;
       }
   if(relatorioGoalsDonePill) relatorioGoalsDonePill.querySelector('strong').textContent = groups['concluido'].length;
   if(relatorioGoalsProgressPill) relatorioGoalsProgressPill.querySelector('strong').textContent = groups['em-andamento'].length;
@@ -32344,8 +32756,8 @@ ${contextoReunioes}`;
         const nao = groups['nao-iniciado'].length;
         const rate = total>0 ? Math.round((concl/total)*100) : 0;
         relatorioGoalsDesc.textContent = total>0
-          ? `🚀 ${mesNome} de ${ano}: ${total} objetivo${total===1?'':'s'} — Concluídos: ${concl} (${rate}%), Em andamento: ${prog}, Não iniciados: ${nao}. Foco em entregas com impacto direto na percepção da marca.`
-          : `Sem objetivos cadastrados para ${mesNome} de ${ano}. Que tal definirmos 2–3 prioridades estratégicas para o próximo ciclo?`;
+          ? `🚀 ${periodoTexto}: ${total} objetivo${total===1?'':'s'} — Concluídos: ${concl} (${rate}%), Em andamento: ${prog}, Não iniciados: ${nao}. Foco em entregas com impacto direto na percepção da marca.`
+          : `Sem objetivos cadastrados para ${periodoTexto}. Que tal definirmos 2–3 prioridades estratégicas para o próximo ciclo?`;
       }
 
       const renderCard = (d)=>{
@@ -32393,41 +32805,82 @@ ${contextoReunioes}`;
     }
     
     async function gerarRelatorio(){
-      if(!relatorioMesInput || !relatorioMesInput.value){
-        alert('Por favor, selecione um mês');
+      // Validação: se não tem mês inicial, alertar
+      if(!relatorioMesInicio || !relatorioMesInicio.value){
+        alert('Por favor, selecione o mês inicial');
         return;
       }
       
-      const mesISO = relatorioMesInput.value;
-  renderRelatorioStories(mesISO);
-  renderRelatorioPosts(mesISO);
-  renderRelatorioGoals(mesISO);
-  renderRelatorioMetas(mesISO);
+      const mesInicialISO = relatorioMesInicio.value;
+      const mesFinalISO = relatorioMesFim && relatorioMesFim.value ? relatorioMesFim.value : mesInicialISO;
+      
+      // Se mês final for anterior ao inicial, alertar
+      if(mesFinalISO < mesInicialISO){
+        alert('O mês final não pode ser anterior ao mês inicial');
+        return;
+      }
+      
+      // Criar objeto de período
+      const periodo = {
+        inicio: mesInicialISO,
+        fim: mesFinalISO
+      };
+      
+      const mesISO = mesInicialISO; // Para compatibilidade com código existente
+      
+  renderRelatorioStories(periodo.inicio, periodo.fim);
+  renderRelatorioPosts(periodo.inicio, periodo.fim);
+  renderRelatorioGoals(periodo.inicio, periodo.fim);
+  renderRelatorioPerformance(periodo.inicio, periodo.fim);
   loadRelatorioGoalsNoteLocal(mesISO);
-  await renderRelatorioLeads(mesISO); // Aguarda buscar leads do Firestore
-  renderRelatorioRedes(mesISO);
+  await renderRelatorioLeads(periodo); // Aguarda buscar leads do Firestore
+  renderRelatorioRedes(periodo.inicio, periodo.fim);
   
   // Aguardar um momento para o DOM ser atualizado
   setTimeout(async () => {
-    gerarResumoTexto(mesISO); // Gerar resumo em texto após renderizar tudo
-    gerarAnaliseEstrategicaIA(mesISO); // Gerar análise estratégica com IA
-    
-    // Salvar relatório no Firebase após gerar
-    await saveRelatorioToFirebase(mesISO);
-    
-    // Recarregar lista de relatórios salvos
-    await loadSavedRelatorios();
-  }, 300);
-  
+    try {
+      console.log('[gerarRelatorio] Iniciando salvamento e análises...');
+      gerarResumoTexto(periodo); // Gerar resumo em texto após renderizar tudo
+      gerarAnaliseEstrategicaIA(periodo); // Gerar análise estratégica com IA
       
+      // Salvar relatório no Firebase após gerar (passa período completo)
+      console.log('[gerarRelatorio] Chamando saveRelatorioToFirebase com:', periodo.inicio, periodo.fim);
+      await saveRelatorioToFirebase(periodo.inicio, periodo.fim);
+      
+      // Recarregar lista de relatórios salvos
+      console.log('[gerarRelatorio] Recarregando lista de relatórios...');
+      await loadSavedRelatorios();
+      console.log('[gerarRelatorio] ✅ Processo completo!');
+    } catch (err) {
+      console.error('[gerarRelatorio] ❌ Erro no processo de salvamento:', err);
+    }
+  }, 300);      
       if(relatorioPreview){
-        const [ano, mes] = mesISO.split('-');
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
+        
+        // Formatar período
+        let periodoTexto = '';
+        if(mesInicialISO === mesFinalISO){
+          const [ano, mes] = mesInicialISO.split('-');
+          const mesNome = meses[parseInt(mes)-1] || mes;
+          periodoTexto = `${mesNome} ${ano}`;
+        } else {
+          const [anoInicio, mesInicio] = mesInicialISO.split('-');
+          const [anoFim, mesFim] = mesFinalISO.split('-');
+          const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+          const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+          
+          if(anoInicio === anoFim){
+            periodoTexto = `${mesInicioNome} a ${mesFimNome} ${anoInicio}`;
+          } else {
+            periodoTexto = `${mesInicioNome} ${anoInicio} a ${mesFimNome} ${anoFim}`;
+          }
+        }
+        
         relatorioPreview.classList.add('has-meta');
         relatorioPreview.innerHTML = `
           <div class="relatorio-preview-meta">
-            <span class="meta-item">📅 ${mesNome} ${ano}</span>
+            <span class="meta-item">📅 ${periodoTexto}</span>
             <span class="meta-sep">•</span>
             <span class="meta-item ok">✅ Relatório gerado</span>
             <span class="meta-sep">•</span>
@@ -32467,9 +32920,13 @@ ${contextoReunioes}`;
     // ========= SAVED REPORTS FUNCTIONS =========
     
     // Salva o relatório gerado no Firebase
-    async function saveRelatorioToFirebase(mesISO){
+    async function saveRelatorioToFirebase(mesInicioISO, mesFimISO = null){
       try{
-        console.log('[Save Relatorio] Iniciando salvamento para:', mesISO);
+        // Se não tiver mês fim, usa o mês início
+        const mesInicio = mesInicioISO;
+        const mesFim = mesFimISO || mesInicioISO;
+        
+        console.log('[Save Relatorio] Iniciando salvamento para período:', mesInicio, 'até', mesFim);
         
         const uid = auth?.currentUser?.uid;
         const clientKey = getClientKeySafe();
@@ -32481,20 +32938,47 @@ ${contextoReunioes}`;
           return;
         }
         
-        const [ano, mes] = mesISO.split('-');
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
         
-        console.log('[Save Relatorio] Mês:', mesNome, 'Ano:', ano);
+        // Formatar nome do período
+        let periodoNome = '';
+        let docId = '';
+        
+        if(mesInicio === mesFim){
+          // Um único mês
+          const [ano, mes] = mesInicio.split('-');
+          const mesNome = meses[parseInt(mes)-1] || mes;
+          periodoNome = `${mesNome} ${ano}`;
+          docId = mesInicio; // Ex: "2026-01"
+        } else {
+          // Múltiplos meses
+          const [anoInicio, mesNumInicio] = mesInicio.split('-');
+          const [anoFim, mesNumFim] = mesFim.split('-');
+          const mesInicioNome = meses[parseInt(mesNumInicio)-1] || mesNumInicio;
+          const mesFimNome = meses[parseInt(mesNumFim)-1] || mesNumFim;
+          
+          if(anoInicio === anoFim){
+            periodoNome = `${mesInicioNome} a ${mesFimNome} ${anoInicio}`;
+          } else {
+            periodoNome = `${mesInicioNome} ${anoInicio} a ${mesFimNome} ${anoFim}`;
+          }
+          
+          docId = `${mesInicio}_${mesFim}`; // Ex: "2026-01_2026-03"
+        }
+        
+        console.log('[Save Relatorio] Período:', periodoNome, 'DocID:', docId);
         
         // Helpers seguros para evitar ReferenceError quando variáveis globais não existem
         const safeArray = (globalName) => {
           const val = typeof window !== 'undefined' ? window[globalName] : undefined;
           return Array.isArray(val) ? val : [];
         };
-        const startsWithMonth = (item) => {
-          if(!item || !item.dateISO || !mesISO) return false;
-          return item.dateISO.startsWith(mesISO);
+        
+        // Função para verificar se item está no período
+        const isInPeriod = (item) => {
+          if(!item || !item.dateISO) return false;
+          const itemDate = item.dateISO.substring(0, 7); // "2026-01"
+          return itemDate >= mesInicio && itemDate <= mesFim;
         };
 
         const storiesArr = safeArray('STORIES_CAROUSEL');
@@ -32502,29 +32986,43 @@ ${contextoReunioes}`;
         const goalsArr = safeArray('GOALS');
         const metasArr = safeArray('META_SUBMISSIONS');
 
+        // 🔥 NOVO: Coletar thumbnails de vídeos dos posts no período
+        const postsNoPeriodo = postsArr.filter(isInPeriod);
+        const videoThumbnails = {};
+        
+        postsNoPeriodo.forEach(post => {
+          if(post.videoThumbUrl && post.videoThumbUrl.startsWith('data:image')){
+            videoThumbnails[post.id] = post.videoThumbUrl;
+          }
+        });
+        
+        console.log('[Save Relatorio] 🎬 Thumbnails de vídeo a salvar:', Object.keys(videoThumbnails).length);
+
         // Coletar todos os dados do relatório atual
         const relatorioData = {
-          mesISO,
-          mesNome,
-          ano,
+          mesInicioISO: mesInicio,
+          mesFimISO: mesFim,
+          periodoNome,
           generatedAt: serverTimestamp(),
-          // Dados das seções (opcional - pode capturar HTML ou dados estruturados)
-          storiesCount: storiesArr.filter(startsWithMonth).length,
-          postsCount: postsArr.filter(startsWithMonth).length,
+          // Dados das seções
+          storiesCount: storiesArr.filter(isInPeriod).length,
+          postsCount: postsNoPeriodo.length,
           goalsCount: goalsArr.length,
-          metasCount: metasArr.length
+          metasCount: metasArr.length,
+          // 🔥 NOVO: Salvar thumbnails de vídeo para carregar instantaneamente depois
+          videoThumbnails: videoThumbnails
         };
         
         console.log('[Save Relatorio] Dados a salvar:', relatorioData);
         
-        // Salvar no Firestore: usuarios/{uid}/clients/{clientKey}/relatorios/{mesISO}
-        const docRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'relatorios', mesISO);
+        // Salvar no Firestore: usuarios/{uid}/clients/{clientKey}/relatorios/{docId}
+        const docRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'relatorios', docId);
         await setDoc(docRef, relatorioData, { merge: true });
         
-        console.log(`[Save Relatorio] ✅ Relatório ${mesNome} ${ano} salvo com sucesso!`);
+        console.log(`[Save Relatorio] ✅ Relatório ${periodoNome} salvo com sucesso!`);
         
         if(typeof mgToast === 'function'){
-          mgToast(`📊 Relatório de ${mesNome} ${ano} salvo!`);
+          mgToast(`📊 Relatório de ${periodoNome} salvo!`);
         }
         
       }catch(err){
@@ -32572,27 +33070,48 @@ ${contextoReunioes}`;
         console.log('[Load Saved Relatorios] Docs:', snapshot.docs.map(d => ({id: d.id, data: d.data()})));
         
         if(!snapshot.empty){
+          console.log('[Load Saved Relatorios] 📊 TEM RELATÓRIOS! Total:', snapshot.size);
+          
           // Tem relatórios salvos
           const tabs = snapshot.docs.map(doc => {
             const data = doc.data();
             console.log('[Load Saved Relatorios] Relatório:', data);
+            
+            // Suportar formato antigo (mesISO) e novo (mesInicioISO/mesFimISO)
+            const periodoNome = data.periodoNome || `${data.mesNome || ''} ${data.ano || ''}`;
+            const mesInicio = data.mesInicioISO || data.mesISO || '';
+            const mesFim = data.mesFimISO || data.mesISO || '';
+            
+            console.log('[Load Saved Relatorios] 🏷️ Gerando aba:', periodoNome, 'Início:', mesInicio, 'Fim:', mesFim);
+            
             return `
-              <button type="button" class="relatorio-history-tab" data-mes-iso="${data.mesISO}">
-                <span class="tab-date">${data.mesNome} ${data.ano}</span>
+              <button type="button" class="relatorio-history-tab" data-mes-inicio="${mesInicio}" data-mes-fim="${mesFim}">
+                <span class="tab-date">${periodoNome}</span>
                 <span class="tab-badge">Salvo</span>
               </button>
             `;
           }).join('');
           
+          console.log('[Load Saved Relatorios] HTML gerado:', tabs);
           tabsEl.innerHTML = tabs;
           console.log('[Load Saved Relatorios] ✅ Abas renderizadas:', snapshot.size);
+          console.log('[Load Saved Relatorios] ✅ Conteúdo de tabsEl:', tabsEl.innerHTML.substring(0, 200));
+          
+          // 🔍 DEBUG: Verificar visibilidade do elemento
+          console.log('[Load Saved Relatorios] 👁️ Display de tabsEl:', window.getComputedStyle(tabsEl).display);
+          console.log('[Load Saved Relatorios] 📐 Dimensões de tabsEl:', tabsEl.getBoundingClientRect());
+          console.log('[Load Saved Relatorios] 🎨 Visibilidade de tabsEl:', window.getComputedStyle(tabsEl).visibility);
+          console.log('[Load Saved Relatorios] 🎨 Opacity de tabsEl:', window.getComputedStyle(tabsEl).opacity);
+          console.log('[Load Saved Relatorios] 📍 Parent de tabsEl:', tabsEl.parentElement.id);
+          console.log('[Load Saved Relatorios] 👁️ Display do parent:', window.getComputedStyle(tabsEl.parentElement).display);
           
           // Bind click events
           tabsEl.querySelectorAll('.relatorio-history-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-              const mesISO = tab.getAttribute('data-mes-iso');
-              console.log('[Load Saved Relatorios] Abrindo relatório:', mesISO);
-              openSavedRelatorio(mesISO);
+              const mesInicio = tab.getAttribute('data-mes-inicio');
+              const mesFim = tab.getAttribute('data-mes-fim');
+              console.log('[Load Saved Relatorios] Abrindo relatório:', mesInicio, 'até', mesFim);
+              openSavedRelatorio(mesInicio, mesFim);
             });
           });
           
@@ -32609,12 +33128,66 @@ ${contextoReunioes}`;
     }
     
     // Abre um relatório salvo
-    async function openSavedRelatorio(mesISO){
-      if(!mesISO) return;
+    async function openSavedRelatorio(mesInicioISO, mesFimISO = null){
+      if(!mesInicioISO) return;
       
-      // Define o mês no input
-      if(relatorioMesInput){
-        relatorioMesInput.value = mesISO;
+      const mesInicio = mesInicioISO;
+      const mesFim = mesFimISO || mesInicioISO;
+      
+      console.log('[Open Saved Relatorio] 📂 Abrindo relatório:', mesInicio, 'até', mesFim);
+      
+      // 🔥 NOVO: Buscar thumbnails salvas do Firebase ANTES de renderizar
+      try {
+        const uid = auth?.currentUser?.uid;
+        const clientKey = getClientKeySafe();
+        
+        if(uid && clientKey){
+          const docId = mesInicio === mesFim ? mesInicio : `${mesInicio}_${mesFim}`;
+          const docRef = doc(db, 'usuarios', uid, 'clients', clientKey, 'relatorios', docId);
+          const docSnap = await getDoc(docRef);
+          
+          if(docSnap.exists()){
+            const data = docSnap.data();
+            const videoThumbnails = data.videoThumbnails || {};
+            
+            console.log('[Open Saved Relatorio] 💾 Thumbnails carregadas do Firebase:', Object.keys(videoThumbnails).length);
+            
+            // Aplicar thumbnails aos posts em memória
+            if(Object.keys(videoThumbnails).length > 0){
+              POSTS.forEach(post => {
+                if(videoThumbnails[post.id] && !post.videoThumbUrl){
+                  post.videoThumbUrl = videoThumbnails[post.id];
+                  console.log('[Open Saved Relatorio] ✅ Thumbnail aplicada ao post:', post.id);
+                }
+              });
+              
+              // Também popular o cache em memória para acesso ultra-rápido
+              const VIDEO_THUMB_CACHE = window.VIDEO_THUMB_CACHE || new Map();
+              window.VIDEO_THUMB_CACHE = VIDEO_THUMB_CACHE;
+              
+              POSTS.forEach(post => {
+                if(post.videoThumbUrl && post.mediaUrls && post.mediaUrls[0]){
+                  const firstMedia = post.mediaUrls[0];
+                  VIDEO_THUMB_CACHE.set(firstMedia, post.videoThumbUrl);
+                }
+              });
+              
+              console.log('[Open Saved Relatorio] 🚀 Cache de thumbnails populado:', VIDEO_THUMB_CACHE.size, 'itens');
+            }
+          } else {
+            console.log('[Open Saved Relatorio] ⚠️ Relatório não encontrado no Firebase');
+          }
+        }
+      } catch(err) {
+        console.error('[Open Saved Relatorio] ❌ Erro ao carregar thumbnails:', err);
+      }
+      
+      // Define os meses nos inputs
+      if(relatorioMesInicio){
+        relatorioMesInicio.value = mesInicio;
+      }
+      if(relatorioMesFim){
+        relatorioMesFim.value = mesFim;
       }
       
       // Gera o relatório (vai buscar os dados e renderizar)
@@ -33015,74 +33588,526 @@ ${contextoReunioes}`;
       }catch(_err){}
     }
 
-    function renderRelatorioMetas(mesISO){
-      if(!relatorioMetasSection) return;
-      const monthKey = getMetaMonthKeyFromISO(mesISO);
-      const activeMetas = Array.isArray(METAS) ? METAS.filter(meta => meta && meta.ativo !== false) : [];
-      const groups = { achieved:[], progress:[], missing:[] };
-      activeMetas.forEach(meta=>{
-        const current = (meta.meses && meta.meses[monthKey]) || {p:'',r:''};
-        const planned = normalizeMetaNumber(current.p ?? current.P);
-        const realized = normalizeMetaNumber(current.r ?? current.R);
-        const status = evaluateMetaGoal(planned, realized, meta.direcao);
-        if(status === 'achieved') groups.achieved.push({meta, planned, realized});
-        else if(status === 'missing') groups.missing.push({meta, planned, realized});
-        else groups.progress.push({meta, planned, realized});
-      });
-
-      const total = activeMetas.length;
-      if(total === 0){ relatorioMetasSection.style.display='none'; return; }
-      relatorioMetasSection.style.display='block';
-
-      const labelMonth = META_MONTH_LABELS[monthKey] || monthKey.toUpperCase();
-      if(relatorioMetasSubtitle){ relatorioMetasSubtitle.textContent = `Metas ativas: ${total} • ${labelMonth}`; }
-      if(relatorioMetasAchievedPill) relatorioMetasAchievedPill.querySelector('strong').textContent = groups.achieved.length;
-      if(relatorioMetasProgressPill) relatorioMetasProgressPill.querySelector('strong').textContent = groups.progress.length;
-      if(relatorioMetasMissingPill) relatorioMetasMissingPill.querySelector('strong').textContent = groups.missing.length;
-
-      // Descrição resumida abaixo do bloco
-      if(relatorioMetasDesc){
-        const a = groups.achieved.length, p = groups.progress.length, m = groups.missing.length;
-        const rate = total>0 ? Math.round((a/total)*100) : 0;
-        relatorioMetasDesc.textContent = `🎯 ${labelMonth}: ${total} meta${total===1?'':'s'} ativa${total===1?'':'s'} — Atingidas: ${a} (${rate}%), Em andamento: ${p}, Precisa colocar: ${m}. Excelente sinal de alinhamento entre planejamento e execução.`;
+    function renderRelatorioPerformance(mesInicioISO, mesFimISO = null){
+      const section = document.getElementById('relatorioPerformanceSection');
+      if(!section) return;
+      
+      const inicio = mesInicioISO;
+      const fim = mesFimISO || mesInicioISO;
+      
+      console.log('🎯 [renderRelatorioPerformance] Iniciando render');
+      console.log('📅 Período:', inicio, 'até', fim);
+      console.log('📊 METAS array:', METAS);
+      console.log('📏 Total de metas:', METAS?.length);
+      
+      // 🎨 LOGOS SVG DAS PLATAFORMAS
+      const PLATFORM_LOGOS = {
+        instagram: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="instagramGradient" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#FED373;stop-opacity:1" /><stop offset="15%" style="stop-color:#F15245;stop-opacity:1" /><stop offset="35%" style="stop-color:#D92E7F;stop-opacity:1" /><stop offset="65%" style="stop-color:#9B36B7;stop-opacity:1" /><stop offset="100%" style="stop-color:#515ECF;stop-opacity:1" /></linearGradient></defs><path fill="url(#instagramGradient)" d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" /></svg>`,
+        
+        meta: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="metaGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0081FB;stop-opacity:1" /><stop offset="100%" style="stop-color:#0064E0;stop-opacity:1" /></linearGradient></defs><path fill="url(#metaGradient)" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M9.5,8C10.33,8 11,8.67 11,9.5C11,10.33 10.33,11 9.5,11C8.67,11 8,10.33 8,9.5C8,8.67 8.67,8 9.5,8M14.5,8C15.33,8 16,8.67 16,9.5C16,10.33 15.33,11 14.5,11C13.67,11 13,10.33 13,9.5C13,8.67 13.67,8 14.5,8M12,14C13.75,14 15.29,14.72 16.19,15.81L14.77,17.23C14.32,16.5 13.25,16 12,16C10.75,16 9.68,16.5 9.23,17.23L7.81,15.81C8.71,14.72 10.25,14 12,14Z" /></svg>`,
+        
+        facebook: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#1877F2" d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" /></svg>`,
+        
+        google: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#4285F4" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1Z" /></svg>`,
+        
+        whatsapp: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#25D366" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M8.53 7.33C8.37 7.33 8.1 7.39 7.87 7.64C7.65 7.89 7 8.5 7 9.71C7 10.93 7.89 12.1 8 12.27C8.14 12.44 9.76 14.94 12.25 16C12.84 16.27 13.3 16.42 13.66 16.53C14.25 16.72 14.79 16.69 15.22 16.63C15.7 16.56 16.68 16.03 16.89 15.45C17.1 14.87 17.1 14.38 17.04 14.27C16.97 14.17 16.81 14.11 16.56 14C16.31 13.86 15.09 13.26 14.87 13.18C14.64 13.1 14.5 13.06 14.31 13.3C14.15 13.55 13.67 14.11 13.53 14.27C13.38 14.44 13.24 14.46 13 14.34C12.74 14.21 11.94 13.95 11 13.11C10.26 12.45 9.77 11.64 9.62 11.39C9.5 11.15 9.61 11 9.73 10.89C9.84 10.78 10 10.6 10.1 10.45C10.23 10.31 10.27 10.2 10.35 10.04C10.43 9.87 10.39 9.73 10.33 9.61C10.27 9.5 9.77 8.26 9.56 7.77C9.36 7.29 9.16 7.35 9 7.34C8.86 7.34 8.7 7.33 8.53 7.33Z" /></svg>`,
+        
+        youtube: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#FF0000" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.69,18.94 13.59,18.94L12,19C7.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.44 2.06,12.84L2,12C2,9.81 2.16,8.2 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.31,5.06 10.41,5.06L12,5C16.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>`,
+        
+        tiktok: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#000000" d="M16.6,5.82C15.9,5.17 15.44,4.27 15.44,3.27H13.32V15.67C13.32,16.87 12.34,17.85 11.14,17.85C9.94,17.85 8.96,16.87 8.96,15.67C8.96,14.47 9.94,13.49 11.14,13.49C11.35,13.49 11.56,13.53 11.75,13.6V11.43C11.55,11.4 11.35,11.38 11.14,11.38C8.77,11.38 6.85,13.3 6.85,15.67C6.85,18.04 8.77,19.96 11.14,19.96C13.51,19.96 15.43,18.04 15.43,15.67V8.93C16.43,9.65 17.65,10.07 18.97,10.09V7.97C17.86,7.95 16.89,7.09 16.6,5.82Z" /></svg>`,
+        
+        linkedin: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path fill="#0A66C2" d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z" /></svg>`,
+        
+        crm: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="crmGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00A055;stop-opacity:1" /><stop offset="100%" style="stop-color:#007E41;stop-opacity:1" /></linearGradient></defs><path fill="url(#crmGradient)" d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" /></svg>`,
+        
+        ads: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="adsGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#E05A0F;stop-opacity:1" /><stop offset="100%" style="stop-color:#C34B09;stop-opacity:1" /></linearGradient></defs><path fill="url(#adsGradient)" d="M18.5,1.15C17.97,1.15 17.46,1.34 17.07,1.73L11.26,7.55L16.91,13.2L22.73,7.39C23.5,6.61 23.5,5.35 22.73,4.56L19.89,1.73C19.5,1.34 19,1.15 18.5,1.15M10.3,8.5L4.34,14.46C3.56,15.24 3.56,16.5 4.36,17.31L11.69,24.64C12.5,25.44 13.76,25.44 14.56,24.64L20.5,18.7L14.84,13.05L10.3,8.5M2.86,15.94L1.15,17.65C0.734,18.07 0.734,18.74 1.15,19.15L4.93,22.93C5.34,23.35 6,23.35 6.42,22.93L8.13,21.22L2.86,15.94Z" /></svg>`,
+        
+        analytics: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="analyticsGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#007AA8;stop-opacity:1" /><stop offset="100%" style="stop-color:#005B81;stop-opacity:1" /></linearGradient></defs><path fill="url(#analyticsGradient)" d="M7,2H9A2,2 0 0,1 11,4V20A2,2 0 0,1 9,22H7A2,2 0 0,1 5,20V4A2,2 0 0,1 7,2M15,8H17A2,2 0 0,1 19,10V20A2,2 0 0,1 17,22H15A2,2 0 0,1 13,20V10A2,2 0 0,1 15,8Z" /></svg>`,
+        
+        email: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="emailGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#A67C00;stop-opacity:1" /><stop offset="100%" style="stop-color:#7F6001;stop-opacity:1" /></linearGradient></defs><path fill="url(#emailGradient)" d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>`,
+        
+        automation: `<svg viewBox="0 0 24 24" style="width:24px;height:24px;"><defs><linearGradient id="automationGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#BB33FF;stop-opacity:1" /><stop offset="100%" style="stop-color:#9900FF;stop-opacity:1" /></linearGradient></defs><path fill="url(#automationGradient)" d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z" /></svg>`
+      };
+      
+      // 🔍 Função para detectar qual logo usar baseado na descrição da meta
+      const getMetricIcon = (descricao, categoria) => {
+        const desc = (descricao || '').toLowerCase();
+        
+        // Logos específicas por palavra-chave
+        if(desc.includes('instagram') || desc.includes('insta')) return PLATFORM_LOGOS.instagram;
+        if(desc.includes('facebook') || desc.includes('fb')) return PLATFORM_LOGOS.facebook;
+        if(desc.includes('meta') && !desc.includes('metrica')) return PLATFORM_LOGOS.meta;
+        if(desc.includes('google') || desc.includes('ads') || desc.includes('adwords')) return PLATFORM_LOGOS.google;
+        if(desc.includes('whatsapp') || desc.includes('wpp') || desc.includes('zap')) return PLATFORM_LOGOS.whatsapp;
+        if(desc.includes('youtube') || desc.includes('yt')) return PLATFORM_LOGOS.youtube;
+        if(desc.includes('tiktok') || desc.includes('tik tok')) return PLATFORM_LOGOS.tiktok;
+        if(desc.includes('linkedin') || desc.includes('linked in')) return PLATFORM_LOGOS.linkedin;
+        if(desc.includes('crm') || desc.includes('cliente') || desc.includes('contato')) return PLATFORM_LOGOS.crm;
+        if(desc.includes('email') || desc.includes('e-mail') || desc.includes('newsletter')) return PLATFORM_LOGOS.email;
+        if(desc.includes('automaç') || desc.includes('automacao') || desc.includes('workflow')) return PLATFORM_LOGOS.automation;
+        if(desc.includes('anúnc') || desc.includes('anuncio') || desc.includes('campanha')) return PLATFORM_LOGOS.ads;
+        if(desc.includes('analis') || desc.includes('analytic') || desc.includes('dado')) return PLATFORM_LOGOS.analytics;
+        
+        // Fallback por categoria
+        if(categoria === 'trafego_pago') return PLATFORM_LOGOS.ads;
+        if(categoria === 'canais') return PLATFORM_LOGOS.analytics;
+        if(categoria === 'crm_automacoes') return PLATFORM_LOGOS.crm;
+        if(categoria === 'lideranca') return PLATFORM_LOGOS.email;
+        
+        // Fallback padrão (ícone genérico de automação/engrenagem)
+        return PLATFORM_LOGOS.automation;
+      };
+      
+      // Gerar array com todos os meses do período
+      const mesesPeriodo = [];
+      let current = inicio;
+      while(current <= fim){
+        mesesPeriodo.push(current);
+        const [ano, mes] = current.split('-');
+        const nextDate = new Date(parseInt(ano), parseInt(mes), 1);
+        const nextMonth = nextDate.getMonth() + 1;
+        const nextYear = nextDate.getFullYear();
+        current = `${nextYear}-${String(nextMonth).padStart(2, '0')}`;
       }
-
-      const renderMetaCard = (item)=>{
-        const m = item.meta;
-        const title = (m.descricao||'').trim() || '(Meta sem título)';
-        const unidade = m.unidade || '';
-        const plannedLabel = formatMetaDisplay(item.planned, unidade);
-        const realizedLabel = formatMetaDisplay(item.realized, unidade);
-        return `<div class="goal-card" data-id="${m.id}">
-          <div class="goal-title">${escapeHtml(title)}</div>
-          <div class="goal-meta">
-            <span class="goal-tag">🎯 Meta: ${escapeHtml(plannedLabel)}</span>
-            <span class="goal-tag">📈 Realizado: ${escapeHtml(realizedLabel)}</span>
-            ${m.setor?`<span class="goal-tag">🏢 ${escapeHtml(m.setor)}</span>`:''}
-          </div>
-        </div>`;
+      
+      console.log('📅 Meses do período:', mesesPeriodo);
+      
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      if(inicio === fim){
+        const monthKey = getMetaMonthKeyFromISO(inicio);
+        periodoTexto = META_MONTH_LABELS[monthKey] || monthKey.toUpperCase();
+      } else {
+        const [anoInicio, mesInicio] = inicio.split('-');
+        const [anoFim, mesFim] = fim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+        const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} de ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
+      
+      const subtitle = section.querySelector('#relatorioPerformanceSubtitle');
+      if(subtitle) subtitle.textContent = `Visão completa das métricas de crescimento • ${periodoTexto}`;
+      
+      // Organizar metas por categoria
+      const activeMetas = Array.isArray(METAS) ? METAS.filter(meta => meta && meta.ativo !== false) : [];
+      
+      console.log('✅ Metas ativas:', activeMetas.length);
+      
+      // 🔍 IDENTIFICAR QUAIS MESES REALMENTE TÊM DADOS
+      // Percorrer todas as metas e coletar meses com valores
+      const mesesComDados = new Set();
+      activeMetas.forEach(meta => {
+        if(meta && meta.meses){
+          // ⚠️ CRÍTICO: Só verificar meses que estão no período selecionado
+          mesesPeriodo.forEach(mesISO => {
+            // Verificar se está dentro do período (filtro duplo de segurança)
+            if(mesISO < inicio || mesISO > fim) {
+              console.log(`⚠️ [FILTRO] Ignorando ${mesISO} (fora do período ${inicio} - ${fim})`);
+              return; // Pular este mês
+            }
+            
+            const monthKey = getMetaMonthKeyFromISO(mesISO);
+            const monthValue = meta.meses[monthKey];
+            
+            // Verificar se esse mês tem dados
+            let temDados = false;
+            if(typeof monthValue === 'number' || (monthValue && !isNaN(parseFloat(monthValue)) && typeof monthValue !== 'object')){
+              const val = normalizeMetaNumber(monthValue);
+              if(val > 0) temDados = true;
+            } else if(monthValue && typeof monthValue === 'object'){
+              const p = normalizeMetaNumber(monthValue.p ?? monthValue.P);
+              const r = normalizeMetaNumber(monthValue.r ?? monthValue.R);
+              if(p > 0 || r > 0) temDados = true;
+            }
+            
+            if(temDados){
+              console.log(`✅ [FILTRO] ${mesISO} (${monthKey}) TEM DADOS - adicionando`);
+              mesesComDados.add(mesISO);
+            }
+          });
+        }
+      });
+      
+      // Converter para array ordenado
+      const mesesReaisComDados = Array.from(mesesComDados).sort();
+      
+      console.log('� [FILTRO FINAL] Período selecionado:', inicio, 'até', fim);
+      console.log('� [FILTRO FINAL] Meses com dados:', mesesReaisComDados);
+      
+      const metasPorCategoria = {
+        trafego_pago: [],
+        canais: [],
+        crm_automacoes: [],
+        lideranca: [],
+        outros: []
       };
-
-      if(relatorioMetasAchieved) relatorioMetasAchieved.innerHTML = groups.achieved.map(renderMetaCard).join('');
-      if(relatorioMetasProgress) relatorioMetasProgress.innerHTML = groups.progress.map(renderMetaCard).join('');
-      if(relatorioMetasMissing) relatorioMetasMissing.innerHTML = groups.missing.map(renderMetaCard).join('');
-
-      const bindClicks = (root)=>{
-        if(!root) return; 
-        root.querySelectorAll('.goal-card').forEach(el=>{
-          if(el.dataset.bound==='1') return; el.dataset.bound='1';
-          el.addEventListener('click', ()=>{ try{ setActiveTab('metas'); }catch(_err){} });
+      
+      // Processar cada meta e agregar valores do período
+      activeMetas.forEach((meta, index) => {
+        let totalPlanned = 0;
+        let totalRealized = 0;
+        let valoresPorMes = []; // Array para armazenar valores de cada mês
+        
+        // Log da primeira meta para debug
+        if(index === 0){
+          console.log('🔬 [DEBUG] Primeira meta completa:', meta);
+          console.log('🔬 [DEBUG] meta.meses:', meta.meses);
+          console.log('🔬 [DEBUG] Meses REAIS com dados:', mesesReaisComDados);
+        }
+        
+        // ⚠️ USAR APENAS MESES QUE TÊM DADOS REAIS (não todo o período selecionado)
+        mesesReaisComDados.forEach(mesISO => {
+          const monthKey = getMetaMonthKeyFromISO(mesISO);
+          const monthValue = (meta.meses && meta.meses[monthKey]);
+          let mesRealized = 0;
+          let mesPlanned = 0;
+          
+          if(index === 0){
+            console.log(`🔬 [DEBUG] mesISO: ${mesISO} → monthKey: ${monthKey} → monthValue:`, monthValue);
+            console.log(`🔬 [DEBUG] typeof monthValue: "${typeof monthValue}" | isNumber: ${typeof monthValue === 'number'} | value: ${monthValue}`);
+          }
+          
+          // ✅ SUPORTE PARA AMBOS OS FORMATOS:
+          if(typeof monthValue === 'number' || (monthValue && !isNaN(parseFloat(monthValue)) && typeof monthValue !== 'object')){
+            // Formato antigo: número direto = realizado
+            const normalized = normalizeMetaNumber(monthValue);
+            mesRealized = normalized;
+            totalRealized += normalized;
+            if(index === 0){
+              console.log(`🔢 [DEBUG] monthValue é number/string (${monthValue}) tipo: ${typeof monthValue} → normalized: ${normalized} → totalRealized agora: ${totalRealized}`);
+            }
+          } else if(monthValue && typeof monthValue === 'object'){
+            // Formato novo: objeto com planned e realized
+            const p = normalizeMetaNumber(monthValue.p ?? monthValue.P);
+            const r = normalizeMetaNumber(monthValue.r ?? monthValue.R);
+            mesPlanned = p;
+            mesRealized = r;
+            totalPlanned += p;
+            totalRealized += r;
+            if(index === 0){
+              console.log(`🔢 [DEBUG] monthValue é object → p: ${p}, r: ${r} → totalPlanned: ${totalPlanned}, totalRealized: ${totalRealized}`);
+            }
+          } else {
+            if(index === 0){
+              console.log(`⚠️ [DEBUG] monthValue não é nem number nem object válido!`);
+            }
+          }
+          
+          // ⚠️ IMPORTANTE: Só armazenar mês se tiver dados reais (realized > 0 ou planned > 0)
+          // Isso garante que a comparação só mostre meses que existem na aba Resultados
+          if(mesRealized > 0 || mesPlanned > 0){
+            valoresPorMes.push({
+              mesISO: mesISO,
+              monthKey: monthKey,
+              planned: mesPlanned,
+              realized: mesRealized
+            });
+          }
         });
+        
+        const categoria = meta.categoria || 'outros';
+        if(metasPorCategoria[categoria]){
+          metasPorCategoria[categoria].push({
+            descricao: meta.descricao,
+            unidade: meta.unidade,
+            planned: totalPlanned,
+            realized: totalRealized,
+            direcao: meta.direcao,
+            valoresPorMes: valoresPorMes, // Array com valores de cada mês
+            meta: meta, // Referência para calcular mês anterior/posterior
+            categoria: categoria // ⚠️ NOVO: Adicionar categoria para aplicar cores
+          });
+        }
+      });
+      
+      // 🎨 Mapeamento de cores por categoria (mesmas da aba Resultados)
+      const CATEGORIA_COLORS = {
+        trafego_pago: {
+          primary: '#C34B09',
+          gradient: 'linear-gradient(135deg, #C34B09 0%, #E05A0F 100%)',
+          shadow: 'rgba(195, 75, 9, 0.4)'
+        },
+        canais: {
+          primary: '#005B81',
+          gradient: 'linear-gradient(135deg, #005B81 0%, #007AA8 100%)',
+          shadow: 'rgba(0, 91, 129, 0.4)'
+        },
+        crm_automacoes: {
+          primary: '#007E41',
+          gradient: 'linear-gradient(135deg, #007E41 0%, #00A556 100%)',
+          shadow: 'rgba(0, 126, 65, 0.4)'
+        },
+        lideranca: {
+          primary: '#7F6001',
+          gradient: 'linear-gradient(135deg, #7F6001 0%, #A57D01 100%)',
+          shadow: 'rgba(127, 96, 1, 0.4)'
+        },
+        outros: {
+          primary: '#9900FF',
+          gradient: 'linear-gradient(135deg, #9900FF 0%, #B333FF 100%)',
+          shadow: 'rgba(153, 0, 255, 0.4)'
+        }
       };
-      bindClicks(relatorioMetasAchieved);
-      bindClicks(relatorioMetasProgress);
-      bindClicks(relatorioMetasMissing);
-
-      filterMetas(currentMetasFilter);
+      
+      // Função para criar card de métrica com comparação mensal
+      const createMetricCard = (metrica) => {
+        const { descricao, unidade, planned, realized, direcao, valoresPorMes, meta, categoria } = metrica;
+        
+        // 🎨 Obter logo personalizada baseado na descrição
+        const platformIcon = getMetricIcon(descricao, categoria);
+        
+        // Calcular performance
+        let performance = 0;
+        let statusColor = '#64748b';
+        let statusEmoji = '⚪';
+        
+        if(planned > 0){
+          performance = Math.round((realized / planned) * 100);
+          
+          if(direcao === 'menor'){
+            // Para métricas onde menor é melhor (ex: CPL)
+            if(realized <= planned){
+              statusColor = '#10b981';
+              statusEmoji = '✅';
+            } else if(realized <= planned * 1.2){
+              statusColor = '#f59e0b';
+              statusEmoji = '⚠️';
+            } else {
+              statusColor = '#ef4444';
+              statusEmoji = '❌';
+            }
+          } else {
+            // Para métricas onde maior é melhor (padrão)
+            if(realized >= planned){
+              statusColor = '#10b981';
+              statusEmoji = '✅';
+            } else if(realized >= planned * 0.8){
+              statusColor = '#f59e0b';
+              statusEmoji = '⚠️';
+            } else {
+              statusColor = '#ef4444';
+              statusEmoji = '❌';
+            }
+          }
+        } else if(realized > 0){
+          statusColor = '#3b82f6';
+          statusEmoji = '📊';
+        }
+        
+        const formatValue = (val) => {
+          if(!val || val === 0) return '—';
+          return formatMetaDisplay(val, unidade);
+        };
+        
+        // Gerar HTML de comparação mensal
+        // ⚠️ SÓ MOSTRAR se houver pelo menos 2 meses COM DADOS REAIS
+        let comparacaoHTML = '';
+        if(valoresPorMes && valoresPorMes.length >= 2){
+          console.log(`📊 [COMPARAÇÃO] Renderizando ${valoresPorMes.length} meses:`, valoresPorMes.map(m => m.mesISO));
+          
+          comparacaoHTML = `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                📊 Comparação Mensal
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+          `;
+          
+          valoresPorMes.forEach((mes, idx) => {
+            // ⚠️ FIX: Parsing correto de data ISO sem problemas de timezone
+            const [ano, mesNum] = mes.mesISO.split('-');
+            const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15); // Dia 15 para evitar problemas de timezone
+            const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+            const valor = mes.realized;
+            
+            console.log(`  📅 [COMPARAÇÃO] Mês ${idx + 1}: ${mes.mesISO} (${mesNome}) = ${valor}`);
+            
+            // Calcular variação com mês anterior (só se não for o primeiro mês)
+            let variacaoHTML = '';
+            if(idx > 0){
+              const mesAnterior = valoresPorMes[idx - 1].realized;
+              // Só calcular variação se o mês anterior tiver valor
+              if(mesAnterior > 0 && valor > 0){
+                const variacao = ((valor - mesAnterior) / mesAnterior) * 100;
+                const variacaoIcon = variacao > 0 ? '📈' : variacao < 0 ? '📉' : '➡️';
+                const variacaoColor = variacao > 0 ? '#10b981' : variacao < 0 ? '#ef4444' : '#64748b';
+                variacaoHTML = `
+                  <span style="font-size: 0.7rem; color: ${variacaoColor}; margin-left: 8px;">
+                    ${variacaoIcon} ${variacao > 0 ? '+' : ''}${variacao.toFixed(1)}%
+                  </span>
+                `;
+              }
+            }
+            
+            comparacaoHTML += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
+                <span style="font-size: 0.75rem; color: rgba(255,255,255,0.8); font-weight: 500;">${mesNome}</span>
+                <div style="display: flex; align-items: center;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #ffffff;">${formatValue(valor)}</span>
+                  ${variacaoHTML}
+                </div>
+              </div>
+            `;
+          });
+          
+          comparacaoHTML += `
+              </div>
+            </div>
+          `;
+        } else if(valoresPorMes && valoresPorMes.length === 1){
+          // Se tiver apenas 1 mês, mostrar mensagem informativa
+          // ⚠️ FIX: Parsing correto de data ISO
+          const [ano, mesNum] = valoresPorMes[0].mesISO.split('-');
+          const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+          const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
+          comparacaoHTML = `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); text-align: center; font-style: italic;">
+                📅 Dados disponíveis apenas para ${mesNome}
+              </div>
+            </div>
+          `;
+        }
+        
+        // 🎨 Obter cores da categoria (mesmas da aba Resultados)
+        const categoriaColor = CATEGORIA_COLORS[categoria] || CATEGORIA_COLORS.outros;
+        
+        return `
+          <div class="metric-card" style="
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid ${statusColor}60;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+          " onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)'">
+            
+            <!-- Logo da plataforma no canto superior direito -->
+            <div style="position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 6px;">
+              ${platformIcon}
+              <span style="font-size: 1.2rem;">${statusEmoji}</span>
+            </div>
+            
+            <div style="margin-bottom: 8px; padding-right: 60px;">
+              <div style="font-size: 0.75rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                ${escapeHtml(descricao)}
+              </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+              <div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #ffffff; line-height: 1;">
+                  ${formatValue(realized)}
+                </div>
+                ${planned > 0 ? `<div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-top: 4px;">Meta: ${formatValue(planned)}</div>` : ''}
+              </div>
+            </div>
+            
+            ${planned > 0 ? `
+              <div style="margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-size: 0.7rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px;">PERFORMANCE</span>
+                  <span style="font-size: 0.85rem; font-weight: 700; color: #ffffff;">${performance}%</span>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="
+                    background: linear-gradient(90deg, ${statusColor}, ${statusColor}cc);
+                    height: 100%;
+                    width: ${Math.min(performance, 100)}%;
+                    transition: width 0.6s ease;
+                    border-radius: 4px;
+                  "></div>
+                </div>
+              </div>
+            ` : ''}
+            
+            ${comparacaoHTML}
+          </div>
+        `;
+      };
+      
+      // Renderizar cada categoria
+      const trafegoGrid = document.getElementById('relatorioTrafegoGrid');
+      const canaisGrid = document.getElementById('relatorioCanaisGrid');
+      const crmGrid = document.getElementById('relatorioCRMGrid');
+      const liderancaGrid = document.getElementById('relatorioLiderancaGrid');
+      const outrosGrid = document.getElementById('relatorioOutrosGrid');
+      
+      console.log('📊 [RENDER] Metas por categoria:', {
+        trafego: metasPorCategoria.trafego_pago.length,
+        canais: metasPorCategoria.canais.length,
+        crm: metasPorCategoria.crm_automacoes.length,
+        lideranca: metasPorCategoria.lideranca.length,
+        outros: metasPorCategoria.outros.length
+      });
+      
+      console.log('🔍 [RENDER] Primeira meta de tráfego:', metasPorCategoria.trafego_pago[0]);
+      if(metasPorCategoria.trafego_pago[0]){
+        console.log('💰 [VALORES] Primeira meta - Planned:', metasPorCategoria.trafego_pago[0].planned, 'Realized:', metasPorCategoria.trafego_pago[0].realized);
+      }
+      
+      if(trafegoGrid){
+        if(metasPorCategoria.trafego_pago.length > 0){
+          const cards = metasPorCategoria.trafego_pago.map(createMetricCard);
+          console.log('🎴 [RENDER] Cards de tráfego gerados:', cards.length);
+          console.log('🎴 [RENDER] Primeiro card HTML length:', cards[0]?.length);
+          console.log('🔎 [HTML] Primeiro card (primeiros 500 chars):', cards[0]?.substring(0, 500));
+          trafegoGrid.innerHTML = cards.join('');
+        } else {
+          trafegoGrid.innerHTML = '<p style="color: #64748b; padding: 20px; text-align: center;">Nenhuma meta de tráfego pago configurada</p>';
+        }
+      }
+      
+      if(canaisGrid){
+        if(metasPorCategoria.canais.length > 0){
+          canaisGrid.innerHTML = metasPorCategoria.canais.map(createMetricCard).join('');
+        } else {
+          canaisGrid.innerHTML = '<p style="color: #64748b; padding: 20px; text-align: center;">Nenhuma meta de canais configurada</p>';
+        }
+      }
+      
+      if(crmGrid){
+        if(metasPorCategoria.crm_automacoes.length > 0){
+          crmGrid.innerHTML = metasPorCategoria.crm_automacoes.map(createMetricCard).join('');
+        } else {
+          crmGrid.innerHTML = '<p style="color: #64748b; padding: 20px; text-align: center;">Nenhuma meta de CRM configurada</p>';
+        }
+      }
+      
+      if(liderancaGrid){
+        if(metasPorCategoria.lideranca.length > 0){
+          liderancaGrid.innerHTML = metasPorCategoria.lideranca.map(createMetricCard).join('');
+        } else {
+          liderancaGrid.innerHTML = '<p style="color: #64748b; padding: 20px; text-align: center;">Nenhuma meta de liderança configurada</p>';
+        }
+      }
+      
+      console.log('✅ [RENDER] Renderização completa!');
+      
+      if(outrosGrid){
+        if(metasPorCategoria.outros.length > 0){
+          outrosGrid.innerHTML = metasPorCategoria.outros.map(createMetricCard).join('');
+        } else {
+          outrosGrid.innerHTML = '<p style="color: #64748b; padding: 20px; text-align: center;">Nenhuma meta de outros configurada</p>';
+        }
+      }
+      
+      section.style.display = 'block';
     }
     
     // Relatório: Leads Gerados no Mês (com análise completa)
-    async function renderRelatorioLeads(mesISO){
+    async function renderRelatorioLeads(mesISOorPeriodo){
       const leadsSection = document.getElementById('relatorioLeadsSection');
       const leadsSubtitle = document.getElementById('relatorioLeadsSubtitle');
       const leadsCount = document.getElementById('relatorioLeadsCount');
@@ -33093,12 +34118,17 @@ ${contextoReunioes}`;
       const leadsQuestions = document.getElementById('relatorioLeadsQuestions');
       const leadsAIAnalysis = document.getElementById('relatorioLeadsAIAnalysis');
       
-      if(!leadsSection || !mesISO) {
+      if(!leadsSection || !mesISOorPeriodo) {
         if(leadsSection) leadsSection.style.display = 'none';
         return;
       }
       
-      console.log('[renderRelatorioLeads] Iniciando para mês:', mesISO);
+      // Detectar se é período ou mês único
+      const isPeriodo = typeof mesISOorPeriodo === 'object' && mesISOorPeriodo.inicio;
+      const mesInicio = isPeriodo ? mesISOorPeriodo.inicio : mesISOorPeriodo;
+      const mesFim = isPeriodo ? mesISOorPeriodo.fim : mesISOorPeriodo;
+      
+      console.log('[renderRelatorioLeads] Iniciando para período:', mesInicio, 'a', mesFim);
       
       // Buscar leads do Firestore
       let leadsList = [];
@@ -33137,7 +34167,7 @@ ${contextoReunioes}`;
         return;
       }
       
-      // Filtrar leads do mês pela coluna "Quando" (createdAt)
+      // Filtrar leads do período pela coluna "Quando" (createdAt)
       const filteredLeads = leadsList.filter(lead => {
         if(!lead.createdAt) {
           console.log('[renderRelatorioLeads] Lead sem createdAt:', lead.id);
@@ -33166,10 +34196,11 @@ ${contextoReunioes}`;
           const month = String(leadDate.getMonth() + 1).padStart(2, '0');
           const leadMonthISO = `${year}-${month}`;
           
-          const match = leadMonthISO === mesISO;
+          // Verificar se está dentro do período
+          const match = leadMonthISO >= mesInicio && leadMonthISO <= mesFim;
           
           if(match) {
-            console.log('[renderRelatorioLeads] ✅ Lead do mês:', lead.name, 'criado em:', leadDate.toLocaleDateString('pt-BR'));
+            console.log('[renderRelatorioLeads] ✅ Lead do período:', lead.name, 'criado em:', leadDate.toLocaleDateString('pt-BR'));
           }
           
           return match;
@@ -33180,17 +34211,34 @@ ${contextoReunioes}`;
       });
       
       const leadCount = filteredLeads.length;
-      console.log('[renderRelatorioLeads] ✅ Leads filtrados para', mesISO, ':', leadCount);
+      console.log('[renderRelatorioLeads] ✅ Leads filtrados para o período:', leadCount);
       
       // Sempre mostrar seção (mesmo com 0 leads)
       leadsSection.style.display = 'block';
       
+      // Construir texto do período
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      let periodoTexto = '';
+      if(mesInicio === mesFim) {
+        const [ano, mes] = mesInicio.split('-');
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome} ${ano}`;
+      } else {
+        const [anoInicio, mesInicioNum] = mesInicio.split('-');
+        const [anoFim, mesFimNum] = mesFim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicioNum)-1] || mesInicioNum;
+        const mesFimNome = meses[parseInt(mesFimNum)-1] || mesFimNum;
+        
+        if(anoInicio === anoFim) {
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} de ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
+      
       // Atualizar conteúdo
       if(leadsSubtitle) {
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
-        leadsSubtitle.textContent = `Leads captados em ${mesNome} ${ano}`;
+        leadsSubtitle.textContent = `Leads captados em ${periodoTexto}`;
       }
       
       if(leadsCount) {
@@ -33201,10 +34249,7 @@ ${contextoReunioes}`;
       if(leadCount === 0) {
         if(leadsAnalysis) leadsAnalysis.style.display = 'none';
         if(leadsDesc) {
-          const [ano, mes] = mesISO.split('-');
-          const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-          const mesNome = meses[parseInt(mes)-1] || mes;
-          leadsDesc.textContent = `Nenhum lead foi gerado durante ${mesNome} ${ano}.`;
+          leadsDesc.textContent = `Nenhum lead foi gerado durante ${periodoTexto}.`;
         }
         return;
       }
@@ -33287,13 +34332,10 @@ ${contextoReunioes}`;
       // ===== ANÁLISE IA (Insights Automáticos) =====
       if(leadsAIAnalysis) {
         const insights = [];
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
         
         // Insight 1: Volume geral
         const avgLeadsPerDay = (leadCount / 30).toFixed(1);
-        insights.push(`📊 <strong>Volume:</strong> ${leadCount} leads gerados em ${mesNome} ${ano}, com média de ${avgLeadsPerDay} leads/dia.`);
+        insights.push(`📊 <strong>Volume:</strong> ${leadCount} leads gerados em ${periodoTexto}, com média de ${avgLeadsPerDay} leads/dia.`);
         
         // Insight 2: Plataforma dominante
         const platformEntries = Object.entries(platformStats).sort((a, b) => b[1] - a[1]);
@@ -33347,14 +34389,10 @@ ${contextoReunioes}`;
       
       // Descrição final
       if(leadsDesc) {
-        const [ano, mes] = mesISO.split('-');
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const mesNome = meses[parseInt(mes)-1] || mes;
-        
         const platformCount = Object.keys(platformStats).length;
         const sourceCount = Object.keys(sourceStats).length;
         
-        leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${mesNome} ${ano} através de ${platformCount} plataforma${platformCount === 1 ? '' : 's'} e ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} diferente${sourceCount === 1 ? '' : 's'}.`;
+        leadsDesc.textContent = `🎯 Total de ${leadCount} lead${leadCount === 1 ? '' : 's'} gerado${leadCount === 1 ? '' : 's'} durante ${periodoTexto} através de ${platformCount} plataforma${platformCount === 1 ? '' : 's'} e ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} diferente${sourceCount === 1 ? '' : 's'}.`;
       }
       
       // Helper para escapar HTML
@@ -33366,7 +34404,7 @@ ${contextoReunioes}`;
     }
     
     // Relatório: Redes trabalhadas (lista apenas redes com link configurado)
-    function renderRelatorioRedes(mesISO){
+    function renderRelatorioRedes(mesInicioISO, mesFimISO = null){
       // mesISO não altera os links, mas mantém consistência com as demais seções
       if(!relatorioRedesSection || !relatorioRedesGrid) return;
       const items = collectHeaderSocialItems();
@@ -33381,7 +34419,13 @@ ${contextoReunioes}`;
         relatorioRedesSubtitle.textContent = 'Redes conectadas no cliente (clique para acessar)';
       }
       if(relatorioRedesDesc){
-        relatorioRedesDesc.textContent = `📌 ${connected.length} rede${connected.length===1?'':'s'} com link configurado${mesISO?` — relatório de ${mesISO}`:''}. Mostrando apenas o que está ativo e pronto para uso.`;
+        let periodoTexto = '';
+        if(mesInicioISO && mesFimISO && mesInicioISO !== mesFimISO) {
+          periodoTexto = ` — relatório de ${mesInicioISO} a ${mesFimISO}`;
+        } else if(mesInicioISO) {
+          periodoTexto = ` — relatório de ${mesInicioISO}`;
+        }
+        relatorioRedesDesc.textContent = `📌 ${connected.length} rede${connected.length===1?'':'s'} com link configurado${periodoTexto}. Mostrando apenas o que está ativo e pronto para uso.`;
       }
       // Monta os cards (reaproveitando os estilos de macro-social-item)
       const frag = document.createDocumentFragment();
@@ -33432,17 +34476,39 @@ ${contextoReunioes}`;
     }
     
     // Gera resumo em texto de todo o relatório
-    function gerarResumoTexto(mesISO){
-      if(!relatorioResumoTextoSection || !relatorioResumoTextoContent || !mesISO) {
+    function gerarResumoTexto(mesISOorPeriodo){
+      if(!relatorioResumoTextoSection || !relatorioResumoTextoContent) {
         if(relatorioResumoTextoSection) relatorioResumoTextoSection.style.display = 'none';
         return;
       }
       
-      const [ano, mes] = mesISO.split('-');
-      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[parseInt(mes)-1] || mes;
+      // Detectar se é período ou mês único
+      const isPeriodo = typeof mesISOorPeriodo === 'object' && mesISOorPeriodo.inicio;
+      const mesInicio = isPeriodo ? mesISOorPeriodo.inicio : mesISOorPeriodo;
+      const mesFim = isPeriodo ? mesISOorPeriodo.fim : mesISOorPeriodo;
       
-      let resumo = `📊 RESUMO DO RELATÓRIO - ${mesNome.toUpperCase()} ${ano}\n`;
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      if(mesInicio === mesFim){
+        const [ano, mes] = mesInicio.split('-');
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome.toUpperCase()} ${ano}`;
+      } else {
+        const [anoInicio, mesInicioNum] = mesInicio.split('-');
+        const [anoFim, mesFimNum] = mesFim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicioNum)-1] || mesInicioNum;
+        const mesFimNome = meses[parseInt(mesFimNum)-1] || mesFimNum;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome.toUpperCase()} A ${mesFimNome.toUpperCase()} ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome.toUpperCase()}/${anoInicio} A ${mesFimNome.toUpperCase()}/${anoFim}`;
+        }
+      }
+      
+      let resumo = `📊 RESUMO DO RELATÓRIO - ${periodoTexto}\n`;
       resumo += `${'='.repeat(60)}\n\n`;
       
       // Stories
@@ -33475,23 +34541,35 @@ ${contextoReunioes}`;
         resumo += `\n`;
       }
       
-      // Metas
-      const metasAchieved = document.querySelectorAll('#relatorioMetasAchieved .goal-card').length;
-      const metasProgress = document.querySelectorAll('#relatorioMetasProgress .goal-card').length;
-      const metasMissing = document.querySelectorAll('#relatorioMetasMissing .goal-card').length;
-      const metasTotal = metasAchieved + metasProgress + metasMissing;
-      
-      if(metasTotal > 0) {
-        resumo += `📈 METAS DO MÊS\n`;
-        resumo += `   Total de metas: ${metasTotal}\n`;
-        resumo += `   ✅ Atingidas: ${metasAchieved}\n`;
-        resumo += `   🔄 Em andamento: ${metasProgress}\n`;
-        resumo += `   ⚠️ Precisa colocar: ${metasMissing}\n`;
+      // Performance (substituindo a seção de Metas antiga)
+      const performanceSection = document.getElementById('relatorioPerformanceSection');
+      if(performanceSection && performanceSection.style.display !== 'none') {
+        resumo += `📊 PERFORMANCE\n`;
         
-        if(metasTotal > 0) {
-          const percentAtingido = Math.round((metasAchieved / metasTotal) * 100);
-          resumo += `   Taxa de atingimento: ${percentAtingido}%\n`;
+        // Contar métricas de tráfego
+        const trafegoCards = document.querySelectorAll('#relatorioTrafegoGrid .metric-card');
+        if(trafegoCards.length > 0){
+          resumo += `   🚀 Tráfego Pago: ${trafegoCards.length} métricas\n`;
         }
+        
+        // Contar métricas de canais
+        const canaisCards = document.querySelectorAll('#relatorioCanaisGrid .metric-card');
+        if(canaisCards.length > 0){
+          resumo += `   � Canais: ${canaisCards.length} métricas\n`;
+        }
+        
+        // Contar métricas de CRM
+        const crmCards = document.querySelectorAll('#relatorioCRMGrid .metric-card');
+        if(crmCards.length > 0){
+          resumo += `   🎯 CRM e Automações: ${crmCards.length} métricas\n`;
+        }
+        
+        // Contar métricas de liderança
+        const liderancaCards = document.querySelectorAll('#relatorioLiderancaGrid .metric-card');
+        if(liderancaCards.length > 0){
+          resumo += `   👥 Liderança: ${liderancaCards.length} métricas\n`;
+        }
+        
         resumo += `\n`;
       }
       
@@ -33645,52 +34723,77 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
      * Gera a análise estratégica completa com IA
      * Analisa os dados do relatório e gera insights profissionais
      */
-    function gerarAnaliseEstrategicaIA(mesISO){
-      if(!relatorioAnaliseIASection || !mesISO) {
+    function gerarAnaliseEstrategicaIA(mesISOorPeriodo){
+      if(!relatorioAnaliseIASection) {
         if(relatorioAnaliseIASection) relatorioAnaliseIASection.style.display = 'none';
         return;
       }
       
-      const [ano, mes] = mesISO.split('-');
+      // Detectar se é período ou mês único
+      const isPeriodo = typeof mesISOorPeriodo === 'object' && mesISOorPeriodo.inicio;
+      const mesInicio = isPeriodo ? mesISOorPeriodo.inicio : mesISOorPeriodo;
+      const mesFim = isPeriodo ? mesISOorPeriodo.fim : mesISOorPeriodo;
+      
       const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesNome = meses[parseInt(mes)-1] || mes;
+      
+      // Construir texto do período
+      let periodoTexto = '';
+      let ano = '';
+      if(mesInicio === mesFim){
+        const [a, mes] = mesInicio.split('-');
+        ano = a;
+        const mesNome = meses[parseInt(mes)-1] || mes;
+        periodoTexto = `${mesNome} ${ano}`;
+      } else {
+        const [anoInicio, mesInicioNum] = mesInicio.split('-');
+        const [anoFim, mesFimNum] = mesFim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicioNum)-1] || mesInicioNum;
+        const mesFimNome = meses[parseInt(mesFimNum)-1] || mesFimNum;
+        ano = anoInicio; // Usa o ano inicial para referência
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} ${anoInicio}`;
+        } else {
+          periodoTexto = `${mesInicioNome}/${anoInicio} a ${mesFimNome}/${anoFim}`;
+        }
+      }
       
       // Coletar dados do relatório atual
-      const dados = coletarDadosRelatorio(mesISO);
+      const dados = coletarDadosRelatorio(mesISOorPeriodo);
       
       // Gerar contexto do negócio
       if(relatorioIAContexto) {
-        relatorioIAContexto.innerHTML = gerarContextoNegocio(dados, mesNome, ano);
+        relatorioIAContexto.innerHTML = gerarContextoNegocio(dados, periodoTexto, ano);
       }
       
       // Gerar diagnóstico de performance
       if(relatorioIADiagnostico) {
-        relatorioIADiagnostico.innerHTML = gerarDiagnosticoPerformance(dados, mesNome);
+        relatorioIADiagnostico.innerHTML = gerarDiagnosticoPerformance(dados, periodoTexto);
       }
       
       // Gerar pontos fortes
       if(relatorioIAPontosFortes) {
-        relatorioIAPontosFortes.innerHTML = gerarPontosFortes(dados, mesNome);
+        relatorioIAPontosFortes.innerHTML = gerarPontosFortes(dados, periodoTexto);
       }
       
       // Gerar oportunidades de melhoria
       if(relatorioIAOportunidades) {
-        relatorioIAOportunidades.innerHTML = gerarOportunidades(dados, mesNome);
+        relatorioIAOportunidades.innerHTML = gerarOportunidades(dados, periodoTexto);
       }
       
       // Gerar recomendações estratégicas
       if(relatorioIARecomendacoes) {
-        relatorioIARecomendacoes.innerHTML = gerarRecomendacoes(dados, mesNome, ano);
+        relatorioIARecomendacoes.innerHTML = gerarRecomendacoes(dados, periodoTexto, ano);
       }
       
       // Gerar prompt copiável para ChatGPT/Claude
       if(relatorioIAPrompt) {
-        relatorioIAPrompt.textContent = gerarPromptAvancado(dados, mesNome, ano);
+        relatorioIAPrompt.textContent = gerarPromptAvancado(dados, periodoTexto, ano);
       }
       
       // Atualizar subtítulo e descrição
       if(relatorioAnaliseIASubtitle) {
-        relatorioAnaliseIASubtitle.textContent = `Insights profissionais baseados nos dados de ${mesNome} ${ano}`;
+        relatorioAnaliseIASubtitle.textContent = `Insights profissionais baseados nos dados de ${periodoTexto}`;
       }
       
       if(relatorioAnaliseIADesc) {
@@ -33703,7 +34806,7 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
     /**
      * Coleta todos os dados do relatório atual do DOM
      */
-    function coletarDadosRelatorio(mesISO){
+    function coletarDadosRelatorio(mesISOorPeriodo){
       // Stories
       const storiesCount = document.querySelectorAll('#relatorioStoriesGrid .relatorio-story-item').length;
       const storiesAprovados = document.querySelectorAll('#relatorioStoriesGrid .relatorio-story-item.aprovado').length;
@@ -33718,11 +34821,12 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
       const goalsTodo = document.querySelectorAll('#relatorioGoalsTodo .goal-card').length;
       const goalsTotal = goalsDone + goalsProgress + goalsTodo;
       
-      // Metas
-      const metasAchieved = document.querySelectorAll('#relatorioMetasAchieved .goal-card').length;
-      const metasProgress = document.querySelectorAll('#relatorioMetasProgress .goal-card').length;
-      const metasMissing = document.querySelectorAll('#relatorioMetasMissing .goal-card').length;
-      const metasTotal = metasAchieved + metasProgress + metasMissing;
+      // Performance (substituindo Metas)
+      const trafegoMetricsCount = document.querySelectorAll('#relatorioTrafegoGrid .metric-card').length;
+      const canaisMetricsCount = document.querySelectorAll('#relatorioCanaisGrid .metric-card').length;
+      const crmMetricsCount = document.querySelectorAll('#relatorioCRMGrid .metric-card').length;
+      const liderancaMetricsCount = document.querySelectorAll('#relatorioLiderancaGrid .metric-card').length;
+      const performanceTotal = trafegoMetricsCount + canaisMetricsCount + crmMetricsCount + liderancaMetricsCount;
       
       // Leads
       const leadsCountEl = document.getElementById('relatorioLeadsCount');
@@ -33752,7 +34856,7 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
         stories: { total: storiesCount, aprovados: storiesAprovados },
         posts: { total: postsCount, aprovados: postsAprovados },
         goals: { done: goalsDone, progress: goalsProgress, todo: goalsTodo, total: goalsTotal },
-        metas: { achieved: metasAchieved, progress: metasProgress, missing: metasMissing, total: metasTotal },
+        performance: { trafego: trafegoMetricsCount, canais: canaisMetricsCount, crm: crmMetricsCount, lideranca: liderancaMetricsCount, total: performanceTotal },
         leads: { count: leadsCount, platforms: platformsCount, sources: sourcesCount, questions: questionsCount },
         redes: redesCount
       };
@@ -33764,11 +34868,11 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
     function gerarContextoNegocio(dados, mesNome, ano){
       const totalConteudo = dados.stories.total + dados.posts.total;
       const taxaObjetivos = dados.goals.total > 0 ? Math.round((dados.goals.done / dados.goals.total) * 100) : 0;
-      const taxaMetas = dados.metas.total > 0 ? Math.round((dados.metas.achieved / dados.metas.total) * 100) : 0;
+      const taxaPerformance = dados.performance.total > 0 ? 100 : 0; // Simplificado - todas métricas presentes
       
       let nivel = 'iniciante';
-      if(totalConteudo > 30 && taxaObjetivos > 60 && taxaMetas > 50) nivel = 'avançado';
-      else if(totalConteudo > 15 || taxaObjetivos > 40 || taxaMetas > 30) nivel = 'intermediário';
+      if(totalConteudo > 30 && taxaObjetivos > 60 && taxaPerformance > 50) nivel = 'avançado';
+      else if(totalConteudo > 15 || taxaObjetivos > 40 || taxaPerformance > 30) nivel = 'intermediário';
       
       let contexto = `<strong>${dados.clientName}</strong> está operando em nível <strong>${nivel}</strong> de maturidade em marketing digital. `;
       
@@ -33837,15 +34941,15 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
         }
       }
       
-      // Análise de metas
-      if(dados.metas.total > 0) {
-        const taxaMetas = Math.round((dados.metas.achieved / dados.metas.total) * 100);
-        let statusMetas = taxaMetas >= 70 ? '🟢' : taxaMetas >= 40 ? '🟡' : '🔴';
-        diagnosticos.push(`${statusMetas} <strong>Metas:</strong> ${taxaMetas}% de atingimento (${dados.metas.achieved}/${dados.metas.total}). ${taxaMetas >= 70 ? 'Performance acima da média!' : taxaMetas >= 40 ? 'Desempenho mediano. Revise as estratégias.' : 'Desempenho abaixo do esperado. Reavaliação urgente necessária.'}`);
+      // Análise de Performance (substituindo metas)
+      if(dados.performance.total > 0) {
+        const metricsBreakdown = [];
+        if(dados.performance.trafego > 0) metricsBreakdown.push(`${dados.performance.trafego} de tráfego`);
+        if(dados.performance.canais > 0) metricsBreakdown.push(`${dados.performance.canais} de canais`);
+        if(dados.performance.crm > 0) metricsBreakdown.push(`${dados.performance.crm} de CRM`);
+        if(dados.performance.lideranca > 0) metricsBreakdown.push(`${dados.performance.lideranca} de liderança`);
         
-        if(dados.metas.missing > 0) {
-          diagnosticos.push(`⚠️ <strong>Atenção:</strong> ${dados.metas.missing} meta${dados.metas.missing > 1 ? 's' : ''} sem dados preenchidos. Complete para análise precisa.`);
-        }
+        diagnosticos.push(`📊 <strong>Métricas de Performance:</strong> ${dados.performance.total} métricas monitoradas (${metricsBreakdown.join(', ')}). Acompanhamento completo ativo!`);
       }
       
       // Análise de leads
@@ -33875,7 +34979,6 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
       
       const totalConteudo = dados.stories.total + dados.posts.total;
       const taxaObjetivos = dados.goals.total > 0 ? (dados.goals.done / dados.goals.total) * 100 : 0;
-      const taxaMetas = dados.metas.total > 0 ? (dados.metas.achieved / dados.metas.total) * 100 : 0;
       
       // Pontos fortes baseados em performance
       if(totalConteudo >= 20) {
@@ -33892,8 +34995,8 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
         pontosFortes.push(`✅ <strong>Boa Execução:</strong> ${Math.round(taxaObjetivos)}% dos objetivos concluídos. Acima da média de mercado.`);
       }
       
-      if(taxaMetas >= 70) {
-        pontosFortes.push(`✅ <strong>Metas Superadas:</strong> ${Math.round(taxaMetas)}% das metas atingidas. Performance acima do esperado!`);
+      if(dados.performance.total >= 10) {
+        pontosFortes.push(`✅ <strong>Monitoramento Completo:</strong> ${dados.performance.total} métricas de performance acompanhadas. Gestão orientada por dados!`);
       }
       
       if(dados.leads.count >= 30) {
@@ -33927,7 +35030,6 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
       
       const totalConteudo = dados.stories.total + dados.posts.total;
       const taxaObjetivos = dados.goals.total > 0 ? (dados.goals.done / dados.goals.total) * 100 : 0;
-      const taxaMetas = dados.metas.total > 0 ? (dados.metas.achieved / dados.metas.total) * 100 : 0;
       
       // Oportunidades baseadas em gaps
       if(dados.stories.total < 60) {
@@ -33948,12 +35050,8 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
         oportunidades.push(`💡 <strong>Foco na Conclusão:</strong> ${dados.goals.progress} objetivos em andamento. Priorize finalizar antes de iniciar novos.`);
       }
       
-      if(dados.metas.missing > 0) {
-        oportunidades.push(`💡 <strong>Complete os Dados:</strong> ${dados.metas.missing} meta${dados.metas.missing > 1 ? 's' : ''} sem valores realizados. Dados completos permitem análises precisas.`);
-      }
-      
-      if(taxaMetas < 50 && dados.metas.total > 0) {
-        oportunidades.push(`💡 <strong>Revisar Metas:</strong> Apenas ${Math.round(taxaMetas)}% atingidas. Considere ajustar metas para níveis mais realistas ou intensificar esforços.`);
+      if(dados.performance.total < 10) {
+        oportunidades.push(`💡 <strong>Ampliar Monitoramento:</strong> Configure mais métricas de performance para ter visibilidade completa dos resultados.`);
       }
       
       if(dados.leads.count < 20 && dados.leads.count > 0) {
@@ -33987,7 +35085,6 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
       
       const totalConteudo = dados.stories.total + dados.posts.total;
       const taxaObjetivos = dados.goals.total > 0 ? (dados.goals.done / dados.goals.total) * 100 : 0;
-      const taxaMetas = dados.metas.total > 0 ? (dados.metas.achieved / dados.metas.total) * 100 : 0;
       
       // Calcular próximo mês
       const [anoNum, mesNum] = dados.mesISO.split('-').map(Number);
@@ -34045,7 +35142,6 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
     function gerarPromptAvancado(dados, mesNome, ano){
       const totalConteudo = dados.stories.total + dados.posts.total;
       const taxaObjetivos = dados.goals.total > 0 ? Math.round((dados.goals.done / dados.goals.total) * 100) : 0;
-      const taxaMetas = dados.metas.total > 0 ? Math.round((dados.metas.achieved / dados.metas.total) * 100) : 0;
       
       return `${MEDIAGROWTH_BUSINESS_CONTEXT}
 
@@ -34066,11 +35162,12 @@ A MediaGrowth é uma agência/plataforma de gestão de marketing digital que ofe
 - Em andamento: ${dados.goals.progress}
 - Não iniciados: ${dados.goals.todo}
 
-**METAS QUANTITATIVAS:**
-- Total de metas: ${dados.metas.total}
-- Atingidas: ${dados.metas.achieved} (${taxaMetas}%)
-- Em progresso: ${dados.metas.progress}
-- Sem dados: ${dados.metas.missing}
+**MÉTRICAS DE PERFORMANCE:**
+- Total de métricas monitoradas: ${dados.performance.total}
+- Tráfego Pago: ${dados.performance.trafego} métricas
+- Canais: ${dados.performance.canais} métricas
+- CRM e Automações: ${dados.performance.crm} métricas
+- Liderança: ${dados.performance.lideranca} métricas
 
 **LEADS CAPTADOS:**
 - Total de leads: ${dados.leads.count}
@@ -62244,177 +63341,309 @@ FORMATO PADRÃO:
       try{ refreshMacroInsights(); }catch(_){ }
     }
 
-    /* ========= metas ========= */
+    /* ========= METAS - NOVA ESTRUTURA SIMPLIFICADA ========= */
     let METAS = [];
-    let CURRENT_METAS_YEAR = new Date().getFullYear(); // Ano atual selecionado
-    let META_PANELS = Array(6).fill(null);
-    const META_MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-    const META_MONTH_LABELS = { jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' };
-    const METAS_LS_KEY = 'mg_metas_cache';
+    let CURRENT_METAS_YEAR = new Date().getFullYear();
     let metasFormUnsub = null;
     let metasFormAppliedVersions = {};
-    const META_TAG_OPTIONS = ['investimento_publicidade','faturamento_trafego','roas_publicidade','taxa_mql','leads_aquecidos','cac','seguidores_tracao','comentarios_gbp','negocios_fechados','valor_contratos_mes','orcamentos_recorrentes','negocios_fechados_recorrentes','taxa_conversao_recorrentes','leads_novos','orcamentos_leads_novos','negocios_fechados_leads_novos','taxa_conversao_leads_novos','valor_orcamentos_perdidos','leads_gerados'];
+    let metasSaveTimeout = null; // ✅ Debounce para salvamento
+    const META_MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const META_MONTH_LABELS = { 
+      jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', 
+      mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', 
+      set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' 
+    };
+    const METAS_LS_KEY = 'mg_metas_cache';
+
+    // ✅ FUNÇÃO AUXILIAR PARA CONVERTER HEX PARA RGBA
+    function hexToRgba(hex, alpha = 1) {
+      // Remove # se presente
+      hex = hex.replace('#', '');
+      
+      // Converte para RGB
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
 
     function createEmptyMonths(){
       const o = {};
-      META_MONTHS.forEach(m => o[m] = { p:'', r:'' });
+      META_MONTHS.forEach(m => o[m] = '');
       return o;
-    }
-
-    function createMeta(){
-      return {
-        id: uuid(),
-        pos: 0,
-        setor: 'comercial',
-        descricao: '',
-        tag: '',
-        unidade: '%',
-        direcao: 'aumentar',
-        modo: 'total',
-        ativo: true,
-        meses: createEmptyMonths()
-      };
-    }
-
-    function nextMetaPos(){
-      return METAS.reduce((max,m)=>Math.max(max, m.pos||0),0) + 1;
     }
 
     function createDefaultMetas(){
       const defs = [
-        {setor:'marketing', descricao:'Investimento em publicidade', unidade:'BRL', direcao:'aumentar', tag:'investimento_publicidade'},
-        {setor:'marketing', descricao:'Faturamento com origem no tráfego', unidade:'BRL', direcao:'aumentar', tag:'faturamento_trafego'},
-        {setor:'marketing', descricao:'Número de leads gerados', unidade:'BRL', direcao:'aumentar', tag:'faturamento_trafego'},
-        {setor:'marketing', descricao:'ROAS (Retorno do Investimento em Publicidade)', unidade:'%', direcao:'aumentar', tag:'roas_publicidade'},
-        {setor:'marketing', descricao:'Taxa de leads qualificados (MQL)', unidade:'%', direcao:'aumentar', tag:'taxa_mql'},
-        {setor:'marketing', descricao:'CPL (Custo por Lead)', unidade:'BRL', direcao:'diminuir'},
-        {setor:'marketing', descricao:'CAC (Custo de Aquisição de Cliente)', unidade:'BRL', direcao:'diminuir', tag:'cac'},
-        {setor:'marketing', descricao:'Nº de leads aquecidos (nutrição)', unidade:'numero', direcao:'aumentar', tag:'leads_aquecidos'},
-        {setor:'marketing', descricao:'Nº de seguidores (canais de tração)', unidade:'numero', direcao:'aumentar', tag:'seguidores_tracao'},
-        {setor:'marketing', descricao:'Comentários positivos no GBP', unidade:'numero', direcao:'aumentar', tag:'comentarios_gbp'},
-        {setor:'comercial', descricao:'Faturamento total das Vendas', unidade:'BRL', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Negócios fechados de clientes recorrentes', unidade:'numero', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Taxa de conversão clientes recorrentes', unidade:'%', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Leads novos', unidade:'numero', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Orçamentos leads novos', unidade:'numero', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Negócios fechados leads novos', unidade:'numero', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Número de negócios fechados', unidade:'numero', direcao:'aumentar', fixed:true},
-        {setor:'comercial', descricao:'Taxa de conversão leads novos', unidade:'%', direcao:'aumentar'},
-        {setor:'comercial', descricao:'Valor de orçamentos perdidos', unidade:'BRL', direcao:'diminuir'}
+        // TRÁFEGO PAGO (11 metas) - ✅ Formatos corretos aplicados
+        {categoria:'trafego_pago', descricao:'Investimento', unidade:'BRL'},
+        {categoria:'trafego_pago', descricao:'Impressões', unidade:'numero'},
+        {categoria:'trafego_pago', descricao:'CTR médio', unidade:'%'},
+        {categoria:'trafego_pago', descricao:'Leads', unidade:'numero'},
+        {categoria:'trafego_pago', descricao:'CPL', unidade:'BRL'},
+        {categoria:'trafego_pago', descricao:'Leads qualificados', unidade:'numero'},
+        {categoria:'trafego_pago', descricao:'Vendas', unidade:'numero'},
+        {categoria:'trafego_pago', descricao:'Faturamento no tráfego', unidade:'BRL'},
+        {categoria:'trafego_pago', descricao:'Número de testes realizados', unidade:'numero'},
+        {categoria:'trafego_pago', descricao:'ROAS', unidade:'multiplicador'},
+        {categoria:'trafego_pago', descricao:'Ticket médio do tráfego', unidade:'BRL'},
+        
+        // CANAIS (17 metas) - ✅ Formatos corretos aplicados
+        {categoria:'canais', descricao:'Visualizações no YouTube', unidade:'numero'},
+        {categoria:'canais', descricao:'Visualizações no Facebook', unidade:'numero'},
+        {categoria:'canais', descricao:'Visualizações no TikTok', unidade:'numero'},
+        {categoria:'canais', descricao:'Visualizações no Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Impressões no LinkedIn', unidade:'numero'},
+        {categoria:'canais', descricao:'Visualizações no Pinterest', unidade:'numero'},
+        {categoria:'canais', descricao:'Interações Google Business Profile', unidade:'numero'},
+        {categoria:'canais', descricao:'Taxa de engajamento no Instagram', unidade:'%'},
+        {categoria:'canais', descricao:'Quantidade reviews no Google', unidade:'numero'},
+        {categoria:'canais', descricao:'Compartilhamentos', unidade:'numero'},
+        {categoria:'canais', descricao:'Salvamentos no Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Seguidores no Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Leads orgânicos canais', unidade:'numero'},
+        {categoria:'canais', descricao:'Mensagens Direct Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Cliques em "ligar agora" no Google', unidade:'numero'},
+        {categoria:'canais', descricao:'Solicitações de rotas', unidade:'numero'},
+        {categoria:'canais', descricao:'Views totais dos canais', unidade:'numero'},
+        
+        // CRM E AUTOMAÇÕES (12 metas) - ✅ Formatos corretos aplicados
+        {categoria:'crm_automacoes', descricao:'Leads recebidos no CRM', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Número de conversas', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Conversas geradas por automação', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Oportunidades ganhas', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Leads qualificados SQL', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Follow-ups realizados', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Leads reativados', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Avaliações respondidas por IA', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Tempo médio de atendimento', unidade:'dias'},
+        {categoria:'crm_automacoes', descricao:'Oportunidades criadas', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Automações disparadas', unidade:'numero'},
+        {categoria:'crm_automacoes', descricao:'Automações ativas', unidade:'numero'},
+        
+        // OUTROS (5 metas) - ✅ Formatos corretos aplicados
+        {categoria:'outros', descricao:'Blogs publicados', unidade:'numero'},
+        {categoria:'outros', descricao:'Cadastro em diretórios', unidade:'numero'},
+        {categoria:'outros', descricao:'Novas fotos Google Business Profile', unidade:'numero'},
+        {categoria:'outros', descricao:'Número de comentários respondidos', unidade:'numero'},
+        {categoria:'outros', descricao:'Número de posts no Google Business Profile', unidade:'numero'},
+        
+        // LIDERANÇA (1 meta) - ✅ Formato correto aplicado
+        {categoria:'lideranca', descricao:'Views no site', unidade:'numero'}
       ];
-      return defs.map((d,i) => ({...createMeta(), pos:i+1, ...d}));
-    }
-
-    function calcRoasMeta(){
-      const active = Array.isArray(METAS) ? METAS.filter(m => m && m.ativo !== false) : [];
-      const inv = active.find(m => m.tag === 'investimento_publicidade');
-      const fat = active.find(m => m.tag === 'faturamento_trafego');
-      const roas = active.find(m => m.tag === 'roas_publicidade');
-      if(!inv || !fat || !roas) return;
-      roas.unidade = '%';
-      META_MONTHS.forEach(m => {
-        const invR = parseFloat(inv.meses?.[m]?.r) || 0;
-        const fatR = parseFloat(fat.meses?.[m]?.r) || 0;
-        if(invR){
-          const ratio = fatR / invR;
-          roas.meses[m].r = parseFloat(ratio.toFixed(2));
-        } else {
-          roas.meses[m].r = 0;
-        }
-      });
+      
+      return defs.map((d,i) => ({
+        id: uuid(),
+        pos: i+1,
+        categoria: d.categoria,
+        descricao: d.descricao,
+        unidade: d.unidade,
+        meses: createEmptyMonths()
+      }));
     }
 
     function loadMetasFromUserData(){
-      // Carregar metas do ano selecionado
       const yearKey = `metas_${CURRENT_METAS_YEAR}`;
       
-      if(!USER_DATA[yearKey] || !Array.isArray(USER_DATA[yearKey])){
+      // ✅ SEMPRE FORÇAR CRIAÇÃO DAS 46 METAS PADRÃO
+      // Isso garante que todas as contas tenham a estrutura completa
+      const defaultMetas = createDefaultMetas();
+      
+      // Tentar carregar do USER_DATA ou localStorage
+      let savedMetas = null;
+      if(USER_DATA[yearKey] && Array.isArray(USER_DATA[yearKey])){
+        savedMetas = USER_DATA[yearKey];
+      } else {
         try{
           const cached = JSON.parse(localStorage.getItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`) || '[]');
           if(Array.isArray(cached) && cached.length){
-            USER_DATA[yearKey] = cached;
+            savedMetas = cached;
           }
         }catch(_){ /* ignore */ }
       }
       
-      METAS = Array.isArray(USER_DATA[yearKey]) ? USER_DATA[yearKey] : [];
-      let changed = false;
-      let maxPos = METAS.reduce((max,m)=>Math.max(max, m.pos||0),0);
-      METAS = METAS.map(m => {
-        const meta = { ...createMeta(), ...m, meses: { ...createEmptyMonths(), ...(m.meses||{}) } };
-        if(meta.ativo === undefined){ meta.ativo = true; }
-        if(!meta.pos || meta.pos <= 0){ meta.pos = ++maxPos; changed = true; }
-        return meta;
-      });
-      const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-      if(METAS.length === 0){
-        METAS = createDefaultMetas();
-        changed = true;
+      // ✅ SE TIVER DADOS SALVOS, MESCLAR COM OS PADRÕES (preservar valores preenchidos)
+      if(savedMetas && savedMetas.length > 0){
+        // ✅ MIGRAÇÃO: Renomear "Tempo médio por etapa" para "Tempo médio de atendimento"
+        savedMetas = savedMetas.map(meta => {
+          if(meta.descricao === 'Tempo médio por etapa' && meta.categoria === 'crm_automacoes'){
+            console.log('🔄 [MIGRAÇÃO] Renomeando "Tempo médio por etapa" → "Tempo médio de atendimento"');
+            return {
+              ...meta,
+              descricao: 'Tempo médio de atendimento'
+            };
+          }
+          return meta;
+        });
+        
+        METAS = defaultMetas.map(defaultMeta => {
+          // Procurar meta salva correspondente pela DESCRIÇÃO e CATEGORIA
+          const saved = savedMetas.find(s => 
+            s.descricao === defaultMeta.descricao && 
+            s.categoria === defaultMeta.categoria
+          );
+          if(saved){
+            // ✅ FAZER CÓPIA PROFUNDA DOS MESES PARA EVITAR REFERÊNCIAS COMPARTILHADAS
+            const mesesCopy = {};
+            META_MONTHS.forEach(month => {
+              mesesCopy[month] = saved.meses && saved.meses[month] ? saved.meses[month] : '';
+            });
+            
+            // Preservar valores salvos, mas garantir estrutura correta
+            return {
+              ...defaultMeta,
+              id: saved.id || defaultMeta.id, // Preservar ID salvo
+              pos: saved.pos || defaultMeta.pos,
+              meses: mesesCopy
+            };
+          }
+          return defaultMeta;
+        });
+      } else {
+        // ✅ SEM DADOS SALVOS = USAR 46 METAS PADRÃO
+        METAS = defaultMetas;
       }
+      
+      // ✅ GARANTIR ESTRUTURA CORRETA E CRIAR NOVOS OBJETOS (evitar referências)
       METAS = METAS.map(m => {
-        // Remove qualquer bloqueio automático - todas as metas são editáveis
-        if(m.fixed){ 
-          m.fixed = false; 
-          changed = true; 
+        const newMeses = {};
+        
+        if(!m.meses || typeof m.meses !== 'object'){
+          // Criar meses vazios
+          META_MONTHS.forEach(month => {
+            newMeses[month] = '';
+          });
+        } else {
+          // Copiar valores existentes (converter formato antigo se necessário)
+          META_MONTHS.forEach(month => {
+            if(typeof m.meses[month] === 'object'){
+              // Formato antigo {r: 'valor'}
+              newMeses[month] = m.meses[month].r || '';
+            } else if(m.meses[month] !== undefined && m.meses[month] !== null){
+              // Formato correto: string ou número
+              newMeses[month] = String(m.meses[month]);
+            } else {
+              // Vazio
+              newMeses[month] = '';
+            }
+          });
         }
-        return m;
+        
+        // ✅ RETORNAR NOVO OBJETO (não modificar o original)
+        return {
+          id: m.id,
+          pos: m.pos,
+          categoria: m.categoria,
+          descricao: m.descricao,
+          unidade: m.unidade,
+          meses: newMeses
+        };
       });
-      calcRoasMeta();
-      try{ localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); }catch(_){ }
-      if(changed){
-        persistMetas();
+      
+      // ✅ SALVAR AS 46 METAS COMPLETAS
+      try{ 
+        localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); 
+      }catch(_){ }
+      
+      console.log(`✅ Metas carregadas para ${CURRENT_METAS_YEAR}: ${METAS.length} metas`);
+      
+      // ✅ LOG DETALHADO: Mostrar primeiras 3 metas com seus valores de janeiro
+      if(METAS.length > 0) {
+        console.log('🔍 [LOAD] Amostra das primeiras 3 metas:');
+        METAS.slice(0, 3).forEach((m, i) => {
+          console.log(`  ${i+1}. ${m.descricao} - jan: "${m.meses.jan}", fev: "${m.meses.fev}"`);
+        });
       }
-      try{ refreshMacroInsights(); }catch(_){ }
+    }
+
+    // ✅ FUNÇÃO DE SALVAMENTO COM DEBOUNCE
+    function debouncedPersistMetas() {
+      // Limpar timeout anterior
+      if(metasSaveTimeout) {
+        clearTimeout(metasSaveTimeout);
+      }
+      
+      // ✅ FAZER CÓPIA PROFUNDA PARA EVITAR REFERÊNCIAS
+      const metasCopy = JSON.parse(JSON.stringify(METAS));
+      
+      // Salvar no localStorage imediatamente
+      try {
+        localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(metasCopy));
+        console.log(`💾 localStorage: ${metasCopy.length} metas salvas`);
+        
+        // ✅ LOG: Mostrar primeiras 3 metas com valores de jan e fev
+        console.log('🔍 [SAVE] Amostra das primeiras 3 metas salvas:');
+        metasCopy.slice(0, 3).forEach((m, i) => {
+          console.log(`  ${i+1}. ${m.descricao} - jan: "${m.meses.jan}", fev: "${m.meses.fev}"`);
+        });
+      } catch(e) {
+        console.error('❌ Erro ao salvar no localStorage:', e);
+      }
+      
+      // Agendar salvamento no Firebase após 1 segundo
+      metasSaveTimeout = setTimeout(async () => {
+        await persistMetas();
+        console.log(`☁️ Firebase: ${METAS.length} metas salvas`);
+      }, 1000);
     }
 
     async function persistMetas(){
-      calcRoasMeta();
       const yearKey = `metas_${CURRENT_METAS_YEAR}`;
+      
+      // ✅ GARANTIR QUE SEMPRE TEMOS 46 METAS ANTES DE SALVAR
+      if(!METAS || METAS.length < 46){
+        console.warn(`⚠️ Apenas ${METAS?.length || 0} metas encontradas, regenerando 46 metas padrão...`);
+        const defaultMetas = createDefaultMetas();
+        if(METAS && METAS.length > 0){
+          // Mesclar valores existentes
+          METAS = defaultMetas.map(dm => {
+            const existing = METAS.find(m => m.descricao === dm.descricao && m.categoria === dm.categoria);
+            return existing ? {...dm, meses: existing.meses} : dm;
+          });
+        } else {
+          METAS = defaultMetas;
+        }
+      }
+      
       USER_DATA[yearKey] = METAS;
-      try{ localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); }catch(_){ }
-      const uid = auth.currentUser?.uid;
-      if(uid){
-        // Calcular tamanho dos dados antes de salvar
+      
+      try{ 
+        localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); 
+      }catch(_){ }
+      
+      // ✅ DETERMINAR UID CORRETO (usuário ou cliente)
+      let targetUid = null;
+      
+      if (Array.isArray(clientDocPathParts) && clientDocPathParts.length >= 2) {
+        // Admin visualizando cliente: salvar no documento do CLIENTE
+        targetUid = clientDocPathParts[1]; // ['usuarios', 'uid-do-cliente', ...]
+        console.log(`👤 [persistMetas] Salvando no cliente: ${targetUid}`);
+      } else {
+        // Usuário normal: salvar no próprio documento
+        targetUid = auth.currentUser?.uid;
+        console.log(`👤 [persistMetas] Salvando no usuário: ${targetUid}`);
+      }
+      
+      if(targetUid){
         const dataToSave = { [yearKey]: METAS };
         const dataStr = JSON.stringify(dataToSave);
         const dataSize = new Blob([dataStr]).size;
         
         console.log(`📊 [persistMetas] Salvando metas do ano ${CURRENT_METAS_YEAR}`);
-        console.log(`📦 [persistMetas] Tamanho dos dados: ${(dataSize / 1024).toFixed(2)} KB`);
+        console.log(`📦 [persistMetas] Tamanho: ${(dataSize / 1024).toFixed(2)} KB`);
         console.log(`📈 [persistMetas] Total de metas: ${METAS.length}`);
         
-        // Usar função de salvamento protegido
-        console.log('💾 [persistMetas] Salvando com proteção contra 1MB...');
-        const result = await safeWriteUserDoc(dataToSave);
-        
-        if(!result.success) {
-          console.error('❌ [persistMetas] Falha ao salvar metas:', result.error);
-          
-          if(result.needsCleanup) {
-            mgToast('🚨 Documento muito grande! Limpeza automática em andamento...', 'warning', 5000);
-          }
-          
-          if(result.criticalFailure) {
-            console.error('🆘 [persistMetas] FALHA CRÍTICA! Sistema não conseguiu limpar automaticamente.');
-            mgToast('🆘 Erro crítico ao salvar metas! Execute: await reduzirDocumentoUsuario()', 'error', 10000);
-          }
-          
-          throw new Error(result.error || 'Falha ao salvar metas');
-        }
-        
-        if(result.autoCleanup || result.emergencyCleanup) {
-          console.log('🧹 [persistMetas] Limpeza automática foi executada durante o salvamento');
-          mgToast('🧹 Limpeza automática realizada ao salvar metas', 'info', 3000);
-        }
-        
-        console.log(`✅ [persistMetas] Metas salvas com sucesso`);
-      }
-      if (typeof renderCAC === 'function' && renderCAC.refresh) {
         try {
-          renderCAC.refresh();
-        } catch (e) { /* noop */ }
+          // ✅ SALVAR NO DOCUMENTO CORRETO (cliente ou usuário)
+          const userDocRef = doc(db, 'usuarios', targetUid);
+          await setDoc(userDocRef, dataToSave, { merge: true });
+          console.log('✅ [persistMetas] Metas salvas com sucesso no Firebase');
+        } catch(err) {
+          console.error('❌ [persistMetas] Erro ao salvar no Firebase:', err);
+          mgToast('❌ Erro ao salvar metas no Firebase', 'error', 3000);
+        }
       }
-      try{ refreshMacroInsights(); }catch(_){ }
     }
 
     function loadMetaPanelsFromUserData(){
@@ -62423,9 +63652,13 @@ FORMATO PADRÃO:
     }
 
     async function persistMetaPanels(){
-      const uid = auth.currentUser?.uid;
-      if(!uid) return;
-      await setDoc(doc(db,'usuarios',uid), { metaPanels: META_PANELS }, { merge:true });
+      try {
+        const uid = auth.currentUser?.uid;
+        if(!uid) return;
+        await setDoc(doc(db,'usuarios',uid), { metaPanels: META_PANELS }, { merge:true });
+      } catch(err) {
+        console.error('❌ [persistMetaPanels] Erro:', err);
+      }
     }
 
     function normalizeClientKey(key){
@@ -62727,10 +63960,19 @@ FORMATO PADRÃO:
 
     function formatMetaNumber(val, unidade){
       if(!isFinite(val)) val = 0;
+      
+      // Formatar com separador de milhares para BRL e USD
       if(unidade === 'BRL' || unidade === 'USD'){
         return val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
       }
-      return val.toFixed(2);
+      
+      // Formatar porcentagem com 2 casas decimais
+      if(unidade === '%'){
+        return val.toFixed(2);
+      }
+      
+      // Para outros (número, visualizações, etc) - separador de milhares sem decimais
+      return val.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:2});
     }
 
     function formatMetaDisplay(val, unidade){
@@ -63040,26 +64282,67 @@ FORMATO PADRÃO:
       };
     }
 
+    // ✅ FUNÇÃO PARA FORÇAR RESET COMPLETO DAS 46 METAS
+    async function forceResetMetas(){
+      if(!confirm(`⚠️ Isso vai RESETAR todas as metas de ${CURRENT_METAS_YEAR} para a estrutura padrão de 46 metas.\n\nVocê perderá todos os valores preenchidos!\n\nDeseja continuar?`)){
+        return;
+      }
+      
+      console.log(`🔄 Forçando reset completo das metas para ${CURRENT_METAS_YEAR}...`);
+      
+      // Criar 46 metas padrão do zero
+      METAS = createDefaultMetas();
+      
+      // Salvar imediatamente
+      await persistMetas();
+      
+      // Re-renderizar
+      renderMetas();
+      
+      mgToast(`✅ ${METAS.length} metas resetadas com sucesso!`, 'success', 3000);
+      console.log(`✅ Reset completo: ${METAS.length} metas criadas`);
+    }
+
     function renderMetas(){
       const container = $('metasContainer');
       if(!container) return;
       
-      // Inicializar seletor de ano (se ainda não foi)
       initMetasYearSelector();
-      
-      hideMetaBulkMenu();
-      renderMetaSummary();
       container.innerHTML = '';
       const mobile = window.matchMedia('(max-width:600px)').matches;
-      const months = META_MONTHS;
 
-      ['marketing','comercial'].forEach(setor => {
-        const metas = METAS.filter(m => (m.setor || 'comercial') === setor);
+      // ✅ INDICADOR DE TOTAL DE METAS NO TOPO - SEM BOTÃO
+      const totalIndicator = document.createElement('div');
+      totalIndicator.style.cssText = 'background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:12px; margin-bottom:16px; display:flex; align-items:center; gap:12px; justify-content:center;';
+      totalIndicator.innerHTML = `
+        <span style="font-weight:600; color:#60a5fa; font-size:1.1rem;">TOTAL: ${METAS.length} METAS ANUAIS CADASTRADAS</span>
+      `;
+      container.appendChild(totalIndicator);
+
+      const categorias = [
+        {id: 'trafego_pago', title: 'TRÁFEGO PAGO', emoji: '', color: '#C34B09'},
+        {id: 'canais', title: 'CANAIS', emoji: '', color: '#005B81'},
+        {id: 'crm_automacoes', title: 'CRM E AUTOMAÇÕES', emoji: '', color: '#007E41'},
+        {id: 'outros', title: 'OUTROS', emoji: '', color: '#9900FF'},
+        {id: 'lideranca', title: 'LIDERANÇA', emoji: '', color: '#7F6001'}
+      ];
+
+      categorias.forEach((cat, catIndex) => {
+        const metas = METAS.filter(m => m.categoria === cat.id);
+        if(metas.length === 0) return;
+        
         const wrap = document.createElement('div');
-        wrap.className = 'meta-setor ' + setor;
+        wrap.className = 'meta-setor ' + cat.id;
+        wrap.style.cssText = 'margin-bottom: 24px; scroll-margin-top: 80px;'; // ✅ ESPAÇO ENTRE CATEGORIAS
+        wrap.id = 'categoria-' + cat.id; // ✅ ID PARA NAVEGAÇÃO
 
         const title = document.createElement('h3');
-        title.textContent = setor.charAt(0).toUpperCase() + setor.slice(1);
+        title.textContent = `${cat.title} (${metas.length} metas)`;
+        // ✅ USAR COR ESPECÍFICA DA CATEGORIA
+        const rgbaColor = hexToRgba(cat.color, 0.15);
+        const rgbaColorLight = hexToRgba(cat.color, 0.05);
+        const rgbaColorShadow = hexToRgba(cat.color, 0.1);
+        title.style.cssText = `font-size:1.2rem; font-weight:700; color:${cat.color}; margin:20px 0 12px 0; padding:12px 16px; background:linear-gradient(135deg, ${rgbaColor}, ${rgbaColorLight}); border-left:4px solid ${cat.color}; border-radius:8px; box-shadow: 0 2px 8px ${rgbaColorShadow};`;
         wrap.appendChild(title);
 
         const table = document.createElement('table');
@@ -63071,7 +64354,7 @@ FORMATO PADRÃO:
           colInfo.className = 'meta-col-info';
           colgroup.appendChild(colInfo);
         }
-        months.forEach(() => {
+        META_MONTHS.forEach(() => {
           const col = document.createElement('col');
           col.className = 'meta-col-month';
           colgroup.appendChild(col);
@@ -63083,8 +64366,8 @@ FORMATO PADRÃO:
 
         const thead = document.createElement('thead');
         thead.innerHTML = mobile
-          ? '<tr>' + months.map(m => '<th>' + m.substring(0,3).toUpperCase() + '</th>').join('') + '<th>Total</th></tr>'
-          : '<tr><th class="meta-name">Meta</th>' + months.map(m => '<th>' + m.substring(0,3).toUpperCase() + '</th>').join('') + '<th>Total</th></tr>';
+          ? '<tr>' + META_MONTHS.map(m => '<th>' + m.substring(0,3).toUpperCase() + '</th>').join('') + '<th>Total</th></tr>'
+          : '<tr><th class="meta-name">Meta</th>' + META_MONTHS.map(m => '<th>' + m.substring(0,3).toUpperCase() + '</th>').join('') + '<th>Total</th></tr>';
         table.appendChild(thead);
 
         const tbody = document.createElement('tbody');
@@ -63097,28 +64380,255 @@ FORMATO PADRÃO:
       const addBtn = $('addMeta');
       if(addBtn){
         addBtn.onclick = () => {
-          const m = createMeta();
-          m.pos = nextMetaPos();
+          const m = {
+            id: uuid(),
+            pos: METAS.length + 1,
+            categoria: 'trafego_pago',
+            descricao: 'Nova meta',
+            unidade: 'numero',
+            meses: createEmptyMonths()
+          };
           METAS.push(m);
           persistMetas();
           renderMetas();
         };
       }
 
-      const shareBtn = $('sendMetasLink');
-      if(shareBtn){
-        shareBtn.onclick = handleSendMetasLink;
-      }
-
       const clearBtn = $('clearMetas');
       if(clearBtn){
-        clearBtn.onclick = clearAllMetas;
+        clearBtn.onclick = () => {
+          if(confirm('Limpar todas as metas do ano ' + CURRENT_METAS_YEAR + '?')){
+            METAS = [];
+            persistMetas();
+            renderMetas();
+          }
+        };
       }
 
       const resetBtn = $('resetMetas');
       if(resetBtn){
-        resetBtn.onclick = resetMetasToDefault;
+        resetBtn.onclick = () => {
+          forceResetMetas(); // ✅ USAR NOVA FUNÇÃO COM CONFIRMAÇÃO E SALVAMENTO AUTOMÁTICO
+        };
       }
+    }
+
+    function createMetaRows(meta, mobile=false){
+      const frag = document.createDocumentFragment();
+      const computeTotal = () => {
+        let sum = 0;
+        META_MONTHS.forEach(m => {
+          const val = parseFloat(meta.meses[m]) || 0;
+          sum += val;
+        });
+        return sum;
+      };
+
+      // Linha de título/configuração
+      const trTitle = document.createElement('tr');
+      trTitle.className = 'meta-title-row';
+      
+      if(!mobile){
+        const tdInfo = document.createElement('td');
+        tdInfo.className = 'meta-info';
+        tdInfo.rowSpan = 2; // ✅ OCUPA 2 LINHAS (título + dados) PARA ALINHAR
+        tdInfo.innerHTML = `
+          <input type="number" class="meta-pos" value="${meta.pos||''}" placeholder="Nº" min="1" style="width:50px">
+          <input type="text" class="meta-desc" value="${meta.descricao||''}" placeholder="Descrição">
+          <select class="meta-categoria">
+            <option value="trafego_pago" ${meta.categoria==='trafego_pago'?'selected':''}>Tráfego Pago</option>
+            <option value="canais" ${meta.categoria==='canais'?'selected':''}>Canais</option>
+            <option value="crm_automacoes" ${meta.categoria==='crm_automacoes'?'selected':''}>CRM e Automações</option>
+            <option value="outros" ${meta.categoria==='outros'?'selected':''}>Outros</option>
+            <option value="lideranca" ${meta.categoria==='lideranca'?'selected':''}>Liderança</option>
+          </select>
+          <select class="meta-unidade">
+            <option value="numero" ${meta.unidade==='numero'?'selected':''}>Número</option>
+            <option value="%" ${meta.unidade==='%'?'selected':''}>%</option>
+            <option value="BRL" ${meta.unidade==='BRL'?'selected':''}>R$</option>
+            <option value="USD" ${meta.unidade==='USD'?'selected':''}>US$</option>
+            <option value="multiplicador" ${meta.unidade==='multiplicador'?'selected':''}>Multiplicador (x)</option>
+            <option value="minutos" ${meta.unidade==='minutos'?'selected':''}>Minutos</option>
+            <option value="horas" ${meta.unidade==='horas'?'selected':''}>Horas</option>
+            <option value="dias" ${meta.unidade==='dias'?'selected':''}>Dias</option>
+          </select>
+          <div class="actions">
+            <button class="up" title="Mover para cima">↑</button>
+            <button class="down" title="Mover para baixo">↓</button>
+            <button class="dup" title="Duplicar">Duplicar</button>
+            <button class="del" title="Excluir">Excluir</button>
+          </div>`;
+        
+        const posInp = tdInfo.querySelector('.meta-pos');
+        const descInp = tdInfo.querySelector('.meta-desc');
+        const catSel = tdInfo.querySelector('.meta-categoria');
+        const unSel = tdInfo.querySelector('.meta-unidade');
+        
+        posInp.onchange = () => { 
+          meta.pos = parseInt(posInp.value, 10) || 0; 
+          persistMetas(); 
+        };
+        descInp.onblur = () => { 
+          meta.descricao = descInp.value; 
+          persistMetas(); 
+        };
+        catSel.onchange = () => { 
+          meta.categoria = catSel.value; 
+          persistMetas(); 
+          renderMetas(); 
+        };
+        unSel.onchange = () => { 
+          meta.unidade = unSel.value; 
+          persistMetas(); 
+          renderMetas(); 
+        };
+        
+        tdInfo.querySelector('.up').onclick = () => {
+          const same = METAS.filter(m => m.categoria === meta.categoria);
+          const idx = same.findIndex(m => m.id === meta.id);
+          if(idx > 0){
+            const target = same[idx - 1];
+            const i1 = METAS.findIndex(m => m.id === meta.id);
+            const i2 = METAS.findIndex(m => m.id === target.id);
+            [METAS[i1], METAS[i2]] = [METAS[i2], METAS[i1]];
+            persistMetas();
+            renderMetas();
+          }
+        };
+        
+        tdInfo.querySelector('.down').onclick = () => {
+          const same = METAS.filter(m => m.categoria === meta.categoria);
+          const idx = same.findIndex(m => m.id === meta.id);
+          if(idx < same.length - 1){
+            const target = same[idx + 1];
+            const i1 = METAS.findIndex(m => m.id === meta.id);
+            const i2 = METAS.findIndex(m => m.id === target.id);
+            [METAS[i1], METAS[i2]] = [METAS[i2], METAS[i1]];
+            persistMetas();
+            renderMetas();
+          }
+        };
+        
+        tdInfo.querySelector('.dup').onclick = () => {
+          const copy = JSON.parse(JSON.stringify(meta));
+          copy.id = uuid();
+          copy.pos = METAS.length + 1;
+          METAS.push(copy);
+          persistMetas();
+          renderMetas();
+        };
+        
+        tdInfo.querySelector('.del').onclick = () => {
+          if(confirm('Excluir meta?')){
+            METAS = METAS.filter(m => m.id !== meta.id);
+            persistMetas();
+            renderMetas();
+          }
+        };
+        
+        trTitle.appendChild(tdInfo);
+      } else {
+        const tdTitle = document.createElement('td');
+        tdTitle.colSpan = META_MONTHS.length + 1;
+        tdTitle.textContent = (meta.pos ? meta.pos + ' - ' : '') + meta.descricao;
+        trTitle.appendChild(tdTitle);
+      }
+      
+      frag.appendChild(trTitle);
+
+      // Linha de dados mensais
+      const trData = document.createElement('tr');
+      trData.className = 'meta-data-row';
+      
+      // ✅ REMOVIDO: meta-info-spacer que empurrava inputs para baixo
+      // Agora os inputs ficam alinhados com o .meta-info
+      /*
+      if(!mobile){
+        const tdSpacer = document.createElement('td');
+        tdSpacer.className = 'meta-info-spacer';
+        trData.appendChild(tdSpacer);
+      }
+      */
+      
+      META_MONTHS.forEach((monthName) => {
+        const td = document.createElement('td');
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.inputMode = 'decimal';
+        
+        // ✅ GARANTIR QUE O VALOR INICIAL É DO MÊS CORRETO
+        const currentValue = meta.meses[monthName] || '';
+        inp.value = currentValue;
+        
+        inp.className = 'meta-month-input';
+        inp.dataset.month = monthName;
+        inp.dataset.metaId = meta.id;
+        
+        // ✅ CRIAR CLOSURE COM VALORES FIXOS CAPTURADOS
+        const metaId = meta.id;
+        const month = monthName;
+        
+        const handleSave = function() {
+          const newValue = inp.value.trim();
+          
+          // Encontrar a meta específica no array global
+          const targetMeta = METAS.find(m => m.id === metaId);
+          if (!targetMeta) {
+            console.error(`❌ Meta não encontrada: ${metaId}`);
+            return;
+          }
+          
+          // ✅ LOG ANTES DE SALVAR
+          console.log(`📝 [ANTES] Meta: ${targetMeta.descricao}, Mês: ${month}, Valor Atual: "${targetMeta.meses[month]}"`);
+          
+          // ✅ ATUALIZAR APENAS O MÊS ESPECÍFICO
+          targetMeta.meses[month] = newValue;
+          
+          // ✅ LOG DEPOIS DE SALVAR
+          console.log(`💾 [DEPOIS] Meta: ${targetMeta.descricao}, Mês: ${month}, Novo Valor: "${newValue}"`);
+          
+          // Verificar se não contaminou outros meses/metas
+          console.log(`� [VERIFICAÇÃO] Objeto meses completo:`, JSON.stringify(targetMeta.meses));
+          
+          // Salvar
+          debouncedPersistMetas();
+          updateTotal();
+        };
+        
+        inp.addEventListener('change', handleSave);
+        inp.addEventListener('blur', handleSave);
+        
+        td.appendChild(inp);
+        trData.appendChild(td);
+      });
+      
+      const tdTotal = document.createElement('td');
+      tdTotal.className = 'meta-total';
+      const updateTotal = () => {
+        const total = computeTotal();
+        const formatted = meta.unidade === 'BRL' ? 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) :
+                         meta.unidade === 'USD' ? '$ ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) :
+                         meta.unidade === '%' ? total.toFixed(2) + '%' :
+                         meta.unidade === 'multiplicador' ? total.toFixed(1) + 'x' :
+                         meta.unidade === 'minutos' ? total.toFixed(0) + ' min' :
+                         meta.unidade === 'horas' ? total.toFixed(1) + ' h' :
+                         meta.unidade === 'dias' ? total.toFixed(0) + ' dias' :
+                         total.toLocaleString('pt-BR');
+        tdTotal.textContent = formatted;
+      };
+      updateTotal();
+      trData.appendChild(tdTotal);
+      frag.appendChild(trData);
+      
+      // Linha de gap
+      const trGap = document.createElement('tr');
+      trGap.className = 'meta-gap';
+      const tdGap = document.createElement('td');
+      tdGap.colSpan = META_MONTHS.length + (mobile ? 1 : 2);
+      trGap.appendChild(tdGap);
+      frag.appendChild(trGap);
+      
+      return frag;
     }
 
     function openColarMetasModal(metaId){
@@ -64289,7 +65799,6 @@ FORMATO PADRÃO:
           <div class="modal-card" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-head">
               <h2 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">
-                <span style="font-size: 24px;">📊</span>
                 <span>Direcionamento Estratégico e Metas</span>
               </h2>
               <button class="close-modal-btn" style="font-size: 28px; background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; width: 32px; height: 32px; transition: color 0.2s;">&times;</button>
@@ -64431,19 +65940,17 @@ FORMATO PADRÃO:
         const meta = METAS.find(m=>m.id===META_PANELS[i]);
         if(meta && meta.ativo !== false){
           const mes = meta.meses?.[monthKey] || {};
-          const mesP = parseFloat(mes.p) || 0;
           const mesR = parseFloat(mes.r) || 0;
-          const anoP = META_MONTHS.reduce((s,m)=>s+(parseFloat(meta.meses?.[m]?.p)||0),0);
           const anoR = META_MONTHS.reduce((s,m)=>s+(parseFloat(meta.meses?.[m]?.r)||0),0);
-          addStat('Mês', `${formatMetaDisplay(mesR, meta.unidade)} / ${formatMetaDisplay(mesP, meta.unidade)}`);
-          addStat('Ano', `${formatMetaDisplay(anoR, meta.unidade)} / ${formatMetaDisplay(anoP, meta.unidade)}`);
+          addStat('Mês Atual', formatMetaDisplay(mesR, meta.unidade));
+          addStat('Total Anual', formatMetaDisplay(anoR, meta.unidade));
         } else if(meta){
           addStat('Status', 'Meta desativada');
-          addStat('Mês', '-');
-          addStat('Ano', '-');
+          addStat('Mês Atual', '-');
+          addStat('Total Anual', '-');
         } else {
-          addStat('Mês', '-');
-          addStat('Ano', '-');
+          addStat('Mês Atual', '-');
+          addStat('Total Anual', '-');
         }
         panel.appendChild(stats);
         wrap.appendChild(panel);
@@ -64453,403 +65960,6 @@ FORMATO PADRÃO:
     window.addEventListener('resize', () => {
       if (currentSection === 'metas') renderMetas();
     });
-
-    function createMetaRows(meta, mobile=false){
-      const months = META_MONTHS;
-      const frag = document.createDocumentFragment();
-      const rows = [];
-      const computeTitle = () => (meta.pos ? meta.pos + ' - ' : '') + (meta.descricao || '');
-      const applyRowState = () => {
-        const active = meta.ativo !== false;
-        rows.forEach(row => {
-          if(row){
-            row.classList.toggle('meta-inactive', !active);
-          }
-        });
-      };
-      const applyToggleVisual = btn => {
-        if(!btn) return;
-        const active = meta.ativo !== false;
-        btn.classList.toggle('on', active);
-        btn.classList.toggle('off', !active);
-        btn.textContent = active ? 'ON' : 'OFF';
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        btn.setAttribute('aria-label', active ? 'Desativar meta' : 'Ativar meta');
-      };
-      const setupToggle = btn => {
-        if(!btn) return;
-        applyToggleVisual(btn);
-        btn.addEventListener('click', ev => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          meta.ativo = meta.ativo === false ? true : false;
-          applyToggleVisual(btn);
-          applyRowState();
-          persistMetas();
-          renderMetas();
-        });
-      };
-
-      const trTitle = document.createElement('tr');
-      trTitle.className = 'meta-title-row';
-      rows.push(trTitle);
-      if(!mobile){
-        const tdSpacer = document.createElement('td');
-        tdSpacer.className = 'meta-title-spacer';
-        trTitle.appendChild(tdSpacer);
-      }
-      const tdTitle = document.createElement('td');
-      tdTitle.className = 'meta-title-cell';
-      tdTitle.colSpan = months.length + 1;
-      const titleWrap = document.createElement('div');
-      titleWrap.className = 'meta-title-content';
-      const titleTextEl = document.createElement('span');
-      titleTextEl.className = 'meta-title-text';
-      titleTextEl.textContent = computeTitle();
-      titleWrap.appendChild(titleTextEl);
-      const updateTitleText = () => { titleTextEl.textContent = computeTitle(); };
-      if(mobile){
-        const toggleWrap = document.createElement('div');
-        toggleWrap.className = 'meta-activation';
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.className = 'meta-toggle';
-        toggleWrap.appendChild(toggleBtn);
-        titleWrap.appendChild(toggleWrap);
-        setupToggle(toggleBtn);
-      }
-      tdTitle.appendChild(titleWrap);
-      trTitle.appendChild(tdTitle);
-      frag.appendChild(trTitle);
-
-      const trMonths = document.createElement('tr');
-      trMonths.className = 'meta-months-row';
-      rows.push(trMonths);
-      if(!mobile){
-        const tdSpacer = document.createElement('td');
-        tdSpacer.className = 'meta-title-spacer';
-        trMonths.appendChild(tdSpacer);
-      }
-      months.forEach(m => {
-        const td = document.createElement('td');
-        td.textContent = m.substring(0,3).toUpperCase();
-        trMonths.appendChild(td);
-      });
-      const tdTotLabel = document.createElement('td');
-      tdTotLabel.textContent = 'Total';
-      trMonths.appendChild(tdTotLabel);
-      frag.appendChild(trMonths);
-
-      const trP = document.createElement('tr');
-      trP.className = 'projetado';
-      rows.push(trP);
-
-      let info;
-      if(!mobile){
-        info = document.createElement('td');
-        info.className = 'meta-info';
-        info.rowSpan = 4;
-        const actionsHtml = meta.fixed
-          ? '<div class="actions"><button class="auto-fill" title="Preencher automaticamente com dados da análise">🤖 Add Auto</button><button class="view-analysis" title="Ver análise de direcionamento estratégico">📊 Ver Análise</button><button class="up">↑</button><button class="down">↓</button><button class="paste-values">📋 Colar</button><button class="del">Excluir</button></div>'
-          : '<div class="actions"><button class="auto-fill" title="Preencher automaticamente com dados da análise">🤖 Add Auto</button><button class="view-analysis" title="Ver análise de direcionamento estratégico">📊 Ver Análise</button><button class="up">↑</button><button class="down">↓</button><button class="dup">Duplicar</button><button class="paste-values">📋 Colar</button><button class="del">Excluir</button></div>';
-        const tagOpts = '<option value=""></option>' + META_TAG_OPTIONS.map(t=>'<option value="'+t+'"'+(meta.tag===t?' selected':'')+'>'+t+'</option>').join('');
-        info.innerHTML = `
-          <div class="meta-activation"><button type="button" class="meta-toggle"></button></div>
-          <input type="number" class="meta-pos" placeholder="Nº" min="1" style="width:50px">
-          <input type="text" class="meta-desc" placeholder="Descrição">
-          <select class="meta-tag">${tagOpts}</select>
-          <select class="meta-setor"><option value="comercial">Comercial</option><option value="marketing">Marketing</option></select>
-          <select class="meta-unidade"><option value="%">%</option><option value="BRL">R$</option><option value="USD">US$</option><option value="numero">Número</option></select>
-          <select class="meta-direcao"><option value="aumentar">Aumentar</option><option value="diminuir">Diminuir</option></select>
-          <div class="meta-modo">
-            <label><input type="radio" name="modo_${meta.id}" value="total"> Valor total</label>
-            <label><input type="radio" name="modo_${meta.id}" value="media"> Valor médio</label>
-          </div>
-          ${actionsHtml}`;
-        trP.appendChild(info);
-        setupToggle(info.querySelector('.meta-toggle'));
-      }
-
-      months.forEach(m => {
-        const td = document.createElement('td');
-        const cell = document.createElement('div');
-        cell.className = 'meta-cell';
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.inputMode = 'decimal';
-        inp.className = 'planned';
-        inp.dataset.metaId = meta.id;
-        inp.dataset.month = m;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'meta-bulk-btn';
-        btn.title = 'Aplicar valor em outros meses';
-        btn.setAttribute('aria-label', 'Aplicar valor planejado em outros meses');
-        btn.textContent = '⇆';
-        btn.addEventListener('click', ev => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          showMetaBulkMenu(btn, meta.id, m, 'planned');
-        });
-        cell.appendChild(inp);
-        cell.appendChild(btn);
-        td.appendChild(cell);
-        trP.appendChild(td);
-      });
-      const tdTotP = document.createElement('td');
-      trP.appendChild(tdTotP);
-
-      const trR = document.createElement('tr');
-      trR.className = 'realizado';
-      rows.push(trR);
-      months.forEach(m => {
-        const td = document.createElement('td');
-        const cell = document.createElement('div');
-        cell.className = 'meta-cell';
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.inputMode = 'decimal';
-        inp.className = 'realized';
-        inp.dataset.metaId = meta.id;
-        inp.dataset.month = m;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'meta-bulk-btn';
-        btn.title = 'Aplicar valor em outros meses';
-        btn.setAttribute('aria-label', 'Aplicar valor realizado em outros meses');
-        btn.textContent = '⇆';
-        btn.addEventListener('click', ev => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          showMetaBulkMenu(btn, meta.id, m, 'realized');
-        });
-        cell.appendChild(inp);
-        cell.appendChild(btn);
-        td.appendChild(cell);
-        trR.appendChild(td);
-      });
-      const tdTotR = document.createElement('td');
-      trR.appendChild(tdTotR);
-
-      const trC = document.createElement('tr');
-      trC.className = 'conclusao';
-      rows.push(trC);
-      const conclMonthCells = [];
-      months.forEach(() => {
-        const td = document.createElement('td');
-        conclMonthCells.push(td);
-        trC.appendChild(td);
-      });
-      const tdTotC = document.createElement('td');
-      trC.appendChild(tdTotC);
-
-      const trE = document.createElement('tr');
-      trE.className = 'evolucao';
-      rows.push(trE);
-      const evolMonthCells = [];
-      months.forEach(() => {
-        const td = document.createElement('td');
-        evolMonthCells.push(td);
-        trE.appendChild(td);
-      });
-      const tdTotE = document.createElement('td');
-      trE.appendChild(tdTotE);
-
-      const updateMetaCalculations = () => {
-        let sumP = 0, sumR = 0;
-        let prev = null, eSum = 0, eCount = 0;
-        months.forEach((m, idx) => {
-          const monthData = meta.meses?.[m] || {};
-          const p = parseFloat(monthData.p) || 0;
-          const r = parseFloat(monthData.r) || 0;
-          sumP += p;
-          sumR += r;
-          const pct = p ? (r / p * 100) : 0;
-          const conclCell = conclMonthCells[idx];
-          if(conclCell){
-            conclCell.textContent = p ? pct.toFixed(2) + '%' : '-';
-            conclCell.className = colorClass(pct);
-          }
-          let evoText = '-';
-          if(prev !== null && prev !== 0){
-            const e = ((r - prev) / prev) * 100;
-            evoText = e.toFixed(2) + '%';
-            eSum += e;
-            eCount++;
-          }
-          const evolCell = evolMonthCells[idx];
-          if(evolCell){
-            evolCell.textContent = evoText;
-          }
-          prev = r;
-        });
-        const divisor = meta.modo === 'media' ? months.length : 1;
-        tdTotP.textContent = formatMetaNumber(sumP / divisor, meta.unidade);
-        tdTotR.textContent = formatMetaNumber(sumR / divisor, meta.unidade);
-        const totalPct = sumP ? (sumR / sumP * 100) : 0;
-        tdTotC.textContent = sumP ? totalPct.toFixed(2) + '%' : '-';
-        tdTotC.className = colorClass(totalPct);
-        tdTotE.textContent = eCount ? (eSum / eCount).toFixed(2) + '%' : '-';
-      };
-
-      updateMetaCalculations();
-
-      if(info){
-        const desc = info.querySelector('.meta-desc');
-        const posInp = info.querySelector('.meta-pos');
-        desc.value = meta.descricao;
-        posInp.value = meta.pos || '';
-        const syncTitle = () => { updateTitleText(); };
-        syncTitle();
-        if(meta.fixed){ desc.disabled = true; }
-        desc.addEventListener('input', () => { meta.descricao = desc.value; syncTitle(); });
-        desc.addEventListener('blur', () => { meta.descricao = desc.value; syncTitle(); persistMetas(); });
-        posInp.onchange = () => { meta.pos = parseInt(posInp.value,10) || 0; syncTitle(); persistMetas(); renderMetaSummary(); };
-
-        const setorSel = info.querySelector('.meta-setor');
-        setorSel.value = meta.setor;
-        if(meta.fixed){ setorSel.disabled = true; }
-        setorSel.onchange = () => { meta.setor = setorSel.value; persistMetas(); renderMetas(); };
-
-        const unSel = info.querySelector('.meta-unidade');
-        unSel.value = meta.unidade;
-        if(meta.fixed){ unSel.disabled = true; }
-        unSel.onchange = () => { meta.unidade = unSel.value; persistMetas(); renderMetas(); };
-
-        const dirSel = info.querySelector('.meta-direcao');
-        dirSel.value = meta.direcao;
-        if(meta.fixed){ dirSel.disabled = true; }
-        dirSel.onchange = () => { meta.direcao = dirSel.value; persistMetas(); };
-
-        const tagSel = info.querySelector('.meta-tag');
-        tagSel.value = meta.tag || '';
-        if(meta.fixed){ tagSel.disabled = true; }
-        tagSel.onchange = () => { meta.tag = tagSel.value; persistMetas(); };
-
-        info.querySelectorAll('input[name="modo_'+meta.id+'"]').forEach(r => {
-          r.checked = meta.modo === r.value;
-          if(meta.fixed){ r.disabled = true; }
-          r.onchange = () => {
-            if(r.checked){
-              meta.modo = r.value;
-              persistMetas();
-              renderMetas();
-            }
-          };
-        });
-
-        const dupBtn = info.querySelector('.dup');
-        if(dupBtn){
-          dupBtn.onclick = () => {
-            const copy = JSON.parse(JSON.stringify(meta));
-            copy.id = uuid();
-            copy.pos = nextMetaPos();
-            METAS.push(copy);
-            persistMetas();
-            renderMetas();
-          };
-        }
-
-        const delBtn = info.querySelector('.del');
-        if(delBtn){
-          delBtn.onclick = () => {
-            if(confirm('Excluir meta?')){
-              METAS = METAS.filter(x => x.id !== meta.id);
-              persistMetas();
-              renderMetas();
-            }
-          };
-        }
-
-        const pasteBtn = info.querySelector('.paste-values');
-        if(pasteBtn){
-          pasteBtn.onclick = () => {
-            openColarMetasModal(meta.id);
-          };
-        }
-
-        const autoFillBtn = info.querySelector('.auto-fill');
-        if(autoFillBtn){
-          autoFillBtn.onclick = async () => {
-            await autoFillMetaFromAnalysis(meta);
-          };
-        }
-
-        const viewAnalysisBtn = info.querySelector('.view-analysis');
-        if(viewAnalysisBtn){
-          viewAnalysisBtn.onclick = async () => {
-            await showMetaAnalysisModal(meta);
-          };
-        }
-
-        const move = (dir)=>{
-          const same = METAS.filter(m=> (m.setor||'comercial')===meta.setor);
-          const idx = same.findIndex(m=>m.id===meta.id);
-          const target = dir==='up'? same[idx-1] : same[idx+1];
-          if(target){
-            const i1 = METAS.findIndex(m=>m.id===meta.id);
-            const i2 = METAS.findIndex(m=>m.id===target.id);
-            [METAS[i1], METAS[i2]] = [METAS[i2], METAS[i1]];
-            persistMetas();
-            renderMetas();
-          }
-        };
-        info.querySelector('.up').onclick = ()=>move('up');
-        info.querySelector('.down').onclick = ()=>move('down');
-      } else {
-        updateTitleText();
-      }
-
-      trP.querySelectorAll('input.planned').forEach(inp => {
-        const m = inp.dataset.month;
-        inp.value = formatMetaInput(meta.meses[m].p, meta.unidade);
-        inp.addEventListener('input', () => {
-          meta.meses[m].p = parseMetaInput(inp.value, meta.unidade);
-          scheduleMetaPersist();
-          updateMetaCalculations();
-        });
-        inp.addEventListener('blur', () => {
-          meta.meses[m].p = parseMetaInput(inp.value, meta.unidade);
-          flushMetaPersist();
-          updateMetaCalculations();
-          if (currentSection === 'metas') {
-            renderMetaSummary();
-          }
-        });
-      });
-
-      trR.querySelectorAll('input.realized').forEach(inp => {
-        const m = inp.dataset.month;
-        inp.value = formatMetaInput(meta.meses[m].r, meta.unidade);
-        inp.addEventListener('input', () => {
-          meta.meses[m].r = parseMetaInput(inp.value, meta.unidade);
-          scheduleMetaPersist();
-          updateMetaCalculations();
-        });
-        inp.addEventListener('blur', () => {
-          meta.meses[m].r = parseMetaInput(inp.value, meta.unidade);
-          flushMetaPersist();
-          updateMetaCalculations();
-          if (currentSection === 'metas') {
-            renderMetaSummary();
-          }
-        });
-      });
-
-      frag.appendChild(trP);
-      frag.appendChild(trR);
-      frag.appendChild(trC);
-      frag.appendChild(trE);
-      const trGap = document.createElement('tr');
-      trGap.className = 'meta-gap';
-      const tdGap = document.createElement('td');
-      tdGap.colSpan = months.length + (mobile ? 1 : 2);
-      trGap.appendChild(tdGap);
-      frag.appendChild(trGap);
-      rows.push(trGap);
-      applyRowState();
-      return frag;
-    }
 
     /* ========= demandas ========= */
     let DEMANDAS = [];
@@ -70566,6 +71676,7 @@ let REVIEWED_SET = new Set();  // índices revisados (carregados de Firestore)
             desc: d.desc||"",
             mediaUrls: d.mediaUrls||[],
             thumbUrl: d.thumbUrl||"",
+            videoThumbUrl: d.videoThumbUrl||"", // 🔥 NOVO: Thumbnail de vídeo salva
             type: d.type||"",
             status: d.status||"pendente",
             target: d.target||"feed",
