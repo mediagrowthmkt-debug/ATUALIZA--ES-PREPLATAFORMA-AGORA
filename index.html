@@ -30441,33 +30441,81 @@ IMPORTANTE:
       try {
         const userId = auth?.currentUser?.uid || 'anonymous-' + Date.now();
         
+        // Enviar a transcrição COMPLETA para análise macro
         const messages = [
           { 
             role: 'system', 
-            content: 'Você gera títulos curtos e descritivos para reuniões. Responda APENAS com o título, sem aspas, sem explicações.' 
+            content: 'Você analisa reuniões e identifica o OBJETIVO MACRO GERAL em NO MÁXIMO 8 PALAVRAS. Capture o PROPÓSITO GERAL da reunião como um todo, não um tópico isolado. Seja abrangente mas conciso.' 
           },
           { 
             role: 'user', 
-            content: `Leia o início desta transcrição de reunião e gere um TÍTULO CURTO (máximo 6 palavras) que descreva o assunto principal.
+            content: `Leia TODA esta transcrição de reunião e identifique o OBJETIVO MACRO GERAL em NO MÁXIMO 8 PALAVRAS.
 
-Transcrição (início):
-${transcricao.substring(0, 1500)}
+REGRAS CRÍTICAS:
+1. MÁXIMO 8 PALAVRAS (obrigatório)
+2. Identifique o PROPÓSITO GERAL da reunião (não um caso isolado)
+3. Se falaram de MÚLTIPLOS temas, capture o objetivo MAIOR que engloba tudo
+4. Pense: "Qual o PROPÓSITO desta reunião acontecer?"
+5. Seja ABRANGENTE mas ESPECÍFICO o suficiente
 
-Responda APENAS com o título. Exemplos de bons títulos:
-- Alinhamento de Campanhas Google Ads
-- Revisão de Metas Mensais
-- Planejamento de Conteúdo Janeiro
-- Feedback de Performance do Site
-- Definição de Estratégia de Tráfego` 
+TRANSCRIÇÃO COMPLETA:
+${transcricao}
+
+---
+
+Exemplos de OBJETIVOS MACRO GERAIS (máximo 8 palavras):
+
+✅ EXCELENTE (visão macro, abrangente):
+- "Revisão mensal performance e ajustes estratégicos"
+- "Planejamento trimestral campanhas e budget"
+- "Alinhamento resultados Janeiro e próximos passos"
+- "Análise performance geral e definição prioridades"
+- "Atualização status projetos e tomada decisões"
+- "Revisão estratégia digital e ajustes necessários"
+- "Planejamento ações marketing próximo trimestre"
+- "Avaliação resultados campanhas e otimizações"
+
+❌ EVITE (muito específico, apenas um caso):
+- "Reduzir CPA Google Ads 30%"
+- "Corrigir erro checkout página"
+- "Aprovar orçamento campanha X"
+
+❌ EVITE (muito genérico, não diz nada):
+- "Reunião de alinhamento"
+- "Discussão geral"
+- "Atualização de status"
+
+IMPORTANTE: 
+- Se discutiram performance + planejamento + decisões → "Revisão performance e planejamento estratégico"
+- Se falaram de múltiplas campanhas → "Análise campanhas e ajustes necessários"
+- Se foi sobre resultados + próximos passos → "Avaliação resultados e definição próximos passos"
+
+GERE O OBJETIVO MACRO GERAL (máximo 8 palavras):` 
           }
         ];
         
-        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 50, 0.3);
+        // Limite de tokens adequado para resposta curta
+        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 80, 0.3);
         const titulo = data?.choices?.[0]?.message?.content?.trim();
         
-        if (titulo && titulo.length > 3 && titulo.length < 80) {
-          // Limpar título de possíveis aspas ou prefixos
-          return titulo.replace(/^["']|["']$/g, '').replace(/^(título:|title:)/i, '').trim();
+        if (titulo && titulo.length > 3) {
+          // Limpar e validar número de palavras
+          let tituloLimpo = titulo
+            .replace(/^["']|["']$/g, '') // Remove aspas
+            .replace(/^(título:|title:|objetivo:)/i, '') // Remove prefixos
+            .replace(/^\*\*|\*\*$/g, '') // Remove ** do início e fim
+            .replace(/\*\*/g, '') // Remove qualquer ** restante
+            .trim();
+          
+          // Contar palavras
+          const palavras = tituloLimpo.split(/\s+/);
+          
+          // Se tiver mais de 8 palavras, truncar
+          if (palavras.length > 8) {
+            tituloLimpo = palavras.slice(0, 8).join(' ');
+          }
+          
+          return tituloLimpo;
         }
         return null;
       } catch (err) {
@@ -30500,7 +30548,7 @@ Responda APENAS com o título. Exemplos de bons títulos:
           ultimaTranscricaoProcessada = transcricao;
           
           // Mostrar indicador de loading
-          objetivoInput.placeholder = '🤖 Gerando título automaticamente...';
+          objetivoInput.placeholder = '🤖 Analisando transcrição para gerar objetivo macro...';
           objetivoInput.style.opacity = '0.7';
           
           try {
@@ -30512,7 +30560,7 @@ Responda APENAS com o título. Exemplos de bons títulos:
               setTimeout(() => {
                 objetivoInput.style.borderColor = '';
               }, 2000);
-              mgToast('✨ Título gerado automaticamente!', 'success');
+              mgToast('✨ Objetivo macro gerado (máx. 8 palavras)!', 'success');
             }
           } catch (err) {
             console.warn('Erro ao gerar título:', err);
