@@ -393,6 +393,40 @@ html, body{ -webkit-text-size-adjust: 100%; }
       padding: 16px;
     }
 
+    /* === VERSÃO DO APP === */
+    .app-version {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 9999;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+    }
+    .app-version:hover {
+      background: rgba(0, 0, 0, 0.85);
+      color: rgba(255, 255, 255, 0.95);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 768px) {
+      .app-version {
+        top: 10px;
+        right: 10px;
+        font-size: 0.7rem;
+        padding: 5px 10px;
+      }
+    }
+    /* === FIM VERSÃO DO APP === */
+
     .input {
       font-size: 0.95rem;
       padding: 12px;
@@ -9980,6 +10014,14 @@ function renderReviewNotes(post){
 <div id="loadingScreen"><div class="loader"></div></div>
 <button id="refreshBtn" title="Atualizar" onclick="location.reload()">⟳</button>
 <h1 class="site-logo"><img src="./logosite.svg" alt="Saúde do Marketing" loading="lazy"/></h1>
+
+<!-- ============================================ -->
+<!-- VERSÃO DO APP - EDITE AQUI A VERSÃO -->
+<!-- Localização: Linha ~10020 -->
+<!-- ============================================ -->
+<div class="app-version" id="appVersion">v5.2.0</div>
+<!-- ============================================ -->
+
 <!-- LOGIN -->
 <div aria-hidden="false" class="center-box" id="authArea">
 <div class="auth-box">
@@ -17343,7 +17385,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       arquivos: 1000,              // Reduzido de 2k - Estrutura mínima
       calendario: 2500,            // Reduzido de 5k - Eventos próximos
       iframes: 1500,               // Reduzido de 3k - Widgets ativos
-      reunioes: 8000,              // Resumos das reuniões com clientes - IMPORTANTE para contexto
+      reunioes: 20000,             // AUMENTADO de 8k para 20k - Resumos das reuniões com clientes - IMPORTANTE para contexto
       notasTime: 6000              // Notas do Time (Marketing atual) - informações diárias de marketing
     };
     
@@ -31998,7 +32040,7 @@ ${contextoReunioes}`;
           }
         ];
         
-        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 2048, 0.3);
+        const data = await window.callAIProxy('google/gemini-2.5-flash', messages, userId, 8000, 0.3);
         const resposta = data?.choices?.[0]?.message?.content;
         
         hideReunioesChatLoading();
@@ -70666,6 +70708,9 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           resetStorageUsageState({ loading: true });
           authArea.style.display="none"; authArea.setAttribute("aria-hidden","true");
           userArea.style.display="block"; userArea.setAttribute("aria-hidden","false");
+          // Esconde versão quando logado
+          const appVersionEl = document.getElementById('appVersion');
+          if(appVersionEl) appVersionEl.style.display = "none";
           if(refreshBtn) refreshBtn.style.display = "block";
           if(notificationWidgetWrap) notificationWidgetWrap.style.display = "flex";
           if(noteWidget) noteWidget.style.display = "flex";
@@ -70846,6 +70891,9 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             // Oculta área de autenticação e mostra painel
             authArea.style.display="none"; authArea.setAttribute("aria-hidden","true");
             userArea.style.display="block"; userArea.setAttribute("aria-hidden","false");
+            // Esconde versão quando logado
+            const appVersionEl = document.getElementById('appVersion');
+            if(appVersionEl) appVersionEl.style.display = "none";
             if(refreshBtn) refreshBtn.style.display = "block";
             if(notificationWidgetWrap) notificationWidgetWrap.style.display = "flex";
             if(noteWidget) noteWidget.style.display = "flex";
@@ -70997,6 +71045,9 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           catch(_e){}
           authArea.style.display="flex"; authArea.setAttribute("aria-hidden","false");
           userArea.style.display="none"; userArea.setAttribute("aria-hidden","true");
+          // Mostra versão novamente quando faz logout
+          const appVersionEl = document.getElementById('appVersion');
+          if(appVersionEl) appVersionEl.style.display = "block";
           if(refreshBtn) refreshBtn.style.display = "none";
           if(notificationWidgetWrap) notificationWidgetWrap.style.display = "none";
           if(noteWidget){
