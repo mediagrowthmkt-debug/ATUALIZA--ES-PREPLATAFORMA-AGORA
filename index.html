@@ -117,6 +117,45 @@
 
 html, body{ -webkit-text-size-adjust: 100%; }
 
+/* Scroll global para modo mobile do DevTools */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 🔧 FIX: Scroll funcionando em qualquer área do app (Desktop modo mobile) */
+@media (hover: none) and (pointer: coarse), (max-width: 900px) {
+  html {
+    overflow: visible !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    width: 100% !important;
+    position: static !important;
+  }
+  body {
+    overflow: auto !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    height: 100vh !important;
+    width: 100% !important;
+    position: static !important;
+    touch-action: pan-y pan-x pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+  #userArea {
+    overflow: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: inherit !important;
+  }
+  
+  /* Garantir que todos os elementos filhos permitam eventos de scroll */
+  body > * {
+    touch-action: inherit !important;
+    pointer-events: auto !important;
+  }
+}
+
 /* mg-toast */
 .mg-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);z-index:100000;font-weight:800}
 
@@ -1024,7 +1063,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover" name="viewport">
 <title>📊 Saúde do Marketing — v4.9.1 (isolação de abas + IDs estáveis)</title>
 <style>
     :root{ --accent:#ff6600; --bg:#000; --panel:#111; --input:#1a1a1a; --border:#333; --muted:#bbb;
@@ -1042,9 +1081,9 @@ html, body{ -webkit-text-size-adjust: 100%; }
       }
     }
     *{box-sizing:border-box}
-    html,body{min-height=100%}
-    html{background:linear-gradient(135deg,var(--bg),#1a1a1a 40%,var(--accent) 120%);background-attachment:fixed}
-    body{margin:0;color:#fff;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;min-height:100vh;width:100%;overflow-x:hidden}
+    html,body{min-height:100%;height:100%}
+    html{background:linear-gradient(135deg,var(--bg),#1a1a1a 40%,var(--accent) 120%);background-attachment:fixed;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+    body{margin:0;color:#fff;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;min-height:100vh;width:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
     h1{margin:16px 0;text-align:center;font-size:1.35rem}
     h1.site-logo{display:flex;align-items:center;justify-content:center}
     h1.site-logo img{height:clamp(40px,8vw,50px);width:auto;max-width:100%}
@@ -1063,7 +1102,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .link{color:#ffb366;text-decoration:underline;cursor:pointer;font-size:.9rem}
     .divider{height:2px;background:#ddd;opacity:.4;margin:8px 0 14px}
 
-    #userArea{display:none;padding:16px}
+    #userArea{display:none;padding:16px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;width:100%}
     .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:14px;margin-bottom:8px}
     .topbar-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
     .user-info{font-weight:700;font-size:.85rem;color:#f5f5f5;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1387,11 +1426,11 @@ html, body{ -webkit-text-size-adjust: 100%; }
 
     @media (max-width: 820px){
       .tabs-container{align-items:stretch;gap:0}
-      .menu-toggle{display:flex;width:min(260px,100%);margin:0 auto}
-      .tabs{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;flex-wrap:nowrap;background:rgba(15,23,42,.95);border:1px solid var(--shell-border);border-radius:12px;padding:12px;max-width:min(340px,calc(100vw - 32px));box-shadow:0 18px 32px rgba(0,0,0,.45);z-index:999}
+      .menu-toggle{display:flex;width:min(260px,100%);margin:0 auto;min-height:48px;touch-action:manipulation}
+      .tabs{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;flex-wrap:nowrap;background:rgba(15,23,42,.95);border:1px solid var(--shell-border);border-radius:12px;padding:12px;max-width:min(340px,calc(100vw - 32px));box-shadow:0 18px 32px rgba(0,0,0,.45);z-index:999;touch-action:pan-y}
       .tabs-container.menu-open .tabs{display:flex}
       .tabs-container.menu-open .menu-toggle{background:linear-gradient(135deg,#ff8a2b,#ff613a);color:#fff;box-shadow:0 12px 24px rgba(255,82,40,.4),0 0 0 1px rgba(255,255,255,.12) inset}
-      .tabs .tab-btn{width:100%;text-align:left}
+      .tabs .tab-btn{width:100%;text-align:left;min-height:48px;padding:12px 16px;touch-action:manipulation;font-size:1rem}
     }
 
     /* iframes list */
@@ -9321,6 +9360,9 @@ function renderReviewNotes(post){
   .reuniao-modal-body{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:20px;
     display:flex;
     flex-direction:column;
@@ -9408,6 +9450,9 @@ function renderReviewNotes(post){
     word-break:break-word;
     max-height:300px;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
   }
   .reuniao-generating{
     display:flex;
@@ -9467,6 +9512,7 @@ function renderReviewNotes(post){
     display:flex;
     height:700px;
     min-height:600px;
+    position:relative;
   }
   /* Sidebar lateral estilo ChatGPT - SEMPRE VISÍVEL */
   .reunioes-chat-sidebar{
@@ -9515,6 +9561,9 @@ function renderReviewNotes(post){
   .reunioes-chat-sidebar-list{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:8px;
   }
   .reunioes-chat-sidebar-list::-webkit-scrollbar{
@@ -9623,6 +9672,10 @@ function renderReviewNotes(post){
     min-width:0;
     background:#0f172a;
   }
+  /* Overlay para mobile */
+  .reunioes-chat-overlay{
+    display:none;
+  }
   .reunioes-chat-header{
     display:flex;
     align-items:center;
@@ -9640,7 +9693,7 @@ function renderReviewNotes(post){
     padding:8px;
     border-radius:8px;
     transition:all 0.15s;
-    display:flex;
+    display:none;
     align-items:center;
     justify-content:center;
   }
@@ -9673,6 +9726,9 @@ function renderReviewNotes(post){
   .reunioes-chat-messages{
     flex:1;
     overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:20px;
     display:flex;
     flex-direction:column;
@@ -9980,29 +10036,390 @@ function renderReviewNotes(post){
     border-color:rgba(99,102,241,0.5);
     transform:translateY(-2px);
   }
-  /* Responsivo */
+  /* Responsivo Mobile - OTIMIZADO PARA MOBILE */
   @media(max-width:900px){
-    .reunioes-chat-section{
-      height:550px;
-      flex-direction:column;
+    .reunioes-wrap{
+      padding:12px 8px;
+      margin-left:8px;
+      margin-right:8px;
     }
-    .reunioes-chat-sidebar{
+    .reunioes-header{
+      flex-direction:column;
+      align-items:flex-start;
+      padding:12px;
+    }
+    .reunioes-header h2{
+      font-size:1rem;
+    }
+    .reunioes-header p{
+      font-size:0.8rem;
+    }
+    .reunioes-add-btn{
       width:100%;
-      height:auto;
-      max-height:200px;
-      border-right:none;
-      border-bottom:1px solid rgba(99,102,241,0.3);
+      justify-content:center;
+      padding:12px;
+      min-height:44px;
+      touch-action:manipulation;
+    }
+    .reuniao-card{
+      flex:1 1 100%;
+      max-width:100%;
+      min-width:100%;
+    }
+    /* Chat IA - Otimizado para Mobile */
+    .reunioes-chat-section{
+      height:calc(100vh - 180px);
+      min-height:500px;
+      margin-top:16px;
+      border-radius:12px;
+      position:relative;
+      overflow:hidden;
+      touch-action:pan-y pan-x;
+    }
+    /* Sidebar colapsável no mobile */
+    .reunioes-chat-sidebar{
+      position:fixed;
+      top:0;
+      left:0;
+      width:85%;
+      max-width:300px;
+      height:100vh;
+      height:100dvh; /* Dynamic viewport height for mobile browsers */
+      z-index:100001;
+      transform:translateX(-100%);
+      transition:transform 0.3s ease;
+      box-shadow:2px 0 10px rgba(0,0,0,0.3);
+      touch-action:pan-y;
+      will-change:transform;
+    }
+    .reunioes-chat-sidebar.show{
+      transform:translateX(0);
     }
     .reunioes-chat-sidebar-list{
-      max-height:100px;
+      max-height:none;
+      flex:1;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+      touch-action:pan-y;
+    }
+    /* Overlay para fechar sidebar */
+    .reunioes-chat-overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.6);
+      z-index:100000;
+      touch-action:none;
+    }
+    .reunioes-chat-overlay.show{
+      display:block;
+    }
+    /* Botão menu sempre visível no mobile */
+    .reunioes-chat-menu-btn{
+      display:flex !important;
+      min-width:44px;
+      min-height:44px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-main{
+      width:100%;
+      touch-action:pan-y;
+    }
+    .reunioes-chat-header{
+      padding:10px 12px;
+      min-height:56px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-title{
+      font-size:0.9rem;
+    }
+    .reunioes-chat-count-badge{
+      font-size:0.75rem;
+      padding:4px 8px;
+    }
+    .reunioes-chat-messages{
+      padding:12px;
+      gap:16px;
+      overflow-y:auto !important;
+      overflow-x:hidden !important;
+      -webkit-overflow-scrolling:touch !important;
+      overscroll-behavior:contain !important;
+      touch-action:pan-y !important;
+      position:relative;
+    }
+    .reunioes-chat-message{
+      padding:12px 14px;
+      gap:12px;
+      touch-action:pan-y;
+    }
+    .reunioes-chat-message-avatar{
+      width:28px;
+      height:28px;
+      font-size:0.9rem;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.9rem;
+      line-height:1.6;
+      word-wrap:break-word;
+      overflow-wrap:break-word;
+    }
+    .reunioes-chat-welcome{
+      padding:40px 16px;
+    }
+    .reunioes-chat-welcome-icon{
+      font-size:3rem;
+    }
+    .reunioes-chat-welcome h4{
+      font-size:1.2rem;
+    }
+    .reunioes-chat-welcome p{
+      font-size:0.9rem;
     }
     .reunioes-chat-suggestions{
-      grid-template-columns:repeat(2, 1fr);
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .reunioes-chat-suggestions button{
+      padding:14px 16px;
+      font-size:0.9rem;
+      text-align:center;
+      min-height:48px;
+      touch-action:manipulation;
+      line-height:1.4;
+    }
+    .reunioes-chat-input-container{
+      padding:10px 12px 12px;
+      background:rgba(15,23,42,0.95);
+      touch-action:manipulation;
+    }
+    .reunioes-chat-filter-row{
+      flex-direction:column;
+      align-items:stretch;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    .reunioes-chat-filter-row label{
+      font-size:0.75rem;
+    }
+    .reunioes-chat-filter-row select{
+      max-width:100%;
+      font-size:0.85rem;
+      padding:10px 12px;
+      min-height:44px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-input-wrapper{
+      padding:10px;
+    }
+    .reunioes-chat-input-wrapper textarea{
+      font-size:0.95rem;
+      padding:6px 4px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-send-btn{
+      width:44px;
+      height:44px;
+      font-size:1.1rem;
+      touch-action:manipulation;
+    }
+    /* Botões de ação do histórico */
+    .reunioes-chat-history-item-btn{
+      min-width:32px;
+      min-height:32px;
+      touch-action:manipulation;
+    }
+    /* Botão nova conversa */
+    .reunioes-chat-new-btn{
+      min-height:44px;
+      touch-action:manipulation;
+    }
+    /* Botões de copiar */
+    .reunioes-chat-copy-btn{
+      min-height:40px;
+      padding:10px 16px;
+      touch-action:manipulation;
+    }
+    .reunioes-chat-copy-line-btn{
+      min-width:36px;
+      min-height:36px;
+      padding:6px 8px;
+      touch-action:manipulation;
+    }
+    /* Item do histórico */
+    .reunioes-chat-history-item{
+      min-height:60px;
+      padding:12px;
+      touch-action:manipulation;
+    }
+    /* Otimização para iOS Safari */
+    @supports (-webkit-touch-callout: none) {
+      .reunioes-chat-section{
+        height:-webkit-fill-available;
+        min-height:-webkit-fill-available;
+      }
+      .reunioes-chat-sidebar{
+        height:-webkit-fill-available;
+      }
+    }
+  }
+    /* Modais otimizados para mobile */
+    .reuniao-modal{
+      padding:10px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    .reuniao-modal-content{
+      max-width:100%;
+      max-height:95vh;
+      border-radius:12px;
+    }
+    .reuniao-modal-header{
+      padding:12px 16px;
+    }
+    .reuniao-modal-header h3{
+      font-size:1rem;
+    }
+    .reuniao-modal-body{
+      padding:16px;
+      gap:12px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    .reuniao-modal-body label{
+      font-size:0.8rem;
+    }
+    .reuniao-modal-body input,
+    .reuniao-modal-body textarea{
+      padding:10px;
+      font-size:0.9rem;
+    }
+    .reuniao-modal-body textarea{
+      min-height:150px;
+    }
+    .reuniao-modal-footer{
+      padding:12px 16px;
+      flex-wrap:wrap;
+    }
+    .reuniao-modal-footer button{
+      flex:1 1 auto;
+      min-width:120px;
+    }
+    .reuniao-resumo-section,
+    .reuniao-transcricao-section{
+      padding:12px;
+    }
+    .reuniao-resumo-section h4{
+      font-size:0.85rem;
+    }
+    .reuniao-resumo-content{
+      font-size:0.85rem;
+      line-height:1.6;
+    }
+    .reuniao-transcricao-content{
+      font-size:0.8rem;
+      max-height:200px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    /* Botões copiar otimizados */
+    .reunioes-chat-copy-btn{
+      padding:8px 12px;
+      font-size:0.75rem;
+    }
+    .reunioes-chat-copy-line-btn{
+      padding:4px 6px;
+      font-size:0.65rem;
     }
   }
   @media(max-width:600px){
-    .reunioes-chat-suggestions{
-      grid-template-columns:1fr;
+    .reunioes-wrap{
+      padding:8px 4px;
+      margin-left:4px;
+      margin-right:4px;
+    }
+    .reunioes-header{
+      padding:10px;
+    }
+    .reunioes-chat-section{
+      height:calc(100vh - 160px);
+      min-height:450px;
+      margin-top:12px;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .reunioes-chat-sidebar{
+      width:90%;
+      max-width:280px;
+    }
+    .reunioes-chat-messages{
+      padding:10px;
+      gap:12px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+    }
+    .reunioes-chat-message{
+      padding:10px 12px;
+      gap:10px;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-welcome{
+      padding:30px 12px;
+    }
+    .reunioes-chat-welcome-icon{
+      font-size:2.5rem;
+    }
+    .reunioes-chat-welcome h4{
+      font-size:1.1rem;
+    }
+    .reunioes-chat-welcome p{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-input-container{
+      padding:8px 10px 10px;
+    }
+    .reuniao-modal-footer{
+      gap:8px;
+    }
+    .reuniao-modal-footer button{
+      font-size:0.85rem;
+      padding:10px 12px;
+    }
+  }
+  /* Ajustes para telas muito pequenas */
+  @media(max-width:400px){
+    .reunioes-chat-section{
+      height:calc(100vh - 140px);
+      overflow:hidden;
+    }
+    .reunioes-chat-message-avatar{
+      width:24px;
+      height:24px;
+      font-size:0.8rem;
+    }
+    .reunioes-chat-message-content{
+      font-size:0.8rem;
+    }
+    .reunioes-chat-input-wrapper textarea{
+      font-size:0.85rem;
+    }
+    .reunioes-chat-send-btn{
+      width:32px;
+      height:32px;
+      font-size:0.9rem;
+    }
+    .reunioes-chat-messages{
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
     }
   }
   /* ========== FIM CHAT IA REUNIÕES ========== */
@@ -10011,6 +10428,427 @@ function renderReviewNotes(post){
 </style>
 </meta></head>
 <body>
+<script>
+// 🔧 🔧 🔧 FIX SCROLL MOBILE - DEBUG COMPLETO 🔧 🔧 🔧
+(function() {
+  'use strict';
+  
+  console.log('%c╔════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  🔧 INICIANDO DIAGNÓSTICO DE SCROLL MOBILE               ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c╚════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-weight: bold');
+  
+  // === FUNÇÃO DE DEBUG DETALHADO ===
+  function debugScrollState(label) {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    console.group(`🔍 ${label}`);
+    
+    // Info do viewport
+    console.log('📐 Viewport:', {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio
+    });
+    
+    // Info do HTML
+    if (html) {
+      const htmlComputed = window.getComputedStyle(html);
+      console.log('📄 HTML:', {
+        overflow: htmlComputed.overflow,
+        overflowY: htmlComputed.overflowY,
+        overflowX: htmlComputed.overflowX,
+        position: htmlComputed.position,
+        height: htmlComputed.height,
+        touchAction: htmlComputed.touchAction,
+        style_overflow: html.style.overflow,
+        style_overflowY: html.style.overflowY
+      });
+    }
+    
+    // Info do BODY
+    if (body) {
+      const bodyComputed = window.getComputedStyle(body);
+      console.log('🧑 BODY:', {
+        overflow: bodyComputed.overflow,
+        overflowY: bodyComputed.overflowY,
+        overflowX: bodyComputed.overflowX,
+        position: bodyComputed.position,
+        height: bodyComputed.height,
+        minHeight: bodyComputed.minHeight,
+        touchAction: bodyComputed.touchAction,
+        style_overflow: body.style.overflow,
+        style_overflowY: body.style.overflowY
+      });
+      
+      // Altura do conteúdo
+      console.log('� Dimensões BODY:', {
+        clientHeight: body.clientHeight,
+        scrollHeight: body.scrollHeight,
+        offsetHeight: body.offsetHeight,
+        scrollTop: body.scrollTop,
+        podeRolar: body.scrollHeight > body.clientHeight
+      });
+    }
+    
+    // Detecção de mobile
+    const userAgent = navigator.userAgent;
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isMobileWidth = window.innerWidth <= 900;
+    const isMobileMedia = matchMedia('(hover: none) and (pointer: coarse)').matches;
+    
+    console.log('📱 Detecção Mobile:', {
+      userAgent: userAgent.substring(0, 60) + '...',
+      isMobileUA,
+      isMobileWidth,
+      isMobileMedia,
+      isMobile: isMobileUA || isMobileWidth || isMobileMedia
+    });
+    
+    // Eventos de scroll/touch
+    console.log('🎯 Event Listeners:', {
+      'body.onscroll': body?.onscroll ? 'definido' : 'não definido',
+      'body.ontouchmove': body?.ontouchmove ? 'definido' : 'não definido',
+      'window.onscroll': window.onscroll ? 'definido' : 'não definido'
+    });
+    
+    console.groupEnd();
+  }
+  
+  // === DEBUG INICIAL ===
+  debugScrollState('ESTADO INICIAL');
+  
+  // === FUNÇÃO PARA HABILITAR SCROLL ===
+  function enableScroll() {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    console.log('🔧 [APLICANDO FIX] Forçando scroll em qualquer área...');
+    
+    if (html) {
+      // Remover qualquer classe que possa estar bloqueando
+      html.classList.remove('no-scroll', 'overflow-hidden');
+      
+      // HTML: visível, permite que o body tenha área de scroll
+      html.style.setProperty('overflow', 'visible', 'important');
+      html.style.setProperty('overflow-y', 'visible', 'important');
+      html.style.setProperty('overflow-x', 'hidden', 'important');
+      html.style.setProperty('height', '100%', 'important');
+      html.style.setProperty('width', '100%', 'important');
+      html.style.setProperty('position', 'static', 'important');
+      
+      console.log('✅ HTML configurado - overflow: visible, height: 100%');
+    }
+    
+    if (body) {
+      // Remover qualquer classe que possa estar bloqueando
+      body.classList.remove('no-scroll', 'overflow-hidden');
+      
+      // BODY: scroll ativo, altura fixa na viewport para criar área rolável
+      body.style.setProperty('overflow', 'auto', 'important');
+      body.style.setProperty('overflow-y', 'scroll', 'important');
+      body.style.setProperty('overflow-x', 'hidden', 'important');
+      body.style.setProperty('height', '100vh', 'important');
+      body.style.setProperty('width', '100%', 'important');
+      body.style.setProperty('position', 'static', 'important');
+      body.style.setProperty('touch-action', 'pan-y pan-x pinch-zoom', 'important');
+      body.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+      body.style.setProperty('overscroll-behavior', 'contain', 'important');
+      
+      console.log('✅ BODY configurado - overflow: scroll, height: 100vh, touch-action: pan-y pan-x pinch-zoom');
+    }
+    
+    // Garantir que elementos filhos não bloqueiem eventos de scroll
+    const allElements = document.querySelectorAll('body > *');
+    let blockedCount = 0;
+    allElements.forEach(el => {
+      const computedStyle = window.getComputedStyle(el);
+      if (computedStyle.pointerEvents === 'none' || computedStyle.touchAction === 'none') {
+        el.style.setProperty('pointer-events', 'auto', 'important');
+        el.style.setProperty('touch-action', 'inherit', 'important');
+        blockedCount++;
+      }
+    });
+    
+    if (blockedCount > 0) {
+      console.log(`🔓 Desbloqueados ${blockedCount} elementos que impediam scroll`);
+    }
+    
+    // Debug após aplicar fix
+    setTimeout(() => {
+      debugScrollState('APÓS APLICAR FIX');
+      
+      // Verificação de scroll disponível
+      const canScroll = document.body.scrollHeight > document.body.clientHeight;
+      console.log('');
+      console.log('%c═══════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+      
+      if (canScroll) {
+        console.log('%c✅ SCROLL DISPONÍVEL!', 'background: #4CAF50; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 14px');
+        console.log('%c📊 scrollHeight:', document.body.scrollHeight + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c📊 clientHeight:', document.body.clientHeight + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c� Espaço para rolar:', (document.body.scrollHeight - document.body.clientHeight) + 'px', 'color: #4CAF50; font-weight: bold');
+        console.log('%c💡 Agora você pode rolar em QUALQUER LUGAR da página!', 'color: #4CAF50; font-weight: bold');
+      } else {
+        console.log('%c⚠️ ATENÇÃO: Conteúdo cabe na tela', 'background: #FF9800; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 14px');
+        console.log('%c📊 scrollHeight:', document.body.scrollHeight + 'px (altura do conteúdo)', 'color: #FF9800');
+        console.log('%c📊 clientHeight:', document.body.clientHeight + 'px (altura da viewport)', 'color: #FF9800');
+        console.log('%c💡 SOLUÇÃO: Adicione mais conteúdo ou diminua a altura da viewport', 'color: #FF9800; font-weight: bold');
+      }
+      
+      console.log('%c═══════════════════════════════════════════════', 'color: #00ff00; font-weight: bold');
+      console.log('');
+    }, 100);
+  }
+  
+  // Detectar modo mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (window.innerWidth <= 900) ||
+                   (matchMedia('(hover: none) and (pointer: coarse)').matches);
+  
+  if (isMobile) {
+    console.log('%c📱 MODO MOBILE DETECTADO', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+  } else {
+    console.log('%c🖥️ MODO DESKTOP DETECTADO', 'background: #2196F3; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+  }
+  
+  // Aplicar fix imediatamente
+  enableScroll();
+  
+  // Aplicar após DOM carregar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 [DOM CARREGADO] Reaplicando scroll...');
+      enableScroll();
+    });
+  }
+  
+  // Verificações periódicas
+  let checks = 0;
+  const intervalId = setInterval(() => {
+    console.log(`⏱️ [CHECK ${checks + 1}/5] Verificando scroll...`);
+    enableScroll();
+    checks++;
+    if (checks >= 5) {
+      clearInterval(intervalId);
+      console.log('%c✅ VERIFICAÇÕES CONCLUÍDAS', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold');
+      debugScrollState('ESTADO FINAL');
+    }
+  }, 400);
+  
+  // Listener para resize
+  window.addEventListener('resize', () => {
+    console.log('🔄 [RESIZE] Redimensionamento detectado');
+    debugScrollState('DURANTE RESIZE');
+    enableScroll();
+  });
+  
+  // Listener para scroll (debug)
+  let lastScrollTop = 0;
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (Math.abs(currentScroll - lastScrollTop) > 10) {
+      console.log(`📜 SCROLL DETECTADO: ${currentScroll}px`);
+      lastScrollTop = currentScroll;
+    }
+  }, { passive: true });
+  
+  // 🖱️ LISTENER PARA WHEEL (SCROLL DO MOUSE/TRACKPAD) - CRÍTICO PARA DESKTOP MODO MOBILE
+  let lastWheelLog = 0;
+  document.addEventListener('wheel', (e) => {
+    const now = Date.now();
+    if (now - lastWheelLog > 500) {
+      console.log('🖱️ WHEEL EVENT: Scroll do mouse/trackpad detectado');
+      console.log('   deltaY:', e.deltaY, '(negativo = para cima, positivo = para baixo)');
+      lastWheelLog = now;
+    }
+    
+    // Garantir que o scroll funcione mesmo que o evento seja em um elemento filho
+    if (document.body.style.overflow !== 'auto') {
+      console.warn('⚠️ Body overflow não está como "auto" - corrigindo...');
+      document.body.style.setProperty('overflow-y', 'scroll', 'important');
+    }
+  }, { passive: true });
+  
+  // 🖱️ FORÇAR PROPAGAÇÃO DE EVENTOS DE WHEEL PARA O BODY
+  document.body.addEventListener('wheel', (e) => {
+    // Este listener garante que o body processe eventos de wheel
+    const now = Date.now();
+    if (now - lastWheelLog > 500) {
+      console.log('✅ Wheel event capturado pelo BODY - scroll funcionando!');
+      lastWheelLog = now;
+    }
+  }, { passive: true, capture: false });
+  
+  // Listener para touch events
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    console.log(`👆 TOUCH START: Y=${touchStartY}`);
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', (e) => {
+    const touchCurrentY = e.touches[0].clientY;
+    const diff = touchStartY - touchCurrentY;
+    console.log(`👆 TOUCH MOVE: Y=${touchCurrentY}, diff=${diff}`);
+  }, { passive: true });
+  
+  document.addEventListener('touchend', () => {
+    console.log('👆 TOUCH END');
+  }, { passive: true });
+  
+  // Observer para mudanças no body
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && 
+          mutation.attributeName === 'style' && 
+          mutation.target === document.body) {
+        const currentOverflow = document.body.style.overflow;
+        console.log(`⚠️ BODY STYLE ALTERADO: overflow="${currentOverflow}"`);
+        
+        if (currentOverflow === 'hidden') {
+          const hasVisibleModal = document.querySelector('.modal.show, .settings-panel[style*="display: flex"], .estruturacao-lightbox[style*="display: flex"]');
+          console.log(`🔍 Modal visível: ${hasVisibleModal ? 'SIM' : 'NÃO'}`);
+          
+          if (!hasVisibleModal && isMobile) {
+            setTimeout(() => {
+              document.body.style.overflowY = 'auto';
+              console.log('🔧 Scroll restaurado!');
+            }, 10);
+          }
+        }
+      }
+    });
+  });
+  
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['style', 'class']
+  });
+  
+  // Comando global para debug manual
+  window.debugScroll = function() {
+    debugScrollState('DEBUG MANUAL');
+    return {
+      message: 'Use console para ver detalhes',
+      tentarForcar: () => {
+        enableScroll();
+        console.log('✅ Fix forçado novamente');
+      }
+    };
+  };
+  
+  console.log('%c╔════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  ✅ SISTEMA DE MONITORAMENTO ATIVADO                     ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c║  💡 Digite debugScroll() para debug manual               ║', 'color: #00ff00; font-weight: bold');
+  console.log('%c╚════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-weight: bold');
+})();
+</script>
+
+<!-- 🎯 OTIMIZAÇÃO GLOBAL MOBILE - GARANTIR CLIQUES E SCROLL -->
+<script>
+(function() {
+  'use strict';
+  
+  const isMobile = window.innerWidth <= 900;
+  
+  if (isMobile) {
+    console.log('%c📱 OTIMIZAÇÃO MOBILE GLOBAL ATIVADA', 'background: #6366f1; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+    
+    // 1. GARANTIR SCROLL GLOBAL DO BODY
+    function ensureBodyScroll() {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      document.body.style.overflowY = 'scroll';
+      document.body.style.overflowX = 'hidden';
+      document.body.style.webkitOverflowScrolling = 'touch';
+      document.body.style.touchAction = 'pan-y pan-x pinch-zoom';
+      document.body.style.overscrollBehavior = 'contain';
+    }
+    
+    // 2. GARANTIR QUE TODOS OS BOTÕES E LINKS SEJAM CLICÁVEIS
+    function ensureClickableElements() {
+      // Adicionar touch-action em todos elementos clicáveis
+      const clickables = document.querySelectorAll('button, a, .tab-btn, .menu-toggle, [onclick], [role="button"]');
+      clickables.forEach(el => {
+        el.style.touchAction = 'manipulation';
+        el.style.webkitTapHighlightColor = 'rgba(255,255,255,0.1)';
+      });
+      console.log(`✅ ${clickables.length} elementos clicáveis otimizados`);
+    }
+    
+    // 3. GARANTIR QUE MENU MOBILE FUNCIONE
+    function ensureMenuWorks() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const tabsContainer = document.querySelector('.tabs-container');
+      
+      if (menuToggle && tabsContainer) {
+        menuToggle.style.minHeight = '48px';
+        menuToggle.style.touchAction = 'manipulation';
+        
+        // Garantir que clique funcione
+        menuToggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          tabsContainer.classList.toggle('menu-open');
+          console.log('📱 Menu toggled:', tabsContainer.classList.contains('menu-open'));
+        }, { passive: false });
+        
+        // Fechar menu ao clicar em um item
+        const tabBtns = document.querySelectorAll('.tabs .tab-btn');
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', function() {
+            setTimeout(() => {
+              tabsContainer.classList.remove('menu-open');
+            }, 100);
+          });
+        });
+        
+        console.log('✅ Menu mobile configurado');
+      }
+    }
+    
+    // 4. PREVENIR ZOOM NO iOS
+    function preventIOSZoom() {
+      const meta = document.querySelector('meta[name="viewport"]');
+      if (meta) {
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+      console.log('✅ Zoom iOS prevenido');
+    }
+    
+    // 5. EXECUTAR OTIMIZAÇÕES
+    function runOptimizations() {
+      ensureBodyScroll();
+      ensureClickableElements();
+      ensureMenuWorks();
+      preventIOSZoom();
+      console.log('%c✅ OTIMIZAÇÃO MOBILE COMPLETA', 'background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+    }
+    
+    // Executar na carga
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runOptimizations);
+    } else {
+      runOptimizations();
+    }
+    
+    // Re-executar periodicamente para garantir
+    setInterval(runOptimizations, 5000);
+    
+    // Re-executar ao mudar de aba
+    document.addEventListener('click', function(e) {
+      const tabBtn = e.target.closest('.tab-btn');
+      if (tabBtn) {
+        setTimeout(() => {
+          ensureBodyScroll();
+          ensureClickableElements();
+        }, 200);
+      }
+    });
+  }
+})();
+</script>
+
 <div id="loadingScreen"><div class="loader"></div></div>
 <button id="refreshBtn" title="Atualizar" onclick="location.reload()">⟳</button>
 <h1 class="site-logo"><img src="./logosite.svg" alt="Saúde do Marketing" loading="lazy"/></h1>
@@ -13766,6 +14604,9 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
   
   <!-- ========== CHAT IA PARA CONSULTAR REUNIÕES ========== -->
   <div class="reunioes-chat-section" id="reunioesChatSection" style="display:none;">
+    <!-- Overlay para fechar sidebar no mobile -->
+    <div class="reunioes-chat-overlay" id="reunioesChatOverlay" onclick="toggleReunioesChatSidebar()"></div>
+    
     <!-- Sidebar lateral - SEMPRE VISÍVEL -->
     <div class="reunioes-chat-sidebar" id="reunioesChatSidebar">
       <div class="reunioes-chat-sidebar-header">
@@ -13785,6 +14626,9 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     <!-- Área principal do chat -->
     <div class="reunioes-chat-main">
       <div class="reunioes-chat-header">
+        <button type="button" class="reunioes-chat-menu-btn" onclick="toggleReunioesChatSidebar()" title="Menu">
+          ☰
+        </button>
         <div class="reunioes-chat-title">
           <span>🤖</span>
           <span>Assistente de Reuniões</span>
@@ -30566,25 +31410,31 @@ Responda APENAS com o título. Exemplos de bons títulos:
         throw new Error('Função callAIProxy não disponível');
       }
       
-      const promptContent = `Você é um assistente ESPECIALISTA em documentar reuniões de negócios.
+      const promptContent = `Você é um assistente ESPECIALISTA em documentar reuniões de negócios e estratégia empresarial.
 
 Crie um RESUMO EXECUTIVO COMPLETO da reunião abaixo. O resumo deve ser claro, bem organizado e permitir que qualquer pessoa entenda o que foi discutido.
 
+**IMPORTANTE:** 
+- Analise TODA a transcrição fornecida (não apenas o início)
+- Foque APENAS em assuntos relevantes para estratégia de negócios, marketing, vendas, operações, metas e decisões empresariais
+- IGNORE conversas paralelas, piadas, assuntos pessoais ou tópicos que não agregam valor à estratégia da empresa
+- Se houver muito conteúdo irrelevante, simplifique para destacar apenas o que importa
+
 **OBJETIVO DA REUNIÃO:** ${objetivo}
 
-**TRANSCRIÇÃO:**
-${transcricao.substring(0, 12000)}
+**TRANSCRIÇÃO COMPLETA:**
+${transcricao}
 
 ---
 
 GERE O RESUMO seguindo esta estrutura. Use formatação SIMPLES e LIMPA (sem headers ####, apenas negrito para títulos de seção):
 
 **📋 RESUMO GERAL**
-Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal.
+Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal. Destaque apenas o que é relevante para o negócio.
 
 **📌 TÓPICOS DISCUTIDOS**
-Liste cada tópico abordado com uma breve descrição do que foi conversado. Use bullet points simples:
-- **Nome do tópico:** Descrição do que foi discutido sobre este ponto.
+Liste APENAS os tópicos relevantes para estratégia/negócios. Use bullet points simples:
+- **Nome do tópico:** Descrição do que foi discutido sobre este ponto (foque no impacto para o negócio)
 - **Outro tópico:** Descrição...
 
 **✅ DECISÕES TOMADAS**
@@ -30598,21 +31448,21 @@ Liste as ações definidas:
 - **Tarefa:** Descrição | Responsável: Nome | Prazo: Data
 
 **📊 DADOS MENCIONADOS**
-Liste números, métricas ou valores citados:
+Liste números, métricas ou valores citados (CPL, ROI, faturamento, leads, conversão, etc):
 - Dado 1: valor/contexto
 - Dado 2: valor/contexto
 (Se não houver dados, escreva "Nenhum dado numérico mencionado")
 
 **⚠️ PROBLEMAS IDENTIFICADOS**
-- Problema ou desafio mencionado
+- Problema ou desafio mencionado que impacta o negócio
 (Se não houver, escreva "Nenhum problema específico levantado")
 
 **💡 INSIGHTS IMPORTANTES**
-- Observações relevantes da conversa
-- Sugestões ou recomendações feitas
+- Observações relevantes para a estratégia da empresa
+- Sugestões ou recomendações feitas que agregam valor
 
 **❓ PENDÊNCIAS**
-- Questões que ficaram em aberto
+- Questões que ficaram em aberto e precisam ser resolvidas
 - Pontos que precisam de follow-up
 
 **📅 PRÓXIMOS PASSOS**
@@ -30625,12 +31475,14 @@ REGRAS DE FORMATAÇÃO:
 2. Use bullet points simples (-)
 3. Seja direto e objetivo
 4. Mantenha parágrafos curtos
-5. Se uma seção não tiver informação, escreva brevemente "Não mencionado"
-6. O resultado deve parecer um documento profissional e fácil de ler`;
+5. Se uma seção não tiver informação relevante, escreva brevemente "Não mencionado"
+6. O resultado deve parecer um documento profissional e fácil de ler
+7. PRIORIZE QUALIDADE sobre quantidade - melhor ter menos informação relevante do que muito conteúdo irrelevante
+8. Leia TODA a transcrição antes de resumir, não apenas o começo`;
 
       // Formato de mensagens igual à aba de IA (OpenRouter/OpenAI format)
       const messages = [
-        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais. Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
+        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais focados em estratégia empresarial. Analise TODA a transcrição fornecida. Ignore conversas paralelas e foque apenas em assuntos relevantes para o negócio (metas, vendas, marketing, operações, decisões estratégicas). Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
         { role: 'user', content: promptContent }
       ];
       
@@ -30665,6 +31517,7 @@ REGRAS DE FORMATAÇÃO:
       }
       
       console.log('🤖 [Reunião/IA] Chamando callAIProxy com userId:', userId);
+      console.log('🤖 [Reunião/IA] Tamanho da transcrição:', transcricao.length, 'caracteres');
       
       // CHAMADA COM MAX_TOKENS AUMENTADO para resumo detalhado
       // max_tokens: 4096 permite resumos bem mais longos e detalhados
@@ -31267,12 +32120,31 @@ REGRAS DE FORMATAÇÃO:
     
     function toggleReunioesChatSidebar() {
       const sidebar = document.getElementById('reunioesChatSidebar');
-      if (sidebar) {
+      const overlay = document.getElementById('reunioesChatOverlay');
+      
+      if (!sidebar) return;
+      
+      // Desktop
+      if (window.innerWidth > 900) {
         sidebar.classList.toggle('collapsed');
-        // Em mobile, usar classe open
-        if (window.innerWidth <= 768) {
-          sidebar.classList.toggle('open');
-        }
+        return;
+      }
+      
+      // Mobile
+      const isOpen = sidebar.classList.contains('show');
+      
+      if (isOpen) {
+        // Fechar
+        sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
+        // Re-enable scroll on body
+        document.body.style.overflow = '';
+      } else {
+        // Abrir
+        sidebar.classList.add('show');
+        if (overlay) overlay.classList.add('show');
+        // Prevent background scroll when sidebar is open
+        document.body.style.overflow = 'hidden';
       }
     }
     window.toggleReunioesChatSidebar = toggleReunioesChatSidebar;
@@ -31314,9 +32186,11 @@ REGRAS DE FORMATAÇÃO:
       renderReunioesChatHistoryList();
       
       // Fechar sidebar em mobile
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 900) {
         const sidebar = document.getElementById('reunioesChatSidebar');
-        if (sidebar) sidebar.classList.remove('open');
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (sidebar) sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
       }
     }
     window.startNewReuniaoChat = startNewReuniaoChat;
@@ -31472,9 +32346,11 @@ TÍTULO:` }];
       renderReunioesChatHistoryList();
       
       // Fechar sidebar em mobile
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 900) {
         const sidebar = document.getElementById('reunioesChatSidebar');
-        if (sidebar) sidebar.classList.remove('open');
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (sidebar) sidebar.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
       }
     }
     window.loadReuniaoChat = loadReuniaoChat;
@@ -32074,6 +32950,165 @@ ${contextoReunioes}`;
       }
     }
     window.sendReuniaoChat = sendReuniaoChat;
+    
+    // ========== OTIMIZAÇÃO MOBILE - ASSISTENTE DE REUNIÕES ==========
+    function initMobileOptimizationReunioes() {
+      if (typeof window === 'undefined') return;
+      
+      const isMobile = window.innerWidth <= 900;
+      
+      if (isMobile) {
+        console.log('%c📱 MOBILE OPTIMIZATION - Assistente de Reuniões', 'background: #6366f1; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+        
+        // 1. Otimizar área de mensagens do chat
+        const messagesContainer = document.getElementById('reunioesChatMessages');
+        if (messagesContainer) {
+          messagesContainer.style.cssText += `
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
+            will-change: scroll-position;
+          `;
+          
+          // Adicionar listeners para melhor experiência de scroll
+          let scrollTimeout;
+          messagesContainer.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+              // Scroll ended - could add logic here if needed
+            }, 150);
+          }, { passive: true });
+          
+          console.log('✅ Chat messages container otimizado para mobile');
+        }
+        
+        // 2. Otimizar sidebar list
+        const sidebarList = document.getElementById('reunioesChatHistoryList');
+        if (sidebarList) {
+          sidebarList.style.cssText += `
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
+          `;
+          console.log('✅ Sidebar list otimizada para mobile');
+        }
+        
+        // 3. Otimizar textarea do input
+        const chatInput = document.getElementById('reunioesChatInput');
+        if (chatInput) {
+          chatInput.style.cssText += `
+            touch-action: manipulation !important;
+          `;
+          
+          // Prevenir zoom no iOS ao focar
+          chatInput.style.fontSize = '16px';
+          
+          // Auto-scroll para input quando o teclado abrir
+          chatInput.addEventListener('focus', function() {
+            setTimeout(() => {
+              this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+          }, { passive: true });
+          
+          console.log('✅ Chat input otimizado para mobile');
+        }
+        
+        // 4. Otimizar botões de sugestão
+        const suggestionButtons = document.querySelectorAll('.reunioes-chat-suggestions button');
+        suggestionButtons.forEach(btn => {
+          btn.style.cssText += `
+            touch-action: manipulation !important;
+            min-height: 48px !important;
+          `;
+        });
+        if (suggestionButtons.length > 0) {
+          console.log(`✅ ${suggestionButtons.length} botões de sugestão otimizados`);
+        }
+        
+        // 5. Garantir que overlay funcione corretamente
+        const overlay = document.getElementById('reunioesChatOverlay');
+        if (overlay) {
+          overlay.style.cssText += `
+            touch-action: none !important;
+          `;
+          console.log('✅ Overlay otimizado');
+        }
+        
+        // 6. Prevenir bounce scroll no iOS Safari
+        document.body.style.overscrollBehavior = 'none';
+        
+        // 7. Fechar sidebar automaticamente ao clicar em um item (mobile)
+        const sidebar = document.getElementById('reunioesChatSidebar');
+        if (sidebar) {
+          sidebar.addEventListener('click', function(e) {
+            const historyItem = e.target.closest('.reunioes-chat-history-item');
+            if (historyItem && window.innerWidth <= 900) {
+              // Pequeno delay para permitir a seleção antes de fechar
+              setTimeout(() => {
+                toggleReunioesChatSidebar();
+              }, 100);
+            }
+          });
+          console.log('✅ Auto-close sidebar configurado');
+        }
+        
+        // 8. Garantir que a seção chat tenha altura correta
+        const chatSection = document.getElementById('reunioesChatSection');
+        if (chatSection) {
+          chatSection.style.cssText += `
+            touch-action: pan-y pan-x !important;
+            height: calc(100vh - 180px) !important;
+            min-height: 500px !important;
+          `;
+          console.log('✅ Chat section altura otimizada');
+        }
+        
+        console.log('%c✅ MOBILE OPTIMIZATION COMPLETA', 'background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold;');
+      }
+    }
+    
+    // Executar otimização quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileOptimizationReunioes);
+    } else {
+      initMobileOptimizationReunioes();
+    }
+    
+    // Re-executar ao redimensionar (transição mobile <-> desktop)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(initMobileOptimizationReunioes, 300);
+    });
+    
+    // Re-executar quando a aba de Reuniões for aberta
+    const originalShowReunioes = window.showReunioes;
+    if (originalShowReunioes) {
+      window.showReunioes = function() {
+        originalShowReunioes();
+        setTimeout(initMobileOptimizationReunioes, 100);
+        
+        // Garantir que body tenha scroll ativo
+        setTimeout(() => {
+          // Remover qualquer overflow: hidden do body
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          
+          console.log('%c✅ Scroll global ativado para aba Reuniões', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+          console.log('📊 Body scroll:', {
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            bodyScrollable: document.body.scrollHeight > document.body.clientHeight,
+            bodyOverflow: getComputedStyle(document.body).overflowY
+          });
+        }, 150);
+      };
+    }
+    // ========== FIM OTIMIZAÇÃO MOBILE ==========
     
     function askReuniaoSuggestion(pergunta) {
       const input = document.getElementById('reunioesChatInput');
