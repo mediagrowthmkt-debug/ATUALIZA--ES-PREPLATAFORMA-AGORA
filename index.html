@@ -9443,6 +9443,46 @@ function renderReviewNotes(post){
     margin:8px 0;
     font-size:0.95rem;
   }
+  
+  /* Estilos para Modal de Correção de Nomes */
+  .nome-correction-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(30,41,59,0.5);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(148,163,184,0.1);
+  }
+  .nome-correction-item:hover{
+    background: rgba(30,41,59,0.7);
+  }
+  .nome-correction-label{
+    flex: 1;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .nome-correction-arrow{
+    color: #64748b;
+    font-size: 1.2rem;
+  }
+  .nome-correction-input{
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(148,163,184,0.2);
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+  }
+  .nome-correction-input:focus{
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(15,23,42,0.8);
+  }
+  
   @media(max-width:820px){
     .reunioes-grid{
       justify-content:center;
@@ -13902,8 +13942,34 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
     <div class="reuniao-modal-footer">
       <button type="button" class="btn secondary" onclick="copyReuniaoResumo()" style="margin-right: auto;">📋 Copiar p/ WhatsApp</button>
       <button type="button" class="btn secondary" onclick="copyReuniaoResumoTexto()">📄 Copiar Texto</button>
+      <button type="button" class="btn secondary" onclick="openMudarNomesModal()">✏️ Mudar Nomes</button>
       <button type="button" class="btn secondary" onclick="regenerateReuniaoResumo()" id="regenerateResumoBtn">🔄 Regenerar Resumo</button>
       <button type="button" class="btn" onclick="closeReuniaoViewModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Mudar Nomes -->
+<div class="reuniao-modal" id="mudarNomesModal">
+  <div class="reuniao-modal-content" style="max-width: 700px;">
+    <div class="reuniao-modal-header">
+      <h3>✏️ Corrigir Nomes na Transcrição</h3>
+      <button type="button" class="reuniao-modal-close" onclick="closeMudarNomesModal()">✕</button>
+    </div>
+    <div class="reuniao-modal-body">
+      <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 12px;">
+        Foram encontrados os seguintes <strong style="color:#60a5fa;">nomes de pessoas e empresas</strong> na transcrição. Corrija os nomes incorretos ao lado:
+      </p>
+      <div style="background:rgba(59,130,246,0.1);border-left:3px solid #3b82f6;padding:10px 12px;margin-bottom:16px;border-radius:4px;">
+        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.5;">
+          💡 <strong style="color:#60a5fa;">Dica:</strong> O sistema filtra automaticamente palavras comuns e técnicas. Apenas nomes próprios de pessoas e empresas são listados.
+        </p>
+      </div>
+      <div id="nomesListContainer"></div>
+    </div>
+    <div class="reuniao-modal-footer">
+      <button type="button" class="btn secondary" onclick="closeMudarNomesModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="aplicarCorrecaoNomes()" id="aplicarNomesBtn">✅ Aplicar Correções</button>
     </div>
   </div>
 </div>
@@ -30570,10 +30636,12 @@ Responda APENAS com o título. Exemplos de bons títulos:
 
 Crie um RESUMO EXECUTIVO COMPLETO da reunião abaixo. O resumo deve ser claro, bem organizado e permitir que qualquer pessoa entenda o que foi discutido.
 
+**IMPORTANTE:** Leia e analise TODA a transcrição fornecida. Não omita nenhuma parte da conversa.
+
 **OBJETIVO DA REUNIÃO:** ${objetivo}
 
-**TRANSCRIÇÃO:**
-${transcricao.substring(0, 12000)}
+**TRANSCRIÇÃO COMPLETA:**
+${transcricao}
 
 ---
 
@@ -30583,54 +30651,62 @@ GERE O RESUMO seguindo esta estrutura. Use formatação SIMPLES e LIMPA (sem hea
 Escreva 2-4 frases explicando o contexto da reunião, participantes (se mencionado) e foco principal.
 
 **📌 TÓPICOS DISCUTIDOS**
-Liste cada tópico abordado com uma breve descrição do que foi conversado. Use bullet points simples:
+Liste TODOS os tópicos abordados ao longo de TODA a conversa, com uma breve descrição do que foi conversado. Use bullet points simples:
 - **Nome do tópico:** Descrição do que foi discutido sobre este ponto.
 - **Outro tópico:** Descrição...
 
 **✅ DECISÕES TOMADAS**
-Liste as decisões acordadas de forma clara:
+Liste TODAS as decisões acordadas de forma clara (do início ao fim da transcrição):
 - Decisão 1 (responsável, se mencionado)
 - Decisão 2
 
 **📋 TAREFAS E RESPONSÁVEIS**
-Liste as ações definidas:
+Liste TODAS as ações definidas ao longo da reunião:
 - **Tarefa:** Descrição | Responsável: Nome | Prazo: Data (se definido)
 - **Tarefa:** Descrição | Responsável: Nome | Prazo: Data
 
 **📊 DADOS MENCIONADOS**
-Liste números, métricas ou valores citados:
+Liste TODOS os números, métricas ou valores citados na conversa completa:
 - Dado 1: valor/contexto
 - Dado 2: valor/contexto
 (Se não houver dados, escreva "Nenhum dado numérico mencionado")
 
 **⚠️ PROBLEMAS IDENTIFICADOS**
+Liste TODOS os problemas ou desafios mencionados:
 - Problema ou desafio mencionado
 (Se não houver, escreva "Nenhum problema específico levantado")
 
 **💡 INSIGHTS IMPORTANTES**
+Liste TODAS as observações relevantes da conversa completa:
 - Observações relevantes da conversa
 - Sugestões ou recomendações feitas
 
 **❓ PENDÊNCIAS**
+Liste TODAS as questões que ficaram em aberto ao longo da reunião:
 - Questões que ficaram em aberto
 - Pontos que precisam de follow-up
 
 **📅 PRÓXIMOS PASSOS**
+Liste TODAS as próximas ações ou reuniões definidas:
 - Próximas ações ou reuniões definidas
 
 ---
 
-REGRAS DE FORMATAÇÃO:
-1. NÃO use ### ou #### - apenas **texto em negrito** para títulos
-2. Use bullet points simples (-)
-3. Seja direto e objetivo
-4. Mantenha parágrafos curtos
-5. Se uma seção não tiver informação, escreva brevemente "Não mencionado"
-6. O resultado deve parecer um documento profissional e fácil de ler`;
+REGRAS CRÍTICAS:
+1. LEIA E ANALISE A TRANSCRIÇÃO COMPLETA - do início ao fim
+2. NÃO omita informações da segunda metade ou final da conversa
+3. Se a reunião for longa, seja proporcionalmente detalhado no resumo
+4. NÃO use ### ou #### - apenas **texto em negrito** para títulos
+5. Use bullet points simples (-)
+6. Seja direto e objetivo
+7. Mantenha parágrafos curtos
+8. Se uma seção não tiver informação, escreva brevemente "Não mencionado"
+9. O resultado deve parecer um documento profissional e fácil de ler
+10. GARANTA que informações do final da transcrição estejam incluídas`;
 
       // Formato de mensagens igual à aba de IA (OpenRouter/OpenAI format)
       const messages = [
-        { role: 'system', content: 'Você é um assistente que cria resumos de reuniões profissionais. Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro e objetivo.' },
+        { role: 'system', content: 'Você é um assistente que cria resumos COMPLETOS e DETALHADOS de reuniões profissionais. SEMPRE leia e analise a transcrição inteira, do início ao fim. Use formatação limpa com negrito para títulos e bullet points para listas. Nunca use ### ou ####. Seja claro, objetivo e não omita informações importantes de nenhuma parte da conversa.' },
         { role: 'user', content: promptContent }
       ];
       
@@ -30666,9 +30742,10 @@ REGRAS DE FORMATAÇÃO:
       
       console.log('🤖 [Reunião/IA] Chamando callAIProxy com userId:', userId);
       
-      // CHAMADA COM MAX_TOKENS AUMENTADO para resumo detalhado
-      // max_tokens: 4096 permite resumos bem mais longos e detalhados
-      const data = await window.callAIProxy(window.IA_CONFIG.model, messages, userId, 4096, 0.3);
+      // CHAMADA COM MAX_TOKENS AUMENTADO para resumo detalhado e completo
+      // max_tokens: 8192 permite que transcrições longas resultem em resumos detalhados
+      // sem corte de conteúdo
+      const data = await window.callAIProxy(window.IA_CONFIG.model, messages, userId, 8192, 0.3);
       
       console.log('🤖 [Reunião/IA] Resposta recebida:', data);
       
@@ -30776,6 +30853,530 @@ REGRAS DE FORMATAÇÃO:
       currentViewingReuniao = null;
     }
     window.closeReuniaoViewModal = closeReuniaoViewModal;
+
+    // ==================== CORREÇÃO DE NOMES ====================
+    
+    // Calcular similaridade entre dois nomes (algoritmo de distância de Levenshtein simplificado)
+    function calcularSimilaridade(nome1, nome2){
+      const s1 = nome1.toLowerCase().trim();
+      const s2 = nome2.toLowerCase().trim();
+      
+      // Se são idênticos
+      if(s1 === s2) return 1.0;
+      
+      // Se um contém o outro (ex: "João" e "João Silva")
+      if(s1.includes(s2) || s2.includes(s1)) return 0.85;
+      
+      // Distância de Levenshtein simplificada
+      const len1 = s1.length;
+      const len2 = s2.length;
+      const maxLen = Math.max(len1, len2);
+      
+      if(maxLen === 0) return 1.0;
+      
+      let distance = 0;
+      const minLen = Math.min(len1, len2);
+      
+      // Contar diferenças
+      for(let i = 0; i < minLen; i++){
+        if(s1[i] !== s2[i]) distance++;
+      }
+      distance += Math.abs(len1 - len2);
+      
+      return 1 - (distance / maxLen);
+    }
+    
+    // Agrupar nomes similares (variantes de transcrição)
+    function agruparNomesSimilares(nomes){
+      const grupos = [];
+      const processados = new Set();
+      
+      nomes.forEach(nome => {
+        if(processados.has(nome)) return;
+        
+        const grupo = {
+          principal: nome,
+          variantes: []
+        };
+        
+        // Buscar nomes similares
+        nomes.forEach(outroNome => {
+          if(nome === outroNome || processados.has(outroNome)) return;
+          
+          const similaridade = calcularSimilaridade(nome, outroNome);
+          
+          // Se similaridade > 70% ou um contém o outro, são variantes
+          if(similaridade > 0.7){
+            grupo.variantes.push(outroNome);
+            processados.add(outroNome);
+          }
+        });
+        
+        processados.add(nome);
+        
+        // Apenas adicionar ao grupo se tiver variantes OU se aparecer múltiplas vezes
+        if(grupo.variantes.length > 0){
+          grupos.push(grupo);
+        }
+      });
+      
+      return grupos;
+    }
+    
+    // Contar ocorrências de cada nome na transcrição
+    function contarOcorrenciasNome(transcricao, nome){
+      const regex = new RegExp(`\\b${nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      const matches = transcricao.match(regex);
+      return matches ? matches.length : 0;
+    }
+    
+    function extrairNomesDaTranscricao(transcricao){
+      // Extrair APENAS nomes de PESSOAS e EMPRESAS da transcrição
+      // Pattern: Nomes compostos (ex: "João Silva") ou nomes simples em contextos específicos
+      const nomes = new Set();
+      
+      // 1. PRIMEIRO: Tentar encontrar nomes compostos (muito mais confiável)
+      // Padrão: Maiúscula + minúsculas + espaço + Maiúscula + minúsculas
+      const regexCompostos = /\b([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{2,})\s+([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{2,}(?:\s+[A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{2,})?)\b/g;
+      
+      let matchCompostos;
+      while((matchCompostos = regexCompostos.exec(transcricao)) !== null){
+        const nomeCompleto = matchCompostos[0];
+        nomes.add(nomeCompleto);
+      }
+      
+      // 2. SEGUNDO: Encontrar nomes simples mas com VALIDAÇÃO RIGOROSA
+      const regex = /\b([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{2,})\b/g;
+      
+      let match;
+      while((match = regex.exec(transcricao)) !== null){
+        const palavra = match[1];
+        
+        // Lista ULTRA EXTENSA de palavras que NÃO são nomes de pessoas/empresas
+        const palavrasComuns = [
+          // === VERBOS E EXPRESSÕES COMUNS (que aparecem capitalizados no início de frases) ===
+          'Acho', 'Achei', 'Achou', 'Acabou', 'Acabei', 'Abraço', 'Abri', 'Abriu',
+          'Adicionar', 'Adicionei', 'Addition', 'Adicional', 'Adicionar', 'Adicionado',
+          'Aham', 'Ahh', 'Aha', 'Aí', 'Ai',
+          'Ajuda', 'Ajudar', 'Ajudou', 'Ajudei', 'Ajustei', 'Ajuste', 'Ajustes',
+          'Algo', 'Alguém', 'Algum', 'Alguma', 'Alguns', 'Algumas',
+          'Ali', 'Aliás', 'Além',
+          'Amo', 'Amei', 'Ameii',
+          'Apesar', 'Apertei', 'Apenas',
+          'Aplicar', 'Apliquei', 'Aprovei', 'Aprovar', 'Aprovado', 'Aprovada',
+          'Aqui', 'Aquilo',
+          'Atualizar', 'Atualizei', 'Atualizado',
+          'Beleza', 'Bem', 'Blz', 'Bom', 'Boa', 'Bora',
+          'Cada', 'Cara', 'Caso', 'Casos', 'Certo', 'Certa', 'Claro', 'Clara',
+          'Coisa', 'Coisas', 'Coloca', 'Coloquei', 'Com', 'Como', 'Comecei', 'Começar',
+          'Consegui', 'Conseguir', 'Confirma', 'Confirmei', 'Conforme', 'Conhece', 'Conheci',
+          'Conta', 'Contas', 'Contou', 'Contei', 'Continue', 'Continuei',
+          'Copia', 'Copiar', 'Copiei', 'Correto', 'Correta',
+          'Criado', 'Criada', 'Criar', 'Criei',
+          'Dai', 'Daí', 'Daqui', 'Dar', 'Das', 'Date', 'Deve', 'Devo',
+          'Deu', 'Dei', 'Deixa', 'Deixei', 'Dele', 'Dela', 'Deles', 'Delas',
+          'Demais', 'Dentro', 'Depois', 'Desculpa', 'Desde',
+          'Desse', 'Dessa', 'Desses', 'Dessas', 'Deste', 'Desta',
+          'Disse', 'Dito', 'Disso', 'Diz', 'Dizer',
+          'Ele', 'Ela', 'Eles', 'Elas',
+          'Email', 'Embora', 'Enfim', 'Entao', 'Então', 'Entendi', 'Entendeu', 'Entender',
+          'Entre', 'Entretanto', 'Enviar', 'Enviei', 'Enviado',
+          'Era', 'Eram', 'Esse', 'Essa', 'Esses', 'Essas', 'Este', 'Esta', 'Estes', 'Estas',
+          'Estava', 'Estavam', 'Estou', 'Estava', 'Estar', 'Este',
+          'Etc', 'Exatamente', 'Exato', 'Exata', 'Exemplo', 'Exemplos',
+          'Fala', 'Falei', 'Falou', 'Falar', 'Falado', 'Falta', 'Faltou', 'Faltam',
+          'Faz', 'Faço', 'Faz', 'Fazer', 'Fazendo', 'Feito', 'Feita', 'Fez', 'Fiz',
+          'Fica', 'Ficou', 'Ficar', 'Fiquei',
+          'Final', 'Finalmente', 'Foi', 'Foram', 'Fomos', 'Forma', 'Formas',
+          'Fora', 'Fui',
+          'Gente', 'Geral', 'Got', 'Gostei', 'Gostar', 'Gostou',
+          'Grande', 'Grandes',
+          'Há', 'Haha', 'Hmm', 'Hmmm', 'Hoje', 'Hora', 'Horas',
+          'Ia', 'Idem', 'Ideia', 'Ideias', 'Imagine', 'Imagina',
+          'Indo', 'Inclusive', 'Inicio', 'Início', 'Ir', 'Isso', 'Isto',
+          'Já', 'Jamais', 'Jeito', 'Jeitos', 'Junto', 'Juntos',
+          'Lá', 'Legal', 'Lembra', 'Lembrei', 'Ler', 'Li', 'Leu',
+          'Liga', 'Ligar', 'Liguei', 'Lista', 'Listas', 'Local', 'Locais',
+          'Logo', 'Loja', 'Lojas', 'Lugar', 'Lugares',
+          'Manda', 'Mandar', 'Mandei', 'Mandou', 'Maneira', 'Manter', 'Mantive',
+          'Mas', 'Mass', 'Maior', 'Maiores', 'Mais', 'Mal', 'Marca', 'Marcas',
+          'Meio', 'Melhor', 'Melhores', 'Menor', 'Menores', 'Menos',
+          'Mesmo', 'Mesma', 'Mesmos', 'Mesmas', 'Meu', 'Meus', 'Minha', 'Minhas',
+          'Mostra', 'Mostrar', 'Mostrei', 'Mostrou', 'Mudou', 'Mudar', 'Mudei',
+          'Muito', 'Muita', 'Muitos', 'Muitas',
+          'Nada', 'Nao', 'Não', 'Né', 'Neh', 'Nem', 'Nenhum', 'Nenhuma',
+          'Nesse', 'Nessa', 'Nesses', 'Nessas', 'Neste', 'Nesta',
+          'Nisso', 'Nisto', 'Nome', 'Nomes', 'Normal', 'Normalmente',
+          'Nosso', 'Nossa', 'Nossos', 'Nossas', 'Nota', 'Notas', 'Notei',
+          'Nova', 'Novo', 'Novas', 'Novos', 'Nunca', 'Número', 'Números',
+          'Obvio', 'Obviamente', 'Oi', 'Oia', 'Oii', 'Ok', 'Okay', 'Olá', 'Olha', 'Olhei',
+          'Onde', 'Ontem', 'Opa', 'Opção', 'Opções', 'Opinião', 'Opiniões',
+          'Ora', 'Ordem', 'Outro', 'Outra', 'Outros', 'Outras',
+          'Para', 'Parece', 'Pareceu', 'Parte', 'Partes', 'Passou', 'Passar', 'Passou',
+          'Pediu', 'Pedir', 'Pedi', 'Pega', 'Pegar', 'Peguei', 'Pegou',
+          'Pelo', 'Pela', 'Pelos', 'Pelas', 'Pensa', 'Pensar', 'Pensei', 'Pensou',
+          'Pequeno', 'Pequena', 'Perfeito', 'Perfeita', 'Pergunta', 'Perguntas', 'Perguntei',
+          'Permite', 'Permitir', 'Pessoa', 'Pessoas', 'Pessoal',
+          'Pode', 'Podem', 'Poder', 'Podia', 'Poderia', 'Pois', 'Ponha',
+          'Ponto', 'Pontos', 'Por', 'Porque', 'Porém', 'Portanto', 'Posso',
+          'Pouco', 'Pouca', 'Poucos', 'Poucas', 'Pra', 'Prazo', 'Prazos',
+          'Precisa', 'Precisar', 'Precisei', 'Precisou', 'Preferir', 'Prefiro',
+          'Primeira', 'Primeiro', 'Primeiras', 'Primeiros', 'Principal', 'Principais',
+          'Pronto', 'Pronta', 'Próprio', 'Própria', 'Próximo', 'Próxima', 'Próximos', 'Próximas',
+          'Pude', 'Puder',
+          'Qual', 'Qualquer', 'Quais', 'Quando', 'Quanto', 'Quanta', 'Quantos', 'Quantas',
+          'Quase', 'Que', 'Quem', 'Quer', 'Querer', 'Quis', 'Questão', 'Questões',
+          'Rápido', 'Rápida', 'Realmente', 'Receber', 'Recebi', 'Recebeu',
+          'Responder', 'Respondi', 'Respondeu', 'Resposta', 'Respostas',
+          'Resto', 'Resultado', 'Resultados',
+          'Sabe', 'Saber', 'Sabem', 'Sabia', 'Saiu', 'Sair', 'Sai',
+          'Será', 'Seria', 'Seriam', 'Sem', 'Sempre', 'Sendo', 'Senão',
+          'Seu', 'Seus', 'Sua', 'Suas', 'Só', 'Sobre', 'Somente',
+          'Sou', 'Super',
+          'Talvez', 'Também', 'Tá', 'Ta', 'Tava', 'Tem', 'Temos', 'Tendo', 'Tenho', 'Ter',
+          'Teria', 'Teve', 'Tinha', 'Tinham', 'Tipo', 'Tipos', 'Tive',
+          'Toda', 'Todo', 'Todas', 'Todos', 'Toma', 'Tomar', 'Tomei', 'Tomou',
+          'Top', 'Total', 'Totalmente', 'Trabalho', 'Trabalhar', 'Trabalhei',
+          'Traz', 'Trazer', 'Trouxe', 'Tudo', 'Tudo',
+          'Uai', 'Uhum', 'Último', 'Última', 'Últimos', 'Últimas', 'Um', 'Uma', 'Uns', 'Umas',
+          'Usa', 'Usar', 'Usei', 'Usou', 'Usuário', 'Usuários', 'Útil',
+          'Vai', 'Vale', 'Valer', 'Valeu', 'Vamos', 'Vão', 'Várias', 'Vários',
+          'Vai', 'Ver', 'Verdade', 'Vez', 'Vezes', 'Vi', 'Via', 'Vimos',
+          'Viu', 'Você', 'Vocês', 'Voltar', 'Voltei', 'Voltou', 'Vou',
+          
+          // === TERMOS DE NEGÓCIO/TRABALHO ===
+          'Cliente', 'Clientes', 'Empresa', 'Empresas', 'Equipe', 'Time', 'Times',
+          'Projeto', 'Projetos', 'Campanha', 'Campanhas', 'Reunião', 'Reuniões',
+          'Mês', 'Meses', 'Ano', 'Anos', 'Dia', 'Dias', 'Semana', 'Semanas',
+          'Contrato', 'Contratos', 'Proposta', 'Propostas', 'Orçamento', 'Orçamentos',
+          'Serviço', 'Serviços', 'Produto', 'Produtos', 'Venda', 'Vendas',
+          'Meta', 'Metas', 'Objetivo', 'Objetivos', 'Resultado', 'Resultados',
+          'Planejamento', 'Estratégia', 'Tática', 'Plano', 'Relatório', 'Relatórios',
+          'Análise', 'Dados', 'Métrica', 'Métricas', 'Indicador', 'Indicadores',
+          'Processo', 'Processos', 'Fluxo', 'Etapa', 'Etapas', 'Fase', 'Fases',
+          'Área', 'Áreas', 'Setor', 'Setores', 'Departamento', 'Gerência', 'Diretoria',
+          'Cargo', 'Função', 'Posição', 'Vaga', 'Vagas',
+          
+          // === MARKETING E DIGITAL ===
+          'Anúncio', 'Anúncios', 'Lead', 'Leads', 'Conversão', 'Conversões',
+          'Click', 'Clicks', 'Impressão', 'Impressões', 'Alcance', 'Engajamento',
+          'Post', 'Posts', 'Conteúdo', 'Conteúdos', 'Publicação', 'Publicações',
+          'Story', 'Stories', 'Reel', 'Reels', 'Feed', 'Timeline',
+          'Página', 'Páginas', 'Perfil', 'Perfis', 'Conta', 'Contas',
+          'Tráfego', 'Mídia', 'Mídias', 'Canal', 'Canais',
+          
+          // === TECNOLOGIA (MARCAS E TERMOS) ===
+          'Google', 'Facebook', 'Instagram', 'Meta', 'Twitter', 'Linkedin', 'Tiktok',
+          'WhatsApp', 'Telegram', 'Youtube', 'Gmail', 'Outlook', 'Teams', 'Zoom',
+          'Email', 'Site', 'Sites', 'Blog', 'Blogs', 'Portal', 'Sistema', 'Sistemas',
+          'Plataforma', 'Plataformas', 'Software', 'Aplicativo', 'App', 'Apps',
+          'Excel', 'Word', 'Powerpoint', 'Drive', 'Dropbox', 'Cloud',
+          'Analytics', 'Ads', 'Pixel', 'Tag', 'Link', 'Links', 'Url',
+          
+          // === MESES E DIAS DA SEMANA ===
+          'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+          'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo',
+          
+          // === DOCUMENTOS E FORMATOS ===
+          'Documento', 'Documentos', 'Arquivo', 'Arquivos', 'Planilha', 'Planilhas',
+          'Apresentação', 'Slide', 'Slides', 'Pdf', 'Imagem', 'Imagens',
+          'Vídeo', 'Vídeos', 'Áudio', 'Foto', 'Fotos',
+          
+          // === TERMOS FINANCEIROS ===
+          'Valor', 'Valores', 'Preço', 'Preços', 'Custo', 'Custos',
+          'Investimento', 'Investimentos', 'Receita', 'Receitas', 'Lucro', 'Lucros',
+          'Pagamento', 'Pagamentos', 'Fatura', 'Faturas',
+          'Budget', 'Verba', 'Verbas', 'Dinheiro', 'Grana',
+          
+          // === LOCAIS GENÉRICOS ===
+          'Local', 'Locais', 'Lugar', 'Lugares', 'Espaço', 'Espaços',
+          'Sala', 'Salas', 'Escritório', 'Loja', 'Lojas',
+          
+          // === INGLÊS COMUM ===
+          'Add', 'Addition', 'Already', 'Also', 'And', 'Are', 'Because', 'Been', 'Before',
+          'But', 'Can', 'Could', 'Did', 'Does', 'Done', 'Each', 'Even', 'Every',
+          'For', 'From', 'Get', 'Got', 'Had', 'Has', 'Have', 'Here', 'How',
+          'Into', 'Its', 'Just', 'Know', 'Like', 'Make', 'Many', 'May', 'More',
+          'Most', 'Much', 'New', 'Next', 'Not', 'Now', 'Off', 'Old', 'One',
+          'Only', 'Other', 'Our', 'Out', 'Over', 'Same', 'See', 'Should', 'Some',
+          'Such', 'Take', 'Than', 'That', 'The', 'Their', 'Them', 'Then', 'There',
+          'These', 'They', 'This', 'Those', 'Through', 'Time', 'Two', 'Under',
+          'Very', 'Was', 'Way', 'Well', 'Were', 'What', 'When', 'Where', 'Which',
+          'While', 'Who', 'Will', 'With', 'Would', 'Year', 'You', 'Your'
+        ];
+        
+        // Verificar se a palavra NÃO está na lista de palavras comuns
+        if(!palavrasComuns.includes(palavra)){
+          // === FILTROS ADICIONAIS ULTRA RIGOROSOS ===
+          
+          // 1. Rejeitar se for muito curto (< 3 letras) ou muito longo (> 30)
+          if(palavra.length < 3 || palavra.length > 30) continue;
+          
+          // 2. Rejeitar terminações típicas de palavras comuns (não nomes)
+          if(palavra.match(/(ção|são|mento|dade|tivo|tiva|mente|ando|endo|indo|ado|ido|edo|ou|ei|iu|am|em|ia|iam)$/i)) continue;
+          
+          // 3. Rejeitar palavras que aparecem em início de frase (contexto comum)
+          // Verificar se a palavra aparece logo após ponto, exclamação ou interrogação
+          const regexIniciofrase = new RegExp(`[.!?]\\s+${palavra}\\b`, 'g');
+          if(regexIniciofrase.test(transcricao)){
+            // Contar total de ocorrências
+            const regexTotal = new RegExp(`\\b${palavra}\\b`, 'g');
+            const totalOcorrencias = (transcricao.match(regexTotal) || []).length;
+            const ocorrenciasInicioFrase = (transcricao.match(regexIniciofrase) || []).length;
+            
+            // Se mais de 50% das ocorrências são no início de frase, provavelmente não é nome
+            if(ocorrenciasInicioFrase / totalOcorrencias > 0.5) continue;
+          }
+          
+          // 4. Validar se parece nome próprio (heurísticas adicionais)
+          // Aceitar se:
+          // - Aparece no meio de frase (mais provável ser nome)
+          // - OU tem padrão de nome (ex: termina com 'o', 'a', 'i' comum em nomes brasileiros)
+          const padroesNomeProprio = /[aeiou]$/i; // Maioria dos nomes termina com vogal
+          const apareceNoMeio = new RegExp(`[a-z]\\s+${palavra}\\s+[a-z]`, 'i').test(transcricao);
+          
+          if(apareceNoMeio || padroesNomeProprio.test(palavra)){
+            nomes.add(palavra);
+          }
+        }
+      }
+      
+      // Converter para array e ordenar alfabeticamente
+      return Array.from(nomes).sort();
+    }
+    
+    function openMudarNomesModal(){
+      if(!currentViewingReuniao){
+        mgToast('⚠️ Nenhuma reunião selecionada');
+        return;
+      }
+      
+      const modal = document.getElementById('mudarNomesModal');
+      const container = document.getElementById('nomesListContainer');
+      
+      if(!modal || !container) return;
+      
+      const nomes = extrairNomesDaTranscricao(currentViewingReuniao.transcricao);
+      
+      if(nomes.length === 0){
+        mgToast('ℹ️ Nenhum nome encontrado na transcrição');
+        return;
+      }
+      
+      // Agrupar nomes similares
+      const gruposSimilares = agruparNomesSimilares(nomes);
+      
+      // Contar ocorrências de cada nome
+      const nomesComOcorrencias = nomes.map(nome => ({
+        nome,
+        ocorrencias: contarOcorrenciasNome(currentViewingReuniao.transcricao, nome)
+      }));
+      
+      // Ordenar: grupos similares primeiro, depois por ocorrências, depois alfabético
+      nomesComOcorrencias.sort((a, b) => {
+        // Verificar se estão em grupos similares
+        const grupoA = gruposSimilares.find(g => g.principal === a.nome || g.variantes.includes(a.nome));
+        const grupoB = gruposSimilares.find(g => g.principal === b.nome || g.variantes.includes(b.nome));
+        
+        if(grupoA && !grupoB) return -1;
+        if(!grupoA && grupoB) return 1;
+        
+        // Ordenar por ocorrências (mais frequente primeiro)
+        if(b.ocorrencias !== a.ocorrencias) return b.ocorrencias - a.ocorrencias;
+        
+        // Alfabético
+        return a.nome.localeCompare(b.nome);
+      });
+      
+      // Gerar HTML
+      let html = '';
+      let currentGrupo = null;
+      
+      nomesComOcorrencias.forEach((item, idx) => {
+        const { nome, ocorrencias } = item;
+        
+        // Verificar se este nome faz parte de um grupo similar
+        const grupo = gruposSimilares.find(g => g.principal === nome || g.variantes.includes(nome));
+        
+        // Se encontrou um novo grupo, adicionar header
+        if(grupo && grupo !== currentGrupo){
+          if(currentGrupo !== null){
+            html += '</div>'; // Fechar grupo anterior
+          }
+          
+          currentGrupo = grupo;
+          const todosNomesGrupo = [grupo.principal, ...grupo.variantes];
+          const totalOcorrencias = todosNomesGrupo.reduce((sum, n) => 
+            sum + contarOcorrenciasNome(currentViewingReuniao.transcricao, n), 0
+          );
+          
+          html += `
+            <div style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;padding:8px 12px;margin:16px 0 8px;border-radius:4px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="color:#fbbf24;font-size:1.1rem;">⚠️</span>
+                <div>
+                  <strong style="color:#fbbf24;font-size:0.9rem;">Nomes Similares Detectados</strong>
+                  <div style="color:#94a3b8;font-size:0.8rem;margin-top:2px;">
+                    ${todosNomesGrupo.length} variantes • ${totalOcorrencias} ocorrências no total
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="background:rgba(30,41,59,0.3);padding:8px;border-radius:8px;margin-bottom:12px;">
+          `;
+        } else if(!grupo && currentGrupo !== null){
+          html += '</div>'; // Fechar grupo anterior
+          currentGrupo = null;
+        }
+        
+        // Badge de múltiplas ocorrências
+        const badgeOcorrencias = ocorrencias > 1 
+          ? `<span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:12px;font-size:0.75rem;margin-left:8px;">${ocorrencias}x</span>`
+          : '';
+        
+        // Destaque para nomes em grupos similares
+        const isGrupoSimilar = grupo !== null;
+        const itemStyle = isGrupoSimilar 
+          ? 'background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.3);'
+          : '';
+        
+        html += `
+          <div class="nome-correction-item" style="${itemStyle}">
+            <div class="nome-correction-label">
+              ${nome}${badgeOcorrencias}
+            </div>
+            <div class="nome-correction-arrow">→</div>
+            <input 
+              type="text" 
+              class="nome-correction-input" 
+              id="nomeCorreto_${idx}"
+              data-nome-original="${nome}"
+              placeholder="Nome correto (padronizado)"
+              value="${nome}"
+              ${isGrupoSimilar ? 'style="border-color:#fbbf24;"' : ''}
+            />
+          </div>
+        `;
+      });
+      
+      if(currentGrupo !== null){
+        html += '</div>'; // Fechar último grupo
+      }
+      
+      // Adicionar dica se houver grupos similares
+      if(gruposSimilares.length > 0){
+        html = `
+          <div style="background:rgba(59,130,246,0.1);border-left:3px solid #3b82f6;padding:10px 12px;margin-bottom:16px;border-radius:4px;">
+            <p style="color:#60a5fa;font-size:0.85rem;margin:0;line-height:1.5;">
+              💡 <strong>Variantes detectadas!</strong> Nomes similares foram agrupados. 
+              Padronize-os para o mesmo nome correto para garantir consistência.
+            </p>
+          </div>
+        ` + html;
+      }
+      
+      container.innerHTML = html;
+      modal.classList.add('show');
+    }
+    window.openMudarNomesModal = openMudarNomesModal;
+    
+    function closeMudarNomesModal(){
+      const modal = document.getElementById('mudarNomesModal');
+      if(modal) modal.classList.remove('show');
+    }
+    window.closeMudarNomesModal = closeMudarNomesModal;
+    
+    async function aplicarCorrecaoNomes(){
+      if(!currentViewingReuniao){
+        mgToast('⚠️ Nenhuma reunião selecionada');
+        return;
+      }
+      
+      const aplicarBtn = document.getElementById('aplicarNomesBtn');
+      const inputs = document.querySelectorAll('.nome-correction-input');
+      
+      // Criar mapa de substituições
+      const substituicoes = {};
+      let temCorrecoes = false;
+      
+      inputs.forEach(input => {
+        const nomeOriginal = input.dataset.nomeOriginal;
+        const nomeCorreto = input.value.trim();
+        
+        if(nomeCorreto && nomeCorreto !== nomeOriginal){
+          substituicoes[nomeOriginal] = nomeCorreto;
+          temCorrecoes = true;
+        }
+      });
+      
+      if(!temCorrecoes){
+        mgToast('ℹ️ Nenhuma correção foi feita');
+        return;
+      }
+      
+      try {
+        aplicarBtn.disabled = true;
+        aplicarBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;margin-right:8px;"></div> Aplicando...';
+        
+        // Aplicar substituições na transcrição
+        let transcricaoCorrigida = currentViewingReuniao.transcricao;
+        
+        Object.entries(substituicoes).forEach(([nomeOriginal, nomeCorreto]) => {
+          // Substituir todas as ocorrências do nome (case sensitive, palavra completa)
+          const regex = new RegExp(`\\b${nomeOriginal}\\b`, 'g');
+          transcricaoCorrigida = transcricaoCorrigida.replace(regex, nomeCorreto);
+        });
+        
+        // Atualizar reunião com transcrição corrigida
+        const idx = REUNIOES.findIndex(r => r.id === currentViewingReuniao.id);
+        if(idx === -1){
+          throw new Error('Reunião não encontrada');
+        }
+        
+        REUNIOES[idx].transcricao = transcricaoCorrigida;
+        REUNIOES[idx].updatedAt = new Date().toISOString();
+        
+        // Regenerar resumo com a transcrição corrigida
+        mgToast('🔄 Gerando novo resumo com nomes corrigidos...');
+        
+        const novoResumo = await generateReuniaoResumoIA(
+          transcricaoCorrigida, 
+          currentViewingReuniao.objetivo
+        );
+        
+        REUNIOES[idx].resumo = novoResumo;
+        
+        // Salvar no Firebase
+        await persistReunioes();
+        
+        // Atualizar visualização
+        currentViewingReuniao = REUNIOES[idx];
+        
+        // Atualizar modal de visualização
+        const transcricaoEl = document.getElementById('reuniaoViewTranscricao');
+        const resumoEl = document.getElementById('reuniaoViewResumo');
+        
+        if(transcricaoEl) transcricaoEl.textContent = transcricaoCorrigida;
+        if(resumoEl) resumoEl.innerHTML = formatResumoForDisplay(novoResumo);
+        
+        // Fechar modal de correção
+        closeMudarNomesModal();
+        
+        // Atualizar lista de reuniões
+        renderReunioes(true);
+        
+        mgToast('✅ Nomes corrigidos e resumo atualizado!');
+        
+      } catch(err) {
+        console.error('❌ Erro ao aplicar correções:', err);
+        mgToast('❌ Erro ao aplicar correções: ' + (err.message || 'Erro desconhecido'));
+      } finally {
+        aplicarBtn.disabled = false;
+        aplicarBtn.innerHTML = '✅ Aplicar Correções';
+      }
+    }
+    window.aplicarCorrecaoNomes = aplicarCorrecaoNomes;
 
     async function regenerateReuniaoResumo(){
       if(!currentViewingReuniao) return;
