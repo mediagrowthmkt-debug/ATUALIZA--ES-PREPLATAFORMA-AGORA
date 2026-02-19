@@ -64596,29 +64596,19 @@ FORMATO PADRÃO:
           console.log('🔄 [SYNC] Dados:', checklistData);
           
           try {
-            // Buscar documento do usuário
-            const userRef = doc(db, 'usuarios', uid);
-            const userDoc = await getDoc(userRef);
-            
-            if(!userDoc.exists()){
-              console.error('❌ [SYNC] Documento do usuário não encontrado');
-              continue;
-            }
-            
-            const userData = userDoc.data();
-            const estruturacao = userData.estruturacao || {};
-            
+            // ✅ CORREÇÃO: Usar ESTRUTURACAO_STATE ao invés de userData.estruturacao
+            // A estruturação é carregada de subcoleções e armazenada em ESTRUTURACAO_STATE
             console.log('🔍 [SYNC] Procurando bloco:');
             console.log('  - weekId buscado:', checklistData.weekId);
             console.log('  - blockId buscado:', checklistData.blockId);
-            console.log('  - weekIds disponíveis:', Object.keys(estruturacao));
+            console.log('  - weekIds disponíveis em ESTRUTURACAO_STATE:', Object.keys(ESTRUTURACAO_STATE));
             
-            const weekData = estruturacao[checklistData.weekId];
+            const weekData = ESTRUTURACAO_STATE[checklistData.weekId];
             
             if(!weekData){
               console.error('❌ [SYNC] Semana não encontrada');
               console.error('  - Procurado:', checklistData.weekId);
-              console.error('  - Disponíveis:', Object.keys(estruturacao));
+              console.error('  - Disponíveis:', Object.keys(ESTRUTURACAO_STATE));
               continue;
             }
             
@@ -64629,7 +64619,7 @@ FORMATO PADRÃO:
             }
             
             if(!weekData.blocks || !weekData.blocks[checklistData.blockId]){
-              console.error('❌ [SYNC] Bloco não encontrado na estruturação:', {
+              console.error('❌ [SYNC] Bloco não encontrado:', {
                 weekId: checklistData.weekId,
                 blockId: checklistData.blockId,
                 weekDataKeys: Object.keys(weekData),
@@ -64639,6 +64629,9 @@ FORMATO PADRÃO:
             }
             
             console.log('✅ [SYNC] Bloco encontrado!');
+            
+            // Buscar documento do usuário para salvar
+            const userRef = doc(db, 'usuarios', uid);
             
             // Converter formato items → checkboxes
             const checkboxes = {};
@@ -64652,14 +64645,28 @@ FORMATO PADRÃO:
             console.log('🔄 [SYNC] Atualizando estruturação...');
             console.log('🔄 [SYNC] Checkboxes:', checkboxes);
             
-            // Atualizar Estruturação
-            await updateDoc(userRef, {
-              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.checkboxes`]: checkboxes,
-              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.clientFilled`]: true,
-              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
+            // ✅ CORREÇÃO: Salvar na SUBCOLEÇÃO (não no documento principal)
+            // Caminho: usuarios/{uid}/estruturacao_weeks/{weekId}
+            const weekDocRef = doc(db, 'usuarios', uid, 'estruturacao_weeks', checklistData.weekId);
+            
+            // Atualizar bloco específico na subcoleção
+            await updateDoc(weekDocRef, {
+              [`blocks.${checklistData.blockId}.checkboxes`]: checkboxes,
+              [`blocks.${checklistData.blockId}.clientFilled`]: true,
+              [`blocks.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
             });
             
-            console.log('✅ [SYNC] Estruturação atualizada!');
+            console.log('✅ [SYNC] Estruturação atualizada na subcoleção!');
+            
+            // Atualizar também o ESTRUTURACAO_STATE local
+            if(ESTRUTURACAO_STATE[checklistData.weekId] && 
+               ESTRUTURACAO_STATE[checklistData.weekId].blocks && 
+               ESTRUTURACAO_STATE[checklistData.weekId].blocks[checklistData.blockId]){
+              ESTRUTURACAO_STATE[checklistData.weekId].blocks[checklistData.blockId].checkboxes = checkboxes;
+              ESTRUTURACAO_STATE[checklistData.weekId].blocks[checklistData.blockId].clientFilled = true;
+              ESTRUTURACAO_STATE[checklistData.weekId].blocks[checklistData.blockId].lastUpdated = new Date().toISOString();
+              console.log('✅ [SYNC] ESTRUTURACAO_STATE local atualizado!');
+            }
             
             // Marcar como sincronizado no public_checklist
             await updateDoc(doc(db, 'public_checklists', token), {
@@ -64674,7 +64681,7 @@ FORMATO PADRÃO:
             
             // Recarregar estruturação se estiver aberta
             if(window.location.hash === '#estruturacao'){
-              loadEstruturacaoFromUserData();
+              await loadEstruturacaoFromSubcollections();
               renderEstruturacao();
             }
             
