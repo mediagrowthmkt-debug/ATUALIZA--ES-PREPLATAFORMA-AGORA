@@ -14874,6 +14874,21 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     // expõe instâncias globais para outros scripts (ex.: planilha Macro)
     window.auth = auth;
     window.onAuthStateChanged = onAuthStateChanged;
+    window.db = db;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.setDoc = setDoc;
+    window.updateDoc = updateDoc;
+    
+    // ================================================================
+    // 📋 STUBS para funções de checklist compartilhado
+    // ================================================================
+    // CRÍTICO: Criar placeholders que serão preenchidos mais tarde
+    // Garante que as funções existam quando forem chamadas
+    // ================================================================
+    window.loadSharedChecklist = null;
+    window.renderSharedChecklistForm = null;
+    console.log('✅ [INIT] Stubs de checklist criados');
     
     // ================================================================
     // � VERIFICAÇÃO DE ROTA DE CHECKLIST COMPARTILHADO
@@ -14903,15 +14918,27 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       
       // Aguardar página carregar completamente
       window.addEventListener('load', () => {
-        console.log('📋 [LOAD] Iniciando carregamento do checklist...');
-        setTimeout(() => {
-          if(window.loadSharedChecklist){
-            console.log('📋 [LOAD] Chamando loadSharedChecklist com token:', token);
+        console.log('📋 [LOAD] Página carregada - Aguardando definição completa das funções...');
+        
+        // Aguardar até que as funções sejam definidas (polling)
+        const checkFunctionsReady = setInterval(() => {
+          if(typeof window.loadSharedChecklist === 'function'){
+            console.log('✅ [LOAD] Funções prontas! Carregando checklist...');
+            clearInterval(checkFunctionsReady);
             window.loadSharedChecklist(token);
           } else {
-            console.error('❌ [LOAD] Função loadSharedChecklist não encontrada!');
+            console.log('⏳ [LOAD] Aguardando funções serem definidas...');
           }
-        }, 1000);
+        }, 50); // Check a cada 50ms
+        
+        // Timeout de segurança (10 segundos)
+        setTimeout(() => {
+          clearInterval(checkFunctionsReady);
+          if(typeof window.loadSharedChecklist !== 'function'){
+            console.error('❌ [LOAD] TIMEOUT: Função loadSharedChecklist não foi definida em 10 segundos!');
+            document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:40px">❌ Erro ao carregar checklist. Por favor, recarregue a página.</div>';
+          }
+        }, 10000);
       });
     }
     
@@ -72104,8 +72131,13 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
         return false;
       };
       
+      // ================================================================
+      // 📋 DEFINIÇÃO COMPLETA DAS FUNÇÕES DE CHECKLIST COMPARTILHADO
+      // ================================================================
+      // Preencher os stubs criados no início do script
+      // ================================================================
+      
       // Função para carregar e renderizar checklist compartilhado
-      // ✅ EXPOR GLOBALMENTE para ser chamada no início do carregamento
       window.loadSharedChecklist = async function(token){
         console.log('📋 Carregando checklist compartilhado:', token);
         
@@ -72186,9 +72218,10 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           `;
         }
       }; // Fim de window.loadSharedChecklist
+      console.log('✅ [DEF] window.loadSharedChecklist definida completamente');
       
       // Renderizar formulário do checklist compartilhado
-      function renderSharedChecklistForm(checklistData, checklistRef, token, ownerUid){
+      window.renderSharedChecklistForm = function(checklistData, checklistRef, token, ownerUid){
         const container = document.getElementById('sharedChecklistContainer');
         
         const isCompleted = checklistData.status === 'completed';
@@ -72428,7 +72461,8 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             }
           });
         }
-      }
+      };
+      console.log('✅ [DEF] window.renderSharedChecklistForm definida completamente');
       
       // Verificar rota ao carregar página
       if(window.IS_SHARED_CHECKLIST_MODE || checkSharedChecklistRoute()){
