@@ -14889,7 +14889,30 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       console.log('📋 [EARLY CHECK] Detectada rota de checklist compartilhado - Bloqueando autenticação');
       // Definir flag global para outros scripts não tentarem autenticar
       window.IS_SHARED_CHECKLIST_MODE = true;
-      // O carregamento do checklist será feito mais tarde no código
+      
+      // ✅ Expor Firebase para checklist compartilhado
+      window.db = db;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.setDoc = setDoc;
+      window.updateDoc = updateDoc;
+      
+      // ✅ Extrair token e carregar checklist
+      const token = window.location.hash.replace('#/checklist/', '');
+      console.log('📋 [EARLY CHECK] Token:', token);
+      
+      // Aguardar página carregar completamente
+      window.addEventListener('load', () => {
+        console.log('📋 [LOAD] Iniciando carregamento do checklist...');
+        setTimeout(() => {
+          if(window.loadSharedChecklist){
+            console.log('📋 [LOAD] Chamando loadSharedChecklist com token:', token);
+            window.loadSharedChecklist(token);
+          } else {
+            console.error('❌ [LOAD] Função loadSharedChecklist não encontrada!');
+          }
+        }, 1000);
+      });
     }
     
     // ================================================================
@@ -72082,7 +72105,8 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
       };
       
       // Função para carregar e renderizar checklist compartilhado
-      async function loadSharedChecklist(token){
+      // ✅ EXPOR GLOBALMENTE para ser chamada no início do carregamento
+      window.loadSharedChecklist = async function(token){
         console.log('📋 Carregando checklist compartilhado:', token);
         
         // Esconder área de autenticação e dashboard
@@ -72161,7 +72185,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             </div>
           `;
         }
-      }
+      }; // Fim de window.loadSharedChecklist
       
       // Renderizar formulário do checklist compartilhado
       function renderSharedChecklistForm(checklistData, checklistRef, token, ownerUid){
