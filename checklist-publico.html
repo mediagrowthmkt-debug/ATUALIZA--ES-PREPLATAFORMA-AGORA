@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📋 Checklist - MediaGrowth</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .header-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+    
+    .header h1 {
+      color: #2d3748;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    .header .subtitle {
+      color: #718096;
+      font-size: 1rem;
+    }
+    
+    .progress-bar {
+      background: #e2e8f0;
+      border-radius: 10px;
+      height: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 100%;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    .progress-text {
+      text-align: center;
+      color: #718096;
+      font-size: 0.9rem;
+      margin-bottom: 30px;
+    }
+    
+    .checklist-item {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.2s;
+    }
+    
+    .checklist-item:hover {
+      border-color: #cbd5e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .checklist-item.completed {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    
+    .item-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .checkbox {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    
+    .item-text {
+      flex: 1;
+      color: #2d3748;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .completed .item-text {
+      color: #a0aec0;
+      text-decoration: line-through;
+    }
+    
+    .item-response {
+      width: 100%;
+      min-height: 100px;
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: #2d3748;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    .item-response:focus {
+      outline: none;
+      border-color: #667eea;
+      background: #fefefe;
+    }
+    
+    .item-response::placeholder {
+      color: #a0aec0;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 30px;
+    }
+    
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #718096;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error {
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      color: #c53030;
+    }
+    
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+    
+    .success {
+      background: #f0fff4;
+      border: 2px solid #48bb78;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #22543d;
+    }
+    
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(400px); }
+      to { transform: translateX(0); }
+    }
+    
+    .toast.show {
+      display: block;
+    }
+    
+    .toast.success {
+      border-left: 4px solid #48bb78;
+    }
+    
+    .toast.error {
+      border-left: 4px solid #f56565;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container" id="app">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <h2>Carregando checklist...</h2>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDV73_tF0rx9JqPJKeyC9-KI7hWDdARfXs",
+      authDomain: "mediagrowth-a5349.firebaseapp.com",
+      projectId: "mediagrowth-a5349",
+      storageBucket: "mediagrowth-a5349.firebasestorage.app",
+      messagingSenderId: "716265249248",
+      appId: "1:716265249248:web:e45cb84d59b08c8c31e4bd"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Extrair token da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    console.log('📋 Token:', token);
+    
+    if(!token){
+      showError('❌ Token inválido ou não encontrado na URL');
+    } else {
+      loadChecklist(token);
+    }
+    
+    async function loadChecklist(token){
+      try {
+        console.log('🔄 Carregando checklist do Firebase...');
+        
+        const checklistRef = doc(db, 'public_checklists', token);
+        const checklistDoc = await getDoc(checklistRef);
+        
+        if(!checklistDoc.exists()){
+          throw new Error('Checklist não encontrado ou expirado');
+        }
+        
+        const data = checklistDoc.data();
+        console.log('✅ Dados carregados:', data);
+        
+        // Verificar expiração
+        const now = new Date();
+        const expiresAt = new Date(data.expiresAt);
+        
+        if(now > expiresAt){
+          throw new Error('Este checklist expirou');
+        }
+        
+        // Verificar se já foi completado
+        if(data.status === 'completed'){
+          showSuccess();
+          return;
+        }
+        
+        // Renderizar formulário
+        renderForm(data, checklistRef, token);
+        
+      } catch(err){
+        console.error('❌ Erro:', err);
+        showError(err.message);
+      }
+    }
+    
+    function renderForm(data, checklistRef, token){
+      const progress = Math.round((data.items.filter(i => i.completed).length / data.items.length) * 100);
+      
+      const itemsHtml = data.items.map((item, idx) => `
+        <div class="checklist-item ${item.completed ? 'completed' : ''}" data-idx="${idx}">
+          <div class="item-header">
+            <input type="checkbox" 
+                   class="checkbox" 
+                   data-idx="${idx}"
+                   ${item.completed ? 'checked' : ''}>
+            <label class="item-text">${escapeHtml(item.text)}</label>
+          </div>
+          <textarea class="item-response" 
+                    placeholder="Adicione suas observações ou resposta aqui..."
+                    data-idx="${idx}">${escapeHtml(item.response || '')}</textarea>
+        </div>
+      `).join('');
+      
+      document.getElementById('app').innerHTML = `
+        <div class="header">
+          <div class="header-icon">📋</div>
+          <h1>${escapeHtml(data.blockTitle || data.titulo)}</h1>
+          <p class="subtitle">${escapeHtml(data.weekTitle || data.semana)}</p>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress}%"></div>
+        </div>
+        <div class="progress-text">${progress}% concluído</div>
+        
+        <div id="items">
+          ${itemsHtml}
+        </div>
+        
+        <button class="btn" id="saveBtn">💾 Salvar e Finalizar</button>
+      `;
+      
+      // Event listeners
+      setupEventListeners(data, checklistRef, token);
+    }
+    
+    function setupEventListeners(data, checklistRef, token){
+      const checkboxes = document.querySelectorAll('.checkbox');
+      const textareas = document.querySelectorAll('.item-response');
+      const saveBtn = document.getElementById('saveBtn');
+      
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const idx = parseInt(cb.dataset.idx);
+          data.items[idx].completed = cb.checked;
+          
+          // Atualizar visual
+          const item = cb.closest('.checklist-item');
+          if(cb.checked){
+            item.classList.add('completed');
+          } else {
+            item.classList.remove('completed');
+          }
+          
+          updateProgress(data);
+        });
+      });
+      
+      textareas.forEach(ta => {
+        ta.addEventListener('input', () => {
+          const idx = parseInt(ta.dataset.idx);
+          data.items[idx].response = ta.value;
+        });
+      });
+      
+      saveBtn.addEventListener('click', () => saveChecklist(data, checklistRef, token));
+    }
+    
+    function updateProgress(data){
+      const completed = data.items.filter(i => i.completed).length;
+      const progress = Math.round((completed / data.items.length) * 100);
+      
+      const progressFill = document.querySelector('.progress-fill');
+      const progressText = document.querySelector('.progress-text');
+      
+      if(progressFill) progressFill.style.width = progress + '%';
+      if(progressText) progressText.textContent = progress + '% concluído';
+    }
+    
+    async function saveChecklist(data, checklistRef, token){
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '💾 Salvando...';
+      
+      try {
+        console.log('💾 Salvando checklist...');
+        
+        const completedData = {
+          items: data.items,
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        };
+        
+        // Atualizar na collection pública
+        await updateDoc(checklistRef, completedData);
+        console.log('✅ Collection pública atualizada!');
+        
+        // Atualizar na Estruturação do usuário
+        if(data.uid && data.weekId && data.blockId){
+          try {
+            const userRef = doc(db, 'usuarios', data.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if(userDoc.exists()){
+              const userData = userDoc.data();
+              const estruturacao = userData.estruturacao || {};
+              const weekData = estruturacao[data.weekId];
+              
+              if(weekData && weekData.blocks && weekData.blocks[data.blockId]){
+                console.log('🔄 Atualizando Estruturação...');
+                
+                // Converter formato
+                const checkboxes = {};
+                data.items.forEach((item, idx) => {
+                  checkboxes[idx] = {
+                    checked: item.completed,
+                    observacao: item.response || ''
+                  };
+                });
+                
+                // Atualizar Estruturação
+                await updateDoc(userRef, {
+                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.checkboxes`]: checkboxes,
+                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.clientFilled`]: true,
+                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.lastUpdated`]: new Date().toISOString()
+                });
+                
+                console.log('✅ Estruturação atualizada!');
+              }
+            }
+          } catch(err){
+            console.warn('⚠️ Erro ao atualizar Estruturação:', err);
+          }
+        }
+        
+        // Mostrar sucesso
+        showSuccess();
+        
+      } catch(err){
+        console.error('❌ Erro ao salvar:', err);
+        showToast('❌ Erro ao salvar: ' + err.message, 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Salvar e Finalizar';
+      }
+    }
+    
+    function showSuccess(){
+      document.getElementById('app').innerHTML = `
+        <div class="success">
+          <div class="success-icon">✅</div>
+          <h2 style="margin-bottom:15px">Checklist Enviado com Sucesso!</h2>
+          <p style="color:#718096">Obrigado por preencher. Você pode fechar esta página.</p>
+        </div>
+      `;
+    }
+    
+    function showError(message){
+      document.getElementById('app').innerHTML = `
+        <div class="error">
+          <div class="error-icon">❌</div>
+          <h2 style="margin-bottom:15px">Erro ao Carregar</h2>
+          <p>${escapeHtml(message)}</p>
+        </div>
+      `;
+    }
+    
+    function showToast(message, type = 'success'){
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    function escapeHtml(text){
+      if(!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+  
+</body>
+</html>

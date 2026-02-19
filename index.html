@@ -64565,16 +64565,16 @@ FORMATO PADRÃO:
       // Gerar token único para o link
       const shareToken = generateShareToken();
       
-      // 🔧 Construir URL corretamente para GitHub Pages
-      // Se pathname é "/" ou vazio, usar apenas origin
-      // Se pathname tem valor (ex: /cferrao45), incluir no URL
+      // 🔧 Construir URL para página pública separada (checklist-publico.html)
       let baseUrl = window.location.origin;
       if(window.location.pathname && window.location.pathname !== '/'){
         baseUrl += window.location.pathname;
       }
       // Remover trailing slash se existir
       baseUrl = baseUrl.replace(/\/$/, '');
-      const shareUrl = `${baseUrl}#/checklist/${shareToken}`;
+      
+      // ✅ USAR PÁGINA SEPARADA ao invés de hash route
+      const shareUrl = `${baseUrl}/checklist-publico.html?token=${shareToken}`;
       
       console.log('🔗 [SHARE] Base URL:', baseUrl);
       console.log('🔗 [SHARE] Share URL:', shareUrl);
