@@ -581,21 +581,21 @@ service cloud.firestore {
                     && request.resource.data.blocoIndex is int
                     && request.resource.data.titulo is string;
       
-      // Qualquer pessoa pode atualizar (cliente preenchendo checklist)
+      // ✅ ATUALIZAÇÃO: Qualquer pessoa pode atualizar (cliente preenchendo checklist)
       // Mas apenas campos específicos podem ser modificados por não-autenticados
       allow update: if
         // Usuário autenticado (dono) pode atualizar tudo
         (isSignedIn() && request.auth.uid == resource.data.uid)
         ||
-        // Anônimo (cliente) pode apenas atualizar checkboxes, observações e status
+        // ✅ Anônimo (cliente) pode atualizar items (novo formato), checkboxes, observações e status
         (
           request.auth == null
           && request.resource.data.token == resource.data.token
           && request.resource.data.uid == resource.data.uid
           && request.resource.data.weekId == resource.data.weekId
           && resource.data.diff(request.resource.data).changedKeys().hasOnly([
-            'checkboxes','observacoes','observacoesGerais','completedCount',
-            'lastUpdated','lastUpdatedBy','updatedAt','status'
+            'items','checkboxes','observacoes','observacoesGerais','completedCount',
+            'lastUpdated','lastUpdatedBy','updatedAt','status','completedAt'
           ])
         );
       
