@@ -64718,12 +64718,9 @@ FORMATO PADRÃO:
       const shareToken = generateShareToken();
       
       // 🔧 Construir URL para página pública separada (checklist-publico.html)
-      let baseUrl = window.location.origin;
-      if(window.location.pathname && window.location.pathname !== '/'){
-        baseUrl += window.location.pathname;
-      }
-      // Remover trailing slash se existir
-      baseUrl = baseUrl.replace(/\/$/, '');
+      // ✅ CORREÇÃO: GitHub Pages serve arquivos na raiz, não em subpastas
+      // Usar apenas origin, sem pathname
+      const baseUrl = window.location.origin;
       
       // ✅ USAR PÁGINA SEPARADA ao invés de hash route
       const shareUrl = `${baseUrl}/checklist-publico.html?token=${shareToken}`;
