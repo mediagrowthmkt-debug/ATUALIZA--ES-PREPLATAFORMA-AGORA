@@ -72316,7 +72316,11 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           const checkboxes = container.querySelectorAll('.shared-checklist-checkbox');
           const textareas = container.querySelectorAll('.shared-checklist-textarea');
           const saveBtn = container.querySelector('#saveSharedChecklist');
-          const submitBtn = container.querySelector('#submitSharedChecklist');
+          
+          console.log('📋 [RENDER] Configurando event listeners...');
+          console.log('📋 [RENDER] saveBtn:', saveBtn);
+          console.log('📋 [RENDER] checkboxes:', checkboxes.length);
+          console.log('📋 [RENDER] textareas:', textareas.length);
           
           checkboxes.forEach(cb => {
             cb.addEventListener('change', () => {
@@ -72342,18 +72346,20 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             if(progressText) progressText.textContent = newProgress + '% concluído';
           };
           
-          saveBtn.addEventListener('click', async () => {
-            saveBtn.disabled = true;
-            saveBtn.textContent = '💾 Salvando...';
-            try {
-              console.log('💾 [SAVE] Iniciando salvamento completo...');
-              console.log('💾 [SAVE] Token:', token);
-              console.log('💾 [SAVE] OwnerUID:', ownerUid);
-              console.log('💾 [SAVE] Items a salvar:', checklistData.items);
-              
-              const completedData = {
-                items: checklistData.items,
-                status: 'completed',
+          if(saveBtn){
+            console.log('✅ [RENDER] saveBtn encontrado, adicionando listener');
+            saveBtn.addEventListener('click', async () => {
+              saveBtn.disabled = true;
+              saveBtn.textContent = '💾 Salvando...';
+              try {
+                console.log('💾 [SAVE] Iniciando salvamento completo...');
+                console.log('💾 [SAVE] Token:', token);
+                console.log('💾 [SAVE] OwnerUID:', ownerUid);
+                console.log('💾 [SAVE] Items a salvar:', checklistData.items);
+                
+                const completedData = {
+                  items: checklistData.items,
+                  status: 'completed',
                 completedAt: new Date().toISOString(),
                 lastUpdated: new Date().toISOString()
               };
@@ -72427,71 +72433,10 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
               saveBtn.disabled = false;
               saveBtn.textContent = '💾 Salvar e Fechar';
             }
-          });
-          
-          submitBtn.addEventListener('click', async () => {
-            if(!confirm('Deseja enviar o checklist? Você não poderá mais editá-lo após o envio.')){
-              return;
-            }
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Enviando...';
-            try {
-              console.log('✅ [SUBMIT] Iniciando envio...');
-              console.log('✅ [SUBMIT] Token:', token);
-              console.log('✅ [SUBMIT] OwnerUID:', ownerUid);
-              
-              const completedData = {
-                items: checklistData.items,
-                status: 'completed',
-                completedAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString()
-              };
-              
-              console.log('✅ [SUBMIT] Dados a enviar:', completedData);
-              
-              // Atualizar na collection pública
-              console.log('✅ [SUBMIT] Atualizando collection pública...');
-              await updateDoc(checklistRef, completedData);
-              console.log('✅ [SUBMIT] Collection pública atualizada!');
-              
-              // Também atualizar no documento do usuário (opcional)
-              if(ownerUid){
-                try {
-                  console.log('✅ [SUBMIT] Tentando atualizar documento do usuário...');
-                  const userRef = doc(db, 'usuarios', ownerUid);
-                  const userDoc = await getDoc(userRef);
-                  if(userDoc.exists()){
-                    const sharedChecklists = userDoc.data().sharedChecklists || {};
-                    if(sharedChecklists[token]){
-                      Object.assign(sharedChecklists[token], completedData);
-                      await updateDoc(userRef, { sharedChecklists });
-                      console.log('✅ [SUBMIT] Documento do usuário atualizado!');
-                    } else {
-                      console.warn('⚠️ [SUBMIT] Token não encontrado em sharedChecklists');
-                    }
-                  } else {
-                    console.warn('⚠️ [SUBMIT] Documento do usuário não existe');
-                  }
-                } catch(userErr) {
-                  console.warn('⚠️ [SUBMIT] Erro ao atualizar doc do usuário (não crítico):', userErr.message);
-                }
-              }
-              
-              mgToast('✅ Checklist enviado com sucesso!', 'success');
-              // Recarregar página para mostrar estado concluído
-              setTimeout(() => {
-                window.location.reload();
-              }, 1500);
-            } catch(err) {
-              console.error('❌ [SUBMIT] Erro ao enviar:', err);
-              console.error('❌ [SUBMIT] Detalhes:', err.message);
-              console.error('❌ [SUBMIT] Stack:', err.stack);
-              mgToast('❌ Erro ao salvar: ' + err.message, 'error');
-              saveBtn.disabled = false;
-              saveBtn.textContent = '💾 Salvar e Fechar';
-            }
-          });
+            });
+          } else {
+            console.error('❌ [RENDER] saveBtn não encontrado!');
+          }
         }
       };
       console.log('✅ [DEF] window.renderSharedChecklistForm definida completamente');
