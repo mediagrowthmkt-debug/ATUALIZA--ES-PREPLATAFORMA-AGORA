@@ -64607,15 +64607,38 @@ FORMATO PADRÃO:
             
             const userData = userDoc.data();
             const estruturacao = userData.estruturacao || {};
+            
+            console.log('🔍 [SYNC] Procurando bloco:');
+            console.log('  - weekId buscado:', checklistData.weekId);
+            console.log('  - blockId buscado:', checklistData.blockId);
+            console.log('  - weekIds disponíveis:', Object.keys(estruturacao));
+            
             const weekData = estruturacao[checklistData.weekId];
             
-            if(!weekData || !weekData.blocks || !weekData.blocks[checklistData.blockId]){
+            if(!weekData){
+              console.error('❌ [SYNC] Semana não encontrada');
+              console.error('  - Procurado:', checklistData.weekId);
+              console.error('  - Disponíveis:', Object.keys(estruturacao));
+              continue;
+            }
+            
+            console.log('✅ [SYNC] Semana encontrada');
+            console.log('  - weekData.blocks existe?', !!weekData.blocks);
+            if(weekData.blocks){
+              console.log('  - blockIds disponíveis:', Object.keys(weekData.blocks));
+            }
+            
+            if(!weekData.blocks || !weekData.blocks[checklistData.blockId]){
               console.error('❌ [SYNC] Bloco não encontrado na estruturação:', {
                 weekId: checklistData.weekId,
-                blockId: checklistData.blockId
+                blockId: checklistData.blockId,
+                weekDataKeys: Object.keys(weekData),
+                blocksKeys: weekData.blocks ? Object.keys(weekData.blocks) : 'blocks não existe'
               });
               continue;
             }
+            
+            console.log('✅ [SYNC] Bloco encontrado!');
             
             // Converter formato items → checkboxes
             const checkboxes = {};
@@ -64702,6 +64725,8 @@ FORMATO PADRÃO:
       console.log('🔗 [SHARE] Share URL:', shareUrl);
       console.log('🔗 [SHARE] Origin:', window.location.origin);
       console.log('🔗 [SHARE] Pathname:', window.location.pathname);
+      console.log('🔗 [SHARE] weekId recebido:', weekId, 'tipo:', typeof weekId);
+      console.log('🔗 [SHARE] blockId recebido:', blockId, 'tipo:', typeof blockId);
       
       // Preparar dados do compartilhamento
       const shareData = {
