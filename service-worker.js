@@ -3,7 +3,7 @@
 // ============================================
 // Permite enviar notificações mesmo com app fechado
 
-const CACHE_NAME = 'mediagrowth-v5.5.6';
+const CACHE_NAME = 'mediagrowth-v5.5.7';
 const NOTIFICATION_CHECK_INTERVAL = 60000; // 1 minuto
 
 // ============================================

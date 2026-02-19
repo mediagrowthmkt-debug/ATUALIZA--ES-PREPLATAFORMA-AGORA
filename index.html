@@ -72288,7 +72288,12 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             
             ${isCompleted ? `
               <div class="shared-checklist-completed-badge">
-                ✅ Checklist enviado com sucesso!
+                ✅ Checklist salvo com sucesso!
+              </div>
+              <div class="shared-checklist-actions" style="margin-top:20px">
+                <button class="shared-checklist-btn shared-checklist-btn-save" onclick="window.close()">
+                  ← Voltar
+                </button>
               </div>
             ` : ''}
             
@@ -72299,10 +72304,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             ${!isCompleted ? `
               <div class="shared-checklist-actions">
                 <button class="shared-checklist-btn shared-checklist-btn-save" id="saveSharedChecklist">
-                  💾 Salvar Progresso
-                </button>
-                <button class="shared-checklist-btn shared-checklist-btn-save" id="submitSharedChecklist">
-                  ✅ Enviar Checklist
+                  💾 Salvar e Fechar
                 </button>
               </div>
             ` : ''}
@@ -72344,56 +72346,86 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             saveBtn.disabled = true;
             saveBtn.textContent = '💾 Salvando...';
             try {
-              console.log('💾 [SAVE] Iniciando salvamento...');
+              console.log('💾 [SAVE] Iniciando salvamento completo...');
               console.log('💾 [SAVE] Token:', token);
               console.log('💾 [SAVE] OwnerUID:', ownerUid);
               console.log('💾 [SAVE] Items a salvar:', checklistData.items);
               
+              const completedData = {
+                items: checklistData.items,
+                status: 'completed',
+                completedAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+              };
+              
               // Atualizar na collection pública
               console.log('💾 [SAVE] Atualizando collection pública...');
-              await updateDoc(checklistRef, {
-                items: checklistData.items,
-                lastUpdated: new Date().toISOString()
-              });
-              console.log('✅ [SAVE] Collection pública atualizada com sucesso!');
+              await updateDoc(checklistRef, completedData);
+              console.log('✅ [SAVE] Collection pública atualizada!');
               
-              // Também atualizar no documento do usuário (opcional)
+              // 🔄 CRÍTICO: Atualizar também na Estruturação do usuário
               if(ownerUid){
                 try {
-                  console.log('💾 [SAVE] Tentando atualizar documento do usuário...');
+                  console.log('💾 [SAVE] Atualizando estruturação do usuário...');
                   const userRef = doc(db, 'usuarios', ownerUid);
                   const userDoc = await getDoc(userRef);
+                  
                   if(userDoc.exists()){
-                    const sharedChecklists = userDoc.data().sharedChecklists || {};
-                    if(sharedChecklists[token]){
-                      sharedChecklists[token].items = checklistData.items;
-                      sharedChecklists[token].lastUpdated = new Date().toISOString();
-                      await updateDoc(userRef, { sharedChecklists });
-                      console.log('✅ [SAVE] Documento do usuário atualizado!');
+                    const userData = userDoc.data();
+                    const estruturacao = userData.estruturacao || {};
+                    const weekData = estruturacao[checklistData.weekId];
+                    
+                    if(weekData && weekData.checklist && weekData.checklist[checklistData.blockId]){
+                      console.log('💾 [SAVE] Encontrou bloco na estruturação!');
+                      
+                      // Atualizar checkboxes no formato da estruturação
+                      const checkboxes = {};
+                      checklistData.items.forEach((item, idx) => {
+                        checkboxes[idx] = {
+                          checked: item.completed,
+                          observacao: item.response || ''
+                        };
+                      });
+                      
+                      // Usar updateDoc com caminho específico (mais eficiente)
+                      await updateDoc(userRef, {
+                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.checkboxes`]: checkboxes,
+                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.clientFilled`]: true,
+                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
+                      });
+                      
+                      console.log('✅ [SAVE] Estruturação atualizada com sucesso!');
                     } else {
-                      console.warn('⚠️ [SAVE] Token não encontrado em sharedChecklists');
+                      console.warn('⚠️ [SAVE] Bloco não encontrado na estruturação');
                     }
-                  } else {
-                    console.warn('⚠️ [SAVE] Documento do usuário não existe');
+                    
+                    // Atualizar também sharedChecklists (referência)
+                    const sharedChecklists = userData.sharedChecklists || {};
+                    if(sharedChecklists[token]){
+                      Object.assign(sharedChecklists[token], completedData);
+                      await updateDoc(userRef, { sharedChecklists });
+                      console.log('✅ [SAVE] sharedChecklists atualizado!');
+                    }
                   }
                 } catch(userErr) {
-                  console.warn('⚠️ [SAVE] Erro ao atualizar doc do usuário (não crítico):', userErr.message);
+                  console.error('⚠️ [SAVE] Erro ao atualizar estruturação:', userErr.message);
                 }
               }
               
-              mgToast('✅ Progresso salvo!', 'success');
-              saveBtn.textContent = '✅ Salvo!';
+              mgToast('✅ Checklist salvo com sucesso!', 'success');
+              
+              // Recarregar página para mostrar estado concluído
               setTimeout(() => {
-                saveBtn.textContent = '💾 Salvar Progresso';
-                saveBtn.disabled = false;
-              }, 2000);
+                window.location.reload();
+              }, 1500);
+              
             } catch(err) {
               console.error('❌ [SAVE] Erro ao salvar:', err);
               console.error('❌ [SAVE] Detalhes:', err.message);
               console.error('❌ [SAVE] Stack:', err.stack);
-              mgToast('❌ Erro ao salvar progresso: ' + err.message, 'error');
+              mgToast('❌ Erro ao salvar: ' + err.message, 'error');
               saveBtn.disabled = false;
-              saveBtn.textContent = '💾 Salvar Progresso';
+              saveBtn.textContent = '💾 Salvar e Fechar';
             }
           });
           
@@ -72455,9 +72487,9 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
               console.error('❌ [SUBMIT] Erro ao enviar:', err);
               console.error('❌ [SUBMIT] Detalhes:', err.message);
               console.error('❌ [SUBMIT] Stack:', err.stack);
-              mgToast('❌ Erro ao enviar checklist: ' + err.message, 'error');
-              submitBtn.disabled = false;
-              submitBtn.textContent = '✅ Enviar Checklist';
+              mgToast('❌ Erro ao salvar: ' + err.message, 'error');
+              saveBtn.disabled = false;
+              saveBtn.textContent = '💾 Salvar e Fechar';
             }
           });
         }
