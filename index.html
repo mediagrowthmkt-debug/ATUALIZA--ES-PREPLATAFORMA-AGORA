@@ -64554,6 +64554,107 @@ FORMATO PADRÃO:
 
     /* ========= COMPARTILHAMENTO DE CHECKLIST COM CLIENTE ========= */
     
+    // ✅ Sistema de sincronização automática de checklists públicos
+    let checklistSyncUnsubscribe = null;
+    
+    function startPublicChecklistSync(uid){
+      console.log('🔄 [SYNC] Iniciando sincronização de checklists públicos...');
+      
+      // Limpar listener anterior se existir
+      if(checklistSyncUnsubscribe){
+        checklistSyncUnsubscribe();
+      }
+      
+      // Criar query para checklists do usuário que precisam sincronizar
+      const checklistsQuery = query(
+        collection(db, 'public_checklists'),
+        where('uid', '==', uid),
+        where('needsSync', '==', true)
+      );
+      
+      // Escutar mudanças em tempo real
+      checklistSyncUnsubscribe = onSnapshot(checklistsQuery, async (snapshot) => {
+        console.log('🔄 [SYNC] Mudanças detectadas:', snapshot.size, 'checklists pendentes');
+        
+        for(const changeDoc of snapshot.docs){
+          const checklistData = changeDoc.data();
+          const token = changeDoc.id;
+          
+          console.log('🔄 [SYNC] Sincronizando checklist:', token);
+          console.log('🔄 [SYNC] Dados:', checklistData);
+          
+          try {
+            // Buscar documento do usuário
+            const userRef = doc(db, 'usuarios', uid);
+            const userDoc = await getDoc(userRef);
+            
+            if(!userDoc.exists()){
+              console.error('❌ [SYNC] Documento do usuário não encontrado');
+              continue;
+            }
+            
+            const userData = userDoc.data();
+            const estruturacao = userData.estruturacao || {};
+            const weekData = estruturacao[checklistData.weekId];
+            
+            if(!weekData || !weekData.blocks || !weekData.blocks[checklistData.blockId]){
+              console.error('❌ [SYNC] Bloco não encontrado na estruturação:', {
+                weekId: checklistData.weekId,
+                blockId: checklistData.blockId
+              });
+              continue;
+            }
+            
+            // Converter formato items → checkboxes
+            const checkboxes = {};
+            checklistData.items.forEach((item, idx) => {
+              checkboxes[idx] = {
+                checked: item.completed || false,
+                observacao: item.response || ''
+              };
+            });
+            
+            console.log('🔄 [SYNC] Atualizando estruturação...');
+            console.log('🔄 [SYNC] Checkboxes:', checkboxes);
+            
+            // Atualizar Estruturação
+            await updateDoc(userRef, {
+              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.checkboxes`]: checkboxes,
+              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.clientFilled`]: true,
+              [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
+            });
+            
+            console.log('✅ [SYNC] Estruturação atualizada!');
+            
+            // Marcar como sincronizado no public_checklist
+            await updateDoc(doc(db, 'public_checklists', token), {
+              needsSync: false,
+              syncedAt: new Date().toISOString()
+            });
+            
+            console.log('✅ [SYNC] Checklist marcado como sincronizado');
+            
+            // Mostrar notificação
+            mgToast('✅ Checklist recebido do cliente!', 'success');
+            
+            // Recarregar estruturação se estiver aberta
+            if(window.location.hash === '#estruturacao'){
+              loadEstruturacaoFromUserData();
+              renderEstruturacao();
+            }
+            
+          } catch(err){
+            console.error('❌ [SYNC] Erro ao sincronizar:', err);
+            console.error('❌ [SYNC] Detalhes:', err.message);
+          }
+        }
+      }, (error) => {
+        console.error('❌ [SYNC] Erro no listener:', error);
+      });
+      
+      console.log('✅ [SYNC] Listener de sincronização ativo');
+    }
+    
     // Função para compartilhar bloco com cliente
     async function compartilharBlocoComCliente(weekId, weekTitle, blockId, blockTitle, items){
       // Verificar autenticação
@@ -72546,6 +72647,10 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           await loadAccessesFromUserDataAsync();
           loadCACFromUserData();
           await loadDemandasFromUserData();
+          
+          // ✅ INICIAR SINCRONIZAÇÃO DE CHECKLISTS PÚBLICOS
+          startPublicChecklistSync(user.uid);
+          
           loadTrafficMetricsFromUserData();
           loadTrafficOptimizationsFromUserData();
           loadTrafficOptimizationHistoryFromUserData();

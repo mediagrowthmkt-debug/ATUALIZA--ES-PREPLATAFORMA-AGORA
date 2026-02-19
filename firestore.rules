@@ -595,7 +595,7 @@ service cloud.firestore {
           && request.resource.data.weekId == resource.data.weekId
           && resource.data.diff(request.resource.data).changedKeys().hasOnly([
             'items','checkboxes','observacoes','observacoesGerais','completedCount',
-            'lastUpdated','lastUpdatedBy','updatedAt','status','completedAt'
+            'lastUpdated','lastUpdatedBy','updatedAt','status','completedAt','needsSync'
           ])
         );
       

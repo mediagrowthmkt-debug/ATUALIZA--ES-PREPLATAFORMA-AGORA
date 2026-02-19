@@ -430,50 +430,13 @@
           items: data.items,
           status: 'completed',
           completedAt: new Date().toISOString(),
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
+          needsSync: true // ✅ Flag para plataforma sincronizar
         };
         
-        // Atualizar na collection pública
+        // ✅ APENAS atualizar collection pública (sem permissão para usuarios/{uid})
         await updateDoc(checklistRef, completedData);
-        console.log('✅ Collection pública atualizada!');
-        
-        // Atualizar na Estruturação do usuário
-        if(data.uid && data.weekId && data.blockId){
-          try {
-            const userRef = doc(db, 'usuarios', data.uid);
-            const userDoc = await getDoc(userRef);
-            
-            if(userDoc.exists()){
-              const userData = userDoc.data();
-              const estruturacao = userData.estruturacao || {};
-              const weekData = estruturacao[data.weekId];
-              
-              if(weekData && weekData.blocks && weekData.blocks[data.blockId]){
-                console.log('🔄 Atualizando Estruturação...');
-                
-                // Converter formato
-                const checkboxes = {};
-                data.items.forEach((item, idx) => {
-                  checkboxes[idx] = {
-                    checked: item.completed,
-                    observacao: item.response || ''
-                  };
-                });
-                
-                // Atualizar Estruturação
-                await updateDoc(userRef, {
-                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.checkboxes`]: checkboxes,
-                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.clientFilled`]: true,
-                  [`estruturacao.${data.weekId}.blocks.${data.blockId}.lastUpdated`]: new Date().toISOString()
-                });
-                
-                console.log('✅ Estruturação atualizada!');
-              }
-            }
-          } catch(err){
-            console.warn('⚠️ Erro ao atualizar Estruturação:', err);
-          }
-        }
+        console.log('✅ Checklist salvo! A plataforma irá sincronizar automaticamente.');
         
         // Mostrar sucesso
         showSuccess();
