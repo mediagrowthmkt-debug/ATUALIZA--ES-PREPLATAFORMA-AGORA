@@ -64559,26 +64559,38 @@ FORMATO PADRÃO:
     
     function startPublicChecklistSync(uid){
       console.log('🔄 [SYNC] Iniciando sincronização de checklists públicos...');
+      console.log('🔄 [SYNC] UID:', uid);
       
       // Limpar listener anterior se existir
       if(checklistSyncUnsubscribe){
         checklistSyncUnsubscribe();
       }
       
-      // Criar query para checklists do usuário que precisam sincronizar
-      const checklistsQuery = query(
-        collection(db, 'public_checklists'),
-        where('uid', '==', uid),
-        where('needsSync', '==', true)
-      );
-      
-      // Escutar mudanças em tempo real
-      checklistSyncUnsubscribe = onSnapshot(checklistsQuery, async (snapshot) => {
-        console.log('🔄 [SYNC] Mudanças detectadas:', snapshot.size, 'checklists pendentes');
+      try {
+        // ✅ Query SIMPLES: apenas uid (sem needsSync para evitar erro de índice)
+        const checklistsQuery = query(
+          collection(db, 'public_checklists'),
+          where('uid', '==', uid)
+        );
         
-        for(const changeDoc of snapshot.docs){
-          const checklistData = changeDoc.data();
-          const token = changeDoc.id;
+        console.log('🔄 [SYNC] Query criada, iniciando listener...');
+        
+        // Escutar mudanças em tempo real
+        checklistSyncUnsubscribe = onSnapshot(
+          checklistsQuery,
+          async (snapshot) => {
+            console.log('🔄 [SYNC] Snapshot recebido:', snapshot.size, 'documentos totais');
+            
+            // Filtrar apenas os que precisam sync (no código, não na query)
+            const pendingDocs = snapshot.docs.filter(doc => doc.data().needsSync === true);
+            console.log('🔄 [SYNC] Checklists pendentes:', pendingDocs.length);
+            
+            for(const changeDoc of pendingDocs){
+              const checklistData = changeDoc.data();
+              const token = changeDoc.id;
+              
+              console.log('🔄 [SYNC] Sincronizando checklist:', token);
+              console.log('🔄 [SYNC] Dados:', checklistData);
           
           console.log('🔄 [SYNC] Sincronizando checklist:', token);
           console.log('🔄 [SYNC] Dados:', checklistData);
@@ -64646,13 +64658,22 @@ FORMATO PADRÃO:
           } catch(err){
             console.error('❌ [SYNC] Erro ao sincronizar:', err);
             console.error('❌ [SYNC] Detalhes:', err.message);
+            console.error('❌ [SYNC] Stack:', err.stack);
           }
         }
       }, (error) => {
         console.error('❌ [SYNC] Erro no listener:', error);
+        console.error('❌ [SYNC] Erro detalhado:', error.message);
+        console.error('❌ [SYNC] Stack:', error.stack);
       });
       
       console.log('✅ [SYNC] Listener de sincronização ativo');
+      
+    } catch(syncError) {
+      console.error('❌ [SYNC] Erro ao iniciar sincronização:', syncError);
+      console.error('❌ [SYNC] Mensagem:', syncError.message);
+      console.error('❌ [SYNC] Stack:', syncError.stack);
+    }
     }
     
     // Função para compartilhar bloco com cliente
