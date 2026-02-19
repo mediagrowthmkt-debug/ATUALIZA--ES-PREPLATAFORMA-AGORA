@@ -566,5 +566,41 @@ service cloud.firestore {
       // Usuário autenticado pode apagar seus próprios compartilhamentos
       allow delete: if isSignedIn() && request.auth.uid == resource.data.createdBy;
     }
+
+    /* ✅ Checklists públicos compartilhados (estruturação) - Sistema de envio para clientes */
+    match /public_checklists/{token} {
+      // Qualquer pessoa com o link pode ler (acesso público para cliente)
+      allow read: if true;
+      
+      // Somente usuário autenticado pode criar novos checklists
+      allow create: if isSignedIn()
+                    && request.resource.data.token == token
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.weekId is string
+                    && request.resource.data.semana is string
+                    && request.resource.data.blocoIndex is int
+                    && request.resource.data.titulo is string;
+      
+      // Qualquer pessoa pode atualizar (cliente preenchendo checklist)
+      // Mas apenas campos específicos podem ser modificados por não-autenticados
+      allow update: if
+        // Usuário autenticado (dono) pode atualizar tudo
+        (isSignedIn() && request.auth.uid == resource.data.uid)
+        ||
+        // Anônimo (cliente) pode apenas atualizar checkboxes, observações e status
+        (
+          request.auth == null
+          && request.resource.data.token == resource.data.token
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.weekId == resource.data.weekId
+          && resource.data.diff(request.resource.data).changedKeys().hasOnly([
+            'checkboxes','observacoes','observacoesGerais','completedCount',
+            'lastUpdated','lastUpdatedBy','updatedAt','status'
+          ])
+        );
+      
+      // Apenas o dono autenticado pode deletar
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
   }
 }

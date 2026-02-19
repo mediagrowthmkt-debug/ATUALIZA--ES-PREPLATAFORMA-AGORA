@@ -1464,6 +1464,9 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-business-textarea{font-family:inherit;line-height:1.5;resize:vertical;min-height:60px;max-height:300px;overflow-y:auto}
     .estruturacao-business-input::placeholder{color:rgba(255,255,255,.3);font-size:.8rem}
     .estruturacao-business-input:focus{border-color:var(--accent);background:rgba(0,0,0,.4)}
+    .estruturacao-business-ai-btn{padding:6px 14px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:6px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s ease;white-space:nowrap;box-shadow:0 2px 8px rgba(139,92,246,.3)}
+    .estruturacao-business-ai-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,.5)}
+    .estruturacao-business-ai-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
     .estruturacao-business-save-btn{padding:6px 14px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s ease;white-space:nowrap}
     .estruturacao-business-save-btn:hover{opacity:.9}
     .estruturacao-business-save-status{font-size:.75rem;color:rgba(255,255,255,.5)}
@@ -1910,7 +1913,7 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-ai-fill-btn .ai-icon{font-size:.8rem}
     
     /* Botão IA Global para Bloco (preenche todos os itens de uma vez) */
-    .estruturacao-block-ai-btn{display:none;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;border-radius:6px;font-size:.75rem;color:#fff;cursor:pointer;transition:all .2s ease;font-weight:600;margin-left:auto;white-space:nowrap}
+    .estruturacao-block-ai-btn{display:none;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;border-radius:6px;font-size:.75rem;color:#fff;cursor:pointer;transition:all .2s ease;font-weight:600;white-space:nowrap}
     .estruturacao-block.open .estruturacao-block-ai-btn{display:flex}
     .estruturacao-block-ai-btn:hover{background:linear-gradient(135deg,#7c3aed,#9333ea);transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,.5)}
     .estruturacao-block-ai-btn:active{transform:translateY(0)}
@@ -1918,6 +1921,14 @@ html, body{ -webkit-text-size-adjust: 100%; }
     .estruturacao-block-ai-btn.loading{opacity:.7;pointer-events:none}
     .estruturacao-block-ai-btn.loading::after{content:'';display:inline-block;width:12px;height:12px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin-left:6px}
     @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* Botão Compartilhar Bloco com Cliente */
+    .estruturacao-block-share-btn{display:none;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;border-radius:6px;font-size:.75rem;color:#fff;cursor:pointer;transition:all .2s ease;font-weight:600;white-space:nowrap}
+    .estruturacao-block.open .estruturacao-block-share-btn{display:flex}
+    .estruturacao-block-share-btn:hover{background:linear-gradient(135deg,#0891b2,#0e7490);transform:translateY(-1px);box-shadow:0 4px 12px rgba(6,182,212,.5)}
+    .estruturacao-block-share-btn:active{transform:translateY(0)}
+    .estruturacao-block-share-btn .share-icon{font-size:.9rem}
+    .estruturacao-block-actions{display:flex;gap:8px;align-items:center}
     
     /* Mini popup para observação antes de gerar com IA */
     .ai-quick-input-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(2px)}
@@ -11643,6 +11654,7 @@ function renderReviewNotes(post){
     <div class="estruturacao-business-info" id="estruturacaoBusinessInfo">
       <div class="estruturacao-business-info-header">
         <span class="estruturacao-business-info-title">📋 Contexto do Negócio</span>
+        <button class="estruturacao-business-ai-btn" id="generateBusinessInfoAI" onclick="generateBusinessInfoWithAI()">🤖 Gerar com IA</button>
         <button class="estruturacao-business-save-btn" id="saveBusinessInfoBtn" onclick="saveBusinessInfo()">💾 Salvar</button>
         <span class="estruturacao-business-save-status" id="businessSaveStatus"></span>
       </div>
@@ -16976,7 +16988,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       
       const clientKey = getClientKey();
       if(!auth.currentUser || !clientKey) {
-        console.log('❌ [' + timestamp + '] Usuário não autenticado ou cliente não selecionado');
+        console.log('⏭️ [' + timestamp + '] Aguardando autenticação completa...');
         console.log('   └─ auth.currentUser:', !!auth.currentUser);
         console.log('   └─ clientKey:', clientKey);
         return;
@@ -30214,6 +30226,7 @@ IMPORTANTE:
 
     /* ========= REUNIÕES ========= */
     let REUNIOES = [];
+    window.REUNIOES = []; // ✅ Expor globalmente desde o início
     let currentEditingReuniao = null;
     let currentViewingReuniao = null;
     let reunioesInitialLoadDone = false; // Flag para indicar se o carregamento inicial foi feito
@@ -30222,6 +30235,7 @@ IMPORTANTE:
     // Função para resetar estado das reuniões (usado quando muda de cliente)
     function resetReunioesState() {
       REUNIOES = [];
+      window.REUNIOES = []; // ✅ Resetar também a variável global
       currentEditingReuniao = null;
       currentViewingReuniao = null;
       reunioesInitialLoadDone = false;
@@ -30254,6 +30268,7 @@ IMPORTANTE:
       if(!uid) {
         console.warn('⚠️ Nenhum UID disponível para carregar reuniões');
         REUNIOES = [];
+        window.REUNIOES = []; // ✅ Expor globalmente
         return;
       }
       
@@ -30264,9 +30279,12 @@ IMPORTANTE:
         if(reunioesDoc.exists()){
           const data = reunioesDoc.data();
           REUNIOES = Array.isArray(data.reunioes) ? data.reunioes : [];
+          window.REUNIOES = REUNIOES; // ✅ Expor globalmente
           console.log('✅ Reuniões carregadas do Firebase:', REUNIOES.length);
+          console.log('✅ window.REUNIOES atualizado:', window.REUNIOES.length);
         } else {
           REUNIOES = [];
+          window.REUNIOES = []; // ✅ Expor globalmente
           console.log('📋 Nenhuma reunião encontrada no Firebase');
         }
         
@@ -30659,6 +30677,10 @@ GERE O OBJETIVO MACRO GERAL (máximo 8 palavras):`
           REUNIOES.push(newReuniao);
         }
         
+        // ✅ Sincronizar com window.REUNIOES
+        window.REUNIOES = REUNIOES;
+        console.log('✅ window.REUNIOES sincronizado:', window.REUNIOES.length);
+        
         await persistReunioes();
         closeReuniaoModal();
         renderReunioes(true); // skipLoad = true para usar dados locais
@@ -30847,6 +30869,7 @@ REGRAS CRÍTICAS:
           if(idx !== -1){
             REUNIOES[idx].resumo = resumo;
             REUNIOES[idx].updatedAt = new Date().toISOString();
+            window.REUNIOES = REUNIOES; // ✅ Sincronizar
             persistReunioes();
           }
           resumoEl.innerHTML = formatResumoForDisplay(resumo);
@@ -31384,6 +31407,7 @@ REGRAS CRÍTICAS:
         
         REUNIOES[idx].transcricao = transcricaoCorrigida;
         REUNIOES[idx].updatedAt = new Date().toISOString();
+        window.REUNIOES = REUNIOES; // ✅ Sincronizar
         
         // Regenerar resumo com a transcrição corrigida
         mgToast('🔄 Gerando novo resumo com nomes corrigidos...');
@@ -31394,6 +31418,7 @@ REGRAS CRÍTICAS:
         );
         
         REUNIOES[idx].resumo = novoResumo;
+        window.REUNIOES = REUNIOES; // ✅ Sincronizar novamente
         
         // Salvar no Firebase
         await persistReunioes();
@@ -31741,6 +31766,7 @@ REGRAS CRÍTICAS:
       
       try {
         REUNIOES = REUNIOES.filter(r => r.id !== reuniaoId);
+        window.REUNIOES = REUNIOES; // ✅ Sincronizar
         await persistReunioes();
         renderReunioes(true); // skipLoad = true após persistir
         mgToast('✅ Reunião excluída');
@@ -44510,6 +44536,300 @@ Digite "CONFIRMAR" para prosseguir:`;
       });
       console.log('[BusinessInfo] Auto-save inicializado para campos:', fields);
     }
+    
+    // ======== GERAR CONTEXTO DO NEGÓCIO COM IA ========
+    // Função para gerar informações do negócio automaticamente usando IA baseando-se nas reuniões
+    async function generateBusinessInfoWithAI(){
+      const btn = document.getElementById('generateBusinessInfoAI');
+      if(!btn) return;
+      
+      // Tentar carregar reuniões se ainda não foram carregadas
+      let reunioes = window.REUNIOES || [];
+      
+      if(!reunioes || !Array.isArray(reunioes) || reunioes.length === 0){
+        console.log('🔄 [BusinessInfo/IA] Reuniões não carregadas localmente, tentando carregar do Firebase...');
+        
+        // Tentar carregar reuniões do Firebase
+        if(typeof loadReunioesFromData === 'function'){
+          try {
+            await loadReunioesFromData(false);
+            // Aguardar um pouco para garantir que a variável global foi atualizada
+            await new Promise(resolve => setTimeout(resolve, 100));
+            reunioes = window.REUNIOES || [];
+            console.log('✅ [BusinessInfo/IA] Reuniões carregadas do Firebase:', reunioes.length);
+          } catch(err){
+            console.error('❌ [BusinessInfo/IA] Erro ao carregar reuniões:', err);
+          }
+        }
+      } else {
+        console.log(`📋 [BusinessInfo/IA] Usando reuniões já carregadas: ${reunioes.length}`);
+      }
+      
+      // Verificar novamente após tentar carregar
+      if(!reunioes || !Array.isArray(reunioes) || reunioes.length === 0){
+        showToast('⚠️ Nenhuma reunião encontrada! Cadastre reuniões primeiro na aba Reuniões para extrair informações.', 'warning');
+        return;
+      }
+      
+      console.log(`📋 [BusinessInfo/IA] Processando ${reunioes.length} reuniões`);
+      
+      // 🔒 Verificar se o proxy de IA está disponível
+      if(typeof window.callAIProxy !== 'function'){
+        showToast('❌ Serviço de IA não disponível. Recarregue a página.', 'error');
+        return;
+      }
+      
+      // Coletar dados atuais (se houver)
+      const currentName = document.getElementById('businessName')?.value?.trim() || '';
+      const currentNiche = document.getElementById('businessNiche')?.value?.trim() || '';
+      const currentLocation = document.getElementById('businessLocation')?.value?.trim() || '';
+      const currentCountry = document.getElementById('businessCountry')?.value?.trim() || '';
+      const currentTime = document.getElementById('businessTime')?.value?.trim() || '';
+      const currentBudget = document.getElementById('businessBudget')?.value?.trim() || '';
+      const currentAgencyFee = document.getElementById('businessAgencyFee')?.value?.trim() || '';
+      const currentTicket = document.getElementById('businessTicket')?.value?.trim() || '';
+      const currentObs = document.getElementById('businessObservations')?.value?.trim() || '';
+      
+      const hasCurrentData = currentName || currentNiche || currentLocation || currentTime || currentBudget || currentTicket;
+      
+      // Se já tem dados, perguntar se quer sobrescrever
+      if(hasCurrentData){
+        const confirmOverwrite = confirm('⚠️ Já existem informações preenchidas. Deseja substituí-las pelas informações extraídas das reuniões?');
+        if(!confirmOverwrite) return;
+      }
+      
+      // Preparar contexto das reuniões
+      let reunioesContext = '**REUNIÕES COM O CLIENTE:**\n\n';
+      
+      // Ordenar reuniões por data (mais recente primeiro)
+      const reunioesOrdenadas = [...reunioes].sort((a, b) => {
+        const dateA = new Date(a.data || 0);
+        const dateB = new Date(b.data || 0);
+        return dateB - dateA;
+      });
+      
+      // Pegar até 10 reuniões mais recentes
+      const reunioesRecentes = reunioesOrdenadas.slice(0, 10);
+      
+      reunioesRecentes.forEach((reuniao, idx) => {
+        const dataReuniao = reuniao.data ? new Date(reuniao.data).toLocaleDateString('pt-BR') : 'Data não informada';
+        const titulo = reuniao.titulo || 'Reunião sem título';
+        
+        reunioesContext += `\n📅 REUNIÃO ${idx + 1}: ${titulo} (${dataReuniao})\n`;
+        
+        if(reuniao.objetivo && reuniao.objetivo.trim()){
+          reunioesContext += `Objetivo: ${reuniao.objetivo.trim()}\n`;
+        }
+        
+        if(reuniao.resumo && reuniao.resumo.trim()){
+          reunioesContext += `Resumo: ${reuniao.resumo.trim()}\n`;
+        } else if(reuniao.transcricao && reuniao.transcricao.trim()){
+          // Se não houver resumo, usar início da transcrição
+          const transcricaoLimitada = reuniao.transcricao.trim().length > 1000
+            ? reuniao.transcricao.trim().substring(0, 1000) + '...'
+            : reuniao.transcricao.trim();
+          reunioesContext += `Transcrição: ${transcricaoLimitada}\n`;
+        }
+        
+        reunioesContext += '\n---\n';
+      });
+      
+      // Montar prompt para IA
+      const prompt = `${reunioesContext}
+
+**TAREFA:**
+Com base EXCLUSIVAMENTE nas reuniões acima, extraia e organize as seguintes informações sobre o negócio do cliente:
+
+1. **Nome do Negócio**: Nome da empresa/marca (deixe vazio se não foi mencionado)
+2. **Nicho/Segmento**: Área de atuação específica (deixe vazio se não foi mencionado)
+3. **Localização**: Cidade/Estado onde atua (deixe vazio se não foi mencionado)
+4. **País**: País de atuação - use BR, US, PT ou OTHER (deixe vazio se não foi mencionado)
+5. **Tempo de Mercado**: Há quanto tempo existe (deixe vazio se não foi mencionado)
+6. **Orçamento Marketing/mês**: Quanto investe em anúncios/marketing por mês (deixe vazio se não foi mencionado)
+7. **Fee Agência/mês**: Quanto paga para agência por mês (deixe vazio se não foi mencionado)
+8. **Ticket Médio**: Valor médio de venda/serviço (deixe vazio se não foi mencionado)
+9. **Observações**: Modelo de negócio, desafios, diferenciais, público-alvo mencionados nas reuniões
+
+**FORMATO DE RESPOSTA (JSON):**
+Responda APENAS com um JSON válido seguindo exatamente esta estrutura:
+
+{
+  "name": "",
+  "niche": "",
+  "location": "",
+  "country": "",
+  "time": "",
+  "budget": "",
+  "agencyFee": "",
+  "ticket": "",
+  "observations": ""
+}
+
+**REGRAS CRÍTICAS - LEIA COM ATENÇÃO:**
+1. ⚠️ **NUNCA INVENTE INFORMAÇÕES** - Se não foi mencionado nas reuniões, deixe o campo VAZIO ("")
+2. ⚠️ **NÃO FAÇA SUPOSIÇÕES** - Não tente adivinhar ou inferir informações
+3. ⚠️ **SÓ USE O QUE FOI DITO** - Copie exatamente o que foi mencionado nas reuniões
+4. ✅ Para valores monetários, mantenha o formato original (ex: "R$ 5.000", "$500")
+5. ✅ Para país, use APENAS: BR (Brasil), US (USA), PT (Portugal) ou OTHER
+6. ✅ Se uma informação foi mencionada parcialmente, inclua o que foi dito
+7. ✅ No campo "observations", inclua APENAS o que foi mencionado nas reuniões
+
+**EXEMPLO DE RESPOSTA CORRETA:**
+- Se o nome "Clínica Odonto" foi mencionado → "name": "Clínica Odonto"
+- Se o nicho NÃO foi mencionado → "niche": ""
+- Se foi dito "investimos R$ 3.000" → "budget": "R$ 3.000"
+- Se tempo de mercado NÃO foi dito → "time": ""
+
+Responda APENAS com o JSON válido, sem explicações adicionais.`;
+
+      // Desabilitar botão e mostrar loading
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="ai-icon" style="animation:spin 1s linear infinite;">⏳</span> Analisando reuniões...';
+      btn.disabled = true;
+      
+      try {
+        console.log('🤖 [BusinessInfo/IA] Enviando prompt para IA...');
+        
+        // ✅ Formato correto: callAIProxy(model, messages, userId, maxTokens, temperature)
+        const messages = [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ];
+        
+        const response = await window.callAIProxy(
+          window.IA_CONFIG.model, // modelo configurado (gpt-4o-mini ou outro)
+          messages,                // array de mensagens
+          auth.currentUser?.uid,   // userId
+          1500,                    // maxTokens
+          0.3                      // temperature baixa para precisão
+        );
+        
+        console.log('🤖 [BusinessInfo/IA] Resposta recebida:', response);
+        
+        // Extrair conteúdo da resposta
+        const aiContent = response?.choices?.[0]?.message?.content || '';
+        
+        if(!aiContent || !aiContent.trim()){
+          throw new Error('Resposta vazia da IA');
+        }
+        
+        // Extrair JSON da resposta (pode vir com ```json ou sem)
+        let jsonText = aiContent.trim();
+        
+        // Remover markdown code block se presente
+        if(jsonText.includes('```json')){
+          jsonText = jsonText.split('```json')[1].split('```')[0].trim();
+        } else if(jsonText.includes('```')){
+          jsonText = jsonText.split('```')[1].split('```')[0].trim();
+        }
+        
+        // Parse JSON
+        const data = JSON.parse(jsonText);
+        
+        console.log('🤖 [BusinessInfo/IA] Dados extraídos:', data);
+        
+        // Contar quantos campos foram preenchidos
+        let fieldsPreenchidos = 0;
+        let fieldsVazios = 0;
+        
+        // Preencher campos APENAS se tiverem conteúdo válido (não vazio)
+        if(data.name && data.name.trim()){
+          document.getElementById('businessName').value = data.name.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.niche && data.niche.trim()){
+          document.getElementById('businessNiche').value = data.niche.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.location && data.location.trim()){
+          document.getElementById('businessLocation').value = data.location.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.country && data.country.trim()){
+          document.getElementById('businessCountry').value = data.country.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.time && data.time.trim()){
+          document.getElementById('businessTime').value = data.time.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.budget && data.budget.trim()){
+          document.getElementById('businessBudget').value = data.budget.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.agencyFee && data.agencyFee.trim()){
+          document.getElementById('businessAgencyFee').value = data.agencyFee.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.ticket && data.ticket.trim()){
+          document.getElementById('businessTicket').value = data.ticket.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        if(data.observations && data.observations.trim()){
+          document.getElementById('businessObservations').value = data.observations.trim();
+          fieldsPreenchidos++;
+        } else {
+          fieldsVazios++;
+        }
+        
+        console.log(`📊 [BusinessInfo/IA] ${fieldsPreenchidos} campos preenchidos, ${fieldsVazios} deixados vazios`);
+        
+        // Trigger auto-resize no textarea de observações
+        const obsField = document.getElementById('businessObservations');
+        if(obsField){
+          obsField.style.height = 'auto';
+          obsField.style.height = Math.min(obsField.scrollHeight, 300) + 'px';
+        }
+        
+        // Salvar automaticamente
+        await saveBusinessInfo(true);
+        
+        // Mensagem de sucesso personalizada
+        if(fieldsPreenchidos === 0){
+          showToast('⚠️ Nenhuma informação foi encontrada nas reuniões. Preencha manualmente os campos necessários.', 'warning');
+        } else if(fieldsVazios === 0){
+          showToast(`✅ Todos os ${fieldsPreenchidos} campos foram preenchidos com base nas reuniões!`, 'success');
+        } else {
+          showToast(`✅ ${fieldsPreenchidos} campo(s) preenchido(s) com sucesso! ${fieldsVazios} campo(s) não foram mencionados nas reuniões.`, 'success');
+        }
+        
+      } catch(err) {
+        console.error('🤖 [BusinessInfo/IA] Erro:', err);
+        showToast('❌ Erro ao gerar informações: ' + err.message, 'error');
+      } finally {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+      }
+    }
+    
+    // Expor função globalmente
+    window.generateBusinessInfoWithAI = generateBusinessInfoWithAI;
     
     // Carregar informações do negócio do estado
     function loadBusinessInfo(){
@@ -60675,9 +60995,14 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
                 <p class="estruturacao-block-items">${block.items.length} item${block.items.length !== 1 ? 's' : ''}${completedCount > 0 ? ` • ${completedCount} concluído${completedCount > 1 ? 's' : ''}` : ''}</p>
                 ${summaryHtml}
               </div>
-              <button type="button" class="estruturacao-block-ai-btn" data-week-id="${week.id}" data-week-title="${week.title}" data-block-id="${block.id}" data-block-title="${block.title}" title="Gerar IA para todos os itens deste bloco">
-                <span class="ai-icon">✨</span> IA para Todos
-              </button>
+              <div class="estruturacao-block-actions">
+                <button type="button" class="estruturacao-block-share-btn" data-week-id="${week.id}" data-week-title="${week.title}" data-block-id="${block.id}" data-block-title="${block.title}" title="Compartilhar checklist com cliente">
+                  <span class="share-icon">🔗</span> Enviar para Cliente
+                </button>
+                <button type="button" class="estruturacao-block-ai-btn" data-week-id="${week.id}" data-week-title="${week.title}" data-block-id="${block.id}" data-block-title="${block.title}" title="Gerar IA para todos os itens deste bloco">
+                  <span class="ai-icon">✨</span> IA para Todos
+                </button>
+              </div>
             </div>
             <div class="estruturacao-block-body">
               <div class="estruturacao-block-content">
@@ -60737,6 +61062,16 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
               e.stopPropagation();
               e.preventDefault();
               gerarIAParaTodosItensBloco(week.id, week.title, block.id, block.title, block.items);
+            });
+          }
+          
+          // Event listener para o botão de compartilhar bloco
+          const blockShareBtn = blockEl.querySelector('.estruturacao-block-share-btn');
+          if(blockShareBtn){
+            blockShareBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              compartilharBlocoComCliente(week.id, week.title, block.id, block.title, block.items);
             });
           }
           
@@ -61145,6 +61480,113 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
     
     // ======== SISTEMA DE IA PARA PREENCHIMENTO ========
     
+    // 🔥 PRIORIDADE #1: Coleta informações das REUNIÕES (fonte principal de informações do cliente)
+    async function getReuniaoesContextForAI(){
+      console.log('🔍 [getReuniaoesContextForAI] Iniciando...');
+      console.log('🔍 [getReuniaoesContextForAI] window.REUNIOES existe?', typeof window.REUNIOES);
+      console.log('🔍 [getReuniaoesContextForAI] É array?', Array.isArray(window.REUNIOES));
+      console.log('🔍 [getReuniaoesContextForAI] Tamanho:', window.REUNIOES?.length);
+      
+      // Tentar carregar reuniões se ainda não foram carregadas
+      if(!window.REUNIOES || !Array.isArray(window.REUNIOES) || window.REUNIOES.length === 0){
+        console.log('🔄 [getReuniaoesContextForAI] Reuniões não carregadas, tentando carregar...');
+        
+        // Tentar carregar reuniões do Firebase
+        if(typeof loadReunioesFromData === 'function'){
+          try {
+            await loadReunioesFromData(false);
+            
+            // Aguardar um pouco para garantir que a variável global foi atualizada
+            console.log('⏳ [getReuniaoesContextForAI] Aguardando atualização da variável global...');
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            console.log('✅ [getReuniaoesContextForAI] Após aguardar - Reuniões:', window.REUNIOES?.length || 0);
+          } catch(err){
+            console.error('❌ [getReuniaoesContextForAI] Erro ao carregar reuniões:', err);
+          }
+        } else {
+          console.error('❌ [getReuniaoesContextForAI] Função loadReunioesFromData não existe!');
+        }
+      } else {
+        console.log('✅ [getReuniaoesContextForAI] Reuniões já carregadas:', window.REUNIOES.length);
+      }
+      
+      // Verificar novamente após tentar carregar
+      if(!window.REUNIOES || !Array.isArray(window.REUNIOES) || window.REUNIOES.length === 0){
+        console.log('⚠️ [getReuniaoesContextForAI] Nenhuma reunião disponível após tentativa de carregamento');
+        console.log('⚠️ [getReuniaoesContextForAI] window.REUNIOES final:', window.REUNIOES);
+        return '';
+      }
+      
+      console.log(`📋 [getReuniaoesContextForAI] Processando ${window.REUNIOES.length} reuniões`);
+      
+      let context = '\n---\n**🎯 INFORMAÇÕES EXTRAÍDAS DAS REUNIÕES COM O CLIENTE (PRIORIDADE MÁXIMA):**\n\n';
+      context += '⚠️ ATENÇÃO: As informações abaixo foram extraídas DIRETAMENTE das reuniões com o cliente. Elas são a FONTE MAIS IMPORTANTE e CONFIÁVEL de informações. USE ESTAS INFORMAÇÕES COMO BASE PRINCIPAL para gerar os textos.\n\n';
+      
+      let hasContent = false;
+      
+      // Ordenar reuniões por data (mais recente primeiro)
+      const reunioesOrdenadas = [...window.REUNIOES].sort((a, b) => {
+        const dateA = new Date(a.data || 0);
+        const dateB = new Date(b.data || 0);
+        return dateB - dateA;
+      });
+      
+      // Limitar a 5 reuniões mais recentes para não estourar o contexto
+      const reunioesRecentes = reunioesOrdenadas.slice(0, 5);
+      
+      console.log(`📋 [getReuniaoesContextForAI] Usando ${reunioesRecentes.length} reuniões mais recentes`);
+      
+      reunioesRecentes.forEach((reuniao, idx) => {
+        const dataReuniao = reuniao.data ? new Date(reuniao.data).toLocaleDateString('pt-BR') : 'Data não informada';
+        const titulo = reuniao.titulo || 'Reunião sem título';
+        
+        console.log(`   📄 [getReuniaoesContextForAI] Reunião ${idx + 1}: "${titulo}"`);
+        
+        let reuniaoContext = `\n📅 **REUNIÃO ${idx + 1}: ${titulo}** (${dataReuniao})\n`;
+        
+        // Adicionar objetivo se existir
+        if(reuniao.objetivo && reuniao.objetivo.trim()){
+          reuniaoContext += `   🎯 Objetivo: ${reuniao.objetivo.trim()}\n`;
+          hasContent = true;
+          console.log(`      ✓ Objetivo incluído (${reuniao.objetivo.trim().length} chars)`);
+        }
+        
+        // Adicionar resumo se existir (priorizar resumo pois é mais condensado)
+        if(reuniao.resumo && reuniao.resumo.trim()){
+          // Limitar resumo a 800 caracteres para não estourar contexto
+          const resumoLimitado = reuniao.resumo.trim().length > 800 
+            ? reuniao.resumo.trim().substring(0, 800) + '...'
+            : reuniao.resumo.trim();
+          reuniaoContext += `   📋 Resumo: ${resumoLimitado}\n`;
+          hasContent = true;
+          console.log(`      ✓ Resumo incluído (${resumoLimitado.length} chars)`);
+        }
+        
+        // Adicionar transcrição COMPLETA se houver (não só o início)
+        if(reuniao.transcricao && reuniao.transcricao.trim()){
+          // Usar transcrição completa para contexto mais rico (limitar a 2000 chars)
+          const transcricaoLimitada = reuniao.transcricao.trim().length > 2000
+            ? reuniao.transcricao.trim().substring(0, 2000) + '...[transcrição continua]'
+            : reuniao.transcricao.trim();
+          reuniaoContext += `   💬 Transcrição: ${transcricaoLimitada}\n`;
+          hasContent = true;
+          console.log(`      ✓ Transcrição incluída (${transcricaoLimitada.length} chars)`);
+        }
+        
+        context += reuniaoContext;
+      });
+      
+      if(!hasContent){
+        console.log('⚠️ [getReuniaoesContextForAI] Reuniões sem conteúdo relevante (sem objetivo, resumo ou transcrição)');
+        return '';
+      }
+      
+      console.log(`✅ [getReuniaoesContextForAI] Contexto gerado com sucesso (${context.length} caracteres)`);
+      context += '\n---\n';
+      return context;
+    }
+    
     // Coleta todas as notas preenchidas em todas as semanas para contexto da IA
     function getAllFilledNotesContext(){
       let context = '';
@@ -61188,7 +61630,7 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
     }
     
     // Gera prompt específico para cada item do checklist
-    function generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote){
+    async function generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote){
       const businessInfo = ESTRUTURACAO_STATE.businessInfo || {};
       const bizName = businessInfo.name || '[Nome não informado]';
       const bizNiche = businessInfo.niche || '[Nicho não informado]';
@@ -61197,6 +61639,9 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
       const bizAgencyFee = businessInfo.agencyFee || '';
       const bizTicket = businessInfo.ticket || '';
       const bizObs = businessInfo.observations || '';
+      
+      // 🔥 PRIORIDADE #1: Coletar contexto das REUNIÕES (fonte principal) - AGUARDAR
+      const reunioesContext = await getReuniaoesContextForAI();
       
       // Coletar contexto de todas as notas já preenchidas
       const allNotesContext = getAllFilledNotesContext();
@@ -61330,6 +61775,7 @@ ${bizAgencyFee ? `- Valor Pago para Agência/mês: ${bizAgencyFee}` : ''}
 ${bizBudget && bizAgencyFee ? `- **INVESTIMENTO TOTAL EM MARKETING/mês:** (${bizBudget} + ${bizAgencyFee}) - Use este valor para cálculos de CAC` : ''}
 ${bizTicket ? `- Ticket médio: ${bizTicket}` : ''}
 ${bizObs ? `- Observações: ${bizObs}` : ''}
+${reunioesContext}
 ${allNotesContext}
 **HIERARQUIA ATUAL:**
 📅 SEMANA: ${weekTitle}
@@ -61533,7 +61979,7 @@ ${formatInstruction}`;
       const itemState = ESTRUTURACAO_STATE[weekId].blocks[blockId].items[itemIdx];
       const existingNote = itemState.note || '';
       
-      const promptData = generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote);
+      const promptData = await generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote);
       let prompt = promptData.prompt;
       
       // Adicionar observação do usuário ao prompt se fornecida
@@ -61858,7 +62304,7 @@ FORMATAÇÃO OBRIGATÓRIA:
     // Função para chamar a IA via OpenRouter e preencher automaticamente
     async function fillNoteWithAI(weekTitle, blockTitle, itemText, noteArea, noteRaw, weekId, blockId, itemIdx, aiBtn, userObservation = '', selectedImageUrls = []){
       const existingNote = noteRaw ? noteRaw.value : '';
-      const promptData = generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote);
+      const promptData = await generateAIFillPrompt(weekTitle, blockTitle, itemText, existingNote);
       let prompt = promptData.prompt;
       const isLongCopy = promptData.isLongCopy;
       const isBlog = promptData.isBlog;
@@ -61887,6 +62333,13 @@ FORMATAÇÃO OBRIGATÓRIA:
       
       // System prompt dinâmico baseado no contexto
       let systemPrompt = `Você é um consultor de marketing e copywriter da Mediagrowth.
+
+🔥 REGRA FUNDAMENTAL DE PRIORIDADE DE INFORMAÇÕES:
+1. **PRIORIDADE MÁXIMA**: Use SEMPRE as informações da seção "INFORMAÇÕES EXTRAÍDAS DAS REUNIÕES COM O CLIENTE" quando disponível. Estas são informações REAIS coletadas diretamente do cliente em reuniões.
+2. **SEGUNDA PRIORIDADE**: Use as informações do "CONTEXTO DO NEGÓCIO" (nome, nicho, etc).
+3. **TERCEIRA PRIORIDADE**: Use o "CONTEXTO JÁ PREENCHIDO" de outras seções da estruturação.
+
+⚠️ IMPORTANTE: Se houver conflito entre informações, SEMPRE priorize as informações das REUNIÕES, pois são as mais recentes e confiáveis.
 
 IMPORTANTE - ENTENDA A HIERARQUIA:
 - O usuário está preenchendo um CHECKLIST organizado em SEMANAS > BLOCOS > ITENS
@@ -64030,6 +64483,248 @@ FORMATO PADRÃO:
         console.log('🧹 Limpeza automática executada ao salvar CAC');
       }
       try{ refreshMacroInsights(); }catch(_){ }
+    }
+
+    /* ========= COMPARTILHAMENTO DE CHECKLIST COM CLIENTE ========= */
+    
+    // Função para compartilhar bloco com cliente
+    async function compartilharBlocoComCliente(weekId, weekTitle, blockId, blockTitle, items){
+      // Verificar autenticação
+      if(!auth.currentUser){
+        mgToast('❌ Você precisa estar logado para compartilhar', 'error');
+        return;
+      }
+      
+      // Gerar token único para o link
+      const shareToken = generateShareToken();
+      const shareUrl = `${window.location.origin}${window.location.pathname}#/checklist/${shareToken}`;
+      
+      // Preparar dados do compartilhamento
+      const shareData = {
+        token: shareToken, // ✅ Adicionar token
+        uid: auth.currentUser.uid, // ✅ Campo obrigatório nas regras
+        weekId,
+        semana: weekTitle, // ✅ Campo obrigatório nas regras (semana)
+        blocoIndex: parseInt(blockId) || 0, // ✅ Campo obrigatório nas regras
+        titulo: blockTitle, // ✅ Campo obrigatório nas regras
+        weekTitle, // Manter também como weekTitle para compatibilidade
+        blockId,
+        blockTitle, // Manter também como blockTitle para compatibilidade
+        items: items.map((itemText, idx) => ({
+          idx,
+          text: itemText,
+          completed: false,
+          response: ''
+        })),
+        createdAt: new Date().toISOString(),
+        createdBy: auth.currentUser.uid,
+        createdByEmail: auth.currentUser.email,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
+        status: 'pending' // pending, completed, expired
+      };
+      
+      try {
+        console.log('🔄 Criando checklist compartilhado...');
+        console.log('Token:', shareToken);
+        console.log('User UID:', auth.currentUser.uid);
+        
+        // Salvar APENAS em collection pública (mais simples e sem problemas de permissão)
+        const publicChecklistRef = doc(db, 'public_checklists', shareToken);
+        await setDoc(publicChecklistRef, shareData);
+        
+        console.log('✅ Checklist compartilhado criado com sucesso:', shareToken);
+        
+        // Opcional: Salvar referência no documento do usuário (mas sem bloquear se falhar)
+        try {
+          const userRef = doc(db, 'usuarios', auth.currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          const existingChecklists = userDoc.exists() ? (userDoc.data().sharedChecklists || {}) : {};
+          existingChecklists[shareToken] = {
+            ...shareData,
+            savedAt: new Date().toISOString()
+          };
+          
+          // Usar setDoc com merge para criar/atualizar sem erro
+          await setDoc(userRef, {
+            sharedChecklists: existingChecklists
+          }, { merge: true });
+          
+          console.log('✅ Referência salva no documento do usuário');
+        } catch(userErr) {
+          // Não bloquear se falhar - o importante é a collection pública
+          console.warn('⚠️ Não foi possível salvar referência no documento do usuário:', userErr.message);
+        }
+        
+        // Mostrar modal com link
+        mostrarModalCompartilhamento(shareUrl, shareToken, blockTitle);
+        
+      } catch(err) {
+        console.error('❌ Erro ao criar compartilhamento:', err);
+        console.error('Detalhes:', err.message);
+        console.error('Stack:', err.stack);
+        mgToast('❌ Erro ao gerar link: ' + (err.message || 'Erro desconhecido'), 'error');
+      }
+    }
+    
+    // Gerar token único
+    function generateShareToken(){
+      return 'ck_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Mostrar modal com link de compartilhamento
+    function mostrarModalCompartilhamento(shareUrl, shareToken, blockTitle){
+      // Remover modal existente
+      const existingModal = document.querySelector('.share-checklist-modal-overlay');
+      if(existingModal) existingModal.remove();
+      
+      const overlay = document.createElement('div');
+      overlay.className = 'share-checklist-modal-overlay';
+      overlay.innerHTML = `
+        <div class="share-checklist-modal">
+          <div class="share-checklist-header">
+            <h3>🔗 Link de Compartilhamento Criado</h3>
+            <button class="share-checklist-close" title="Fechar">×</button>
+          </div>
+          
+          <div class="share-checklist-body">
+            <div class="share-checklist-info">
+              <strong>📦 Checklist:</strong> ${escapeHtml(blockTitle)}
+            </div>
+            
+            <div class="share-checklist-url-container">
+              <label>Link para enviar ao cliente:</label>
+              <div class="share-checklist-url-box">
+                <input type="text" readonly value="${shareUrl}" class="share-checklist-url-input" id="shareUrlInput">
+                <button class="share-checklist-copy-btn" data-url="${shareUrl}" title="Copiar link">
+                  📋 Copiar
+                </button>
+              </div>
+            </div>
+            
+            <div class="share-checklist-details">
+              <div class="share-checklist-detail-item">
+                <span class="icon">⏱️</span>
+                <span>Válido por 7 dias</span>
+              </div>
+              <div class="share-checklist-detail-item">
+                <span class="icon">🔄</span>
+                <span>Atualizações em tempo real</span>
+              </div>
+              <div class="share-checklist-detail-item">
+                <span class="icon">📊</span>
+                <span>Veja respostas no painel</span>
+              </div>
+            </div>
+            
+            <div class="share-checklist-actions">
+              <button class="share-checklist-whatsapp-btn" data-url="${shareUrl}" data-title="${escapeHtml(blockTitle)}">
+                💬 Enviar por WhatsApp
+              </button>
+              <button class="share-checklist-email-btn" data-url="${shareUrl}" data-title="${escapeHtml(blockTitle)}">
+                📧 Enviar por Email
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      // Event listeners
+      const closeBtn = overlay.querySelector('.share-checklist-close');
+      const copyBtn = overlay.querySelector('.share-checklist-copy-btn');
+      const whatsappBtn = overlay.querySelector('.share-checklist-whatsapp-btn');
+      const emailBtn = overlay.querySelector('.share-checklist-email-btn');
+      const urlInput = overlay.querySelector('#shareUrlInput');
+      
+      // Fechar modal
+      const closeModal = () => overlay.remove();
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => {
+        if(e.target === overlay) closeModal();
+      });
+      
+      // Copiar link
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          urlInput.select();
+          copyBtn.innerHTML = '✅ Copiado!';
+          mgToast('✅ Link copiado para área de transferência!', 'success');
+          setTimeout(() => {
+            copyBtn.innerHTML = '📋 Copiar';
+          }, 2000);
+        } catch(err) {
+          console.error('Erro ao copiar:', err);
+          // Fallback: selecionar texto
+          urlInput.select();
+          document.execCommand('copy');
+          mgToast('✅ Link copiado!', 'success');
+        }
+      });
+      
+      // Enviar por WhatsApp
+      whatsappBtn.addEventListener('click', () => {
+        const message = encodeURIComponent(
+          `📋 *${blockTitle}*\n\n` +
+          `Olá! Compartilhei um checklist para você preencher.\n\n` +
+          `🔗 Acesse o link abaixo:\n${shareUrl}\n\n` +
+          `_Link válido por 7 dias_`
+        );
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+      });
+      
+      // Enviar por Email
+      emailBtn.addEventListener('click', () => {
+        const subject = encodeURIComponent(`Checklist: ${blockTitle}`);
+        const body = encodeURIComponent(
+          `Olá,\n\n` +
+          `Compartilhei um checklist para você preencher.\n\n` +
+          `📋 ${blockTitle}\n\n` +
+          `🔗 Acesse o link abaixo:\n${shareUrl}\n\n` +
+          `Link válido por 7 dias.\n\n` +
+          `Atenciosamente`
+        );
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+      });
+      
+      // Auto-selecionar URL ao abrir
+      urlInput.select();
+      urlInput.focus();
+    }
+    
+    // Adicionar estilos para o modal de compartilhamento
+    if(!document.getElementById('share-checklist-styles')){
+      const style = document.createElement('style');
+      style.id = 'share-checklist-styles';
+      style.textContent = `
+        .share-checklist-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px);animation:fadeIn .2s ease}
+        .share-checklist-modal{background:#1e1e2e;border:1px solid rgba(6,182,212,.4);border-radius:16px;width:90%;max-width:600px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .3s ease}
+        .share-checklist-header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between}
+        .share-checklist-header h3{font-size:1.2rem;font-weight:700;color:#fff;margin:0;display:flex;align-items:center;gap:8px}
+        .share-checklist-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:1.5rem;cursor:pointer;padding:0;line-height:1;transition:color .2s}
+        .share-checklist-close:hover{color:#fff}
+        .share-checklist-body{padding:24px}
+        .share-checklist-info{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);border-radius:8px;padding:12px 16px;margin-bottom:20px;color:rgba(255,255,255,.9);font-size:.9rem}
+        .share-checklist-url-container{margin-bottom:20px}
+        .share-checklist-url-container label{display:block;font-size:.85rem;color:rgba(255,255,255,.7);margin-bottom:8px;font-weight:600}
+        .share-checklist-url-box{display:flex;gap:8px}
+        .share-checklist-url-input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px 16px;color:#fff;font-size:.9rem;font-family:monospace}
+        .share-checklist-copy-btn{background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;border-radius:8px;padding:12px 20px;color:#fff;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+        .share-checklist-copy-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(6,182,212,.4)}
+        .share-checklist-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+        .share-checklist-detail-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;font-size:.85rem;color:rgba(255,255,255,.8)}
+        .share-checklist-detail-item .icon{font-size:1.2rem}
+        .share-checklist-actions{display:flex;gap:12px}
+        .share-checklist-actions button{flex:1;padding:14px 20px;border:none;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s}
+        .share-checklist-whatsapp-btn{background:linear-gradient(135deg,#25d366,#20ba5a);color:#fff}
+        .share-checklist-whatsapp-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,211,102,.4)}
+        .share-checklist-email-btn{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+        .share-checklist-email-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(59,130,246,.4)}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+      `;
+      document.head.appendChild(style);
     }
 
     /* ========= METAS - NOVA ESTRUTURA SIMPLIFICADA ========= */
@@ -71331,6 +72026,353 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
         btn.disabled = false;
       }
     };
+    
+      // ========= DETECTOR DE CHECKLIST COMPARTILHADO =========
+      // Verifica se a URL contém um token de checklist compartilhado
+      const checkSharedChecklistRoute = () => {
+        const hash = window.location.hash;
+        if(hash.startsWith('#/checklist/')){
+          const token = hash.replace('#/checklist/', '');
+          if(token){
+            // Carregar página de checklist compartilhado
+            loadSharedChecklist(token);
+            return true;
+          }
+        }
+        return false;
+      };
+      
+      // Função para carregar e renderizar checklist compartilhado
+      async function loadSharedChecklist(token){
+        console.log('📋 Carregando checklist compartilhado:', token);
+        
+        // Esconder área de autenticação e dashboard
+        const authArea = document.getElementById('authArea');
+        const userArea = document.getElementById('userArea');
+        if(authArea) authArea.style.display = 'none';
+        if(userArea) userArea.style.display = 'none';
+        
+        // Criar container para checklist compartilhado
+        let sharedContainer = document.getElementById('sharedChecklistContainer');
+        if(!sharedContainer){
+          sharedContainer = document.createElement('div');
+          sharedContainer.id = 'sharedChecklistContainer';
+          sharedContainer.style.cssText = 'max-width:800px;margin:40px auto;padding:20px';
+          document.body.appendChild(sharedContainer);
+        }
+        
+        sharedContainer.innerHTML = `
+          <div style="text-align:center;padding:40px 20px">
+            <div style="font-size:3rem;margin-bottom:20px">📋</div>
+            <h2 style="margin:0 0 10px;color:#fff">Carregando checklist...</h2>
+            <div class="loading-spinner" style="margin:20px auto"></div>
+          </div>
+        `;
+        
+        try {
+          console.log('📋 [LOAD] Buscando checklist no Firebase...');
+          console.log('📋 [LOAD] Token:', token);
+          
+          // Buscar na collection pública
+          const publicChecklistRef = doc(db, 'public_checklists', token);
+          console.log('📋 [LOAD] Referência criada:', publicChecklistRef.path);
+          
+          const publicChecklistDoc = await getDoc(publicChecklistRef);
+          console.log('📋 [LOAD] Documento existe?', publicChecklistDoc.exists());
+          
+          if(!publicChecklistDoc.exists()){
+            throw new Error('Checklist não encontrado ou expirado');
+          }
+          
+          const checklistData = publicChecklistDoc.data();
+          console.log('📋 [LOAD] Dados do checklist:', checklistData);
+          
+          const ownerUid = checklistData.createdBy || checklistData.uid;
+          console.log('📋 [LOAD] Owner UID:', ownerUid);
+          
+          // Verificar se expirou
+          const now = new Date();
+          const expiresAt = new Date(checklistData.expiresAt);
+          console.log('📋 [LOAD] Data atual:', now.toISOString());
+          console.log('📋 [LOAD] Expira em:', checklistData.expiresAt);
+          console.log('📋 [LOAD] Expirado?', now > expiresAt);
+          
+          if(now > expiresAt){
+            checklistData.status = 'expired';
+            throw new Error('Este checklist expirou');
+          }
+          
+          console.log('✅ [LOAD] Checklist carregado com sucesso! Renderizando formulário...');
+          
+          // Renderizar checklist (passar referência para salvar)
+          renderSharedChecklistForm(checklistData, publicChecklistRef, token, ownerUid);
+          
+        } catch(err) {
+          console.error('❌ [LOAD] Erro ao carregar checklist:', err);
+          console.error('❌ [LOAD] Detalhes:', err.message);
+          console.error('❌ [LOAD] Stack:', err.stack);
+          sharedContainer.innerHTML = `
+            <div style="text-align:center;padding:40px 20px">
+              <div style="font-size:3rem;margin-bottom:20px">❌</div>
+              <h2 style="margin:0 0 10px;color:#ff6666">Erro ao Carregar</h2>
+              <p style="color:rgba(255,255,255,.7);margin:0">${escapeHtml(err.message)}</p>
+              <button onclick="window.location.href='/'" style="margin-top:20px;padding:12px 24px;background:#06b6d4;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer">
+                Ir para Dashboard
+              </button>
+            </div>
+          `;
+        }
+      }
+      
+      // Renderizar formulário do checklist compartilhado
+      function renderSharedChecklistForm(checklistData, checklistRef, token, ownerUid){
+        const container = document.getElementById('sharedChecklistContainer');
+        
+        const isCompleted = checklistData.status === 'completed';
+        const itemsHtml = checklistData.items.map((item, idx) => `
+          <div class="shared-checklist-item ${item.completed ? 'completed' : ''}" data-idx="${idx}">
+            <div class="shared-checklist-item-header">
+              <input type="checkbox" 
+                     class="shared-checklist-checkbox" 
+                     id="item_${idx}" 
+                     ${item.completed ? 'checked' : ''}
+                     ${isCompleted ? 'disabled' : ''}
+                     data-idx="${idx}">
+              <label for="item_${idx}" class="shared-checklist-item-text">${escapeHtml(item.text)}</label>
+            </div>
+            <textarea class="shared-checklist-textarea" 
+                      placeholder="Adicione suas observações ou resposta aqui..."
+                      data-idx="${idx}"
+                      ${isCompleted ? 'disabled' : ''}>${escapeHtml(item.response || '')}</textarea>
+          </div>
+        `).join('');
+        
+        const progress = Math.round((checklistData.items.filter(i => i.completed).length / checklistData.items.length) * 100);
+        
+        container.innerHTML = `
+          <style>
+            .shared-checklist-container{background:#1e1e2e;border:1px solid rgba(6,182,212,.3);border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+            .shared-checklist-header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid rgba(255,255,255,.1)}
+            .shared-checklist-header h1{margin:0 0 8px;color:#fff;font-size:1.8rem;display:flex;align-items:center;justify-content:center;gap:12px}
+            .shared-checklist-header .subtitle{color:rgba(255,255,255,.6);font-size:.9rem;margin:0}
+            .shared-checklist-progress{margin-bottom:24px;text-align:center}
+            .shared-checklist-progress-bar{height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin:8px 0}
+            .shared-checklist-progress-fill{height:100%;background:linear-gradient(90deg,#06b6d4,#0891b2);transition:width .3s ease}
+            .shared-checklist-progress-text{font-size:.85rem;color:rgba(255,255,255,.7)}
+            .shared-checklist-items{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+            .shared-checklist-item{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;transition:all .2s}
+            .shared-checklist-item.completed{border-color:#2e7d32;background:rgba(46,125,50,.08)}
+            .shared-checklist-item-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+            .shared-checklist-checkbox{width:24px;height:24px;min-width:24px;cursor:pointer;accent-color:#06b6d4;margin-top:2px}
+            .shared-checklist-item-text{flex:1;color:rgba(255,255,255,.9);font-size:1rem;line-height:1.5;cursor:pointer;user-select:none}
+            .shared-checklist-item.completed .shared-checklist-item-text{color:rgba(255,255,255,.5);text-decoration:line-through}
+            .shared-checklist-textarea{width:100%;min-height:80px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px;color:#fff;font-family:inherit;font-size:.9rem;resize:vertical}
+            .shared-checklist-textarea:focus{outline:none;border-color:#06b6d4;background:rgba(0,0,0,.5)}
+            .shared-checklist-textarea:disabled{opacity:.5;cursor:not-allowed}
+            .shared-checklist-actions{display:flex;gap:12px;justify-content:center}
+            .shared-checklist-btn{padding:14px 32px;border:none;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;transition:all .2s}
+            .shared-checklist-btn-save{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
+            .shared-checklist-btn-save:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(6,182,212,.4)}
+            .shared-checklist-btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none}
+            .shared-checklist-completed-badge{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:12px 24px;border-radius:8px;text-align:center;font-weight:600}
+          </style>
+          
+          <div class="shared-checklist-container">
+            <div class="shared-checklist-header">
+              <h1>📋 ${escapeHtml(checklistData.blockTitle)}</h1>
+              <p class="subtitle">${escapeHtml(checklistData.weekTitle)}</p>
+            </div>
+            
+            <div class="shared-checklist-progress">
+              <div class="shared-checklist-progress-text">${progress}% concluído</div>
+              <div class="shared-checklist-progress-bar">
+                <div class="shared-checklist-progress-fill" style="width:${progress}%"></div>
+              </div>
+            </div>
+            
+            ${isCompleted ? `
+              <div class="shared-checklist-completed-badge">
+                ✅ Checklist enviado com sucesso!
+              </div>
+            ` : ''}
+            
+            <div class="shared-checklist-items">
+              ${itemsHtml}
+            </div>
+            
+            ${!isCompleted ? `
+              <div class="shared-checklist-actions">
+                <button class="shared-checklist-btn shared-checklist-btn-save" id="saveSharedChecklist">
+                  💾 Salvar Progresso
+                </button>
+                <button class="shared-checklist-btn shared-checklist-btn-save" id="submitSharedChecklist">
+                  ✅ Enviar Checklist
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        
+        if(!isCompleted){
+          // Event listeners
+          const checkboxes = container.querySelectorAll('.shared-checklist-checkbox');
+          const textareas = container.querySelectorAll('.shared-checklist-textarea');
+          const saveBtn = container.querySelector('#saveSharedChecklist');
+          const submitBtn = container.querySelector('#submitSharedChecklist');
+          
+          checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+              const idx = parseInt(cb.dataset.idx);
+              checklistData.items[idx].completed = cb.checked;
+              updateProgress();
+            });
+          });
+          
+          textareas.forEach(ta => {
+            ta.addEventListener('input', () => {
+              const idx = parseInt(ta.dataset.idx);
+              checklistData.items[idx].response = ta.value;
+            });
+          });
+          
+          const updateProgress = () => {
+            const completed = checklistData.items.filter(i => i.completed).length;
+            const newProgress = Math.round((completed / checklistData.items.length) * 100);
+            const progressFill = container.querySelector('.shared-checklist-progress-fill');
+            const progressText = container.querySelector('.shared-checklist-progress-text');
+            if(progressFill) progressFill.style.width = newProgress + '%';
+            if(progressText) progressText.textContent = newProgress + '% concluído';
+          };
+          
+          saveBtn.addEventListener('click', async () => {
+            saveBtn.disabled = true;
+            saveBtn.textContent = '💾 Salvando...';
+            try {
+              console.log('💾 [SAVE] Iniciando salvamento...');
+              console.log('💾 [SAVE] Token:', token);
+              console.log('💾 [SAVE] OwnerUID:', ownerUid);
+              console.log('💾 [SAVE] Items a salvar:', checklistData.items);
+              
+              // Atualizar na collection pública
+              console.log('💾 [SAVE] Atualizando collection pública...');
+              await updateDoc(checklistRef, {
+                items: checklistData.items,
+                lastUpdated: new Date().toISOString()
+              });
+              console.log('✅ [SAVE] Collection pública atualizada com sucesso!');
+              
+              // Também atualizar no documento do usuário (opcional)
+              if(ownerUid){
+                try {
+                  console.log('💾 [SAVE] Tentando atualizar documento do usuário...');
+                  const userRef = doc(db, 'usuarios', ownerUid);
+                  const userDoc = await getDoc(userRef);
+                  if(userDoc.exists()){
+                    const sharedChecklists = userDoc.data().sharedChecklists || {};
+                    if(sharedChecklists[token]){
+                      sharedChecklists[token].items = checklistData.items;
+                      sharedChecklists[token].lastUpdated = new Date().toISOString();
+                      await updateDoc(userRef, { sharedChecklists });
+                      console.log('✅ [SAVE] Documento do usuário atualizado!');
+                    } else {
+                      console.warn('⚠️ [SAVE] Token não encontrado em sharedChecklists');
+                    }
+                  } else {
+                    console.warn('⚠️ [SAVE] Documento do usuário não existe');
+                  }
+                } catch(userErr) {
+                  console.warn('⚠️ [SAVE] Erro ao atualizar doc do usuário (não crítico):', userErr.message);
+                }
+              }
+              
+              mgToast('✅ Progresso salvo!', 'success');
+              saveBtn.textContent = '✅ Salvo!';
+              setTimeout(() => {
+                saveBtn.textContent = '💾 Salvar Progresso';
+                saveBtn.disabled = false;
+              }, 2000);
+            } catch(err) {
+              console.error('❌ [SAVE] Erro ao salvar:', err);
+              console.error('❌ [SAVE] Detalhes:', err.message);
+              console.error('❌ [SAVE] Stack:', err.stack);
+              mgToast('❌ Erro ao salvar progresso: ' + err.message, 'error');
+              saveBtn.disabled = false;
+              saveBtn.textContent = '💾 Salvar Progresso';
+            }
+          });
+          
+          submitBtn.addEventListener('click', async () => {
+            if(!confirm('Deseja enviar o checklist? Você não poderá mais editá-lo após o envio.')){
+              return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Enviando...';
+            try {
+              console.log('✅ [SUBMIT] Iniciando envio...');
+              console.log('✅ [SUBMIT] Token:', token);
+              console.log('✅ [SUBMIT] OwnerUID:', ownerUid);
+              
+              const completedData = {
+                items: checklistData.items,
+                status: 'completed',
+                completedAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+              };
+              
+              console.log('✅ [SUBMIT] Dados a enviar:', completedData);
+              
+              // Atualizar na collection pública
+              console.log('✅ [SUBMIT] Atualizando collection pública...');
+              await updateDoc(checklistRef, completedData);
+              console.log('✅ [SUBMIT] Collection pública atualizada!');
+              
+              // Também atualizar no documento do usuário (opcional)
+              if(ownerUid){
+                try {
+                  console.log('✅ [SUBMIT] Tentando atualizar documento do usuário...');
+                  const userRef = doc(db, 'usuarios', ownerUid);
+                  const userDoc = await getDoc(userRef);
+                  if(userDoc.exists()){
+                    const sharedChecklists = userDoc.data().sharedChecklists || {};
+                    if(sharedChecklists[token]){
+                      Object.assign(sharedChecklists[token], completedData);
+                      await updateDoc(userRef, { sharedChecklists });
+                      console.log('✅ [SUBMIT] Documento do usuário atualizado!');
+                    } else {
+                      console.warn('⚠️ [SUBMIT] Token não encontrado em sharedChecklists');
+                    }
+                  } else {
+                    console.warn('⚠️ [SUBMIT] Documento do usuário não existe');
+                  }
+                } catch(userErr) {
+                  console.warn('⚠️ [SUBMIT] Erro ao atualizar doc do usuário (não crítico):', userErr.message);
+                }
+              }
+              
+              mgToast('✅ Checklist enviado com sucesso!', 'success');
+              // Recarregar página para mostrar estado concluído
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            } catch(err) {
+              console.error('❌ [SUBMIT] Erro ao enviar:', err);
+              console.error('❌ [SUBMIT] Detalhes:', err.message);
+              console.error('❌ [SUBMIT] Stack:', err.stack);
+              mgToast('❌ Erro ao enviar checklist: ' + err.message, 'error');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '✅ Enviar Checklist';
+            }
+          });
+        }
+      }
+      
+      // Verificar rota ao carregar página
+      if(checkSharedChecklistRoute()){
+        // Não continuar com autenticação normal
+        console.log('📋 Modo checklist compartilhado ativo');
+      } else {
+        // Continuar com fluxo normal de autenticação
 
       onAuthStateChanged(auth, async (user)=>{
         // Verifica se é acesso admin pelos parâmetros da URL
@@ -71792,6 +72834,8 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           clearMacroTabBadge();
         }
       });
+      
+      } // Fim do else (fluxo normal de autenticação)
 
 
     /* ========= CALENDÁRIO / POSTS (Firestore + Storage) ========= */
