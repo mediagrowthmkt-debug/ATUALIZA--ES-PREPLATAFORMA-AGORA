@@ -72388,14 +72388,15 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
                     console.log('💾 [SAVE] weekData encontrado?', !!weekData);
                     
                     if(weekData){
-                      console.log('💾 [SAVE] weekData.checklist existe?', !!weekData.checklist);
-                      if(weekData.checklist){
-                        console.log('💾 [SAVE] weekData.checklist keys:', Object.keys(weekData.checklist));
+                      console.log('💾 [SAVE] weekData.blocks existe?', !!weekData.blocks);
+                      if(weekData.blocks){
+                        console.log('💾 [SAVE] weekData.blocks keys:', Object.keys(weekData.blocks));
                         console.log('💾 [SAVE] Procurando blockId:', checklistData.blockId);
                       }
                     }
                     
-                    if(weekData && weekData.checklist && weekData.checklist[checklistData.blockId]){
+                    // ✅ CORREÇÃO: A estrutura correta é blocks, não checklist!
+                    if(weekData && weekData.blocks && weekData.blocks[checklistData.blockId]){
                       console.log('💾 [SAVE] ✅ Encontrou bloco na estruturação!');
                       
                       // Atualizar checkboxes no formato da estruturação
@@ -72409,11 +72410,11 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
                       
                       console.log('💾 [SAVE] Checkboxes a salvar:', checkboxes);
                       
-                      // Usar updateDoc com caminho específico (mais eficiente)
+                      // ✅ USAR CAMINHO CORRETO: blocks ao invés de checklist
                       await updateDoc(userRef, {
-                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.checkboxes`]: checkboxes,
-                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.clientFilled`]: true,
-                        [`estruturacao.${checklistData.weekId}.checklist.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
+                        [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.checkboxes`]: checkboxes,
+                        [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.clientFilled`]: true,
+                        [`estruturacao.${checklistData.weekId}.blocks.${checklistData.blockId}.lastUpdated`]: new Date().toISOString()
                       });
                       
                       console.log('✅ [SAVE] Estruturação atualizada com sucesso!');
@@ -72423,8 +72424,8 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
                         weekId: checklistData.weekId,
                         blockId: checklistData.blockId,
                         hasWeekData: !!weekData,
-                        hasChecklist: weekData ? !!weekData.checklist : false,
-                        checklistKeys: weekData && weekData.checklist ? Object.keys(weekData.checklist) : []
+                        hasBlocks: weekData ? !!weekData.blocks : false,
+                        blocksKeys: weekData && weekData.blocks ? Object.keys(weekData.blocks) : []
                       });
                     }
                     
