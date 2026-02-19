@@ -64655,6 +64655,10 @@ FORMATO PADRÃO:
     
     // Mostrar modal com link de compartilhamento
     function mostrarModalCompartilhamento(shareUrl, shareToken, blockTitle){
+      console.log('🔗 [MODAL] Recebido shareUrl:', shareUrl);
+      console.log('🔗 [MODAL] Recebido shareToken:', shareToken);
+      console.log('🔗 [MODAL] Recebido blockTitle:', blockTitle);
+      
       // Remover modal existente
       const existingModal = document.querySelector('.share-checklist-modal-overlay');
       if(existingModal) existingModal.remove();
@@ -64728,16 +64732,22 @@ FORMATO PADRÃO:
       
       // Copiar link
       copyBtn.addEventListener('click', async () => {
+        console.log('🔗 [COPY] Botão clicado');
+        console.log('🔗 [COPY] shareUrl:', shareUrl);
+        console.log('🔗 [COPY] copyBtn.dataset.url:', copyBtn.dataset.url);
+        console.log('🔗 [COPY] urlInput.value:', urlInput.value);
+        
         try {
           await navigator.clipboard.writeText(shareUrl);
           urlInput.select();
           copyBtn.innerHTML = '✅ Copiado!';
+          console.log('✅ [COPY] Texto copiado com sucesso:', shareUrl);
           mgToast('✅ Link copiado para área de transferência!', 'success');
           setTimeout(() => {
             copyBtn.innerHTML = '📋 Copiar';
           }, 2000);
         } catch(err) {
-          console.error('Erro ao copiar:', err);
+          console.error('❌ [COPY] Erro ao copiar:', err);
           // Fallback: selecionar texto
           urlInput.select();
           document.execCommand('copy');
