@@ -14876,7 +14876,24 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     window.onAuthStateChanged = onAuthStateChanged;
     
     // ================================================================
-    // 🔐 FUNÇÃO PARA CHAMAR A IA VIA BACKEND (API KEY SEGURA)
+    // � VERIFICAÇÃO DE ROTA DE CHECKLIST COMPARTILHADO
+    // ================================================================
+    // CRÍTICO: Verificar ANTES de qualquer autenticação
+    // Se for link de checklist, não carregar sistema de autenticação
+    // ================================================================
+    const isSharedChecklistRoute = window.location.hash.startsWith('#/checklist/');
+    console.log('🔍 [EARLY CHECK] É rota compartilhada?', isSharedChecklistRoute);
+    console.log('🔍 [EARLY CHECK] Hash:', window.location.hash);
+    
+    if(isSharedChecklistRoute){
+      console.log('📋 [EARLY CHECK] Detectada rota de checklist compartilhado - Bloqueando autenticação');
+      // Definir flag global para outros scripts não tentarem autenticar
+      window.IS_SHARED_CHECKLIST_MODE = true;
+      // O carregamento do checklist será feito mais tarde no código
+    }
+    
+    // ================================================================
+    // �🔐 FUNÇÃO PARA CHAMAR A IA VIA BACKEND (API KEY SEGURA)
     // ================================================================
     // Esta função usa Firebase Functions como proxy para a API OpenRouter
     // A API key nunca é exposta no frontend
@@ -72031,14 +72048,21 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
       // Verifica se a URL contém um token de checklist compartilhado
       const checkSharedChecklistRoute = () => {
         const hash = window.location.hash;
+        console.log('🔍 [ROUTE CHECK] Verificando rota compartilhada...');
+        console.log('🔍 [ROUTE CHECK] Hash atual:', hash);
+        console.log('🔍 [ROUTE CHECK] Pathname:', window.location.pathname);
+        console.log('🔍 [ROUTE CHECK] Full URL:', window.location.href);
+        
         if(hash.startsWith('#/checklist/')){
           const token = hash.replace('#/checklist/', '');
+          console.log('✅ [ROUTE CHECK] Token encontrado:', token);
           if(token){
             // Carregar página de checklist compartilhado
             loadSharedChecklist(token);
             return true;
           }
         }
+        console.log('❌ [ROUTE CHECK] Não é rota de checklist compartilhado');
         return false;
       };
       
@@ -72368,11 +72392,14 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
       }
       
       // Verificar rota ao carregar página
-      if(checkSharedChecklistRoute()){
+      if(window.IS_SHARED_CHECKLIST_MODE || checkSharedChecklistRoute()){
         // Não continuar com autenticação normal
-        console.log('📋 Modo checklist compartilhado ativo');
+        console.log('📋 Modo checklist compartilhado ativo - Pulando autenticação');
+        return; // IMPORTANTE: Não executar onAuthStateChanged
       } else {
         // Continuar com fluxo normal de autenticação
+        console.log('🔐 Modo normal - Iniciando autenticação');
+      }
 
       onAuthStateChanged(auth, async (user)=>{
         // Verifica se é acesso admin pelos parâmetros da URL
