@@ -64514,7 +64514,22 @@ FORMATO PADRÃO:
       
       // Gerar token único para o link
       const shareToken = generateShareToken();
-      const shareUrl = `${window.location.origin}${window.location.pathname}#/checklist/${shareToken}`;
+      
+      // 🔧 Construir URL corretamente para GitHub Pages
+      // Se pathname é "/" ou vazio, usar apenas origin
+      // Se pathname tem valor (ex: /cferrao45), incluir no URL
+      let baseUrl = window.location.origin;
+      if(window.location.pathname && window.location.pathname !== '/'){
+        baseUrl += window.location.pathname;
+      }
+      // Remover trailing slash se existir
+      baseUrl = baseUrl.replace(/\/$/, '');
+      const shareUrl = `${baseUrl}#/checklist/${shareToken}`;
+      
+      console.log('🔗 [SHARE] Base URL:', baseUrl);
+      console.log('🔗 [SHARE] Share URL:', shareUrl);
+      console.log('🔗 [SHARE] Origin:', window.location.origin);
+      console.log('🔗 [SHARE] Pathname:', window.location.pathname);
       
       // Preparar dados do compartilhamento
       const shareData = {
