@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Open Graph Tags - Relatório</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0b1020;
+      color: #e2e8f0;
+    }
+    .test-card {
+      background: #111936;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #ff6633;
+      margin-top: 0;
+    }
+    h2 {
+      color: #ff944d;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      padding-bottom: 10px;
+    }
+    .meta-tag {
+      background: rgba(255,255,255,.05);
+      border-left: 3px solid #10b981;
+      padding: 10px;
+      margin: 8px 0;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+    .property {
+      color: #60a5fa;
+    }
+    .value {
+      color: #34d399;
+    }
+    .preview-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .preview-image {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .preview-content {
+      padding: 15px;
+      color: #1f2937;
+    }
+    .preview-title {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    .preview-description {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .preview-url {
+      color: #9ca3af;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .btn {
+      background: #ff6633;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .btn:hover {
+      background: #ff7744;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-card">
+    <h1>🧪 Teste de Open Graph Tags - Relatório</h1>
+    <p>Validação dos meta tags para compartilhamento no WhatsApp, Facebook, LinkedIn e outras redes sociais.</p>
+  </div>
+
+  <div class="test-card">
+    <h2>📋 Meta Tags Configurados</h2>
+    
+    <div class="meta-tag">
+      <span class="property">og:type:</span> <span class="value">website</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:title:</span> <span class="value">📊 Relatório de Performance - MediaGrowth</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:description:</span> <span class="value">📈 Relatório completo com posts publicados, objetivos alcançados, métricas de crescimento e análise de leads. Visualize o progresso da sua estratégia de marketing digital com dados detalhados e insights acionáveis.</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:image:</span> <span class="value">https://dashboard.mediagrowth.com.br/assets/relatorio-thumbnail.png</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:image:width:</span> <span class="value">1200</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:image:height:</span> <span class="value">630</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">og:url:</span> <span class="value">[Dinâmico - URL atual do relatório]</span>
+    </div>
+    <div class="meta-tag">
+      <span class="property">twitter:card:</span> <span class="value">summary_large_image</span>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>👁️ Preview de Compartilhamento</h2>
+    <p><strong>Como aparecerá no WhatsApp/Facebook/LinkedIn:</strong></p>
+    
+    <div class="preview-card">
+      <img src="assets/relatorio-thumbnail.png" alt="Thumbnail" class="preview-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <div style="display:none; padding: 40px; text-align: center; background: #f3f4f6; color: #6b7280;">
+        ❌ Imagem não encontrada<br>
+        <small>Certifique-se de que o arquivo existe em: assets/relatorio-thumbnail.png</small>
+      </div>
+      <div class="preview-content">
+        <div class="preview-title">📊 Relatório de Performance - MediaGrowth</div>
+        <div class="preview-description">📈 Relatório completo com posts publicados, objetivos alcançados, métricas de crescimento e análise de leads. Visualize o progresso da sua estratégia de marketing digital com dados detalhados e insights acionáveis.</div>
+        <div class="preview-url">dashboard.mediagrowth.com.br</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>🔗 Ferramentas de Validação</h2>
+    <p>Use estas ferramentas online para validar os meta tags antes de publicar:</p>
+    
+    <button class="btn" onclick="window.open('https://developers.facebook.com/tools/debug/', '_blank')">
+      Facebook Debugger
+    </button>
+    <button class="btn" onclick="window.open('https://cards-dev.twitter.com/validator', '_blank')">
+      Twitter Card Validator
+    </button>
+    <button class="btn" onclick="window.open('https://www.linkedin.com/post-inspector/', '_blank')">
+      LinkedIn Inspector
+    </button>
+    
+    <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
+      <strong>📝 Como usar:</strong>
+      <ol style="margin: 10px 0 0; padding-left: 20px;">
+        <li>Publique o site no servidor de produção</li>
+        <li>Copie a URL completa do relatório (ex: https://dashboard.mediagrowth.com.br/relatorio.html?share=xxx)</li>
+        <li>Cole a URL nas ferramentas acima</li>
+        <li>Clique em "Debug" ou "Validate"</li>
+        <li>Verifique se a imagem e descrição aparecem corretamente</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>✅ Checklist de Implementação</h2>
+    <div style="line-height: 2;">
+      ✅ Imagem movida para: <code>assets/relatorio-thumbnail.png</code><br>
+      ✅ Meta tags Open Graph configurados<br>
+      ✅ Meta tags Twitter Card configurados<br>
+      ✅ Imagem em alta resolução (1200x630px recomendado)<br>
+      ✅ URL absoluta da imagem (https://dashboard.mediagrowth.com.br/...)<br>
+      ✅ Descrição otimizada com emojis e palavras-chave<br>
+      ✅ Meta tags dinâmicos atualizados com período do relatório<br>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>🚀 Próximos Passos</h2>
+    <ol>
+      <li><strong>Fazer commit e push:</strong> Envie as alterações para o GitHub</li>
+      <li><strong>Aguardar deploy:</strong> GitHub Pages irá atualizar automaticamente</li>
+      <li><strong>Limpar cache do WhatsApp:</strong> O WhatsApp cacheia por 7 dias, então novos links funcionarão imediatamente</li>
+      <li><strong>Testar compartilhamento:</strong> Copie um link de relatório e envie para um contato teste</li>
+      <li><strong>Validar em múltiplas plataformas:</strong> WhatsApp, Facebook, LinkedIn, Twitter</li>
+    </ol>
+  </div>
+
+  <script>
+    // Verificar se a imagem existe
+    const img = document.querySelector('.preview-image');
+    img.addEventListener('load', () => {
+      console.log('✅ Thumbnail carregada com sucesso!');
+    });
+  </script>
+</body>
+</html>

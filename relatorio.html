@@ -1,28 +1,31 @@
 <!doctype html>
+<!-- Version: 5.16.0 - Enhanced social sharing with thumbnail - Cache buster: 2026-02-24-v5 -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Relatório do mês</title>
+  <meta name="description" content="Relatório completo de Performance com posts publicados, stories, objetivos alcançados, métricas de crescimento detalhadas e análise de leads gerados. Acompanhe o progresso da sua estratégia de marketing digital.">
+  <title>Relatório de Performance • MediaGrowth</title>
   
   <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  <meta property="og:title" content="📊 Relatório Mensal - MediaGrowth">
-  <meta property="og:description" content="Confira o relatório completo com posts, stories, objetivos, metas e leads gerados durante o mês.">
-  <meta property="og:image" content="">
+  <meta property="og:title" content="📊 Relatório de Performance - MediaGrowth">
+  <meta property="og:description" content="📈 Relatório completo com posts publicados, objetivos alcançados, métricas de crescimento e análise de leads. Visualize o progresso da sua estratégia de marketing digital com dados detalhados e insights acionáveis.">
+  <meta property="og:image" content="https://dashboard.mediagrowth.com.br/assets/relatorio-thumbnail.png">
+  <meta property="og:image:secure_url" content="https://dashboard.mediagrowth.com.br/assets/relatorio-thumbnail.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Relatório Mensal - Resumo de Performance">
+  <meta property="og:image:alt" content="Relatório de Performance - Dashboard com métricas e resultados">
   <meta property="og:site_name" content="MediaGrowth Dashboard">
   <meta property="og:locale" content="pt_BR">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="">
-  <meta name="twitter:title" content="📊 Relatório Mensal - MediaGrowth">
-  <meta name="twitter:description" content="Confira o relatório completo com posts, stories, objetivos, metas e leads gerados durante o mês.">
-  <meta name="twitter:image" content="">
+  <meta name="twitter:title" content="📊 Relatório de Performance - MediaGrowth">
+  <meta name="twitter:description" content="📈 Relatório completo com posts publicados, objetivos alcançados, métricas de crescimento e análise de leads. Acompanhe o progresso da sua estratégia digital.">
+  <meta name="twitter:image" content="https://dashboard.mediagrowth.com.br/assets/relatorio-thumbnail.png">
   
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
@@ -71,13 +74,6 @@
   #relatorioGoalsProgressPill{ border-color:#b45309; background:rgba(180,83,9,.22); }
   #relatorioGoalsTodoPill{ border-color:#1e3a8a; background:rgba(30,58,138,.22); }
 
-  /* Cores por status — Metas do mês (map: achieved=verde, progress=amarelo, missing=azul) */
-  #relatorioMetasColumns .goals-col[data-status="concluido"]{ background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.35); }
-  #relatorioMetasColumns .goals-col[data-status="em-andamento"]{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.35); }
-  #relatorioMetasColumns .goals-col[data-status="nao-iniciado"]{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.35); }
-  #relatorioMetasAchievedPill{ border-color:#14532d; background:rgba(20,83,45,.25); }
-  #relatorioMetasProgressPill{ border-color:#b45309; background:rgba(180,83,9,.22); }
-  #relatorioMetasMissingPill{ border-color:#1e3a8a; background:rgba(30,58,138,.22); }
     @media print{ .btn{display:none !important} .relatorio-container{box-shadow:none} }
     /* Stories & Posts carrossel */
     .relatorio-stories-carousel{position:relative;display:flex;align-items:center;gap:12px}
@@ -153,8 +149,8 @@
 
     <div class="relatorio-container" id="content" style="display:none">
       <div class="relatorio-header">
-        <h2>Relatório do mês</h2>
-        <p class="relatorio-subtitle" id="relatorioHeaderSubtitle"></p>
+        <h2>Relatório de Performance</h2>
+        <p class="relatorio-subtitle" id="relatorioHeaderSubtitle">Visão completa das métricas de crescimento</p>
       </div>
       <div class="relatorio-preview">
         <div class="relatorio-preview-meta" id="relatorioPreviewMeta">
@@ -227,32 +223,67 @@
       <p class="relatorio-desc" id="relatorioGoalsDesc"></p>
     </div>
 
-    <!-- Metas -->
-    <div class="relatorio-container" id="relatorioMetasSection" style="display:none">
+    <!-- Relatório de Performance -->
+    <div class="relatorio-container" id="relatorioPerformanceSection" style="display:none">
       <div class="relatorio-header">
-        <h2>📈 Metas do mês</h2>
-        <p class="relatorio-subtitle" id="relatorioMetasSubtitle"></p>
+        <h2>Relatório de Performance</h2>
+        <p class="relatorio-subtitle" id="relatorioPerformanceSubtitle">Visão completa das métricas de crescimento</p>
       </div>
-      <div class="relatorio-goals-summary">
-        <div class="goal-pill" id="relatorioMetasAchievedPill">Atingidas: <strong>-</strong></div>
-        <div class="goal-pill" id="relatorioMetasProgressPill">Em andamento: <strong>-</strong></div>
-        <div class="goal-pill" id="relatorioMetasMissingPill">Precisa colocar: <strong>-</strong></div>
-      </div>
-      <div class="goals-columns" id="relatorioMetasColumns">
-        <div class="goals-col" data-status="concluido">
-          <h3>Atingidas</h3>
-          <div class="goals-list" id="relatorioMetasAchieved"></div>
-        </div>
-        <div class="goals-col" data-status="em-andamento">
-          <h3>Em andamento</h3>
-          <div class="goals-list" id="relatorioMetasProgress"></div>
-        </div>
-        <div class="goals-col" data-status="nao-iniciado">
-          <h3>Precisa colocar</h3>
-          <div class="goals-list" id="relatorioMetasMissing"></div>
+
+      <!-- TRÁFEGO PAGO -->
+      <div class="performance-category">
+        <h3 class="performance-category-title" style="background: linear-gradient(135deg, #C34B09, #E05A0F); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="adsGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#adsGradientTitle)" d="M18.5,1.15C17.97,1.15 17.46,1.34 17.07,1.73L11.26,7.55L16.91,13.2L22.73,7.39C23.5,6.61 23.5,5.35 22.73,4.56L19.89,1.73C19.5,1.34 19,1.15 18.5,1.15M10.3,8.5L4.34,14.46C3.56,15.24 3.56,16.5 4.36,17.31L11.69,24.64C12.5,25.44 13.76,25.44 14.56,24.64L20.5,18.7L14.84,13.05L10.3,8.5M2.86,15.94L1.15,17.65C0.734,18.07 0.734,18.74 1.15,19.15L4.93,22.93C5.34,23.35 6,23.35 6.42,22.93L8.13,21.22L2.86,15.94Z" /></svg>
+          TRÁFEGO PAGO
+        </h3>
+        <div class="performance-grid" id="relatorioTrafegoGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(195, 75, 9, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(195, 75, 9, 0.2);">
+          <!-- Cards serão inseridos aqui -->
         </div>
       </div>
-      <p class="relatorio-desc" id="relatorioMetasDesc"></p>
+
+      <!-- CANAIS -->
+      <div class="performance-category" style="margin-top: 24px;">
+        <h3 class="performance-category-title" style="background: linear-gradient(135deg, #005B81, #007AA8); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="analyticsGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#analyticsGradientTitle)" d="M7,2H9A2,2 0 0,1 11,4V20A2,2 0 0,1 9,22H7A2,2 0 0,1 5,20V4A2,2 0 0,1 7,2M15,8H17A2,2 0 0,1 19,10V20A2,2 0 0,1 17,22H15A2,2 0 0,1 13,20V10A2,2 0 0,1 15,8Z" /></svg>
+          CANAIS
+        </h3>
+        <div class="performance-grid" id="relatorioCanaisGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(0, 91, 129, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(0, 91, 129, 0.2);">
+          <!-- Cards serão inseridos aqui -->
+        </div>
+      </div>
+
+      <!-- CRM E AUTOMAÇÕES -->
+      <div class="performance-category" style="margin-top: 24px;">
+        <h3 class="performance-category-title" style="background: linear-gradient(135deg, #007E41, #00A055); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="crmGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#crmGradientTitle)" d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" /></svg>
+          CRM E AUTOMAÇÕES
+        </h3>
+        <div class="performance-grid" id="relatorioCRMGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(0, 126, 65, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(0, 126, 65, 0.2);">
+          <!-- Cards serão inseridos aqui -->
+        </div>
+      </div>
+
+      <!-- LIDERANÇA -->
+      <div class="performance-category" style="margin-top: 24px;">
+        <h3 class="performance-category-title" style="background: linear-gradient(135deg, #7F6001, #A67C00); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="emailGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#emailGradientTitle)" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z" /></svg>
+          LIDERANÇA
+        </h3>
+        <div class="performance-grid" id="relatorioLiderancaGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(127, 96, 1, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(127, 96, 1, 0.2);">
+          <!-- Cards serão inseridos aqui -->
+        </div>
+      </div>
+
+      <!-- OUTROS -->
+      <div class="performance-category" style="margin-top: 24px;">
+        <h3 class="performance-category-title" style="background: linear-gradient(135deg, #9900FF, #BB33FF); color: white; padding: 12px 16px; border-radius: 8px 8px 0 0; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><defs><linearGradient id="automationGradientTitle" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /><stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.8" /></linearGradient></defs><path fill="url(#automationGradientTitle)" d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z" /></svg>
+          OUTROS
+        </h3>
+        <div class="performance-grid" id="relatorioOutrosGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 16px; background: rgba(153, 0, 255, 0.05); border-radius: 0 0 8px 8px; border: 1px solid rgba(153, 0, 255, 0.2);">
+          <!-- Cards serão inseridos aqui -->
+        </div>
+      </div>
     </div>
 
     <!-- Leads Gerados -->
@@ -363,26 +394,66 @@
     // Parse params
   const qs = new URLSearchParams(location.search);
   const shareToken = qs.get('share') || '';
-  const mesISO = (qs.get('mes') || '').slice(0,7);
+  
+  // 🔥 NOVO: Suportar período multi-mês (mesInicio + mesFim) e formato antigo (mes)
+  const mesInicioISO = (qs.get('mesInicio') || qs.get('mes') || '').slice(0,7);
+  const mesFimISO = (qs.get('mesFim') || mesInicioISO || '').slice(0,7);
+  const mesISO = mesInicioISO; // Compatibilidade com código antigo
+  
   const TENANT = qs.get('tenant') || document.body.getAttribute('data-client-id') || '';
-  const monthLabel = (()=>{ try{ const [a,m]=mesISO.split('-'); const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return `${nomes[(+m||1)-1]} ${a}` }catch{ return mesISO } })();
+  
+  // 🔥 NOVO: Gerar label de período (Janeiro a Fevereiro 2026, ou apenas Janeiro 2026)
+  const monthLabel = (()=>{ 
+    try{ 
+      const [anoInicio, mesInicio] = mesInicioISO.split('-'); 
+      const [anoFim, mesFim] = mesFimISO.split('-'); 
+      const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; 
+      
+      if(mesInicioISO === mesFimISO){
+        // Período de um único mês
+        return `${nomes[(+mesInicio||1)-1]} ${anoInicio}`;
+      } else {
+        // Período multi-mês
+        const mesInicioNome = nomes[(+mesInicio||1)-1];
+        const mesFimNome = nomes[(+mesFim||1)-1];
+        
+        if(anoInicio === anoFim){
+          return `${mesInicioNome} a ${mesFimNome} ${anoInicio}`;
+        } else {
+          return `${mesInicioNome} ${anoInicio} a ${mesFimNome} ${anoFim}`;
+        }
+      }
+    } catch{ 
+      return mesInicioISO; 
+    } 
+  })();
+  
   document.getElementById('reportMonth').textContent = monthLabel || '';
-  document.getElementById('relatorioHeaderSubtitle').textContent = monthLabel ? `Resumo do mês ${monthLabel}` : '';
+  document.getElementById('relatorioHeaderSubtitle').textContent = monthLabel ? `Resumo do período ${monthLabel}` : '';
   
   // Atualizar meta tags Open Graph dinamicamente
   const currentUrl = window.location.href;
+  const baseUrl = window.location.origin;
+  const thumbnailUrl = `${baseUrl}/assets/relatorio-thumbnail.png`;
+  
   document.querySelector('meta[property="og:url"]').setAttribute('content', currentUrl);
   document.querySelector('meta[name="twitter:url"]').setAttribute('content', currentUrl);
   
+  // Garantir que a imagem esteja sempre definida
+  document.querySelector('meta[property="og:image"]').setAttribute('content', thumbnailUrl);
+  document.querySelector('meta[property="og:image:secure_url"]').setAttribute('content', thumbnailUrl);
+  document.querySelector('meta[name="twitter:image"]').setAttribute('content', thumbnailUrl);
+  
   if(monthLabel) {
     const ogTitle = `📊 Relatório de ${monthLabel} - MediaGrowth`;
-    const ogDesc = `Confira o relatório completo de ${monthLabel} com posts, stories, objetivos, metas e leads gerados.`;
+    const ogDesc = `📈 Relatório completo de ${monthLabel}: posts publicados, objetivos alcançados, métricas detalhadas de crescimento (visualizações, engajamento, novos seguidores) e análise de leads gerados. Acompanhe os resultados da sua estratégia digital.`;
     
     document.title = ogTitle;
     document.querySelector('meta[property="og:title"]').setAttribute('content', ogTitle);
     document.querySelector('meta[property="og:description"]').setAttribute('content', ogDesc);
     document.querySelector('meta[name="twitter:title"]').setAttribute('content', ogTitle);
     document.querySelector('meta[name="twitter:description"]').setAttribute('content', ogDesc);
+    document.querySelector('meta[name="description"]').setAttribute('content', ogDesc);
   }
 
   // App/Auth/DB
@@ -390,6 +461,25 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
+
+    // ==================== CONSTANTES GLOBAIS (DEVE ESTAR NO TOPO DO MÓDULO) ====================
+    
+    // 🎨 Logos de plataformas (SVG inline) - DECLARADO ANTES DE TODAS AS FUNÇÕES QUE O USAM
+    const PLATFORM_LOGOS = {
+      google: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>',
+      facebook: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+      instagram: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>',
+      linkedin: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+      youtube: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+      tiktok: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
+      whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>',
+      meta: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+      crm: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+      email: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
+      automation: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>',
+      ads: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M18.5 3h-13C4.67 3 4 3.67 4 4.5v15c0 .83.67 1.5 1.5 1.5h13c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM7 18H5V9h2v9zm8 0h-2v-6h2v6zm4 0h-2V6h2v12z"/></svg>',
+      analytics: '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>'
+    };
 
     /**
      * Função robusta para copiar texto que funciona em iframes e diferentes contextos de permissão
@@ -584,24 +674,29 @@
       const SOCIAL_LINKS = USER_DATA.socialLinks && typeof USER_DATA.socialLinks==='object' ? USER_DATA.socialLinks : {};
       console.log('[Relatorio] USER_DATA carregado - metas:', METAS.length);
 
-      // 2) Posts (filtrar por mês e tenant)
+      // 2) Posts (filtrar por período e tenant)
       const postsSnap = await getDocs(collection(db,'usuarios', uid, 'posts'));
       const allPosts = postsSnap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
       console.log('[Relatorio] Total de posts no Firestore:', allPosts.length);
       
       const posts = allPosts.filter(p => {
-        const iso = String(p.dateISO||'');
-        const okMes = mesISO ? iso.startsWith(mesISO) : true;
-        const tenant = p.tenant||''; const safeTenant = TENANT||'';
+        const iso = String(p.dateISO||'').slice(0,7); // Pega apenas YYYY-MM
+        
+        // 🔥 NOVO: Verificar se está no período (mesInicio <= iso <= mesFim)
+        const okMes = iso >= mesInicioISO && iso <= mesFimISO;
+        
+        const tenant = p.tenant||''; 
+        const safeTenant = TENANT||'';
         const okTenant = !tenant || !safeTenant ? true : (tenant===safeTenant);
         const keep = okMes && okTenant;
-        if(!keep && mesISO && TENANT){
+        
+        if(!keep && mesInicioISO && TENANT){
           console.log('[Relatorio] Post filtrado:', p.id, 'dateISO:', iso, 'tenant:', tenant, 'okMes:', okMes, 'okTenant:', okTenant);
         }
         return keep;
       }).sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
       
-      console.log('[Relatorio] Posts após filtro:', posts.length);
+      console.log('[Relatorio] Posts após filtro (período', mesInicioISO, 'até', mesFimISO, '):', posts.length);
       console.log('[Relatorio] Stories:', posts.filter(p => p.target === 'stories').length);
       console.log('[Relatorio] Feed posts:', posts.filter(p => (p.target||'feed') === 'feed').length);
 
@@ -707,6 +802,318 @@
         });
       }, 1000);
     }
+    
+    // ==================== FUNÇÕES ====================
+    
+    // Função para obter ícone da métrica (usa PLATFORM_LOGOS acima)
+    function getMetricIcon(descricao, categoria){
+      const desc = (descricao || '').toLowerCase();
+      
+      // Logos específicas por palavra-chave
+      if(desc.includes('instagram') || desc.includes('insta')) return PLATFORM_LOGOS.instagram;
+      if(desc.includes('facebook') || desc.includes('fb')) return PLATFORM_LOGOS.facebook;
+      if(desc.includes('meta') && !desc.includes('metrica')) return PLATFORM_LOGOS.meta;
+      if(desc.includes('google') || desc.includes('ads') || desc.includes('adwords')) return PLATFORM_LOGOS.google;
+      if(desc.includes('whatsapp') || desc.includes('wpp') || desc.includes('zap')) return PLATFORM_LOGOS.whatsapp;
+      if(desc.includes('youtube') || desc.includes('yt')) return PLATFORM_LOGOS.youtube;
+      if(desc.includes('tiktok') || desc.includes('tik tok')) return PLATFORM_LOGOS.tiktok;
+      if(desc.includes('linkedin') || desc.includes('linked in')) return PLATFORM_LOGOS.linkedin;
+      if(desc.includes('crm') || desc.includes('cliente') || desc.includes('contato')) return PLATFORM_LOGOS.crm;
+      if(desc.includes('email') || desc.includes('e-mail') || desc.includes('newsletter')) return PLATFORM_LOGOS.email;
+      if(desc.includes('automaç') || desc.includes('automacao') || desc.includes('workflow')) return PLATFORM_LOGOS.automation;
+      if(desc.includes('anúnc') || desc.includes('anuncio') || desc.includes('campanha')) return PLATFORM_LOGOS.ads;
+      if(desc.includes('analis') || desc.includes('analytic') || desc.includes('dado')) return PLATFORM_LOGOS.analytics;
+      
+      // Fallback por categoria
+      if(categoria === 'trafego_pago') return PLATFORM_LOGOS.ads;
+      if(categoria === 'canais') return PLATFORM_LOGOS.analytics;
+      if(categoria === 'crm_automacoes') return PLATFORM_LOGOS.crm;
+      if(categoria === 'lideranca') return PLATFORM_LOGOS.email;
+      
+      // Fallback padrão
+      return PLATFORM_LOGOS.automation;
+    }
+    
+    // Função para renderizar Relatório de Performance
+    function renderPerformance(metas, labelMonth, periodoTexto){
+      console.log('[renderPerformance] Iniciando - metas:', metas.length, 'período:', periodoTexto);
+      
+      const section = document.getElementById('relatorioPerformanceSection');
+      if(!section) {
+        console.error('[renderPerformance] Seção #relatorioPerformanceSection não encontrada');
+        return;
+      }
+      
+      if(!metas || metas.length === 0){
+        section.style.display = 'none';
+        console.log('[renderPerformance] Sem metas, ocultando seção');
+        return;
+      }
+      
+      section.style.display = 'block';
+      
+      // Atualizar subtitle com período
+      const subtitle = section.querySelector('#relatorioPerformanceSubtitle');
+      if(subtitle) {
+        subtitle.textContent = `Visão completa das métricas de crescimento • ${periodoTexto || labelMonth}`;
+      }
+      
+      // Organizar metas por categoria
+      const metasPorCategoria = {
+        trafego_pago: [],
+        canais: [],
+        crm_automacoes: [],
+        lideranca: [],
+        outros: []
+      };
+      
+      metas.forEach(meta => {
+        // Usar categoria que vem do payload (se existir) ou detectar automaticamente
+        const categoria = meta.categoria || detectarCategoriaMeta(meta.descricao || '');
+        
+        if(metasPorCategoria[categoria]){
+          metasPorCategoria[categoria].push({...meta, categoria}); // Garantir que categoria está no meta
+        } else {
+          metasPorCategoria.outros.push({...meta, categoria: 'outros'});
+        }
+      });
+      
+      console.log('[renderPerformance] Metas por categoria:', {
+        trafego_pago: metasPorCategoria.trafego_pago.length,
+        canais: metasPorCategoria.canais.length,
+        crm_automacoes: metasPorCategoria.crm_automacoes.length,
+        lideranca: metasPorCategoria.lideranca.length,
+        outros: metasPorCategoria.outros.length
+      });
+      
+      // Renderizar cada categoria
+      renderCategoriaGrid('relatorioTrafegoGrid', metasPorCategoria.trafego_pago);
+      renderCategoriaGrid('relatorioCanaisGrid', metasPorCategoria.canais);
+      renderCategoriaGrid('relatorioCRMGrid', metasPorCategoria.crm_automacoes);
+      renderCategoriaGrid('relatorioLiderancaGrid', metasPorCategoria.lideranca);
+      renderCategoriaGrid('relatorioOutrosGrid', metasPorCategoria.outros);
+    }
+    
+    // Detectar categoria da meta baseado na descrição
+    function detectarCategoriaMeta(descricao){
+      const desc = (descricao || '').toLowerCase();
+      
+      // Tráfego Pago - PRIORIDADE MÁXIMA
+      if(desc.includes('tráfego pago') || desc.includes('trafego pago') ||
+         desc.includes('google ads') || desc.includes('facebook ads') || desc.includes('meta ads') || 
+         desc.includes('anúncio') || desc.includes('anuncio') || desc.includes('ads') ||
+         desc.includes('investimento') || desc.includes('roi') ||
+         desc.includes('cpa') || desc.includes('cpc') || desc.includes('cpm') ||
+         desc.includes('roas') || desc.includes('conversão') || desc.includes('conversao') ||
+         desc.includes('verba') || desc.includes('campanha') || desc.includes('lead') && (desc.includes('qualificado') || desc.includes('vendas'))){
+        return 'trafego_pago';
+      }
+      
+      // Canais (Redes Sociais, SEO, Orgânico)
+      if(desc.includes('seo') || desc.includes('orgânico') || desc.includes('organico') || 
+         desc.includes('conteúdo') || desc.includes('conteudo') || 
+         desc.includes('blog') || desc.includes('redes sociais') || 
+         desc.includes('instagram') || desc.includes('facebook') || desc.includes('linkedin') ||
+         desc.includes('youtube') || desc.includes('tiktok') || desc.includes('twitter') ||
+         desc.includes('seguidores') || desc.includes('alcance') || desc.includes('engajamento') ||
+         desc.includes('impressões') || desc.includes('impressoes') || desc.includes('visualiza') ||
+         desc.includes('views') || desc.includes('comentário') || desc.includes('comentario') ||
+         desc.includes('salva') || desc.includes('compartilha')){
+        return 'canais';
+      }
+      
+      // CRM e Automações
+      if(desc.includes('crm') || desc.includes('automação') || desc.includes('automacao') || 
+         desc.includes('leads') && !desc.includes('qualificado') || desc.includes('conversões') || desc.includes('conversoes') || 
+         desc.includes('funil') || desc.includes('pipeline') || 
+         desc.includes('email') || desc.includes('whatsapp') ||
+         desc.includes('contato') || desc.includes('cliente') || desc.includes('oportunidade') ||
+         desc.includes('workflow') || desc.includes('sequência') || desc.includes('sequencia') || desc.includes('nurturing')){
+        return 'crm_automacoes';
+      }
+      
+      // Liderança (Reuniões, Apresentações, KPIs)
+      if(desc.includes('liderança') || desc.includes('lideranca') || 
+         desc.includes('equipe') || desc.includes('time') || 
+         desc.includes('produtividade') || desc.includes('gestão') || desc.includes('gestao') ||
+         desc.includes('reunião') || desc.includes('reuniao') || desc.includes('meeting') ||
+         desc.includes('kpi') || desc.includes('performance') ||
+         desc.includes('apresentação') || desc.includes('apresentacao') || desc.includes('proposta') ||
+         desc.includes('alinhamento') || desc.includes('follow-up')){
+        return 'lideranca';
+      }
+      
+      // Outros (padrão)
+      return 'outros';
+    }
+    
+    // Renderizar grid de uma categoria
+    function renderCategoriaGrid(gridId, metas){
+      const grid = document.getElementById(gridId);
+      if(!grid){
+        console.error('[renderCategoriaGrid] Grid não encontrado:', gridId);
+        return;
+      }
+      
+      // LOG SIMPLIFICADO (só primeira vez)
+      if(gridId === 'relatorioTrafegoGrid'){
+        console.log(`[renderPerformance] Total de metas: Tráfego=${metas.length}`);
+      }
+      
+      if(!metas || metas.length === 0){
+        grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8; grid-column: 1/-1;">Nenhuma métrica registrada nesta categoria</div>';
+        return;
+      }
+      
+      grid.innerHTML = metas.map(meta => criarCardMeta(meta)).join('');
+    }
+    
+    // Criar HTML de um card de meta
+    function criarCardMeta(meta){
+      // ⚠️ LOG SIMPLIFICADO (não usar JSON.stringify em loop)
+      const realized = Number.isFinite(meta.realized) ? meta.realized : 0;
+      const unidade = escapeHtml(meta.unidade || '');
+      const descricao = escapeHtml(meta.descricao || 'Meta');
+      const categoria = meta.categoria || 'outros';
+      
+      // ⚠️ Se não tiver dados, retornar mensagem
+      if(realized === 0 && (!meta.valoresPorMes || meta.valoresPorMes.length === 0)){
+        return `
+          <div style="background: rgba(30, 41, 59, 0.8); border: 2px solid rgba(100, 116, 139, 0.4); border-radius: 12px; padding: 16px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div style="color: rgba(255,255,255,0.6);">📊</div>
+              <div style="font-size: 0.9rem; font-weight: 600; color: #cbd5e1;">${descricao}</div>
+            </div>
+            <div style="text-align: center; padding: 20px; color: #64748b; font-style: italic;">
+              Sem dados registrados para este período
+            </div>
+          </div>
+        `;
+      }
+      
+      // 🎨 Obter logo personalizada baseado na descrição
+      const platformIcon = getMetricIcon(descricao, categoria);
+      
+      // Formatar valor
+      const formatValue = (val) => {
+        if(!val || val === 0) return '—';
+        if(!unidade) return val.toLocaleString('pt-BR');
+        return `${val.toLocaleString('pt-BR')} ${unidade}`;
+      };
+      
+      // Status visual baseado se tem valor ou não
+      let statusColor = '#64748b';
+      let statusEmoji = '⚪';
+      
+      if(realized > 0){
+        statusColor = '#10b981';
+        statusEmoji = '📊';
+      }
+      
+      // Criar HTML de comparação mensal se houver valoresPorMes
+      let comparacaoHTML = '';
+      if(meta.valoresPorMes && Array.isArray(meta.valoresPorMes) && meta.valoresPorMes.length > 0){
+        const meses = meta.valoresPorMes;
+        
+        // Só mostrar comparação se houver pelo menos 2 meses
+        if(meses.length >= 2){
+          comparacaoHTML = `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                📊 Comparação Mensal
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+          `;
+          
+          meses.forEach((mes, idx) => {
+            const [ano, mesNum] = mes.mesISO.split('-');
+            const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+            const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+            const valor = mes.realized || 0;
+            
+            // Calcular variação com mês anterior
+            let variacaoHTML = '';
+            if(idx > 0){
+              const mesAnterior = meses[idx - 1].realized || 0;
+              if(mesAnterior > 0 && valor > 0){
+                const variacao = ((valor - mesAnterior) / mesAnterior) * 100;
+                const variacaoIcon = variacao > 0 ? '📈' : variacao < 0 ? '📉' : '➡️';
+                const variacaoColor = variacao > 0 ? '#10b981' : variacao < 0 ? '#ef4444' : '#64748b';
+                variacaoHTML = `
+                  <span style="font-size: 0.7rem; color: ${variacaoColor}; margin-left: 8px;">
+                    ${variacaoIcon} ${variacao > 0 ? '+' : ''}${variacao.toFixed(1)}%
+                  </span>
+                `;
+              }
+            }
+            
+            comparacaoHTML += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
+                <span style="font-size: 0.75rem; color: rgba(255,255,255,0.8); font-weight: 500;">${mesNome}</span>
+                <div style="display: flex; align-items: center;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #ffffff;">${formatValue(valor)}</span>
+                  ${variacaoHTML}
+                </div>
+              </div>
+            `;
+          });
+          
+          comparacaoHTML += `
+              </div>
+            </div>
+          `;
+        } else if(meses.length === 1){
+          // Se tiver apenas 1 mês
+          const [ano, mesNum] = meses[0].mesISO.split('-');
+          const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+          const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
+          comparacaoHTML = `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); text-align: center; font-style: italic;">
+                📅 Dados disponíveis apenas para ${mesNome}
+              </div>
+            </div>
+          `;
+        }
+      }
+      
+      return `
+        <div style="background: rgba(30, 41, 59, 0.8); border: 2px solid ${statusColor}60; border-radius: 12px; padding: 16px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
+          <!-- Cabeçalho com Ícone da Plataforma -->
+          <div style="display: flex; justify-content: space-between; align-items: start; gap: 8px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+              <div style="color: rgba(255,255,255,0.9); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                ${platformIcon}
+              </div>
+              <div style="font-size: 0.95rem; font-weight: 600; color: #e2e8f0; line-height: 1.4;">
+                ${descricao}
+              </div>
+            </div>
+            <div style="font-size: 1.2rem;">
+              ${statusEmoji}
+            </div>
+          </div>
+          
+          <!-- Valor Principal -->
+          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 16px; text-align: center;">
+            <div style="font-size: 0.75rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600;">Total do Período</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #10b981; line-height: 1;">
+              ${formatNumber(realized)}
+            </div>
+            ${unidade ? `<div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; font-weight: 500;">${unidade}</div>` : ''}
+          </div>
+          
+          ${comparacaoHTML}
+        </div>
+      `;
+    }
+    
+    // Formatar número com separador de milhares
+    function formatNumber(num){
+      if(!Number.isFinite(num)) return '0';
+      return num.toLocaleString('pt-BR');
+    }
+    
     function renderReportSections(payload){
       console.log('[Relatorio] renderReportSections chamado - payload:', {
         hasPosts: Array.isArray(payload.posts),
@@ -729,38 +1136,17 @@
   // Objetivos do mês (Planejamento)
   try{ renderGoals(payload.goals||null, payload.labelMonth||''); }catch(e){ console.warn('renderGoals', e); }
 
-  // Metas
-      const metas = Array.isArray(payload.metas)?payload.metas:[];
-      const metasSection = document.getElementById('relatorioMetasSection');
-      const sub = document.getElementById('relatorioMetasSubtitle');
-      const desc = document.getElementById('relatorioMetasDesc');
-      const colA = document.getElementById('relatorioMetasAchieved');
-      const colP = document.getElementById('relatorioMetasProgress');
-      const colM = document.getElementById('relatorioMetasMissing');
-      const pillA = document.getElementById('relatorioMetasAchievedPill');
-      const pillP = document.getElementById('relatorioMetasProgressPill');
-      const pillM = document.getElementById('relatorioMetasMissingPill');
-      if(metas.length){
-        metasSection.style.display='block';
-        if(sub) sub.textContent = `Metas ativas no mês ${payload.labelMonth||''}`;
-        const groups = { achieved:[], progress:[], missing:[] };
-        metas.forEach(m=>{ const st=evaluateMetaGoal(m.planned,m.realized,m.direcao); (groups[st]||(groups.progress)).push(m); });
-        pillA.querySelector('strong').textContent = groups.achieved.length;
-        pillP.querySelector('strong').textContent = groups.progress.length;
-        pillM.querySelector('strong').textContent = groups.missing.length;
-        const total = metas.length; const rate = total? Math.round((groups.achieved.length/total)*100):0;
-        if(desc) desc.textContent = `🎯 ${payload.labelMonth||''}: ${total} metas ativas — Atingidas: ${groups.achieved.length} (${rate}%), Em andamento: ${groups.progress.length}, Precisa colocar: ${groups.missing.length}.`;
-        const card = (m)=>{
-          const planned = Number.isFinite(m.planned)?m.planned:0;
-          const realized = Number.isFinite(m.realized)?m.realized:0;
-          return `<div class="goal-card"><div class="goal-title">${escapeHtml(m.descricao||'(Meta)')}</div><div class="goal-meta">Planejado: <strong>${planned}</strong> ${escapeHtml(m.unidade||'')} • Realizado: <strong>${realized}</strong> ${escapeHtml(m.unidade||'')}</div></div>`;
-        };
-        colA.innerHTML = groups.achieved.map(card).join('');
-        colP.innerHTML = groups.progress.map(card).join('');
-        colM.innerHTML = groups.missing.map(card).join('');
-      } else {
-        metasSection.style.display='none';
-      }
+  // Relatório de Performance (substitui Metas)
+  try{ 
+    console.log('[Relatorio] Chamando renderPerformance...');
+    console.log('[Relatorio] payload.metas:', Array.isArray(payload.metas) ? payload.metas.length : 'não é array');
+    if(Array.isArray(payload.metas) && payload.metas.length > 0){
+      console.log('[Relatorio] Primeira meta:', JSON.stringify(payload.metas[0], null, 2));
+    }
+    renderPerformance(Array.isArray(payload.metas)?payload.metas:[], payload.labelMonth||'', payload.periodoTexto||''); 
+  }catch(e){ 
+    console.error('[Relatorio] Erro em renderPerformance:', e); 
+  }
 
       // Leads Gerados
       const leadsSection = document.getElementById('relatorioLeadsSection');
@@ -1045,11 +1431,11 @@
       const metasTotal = metas.length;
       
       if(metasTotal > 0) {
-        resumo += `📈 METAS DO MÊS\n`;
-        resumo += `   Total de metas: ${metasTotal}\n`;
+        resumo += `� RELATÓRIO DE PERFORMANCE\n`;
+        resumo += `   Total de métricas: ${metasTotal}\n`;
         resumo += `   ✅ Atingidas: ${metasAchieved}\n`;
         resumo += `   🔄 Em andamento: ${metasProgress}\n`;
-        resumo += `   ⚠️ Precisa colocar: ${metasMissing}\n`;
+        resumo += `   ⚠️ Abaixo do esperado: ${metasMissing}\n`;
         
         if(metasTotal > 0) {
           const percentAtingido = Math.round((metasAchieved / metasTotal) * 100);
@@ -1143,7 +1529,19 @@
     const VIDEO_THUMBNAILS_CACHE = new Map();
 
     async function generateVideoThumbnail(videoUrl, postId) {
+      // ⚠️ FUNÇÃO DESABILITADA: Previne loops de erro MEDIA_ELEMENT_ERROR
+      console.log('[Relatorio] ⚠️ generateVideoThumbnail DESABILITADA - retornando null');
+      return null;
+      
+      // CÓDIGO ORIGINAL COMENTADO PARA REFERÊNCIA:
+      /*
       console.log('[Relatorio] Gerando thumbnail para:', videoUrl);
+      
+      // ⚠️ Validar URL antes de tentar gerar thumbnail
+      if(!videoUrl || videoUrl.trim() === ''){
+        console.warn('[Relatorio] ⚠️ URL de vídeo vazia/inválida, retornando fallback');
+        return '/assets/video-placeholder.jpg'; // ou null
+      }
       
       if (VIDEO_THUMBNAILS_CACHE.has(videoUrl)) {
         console.log('[Relatorio] Retornando do cache');
@@ -1216,6 +1614,14 @@
             console.log('[Relatorio] URL convertida para HTTPS:', safeUrl);
           }
           
+          // ⚠️ NÃO setar src se a URL estiver vazia (evita erro MEDIA_ELEMENT_ERROR)
+          if(!safeUrl || safeUrl.trim() === ''){
+            console.warn('[Relatorio] ⚠️ videoUrl vazio, pulando geração de thumbnail');
+            clearTimeout(timeout);
+            reject(new Error('URL de vídeo vazia'));
+            return;
+          }
+          
           video.src = safeUrl;
         });
       };
@@ -1227,6 +1633,7 @@
         console.warn('[Relatorio] Primeira tentativa falhou, tentando com CORS...');
         return await tryGenerate(true);
       }
+      */
     }
 
     // Lazy + throttled thumbnail generation para reduzir jank
@@ -1326,6 +1733,21 @@
     }
 
     function applyVideoThumbnails() {
+      // ⚠️ DESABILITADO: Geração de thumbnails de vídeo causa erros em loop
+      console.log('[Relatorio] ⚠️ Geração de thumbnails de vídeo DESABILITADA (previne loops de erro)');
+      
+      // Apenas adicionar ícone de play em vídeos
+      const items = document.querySelectorAll('.relatorio-story-item[data-video-url]');
+      items.forEach(container => {
+        if(!container.classList.contains('has-thumb')){
+          addVideoPlayIcon(container);
+        }
+      });
+      
+      return; // ← RETORNA AQUI, não executa o código abaixo
+      
+      // CÓDIGO ORIGINAL (DESABILITADO):
+      /*
       const items = document.querySelectorAll('.relatorio-story-item[data-video-url]');
       if('IntersectionObserver' in window){
         if(!thumbObserver){
@@ -1344,6 +1766,7 @@
         // Fallback: processa todos, com fila
         items.forEach(el=> enqueueContainer(el));
       }
+      */
     }
 
     function renderStoriesAndPosts(posts, labelMonth){
@@ -1377,9 +1800,33 @@
 
       // Helpers
       const buildCard = (p)=>{
-        const first = ensureHttps(p.thumbUrl || (Array.isArray(p.mediaUrls)&&p.mediaUrls[0]) || '');
-        const ext = String(first).split('?')[0].split('.').pop().toLowerCase();
-        const isVideo = ['mp4','mov','webm','m4v','avi'].includes(ext);
+        const [y,m,d] = String(p.dateISO||'').split('-');
+        const dateLabel = (d&&m)? `${d}/${m}` : '';
+        
+        // Determinar se é vídeo baseado no mediaUrls[0] (primeira mídia)
+        const firstMedia = (Array.isArray(p.mediaUrls) && p.mediaUrls[0]) || '';
+        const firstMediaExt = String(firstMedia).split('?')[0].split('.').pop().toLowerCase();
+        const isVideo = ['mp4','mov','webm','m4v','avi'].includes(firstMediaExt);
+        
+        // Determinar thumbnail a usar
+        let thumbnailUrl = '';
+        
+        // Prioridade 1: Se tem thumbUrl (capa personalizada/gerada), usar ela
+        if(p.thumbUrl) {
+          thumbnailUrl = ensureHttps(p.thumbUrl);
+          console.log(`[buildCard] Post ${p.id}: thumbUrl encontrada:`, p.thumbUrl.substring(0, 80));
+        }
+        // Prioridade 2: Se não tem thumbUrl mas tem mediaUrls[0] e não é vídeo, usar primeira mídia
+        else if(firstMedia && !isVideo) {
+          thumbnailUrl = ensureHttps(firstMedia);
+          console.log(`[buildCard] Post ${p.id}: usando primeira mídia (imagem)`);
+        }
+        // Prioridade 3: Vídeo sem thumbnail - não renderiza imagem (só ícone de play será adicionado)
+        else if(isVideo && firstMedia) {
+          console.log(`[buildCard] Post ${p.id}: vídeo SEM thumbnail - precisa gerar`);
+        }
+        
+        // Classes CSS
         let cls = 'relatorio-story-item';
         if((p.status||'')==='aprovado'){
           cls += (p.approvedBy==='interno')? ' aprovado-interno':' aprovado';
@@ -1389,23 +1836,17 @@
           cls += ' pendente';
         }
         if(isVideo) cls += ' video';
-        const [y,m,d] = String(p.dateISO||'').split('-');
-        const dateLabel = (d&&m)? `${d}/${m}` : '';
         
-        // Se é vídeo e tem thumbUrl personalizada (capa), usa ela
-        if(isVideo && p.thumbUrl && !p.thumbUrl.includes('.mp4') && !p.thumbUrl.includes('.mov') && !p.thumbUrl.includes('.webm')) {
-          const safeThumbUrl = ensureHttps(p.thumbUrl);
-          return `<div class="${cls}" data-id="${p.id||''}"><img src="${safeThumbUrl}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}" loading="lazy"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
-        }
+        // Renderizar card
+        const imgTag = thumbnailUrl 
+          ? `<img src="${thumbnailUrl}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}" loading="lazy">` 
+          : '';
         
-        // Se é vídeo sem capa, adiciona data-video-url para gerar thumbnail
-        if(isVideo && first) {
-          return `<div class="${cls}" data-id="${p.id||''}" data-video-url="${first}"><div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
-        }
+        const videoAttr = (isVideo && !thumbnailUrl && firstMedia) 
+          ? ` data-video-url="${ensureHttps(firstMedia)}"` 
+          : '';
         
-        // Se é imagem ou não tem mídia
-        const img = first ? `<img src="${first}" alt="${(p.target||'')==='stories'?'Story':'Post'} ${dateLabel}" loading="lazy">` : '';
-        return `<div class="${cls}" data-id="${p.id||''}">${img}<div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
+        return `<div class="${cls}" data-id="${p.id||''}"${videoAttr}>${imgTag}<div class="relatorio-story-status"></div><div class="relatorio-story-date">${dateLabel}</div></div>`;
       };
 
       // Stories section
@@ -1511,10 +1952,15 @@
 
     // Preenche página pública a partir do snapshot do token
     function renderFromPayload(payload){
-      if(payload && payload.labelMonth){
-        document.getElementById('reportMonth').textContent = payload.labelMonth;
-        document.getElementById('relatorioHeaderSubtitle').textContent = `Resumo do mês ${payload.labelMonth}`;
+      // Atualizar título e período
+      const titulo = payload.reportTitle || 'Relatório de Performance';
+      const periodo = payload.periodoTexto || payload.labelMonth || '';
+      
+      if(payload && periodo){
+        document.getElementById('reportMonth').textContent = periodo;
+        document.getElementById('relatorioHeaderSubtitle').textContent = `${titulo} • ${periodo}`;
       }
+      
       renderReportSections(payload||{});
       
       // Gerar preview para redes sociais (async)
@@ -1694,7 +2140,8 @@
 
     // Log inicial para debug
     console.log('[Relatorio] Script carregado. Modo:', shareToken ? 'Público (token)' : 'Autenticado');
-    console.log('[Relatorio] Mês:', mesISO);
+    console.log('[Relatorio] Período:', mesInicioISO, 'até', mesFimISO);
+    console.log('[Relatorio] Label:', monthLabel);
     console.log('[Relatorio] Tenant:', TENANT);
   </script>
 </body>

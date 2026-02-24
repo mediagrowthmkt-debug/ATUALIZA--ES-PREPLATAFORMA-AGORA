@@ -33464,6 +33464,106 @@ ${contextoReunioes}`;
         console.error('[Fast Thumbs] ❌ Erro:', err);
       });
     }
+    
+    // 🎬 GERA THUMBNAILS DE TODOS OS VÍDEOS NO FIREBASE (não apenas os visíveis)
+    async function fastGenerateAllVideoThumbnails(){
+      console.log('[generateAllThumbs] 🎬 Iniciando geração de todas as thumbnails...');
+      
+      try {
+        // 1. Obter clientKey
+        const clientKey = getClientKeySafe();
+        if(!clientKey){
+          throw new Error('ClientKey não encontrado');
+        }
+        console.log('[generateAllThumbs] 📍 ClientKey:', clientKey);
+        
+        // 2. Carregar TODOS os posts do Firebase
+        const postsRef = collection(db, 'clients', clientKey, 'posts');
+        const snapshot = await getDocs(postsRef);
+        console.log('[generateAllThumbs] 📦 Total de posts no Firebase:', snapshot.size);
+        
+        // 3. Filtrar apenas vídeos SEM thumbnail
+        const videosToProcess = [];
+        
+        snapshot.forEach(doc => {
+          const post = doc.data();
+          const postId = doc.id;
+          const mediaUrls = post.mediaUrls || [];
+          const firstMedia = mediaUrls[0];
+          
+          // Verificar se é vídeo
+          const isVideo = firstMedia && /\.(mp4|mov|avi|webm)$/i.test(firstMedia);
+          
+          // Verificar se JÁ tem thumbnail
+          const hasThumb = post.videoThumbUrl && post.videoThumbUrl.startsWith('data:image');
+          
+          if(isVideo && !hasThumb){
+            videosToProcess.push({
+              id: postId,
+              videoUrl: firstMedia,
+              post: {...post, id: postId}
+            });
+          }
+        });
+        
+        console.log('[generateAllThumbs] 🎥 Vídeos SEM thumbnail:', videosToProcess.length);
+        
+        if(videosToProcess.length === 0){
+          console.log('[generateAllThumbs] ✅ Todos os vídeos já têm thumbnail!');
+          return { success: true, generated: 0, failed: 0, total: 0 };
+        }
+        
+        // 4. Gerar thumbnails em lotes
+        const BATCH_SIZE = 3; // Processar 3 vídeos por vez
+        let generated = 0;
+        let failed = 0;
+        const startTime = Date.now();
+        
+        for(let i = 0; i < videosToProcess.length; i += BATCH_SIZE){
+          const batch = videosToProcess.slice(i, i + BATCH_SIZE);
+          console.log(`[generateAllThumbs] 🔄 Processando lote ${Math.floor(i/BATCH_SIZE)+1}/${Math.ceil(videosToProcess.length/BATCH_SIZE)}...`);
+          
+          await Promise.all(batch.map(async ({id, videoUrl, post}) => {
+            try {
+              // Gerar thumbnail (a função generateFastThumbnail já salva no Firebase)
+              const thumb = await generateFastThumbnail(videoUrl, id);
+              
+              if(thumb){
+                generated++;
+                console.log(`[generateAllThumbs] ✅ Thumbnail gerada para post ${id}`);
+              } else {
+                failed++;
+                console.warn(`[generateAllThumbs] ⚠️ Falha ao gerar thumbnail para post ${id}`);
+              }
+            } catch(err){
+              failed++;
+              console.error(`[generateAllThumbs] ❌ Erro ao processar post ${id}:`, err);
+            }
+          }));
+        }
+        
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`[generateAllThumbs] 🎉 Concluído! ${generated} geradas, ${failed} falharam (${elapsed}s)`);
+        
+        return {
+          success: true,
+          generated,
+          failed,
+          total: videosToProcess.length,
+          elapsed
+        };
+        
+      } catch(err){
+        console.error('[generateAllThumbs] ❌ Erro fatal:', err);
+        return {
+          success: false,
+          error: err.message,
+          generated: 0,
+          failed: 0,
+          total: 0
+        };
+      }
+    }
 
     function mapDemandaToStatusKey(status){
       const s = (status||'').toLowerCase();
@@ -33675,27 +33775,82 @@ ${contextoReunioes}`;
         // botão: copiar link do relatório (gera link público por token)
         const btn = relatorioPreview.querySelector('#copyRelatorioLinkBtn');
         btn?.addEventListener('click', async ()=>{
-          console.log('🔗 [Botão Copiar Link] Clicado! mesISO:', mesISO);
+          console.log('🔗 [Botão Copiar Link] Clicado! Período:', mesInicialISO, 'até', mesFinalISO);
           let url = '';
+          const btnText = btn.textContent;
           try{
+            // 🔐 VERIFICAR AUTENTICAÇÃO PRIMEIRO
+            console.log('🔐 [Botão Copiar Link] Verificando autenticação...');
+            btn.textContent = '⏳ Verificando...';
+            btn.disabled = true;
+            
+            // Aguardar autenticação estar completa
+            await requireAuthUser();
+            const uid = getUserKey();
+            if(!uid || !auth.currentUser){
+              throw new Error('Você precisa estar autenticado. Recarregue a página (Cmd+R) e faça login novamente.');
+            }
+            console.log('🔐 [Botão Copiar Link] ✅ Autenticado! uid:', uid);
+            
+            // 🎬 GERAR THUMBNAILS DOS VÍDEOS ANTES DE CRIAR O RELATÓRIO
+            console.log('🎬 [Botão Copiar Link] Gerando thumbnails dos vídeos...');
+            btn.textContent = '⏳ Gerando thumbnails...';
+            
+            let thumbResult = null;
+            try {
+              // Chamar função de geração de thumbnails
+              if(typeof fastGenerateAllVideoThumbnails === 'function'){
+                thumbResult = await fastGenerateAllVideoThumbnails();
+                console.log('🎬 [Botão Copiar Link] ✅ Thumbnails geradas!', thumbResult);
+                
+                if(thumbResult && thumbResult.generated > 0){
+                  btn.textContent = `✅ ${thumbResult.generated} thumbnails geradas!`;
+                  await new Promise(r => setTimeout(r, 1500)); // Mostra por 1.5s
+                }
+              } else {
+                console.warn('🎬 [Botão Copiar Link] ⚠️ Função fastGenerateAllVideoThumbnails não existe!');
+              }
+            } catch(thumbErr) {
+              console.warn('🎬 [Botão Copiar Link] ⚠️ Erro ao gerar thumbnails (continuando...):', thumbErr);
+            }
+            
+            btn.textContent = '⏳ Criando relatório...';
+            
             console.log('🔗 [Botão Copiar Link] Chamando createOrUpdateReportShare...');
-            const token = await createOrUpdateReportShare(mesISO);
+            const token = await createOrUpdateReportShare(mesInicialISO, mesFinalISO);
             console.log('🔗 [Botão Copiar Link] Token gerado:', token);
-            url = buildRelatorioShareUrl(mesISO, token);
+            url = buildRelatorioShareUrl(mesInicialISO, mesFinalISO, token);
             console.log('🔗 [Botão Copiar Link] URL gerada:', url);
+            
+            btn.textContent = btnText;
+            btn.disabled = false;
             
             // Usar função robusta de clipboard com fallback para iframes
             const copiado = await mgCopyToClipboard(url);
             if(copiado){
-              alert('Link do relatório copiado! (acesso público)');
+              alert('✅ Link do relatório copiado! (acesso público)');
               console.log('🔗 [Botão Copiar Link] ✅ Link copiado com sucesso!');
             } else {
               prompt('Copie o link do relatório:', url);
             }
           }catch(_err){
             console.error('🔗 [Botão Copiar Link] ❌ Erro:', _err);
-            url = url || buildRelatorioShareUrl(mesISO);
-            prompt('Copie o link do relatório:', url);
+            btn.textContent = btnText || '🔗 Copiar link';
+            btn.disabled = false;
+            
+            // Mensagem de erro mais clara
+            const errorMsg = _err.message || 'Erro desconhecido';
+            if(errorMsg.includes('autenticado') || errorMsg.includes('authenticated')){
+              alert('❌ Erro de autenticação.\n\nPor favor:\n1. Recarregue a página (Cmd+R)\n2. Faça login novamente\n3. Tente copiar o link novamente');
+            } else {
+              alert('❌ Erro ao criar relatório:\n\n' + errorMsg);
+            }
+            
+            // Fallback: tentar gerar URL mesmo sem token
+            if(!url){
+              url = buildRelatorioShareUrl(mesInicialISO, mesFinalISO);
+              prompt('Copie o link do relatório (sem dados salvos):', url);
+            }
           }
         });
       }
@@ -34004,69 +34159,304 @@ ${contextoReunioes}`;
 
     // Gera a URL compartilhável do relatório para o mês selecionado
     // Se token for informado, gera link público (?share=token)
-    function buildRelatorioShareUrl(mesISO, token){
+    // 🔥 NOVO: Aceita mesInicioISO e mesFimISO para períodos multi-mês
+    function buildRelatorioShareUrl(mesInicioISO, mesFimISO = null, token = null){
       try{
         const pageUrl = new URL('relatorio.html', location.href);
-        const mes = (mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7));
+        const mesInicio = (mesInicioISO && mesInicioISO.length>=7) ? mesInicioISO : (relatorioMesInicio?.value || new Date().toISOString().slice(0,7));
+        const mesFim = mesFimISO || mesInicio;
         const tenant = getClientKey();
+        
         if(token){
           pageUrl.searchParams.set('share', token);
           // extras amigáveis (não usados para auth, só rótulo)
           if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
-          pageUrl.searchParams.set('mes', mes);
+          pageUrl.searchParams.set('mesInicio', mesInicio);
+          pageUrl.searchParams.set('mesFim', mesFim);
         } else {
           if(tenant){ pageUrl.searchParams.set('tenant', tenant); }
-          pageUrl.searchParams.set('mes', mes);
+          pageUrl.searchParams.set('mesInicio', mesInicio);
+          pageUrl.searchParams.set('mesFim', mesFim);
         }
         return pageUrl.toString();
       }catch(_){
         // Fallback simples
         const base = location.origin + location.pathname.replace(/index\.html?$/i,'');
-        const mes = encodeURIComponent((mesISO && mesISO.length>=7) ? mesISO : (relatorioMesInput?.value || new Date().toISOString().slice(0,7)));
+        const mesInicio = encodeURIComponent((mesInicioISO && mesInicioISO.length>=7) ? mesInicioISO : (relatorioMesInicio?.value || new Date().toISOString().slice(0,7)));
+        const mesFim = encodeURIComponent(mesFimISO || mesInicio);
         const tenant = encodeURIComponent(getClientKey()||'');
         return token
-          ? `${base}relatorio.html?share=${encodeURIComponent(token)}&tenant=${tenant}&mes=${mes}`
-          : `${base}relatorio.html?tenant=${tenant}&mes=${mes}`;
+          ? `${base}relatorio.html?share=${encodeURIComponent(token)}&tenant=${tenant}&mesInicio=${mesInicio}&mesFim=${mesFim}`
+          : `${base}relatorio.html?tenant=${tenant}&mesInicio=${mesInicio}&mesFim=${mesFim}`;
       }
     }
 
+    // Detecta categoria da meta baseada na descrição
+    function detectarCategoriaMetaGlobal(descricao){
+      const desc = descricao.toLowerCase();
+      
+      if(desc.includes('tráfego pago') || desc.includes('trafego pago') || 
+         desc.includes('google ads') || desc.includes('facebook ads') || 
+         desc.includes('meta ads') || desc.includes('anúncios') || 
+         desc.includes('anuncios') || desc.includes('ads') ||
+         desc.includes('investimento') || desc.includes('roi') ||
+         desc.includes('cpa') || desc.includes('cpc') || desc.includes('cpm')){
+        return 'trafego_pago';
+      }
+      
+      if(desc.includes('seo') || desc.includes('orgânico') || desc.includes('organico') || 
+         desc.includes('conteúdo') || desc.includes('conteudo') || 
+         desc.includes('blog') || desc.includes('redes sociais') || 
+         desc.includes('instagram') || desc.includes('linkedin') || 
+         desc.includes('youtube') || desc.includes('tiktok')){
+        return 'canais';
+      }
+      
+      if(desc.includes('crm') || desc.includes('automação') || desc.includes('automacao') || 
+         desc.includes('leads') || desc.includes('conversões') || desc.includes('conversoes') || 
+         desc.includes('funil') || desc.includes('pipeline') || 
+         desc.includes('email') || desc.includes('whatsapp')){
+        return 'crm_automacoes';
+      }
+      
+      if(desc.includes('liderança') || desc.includes('lideranca') || 
+         desc.includes('equipe') || desc.includes('time') || 
+         desc.includes('produtividade') || desc.includes('gestão') || desc.includes('gestao') ||
+         desc.includes('reuniões') || desc.includes('reunioes') || 
+         desc.includes('kpi') || desc.includes('performance')){
+        return 'lideranca';
+      }
+      
+      return 'outros';
+    }
+
     // Monta snapshot dos dados do relatório do mês (para link público)
-    async function buildMonthlyReportData(mesISO){
-      console.log('[buildMonthlyReportData] Iniciando - mesISO:', mesISO);
+    async function buildMonthlyReportData(mesInicioISO, mesFimISO = null){
+      console.log('[buildMonthlyReportData] Iniciando - mesInicioISO:', mesInicioISO, 'mesFimISO:', mesFimISO);
+      
+      // Se não tiver mês fim, usa o mês início
+      const periodoInicio = mesInicioISO;
+      const periodoFim = mesFimISO || mesInicioISO;
+      
       const clientKey = getClientKey();
       console.log('[buildMonthlyReportData] clientKey:', clientKey);
       
-      const [ano, mm] = (mesISO||'').split('-');
-      const labelMonth = (()=>{
-        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const idx = Math.max(0, Math.min(11, (parseInt(mm,10)||1)-1));
-        return `${meses[idx]} ${ano||''}`.trim();
-      })();
-      console.log('[buildMonthlyReportData] labelMonth:', labelMonth);
+      // Formatar label do período
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
       
-      // metas
-      const monthKey = getMetaMonthKeyFromISO(mesISO);
+      let periodoTexto = '';
+      let labelMonth = '';
+      
+      if(periodoInicio === periodoFim){
+        const [ano, mm] = (periodoInicio||'').split('-');
+        const idx = Math.max(0, Math.min(11, (parseInt(mm,10)||1)-1));
+        labelMonth = `${meses[idx]} ${ano||''}`.trim();
+        periodoTexto = labelMonth;
+      } else {
+        const [anoInicio, mesInicio] = periodoInicio.split('-');
+        const [anoFim, mesFim] = periodoFim.split('-');
+        const mesInicioNome = meses[parseInt(mesInicio)-1] || mesInicio;
+        const mesFimNome = meses[parseInt(mesFim)-1] || mesFim;
+        
+        if(anoInicio === anoFim){
+          periodoTexto = `${mesInicioNome} a ${mesFimNome} ${anoInicio}`;
+          labelMonth = periodoTexto;
+        } else {
+          periodoTexto = `${mesInicioNome} ${anoInicio} a ${mesFimNome} ${anoFim}`;
+          labelMonth = periodoTexto;
+        }
+      }
+      
+      console.log('[buildMonthlyReportData] Período formatado:', periodoTexto);
+      
+      // metas - agregar todas as metas do período
       const metasActive = Array.isArray(METAS) ? METAS.filter(m=>m && m.ativo!==false) : [];
-      const metas = metasActive.map(m=>{
-        const cur = (m.meses && m.meses[monthKey]) || {p:'',r:''};
-        const planned = normalizeMetaNumber(cur.p ?? cur.P);
-        const realized = normalizeMetaNumber(cur.r ?? cur.R);
-        const status = evaluateMetaGoal(planned, realized, m.direcao);
-        return {
-          descricao: (m.descricao||'').toString(),
-          unidade: m.unidade||'',
-          direcao: m.direcao||'up',
-          planned, realized, status
-        };
-      });
-      console.log('[buildMonthlyReportData] Metas preparadas:', metas.length);
+      const metas = [];
+      
+      console.log('[buildMonthlyReportData] 🎯 Processando metas:', metasActive.length);
+      console.log('[buildMonthlyReportData] 📅 Período:', periodoInicio, 'até', periodoFim);
+      
+      // Se for um único mês, usar lógica antiga
+      if(periodoInicio === periodoFim){
+        const mesISO = periodoInicio;
+        const monthKey = getMetaMonthKeyFromISO(mesISO); // ✅ FIX: Usar formato correto
+        
+        console.log('[buildMonthlyReportData] 📊 Mês único - mesISO:', mesISO, 'monthKey:', monthKey);
+        
+        metasActive.forEach((m, idx)=>{
+          const monthValue = (m.meses && m.meses[monthKey]);
+          let planned = 0;
+          let realized = 0;
+          
+          if(idx === 0){
+            console.log('[buildMonthlyReportData] 🔍 Primeira meta:', m.descricao);
+            console.log('[buildMonthlyReportData] 🔍 m.meses:', m.meses);
+            console.log('[buildMonthlyReportData] 🔍 monthValue:', monthValue, 'tipo:', typeof monthValue);
+          }
+          
+          // ✅ SUPORTE PARA AMBOS OS FORMATOS (igual renderRelatorioPerformance)
+          if(typeof monthValue === 'number' || (monthValue && !isNaN(parseFloat(monthValue)) && typeof monthValue !== 'object')){
+            // Formato antigo: número direto = realizado
+            realized = normalizeMetaNumber(monthValue);
+            if(idx === 0) console.log('[buildMonthlyReportData] ✅ Formato número:', realized);
+          } else if(monthValue && typeof monthValue === 'object'){
+            // Formato novo: objeto com planned e realized
+            planned = normalizeMetaNumber(monthValue.p ?? monthValue.P);
+            realized = normalizeMetaNumber(monthValue.r ?? monthValue.R);
+            if(idx === 0) console.log('[buildMonthlyReportData] ✅ Formato objeto - p:', planned, 'r:', realized);
+          }
+          
+          const status = evaluateMetaGoal(planned, realized, m.direcao);
+          
+          // Detectar categoria
+          const categoria = m.categoria || detectarCategoriaMetaGlobal(m.descricao || '');
+          
+          // Criar valoresPorMes com um único mês (só se tiver dados)
+          const valoresPorMes = (realized > 0 || planned > 0) ? [{
+            mesISO: mesISO,
+            monthKey: monthKey,
+            planned: planned,
+            realized: realized
+          }] : [];
+          
+          const metaObj = {
+            descricao: (m.descricao||'').toString(),
+            unidade: m.unidade||'',
+            direcao: m.direcao||'up',
+            categoria: categoria,
+            planned, 
+            realized, 
+            status,
+            valoresPorMes: valoresPorMes
+          };
+          
+          metas.push(metaObj);
+          
+          if(idx === 0){
+            console.log('[buildMonthlyReportData] 📊 Primeira meta processada (mês único):', JSON.stringify(metaObj, null, 2));
+          }
+        });
+      } else {
+        // Para múltiplos meses, somar planejado e realizado de todos os meses
+        console.log('[buildMonthlyReportData] 🔁 MODO MULTI-MÊS - Loop por metas');
+        
+        metasActive.forEach((m, metaIndex)=>{
+          let totalPlanned = 0;
+          let totalRealized = 0;
+          const valoresPorMes = []; // Array para armazenar valores de cada mês
+          
+          console.log(`[buildMonthlyReportData] 📊 Meta ${metaIndex + 1}/${metasActive.length}: "${m.descricao}"`);
+          console.log(`[buildMonthlyReportData] 📅 Período: ${periodoInicio} até ${periodoFim}`);
+          
+          // 🔧 FIX: Usar UTC para evitar problema de timezone
+          let current = new Date(periodoInicio + '-01T00:00:00Z');
+          const endDateUTC = new Date(periodoFim + '-01T00:00:00Z');
+          
+          console.log(`[buildMonthlyReportData] 🗓️ startDate:`, current, 'endDate:', endDateUTC);
+          
+          let loopCount = 0;
+          
+          while(current <= endDateUTC){
+            loopCount++;
+            const year = current.getUTCFullYear();
+            const month = String(current.getUTCMonth() + 1).padStart(2, '0');
+            const mesISO = `${year}-${month}`;
+            const monthKey = getMetaMonthKeyFromISO(mesISO); // Retorna "jan", "fev", etc
+            
+            console.log(`[buildMonthlyReportData]   Loop ${loopCount}: mesISO=${mesISO}, monthKey=${monthKey}`);
+            
+            const monthValue = (m.meses && m.meses[monthKey]);
+            console.log(`[buildMonthlyReportData]   m.meses[${monthKey}]:`, monthValue);
+            
+            let mesPlanned = 0;
+            let mesRealized = 0;
+            
+            // ✅ SUPORTE PARA AMBOS OS FORMATOS (igual renderRelatorioPerformance)
+            if(typeof monthValue === 'number' || (monthValue && !isNaN(parseFloat(monthValue)) && typeof monthValue !== 'object')){
+              // Formato antigo: número direto = realizado
+              const normalized = normalizeMetaNumber(monthValue);
+              mesRealized = normalized;
+              totalRealized += normalized;
+              console.log(`[buildMonthlyReportData]     ✅ Formato número: realized=${normalized}`);
+            } else if(monthValue && typeof monthValue === 'object'){
+              // Formato novo: objeto com planned e realized
+              const p = normalizeMetaNumber(monthValue.p ?? monthValue.P);
+              const r = normalizeMetaNumber(monthValue.r ?? monthValue.R);
+              mesPlanned = p;
+              mesRealized = r;
+              totalPlanned += p;
+              totalRealized += r;
+              console.log(`[buildMonthlyReportData]     ✅ Formato objeto: planned=${p}, realized=${r}`);
+            } else {
+              console.log(`[buildMonthlyReportData]     ⚠️ Sem dados para este mês`);
+            }
+            
+            // Adicionar ao array de valores por mês (só se tiver dados)
+            if(mesRealized > 0 || mesPlanned > 0){
+              valoresPorMes.push({
+                mesISO: mesISO,
+                monthKey: monthKey,
+                planned: mesPlanned,
+                realized: mesRealized
+              });
+              console.log(`[buildMonthlyReportData]     ➕ Adicionado ao valoresPorMes:`, {mesISO, monthKey, mesPlanned, mesRealized});
+            }
+            
+            console.log(`[buildMonthlyReportData]   🔄 Avançando para próximo mês...`);
+            // 🔧 FIX: Usar setUTCMonth para manter consistência UTC
+            current.setUTCMonth(current.getUTCMonth() + 1);
+          }
+          
+          console.log(`[buildMonthlyReportData] ✅ Loop finalizado! Total loops: ${loopCount}`);
+          console.log(`[buildMonthlyReportData] 📊 valoresPorMes.length: ${valoresPorMes.length}`);
+          console.log(`[buildMonthlyReportData] 💰 Totais: planned=${totalPlanned}, realized=${totalRealized}`);
+          
+          const status = evaluateMetaGoal(totalPlanned, totalRealized, m.direcao);
+          
+          // Detectar categoria
+          const categoria = m.categoria || detectarCategoriaMetaGlobal(m.descricao || '');
+          
+          const metaObj = {
+            descricao: (m.descricao||'').toString(),
+            unidade: m.unidade||'',
+            direcao: m.direcao||'up',
+            categoria: categoria,
+            planned: totalPlanned, 
+            realized: totalRealized, 
+            status,
+            valoresPorMes: valoresPorMes // Incluir array de valores mensais
+          };
+          
+          metas.push(metaObj);
+          
+          if(metas.length === 1){
+            console.log('[buildMonthlyReportData] 📊 Primeira meta processada:', JSON.stringify(metaObj, null, 2));
+          }
+        });
+      }
+      console.log('[buildMonthlyReportData] ✅ Metas preparadas:', metas.length);
+      if(metas.length > 0){
+        console.log('[buildMonthlyReportData] 📝 Exemplo da primeira meta:', {
+          descricao: metas[0].descricao,
+          realized: metas[0].realized,
+          categoria: metas[0].categoria,
+          valoresPorMes: metas[0].valoresPorMes
+        });
+      }
       
       // posts
       const tenant = clientKey;
       console.log('[buildMonthlyReportData] Total de POSTS:', Array.isArray(POSTS) ? POSTS.length : 0);
       
-      let relevantPosts = filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant)
-        .filter(p=> String(p.dateISO||'').startsWith(mesISO))
+      // Filtrar posts pelo período completo
+      const filterPostsByPeriodo = (posts) => {
+        return posts.filter(p => {
+          const dateISO = String(p.dateISO || '');
+          return dateISO >= periodoInicio && dateISO <= (periodoFim + '-31'); // Adiciona -31 para pegar todos os dias do mês final
+        });
+      };
+      
+      let relevantPosts = filterPostsByPeriodo(filterPostsByClient(Array.isArray(POSTS)?POSTS:[], tenant))
         .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
 
       // Se não temos posts em memória (por exemplo, usuário não abriu a aba de Posts), buscar direto do Firestore
@@ -34079,8 +34469,7 @@ ${contextoReunioes}`;
             const all = snap.docs.map(d => ({ id: d.id, ...(d.data()||{}) }));
             console.log('[buildMonthlyReportData] Posts no Firestore:', all.length);
             const filteredByTenant = filterPostsByClient(all, tenant);
-            relevantPosts = filteredByTenant
-              .filter(p=> String(p.dateISO||'').startsWith(mesISO))
+            relevantPosts = filterPostsByPeriodo(filteredByTenant)
               .sort((a,b)=> String(a.dateISO||'').localeCompare(String(b.dateISO||'')));
             console.log('[buildMonthlyReportData] Posts relevantes após Firestore:', relevantPosts.length);
           } else {
@@ -34096,12 +34485,14 @@ ${contextoReunioes}`;
       console.log('[buildMonthlyReportData] Feed:', relevantPosts.filter(p => (p.target||'feed') === 'feed').length);
       
       if(relevantPosts.length > 0){
+        const first = relevantPosts[0];
         console.log('[buildMonthlyReportData] Primeiro post relevante:', {
-          id: relevantPosts[0].id,
-          dateISO: relevantPosts[0].dateISO,
-          target: relevantPosts[0].target,
-          tenant: relevantPosts[0].tenant,
-          thumbUrl: relevantPosts[0].thumbUrl?.substring(0, 50) + '...'
+          id: first.id,
+          dateISO: first.dateISO,
+          target: first.target,
+          tenant: first.tenant,
+          videoThumbUrl: first.videoThumbUrl ? first.videoThumbUrl.substring(0, 50) + '...' : '(não tem)',
+          thumbUrl: first.thumbUrl?.substring(0, 50) + '...'
         });
       }
       
@@ -34113,7 +34504,8 @@ ${contextoReunioes}`;
         desc: p.desc||'',
         status: p.status||'',
         approvedBy: p.approvedBy||'',
-        thumbUrl: p.thumbUrl||'',
+        // 🔥 PRIORIDADE: videoThumbUrl (thumbnail gerada) > thumbUrl (original)
+        thumbUrl: p.videoThumbUrl || p.thumbUrl || '',
         mediaUrls: Array.isArray(p.mediaUrls) ? p.mediaUrls.slice(0, 4) : []
       }));
       
@@ -34121,12 +34513,41 @@ ${contextoReunioes}`;
       // objetivos do mês (Planejamento)
       let goals = null;
       try{
-        const [ano, mm2] = (mesISO||'').split('-');
-        const monthKey = `${ano}-${mm2}`;
         const list = Array.isArray(DEMANDAS) ? DEMANDAS : [];
+        
+        // Gerar lista de monthKeys no período
+        const periodMonthKeys = [];
+        // 🔧 FIX: Usar UTC para evitar problema de timezone
+        let current = new Date(periodoInicio + '-01T00:00:00Z');
+        const endDate = new Date(periodoFim + '-01T00:00:00Z');
+        
+        while(current <= endDate){
+          const year = current.getUTCFullYear();
+          const month = String(current.getUTCMonth() + 1).padStart(2, '0');
+          periodMonthKeys.push(`${year}-${month}`);
+          current.setUTCMonth(current.getUTCMonth() + 1);
+        }
+        
+        console.log(`[buildMonthlyReportData] 🎯 OBJETIVOS - Período: ${periodoInicio} até ${periodoFim}`);
+        console.log(`[buildMonthlyReportData] 🎯 periodMonthKeys gerados:`, periodMonthKeys);
+        console.log(`[buildMonthlyReportData] 🎯 Total de demandas disponíveis:`, list.length);
+        
+        // Filtrar demandas que estão em qualquer mês do período
         const inMonth = list.filter(d=>{
-          try{ return Array.isArray(getDemandMonthKeys(d)) && getDemandMonthKeys(d).includes(monthKey); }catch(_){ return false; }
+          try{ 
+            const demandKeys = getDemandMonthKeys(d);
+            if(!Array.isArray(demandKeys)) return false;
+            // Verifica se algum dos meses da demanda está no período
+            const matches = demandKeys.some(k => periodMonthKeys.includes(k));
+            if(matches){
+              console.log(`[buildMonthlyReportData] 🎯 ✅ Demanda incluída: "${d.demanda}" (meses: [${demandKeys.join(', ')}])`);
+            }
+            return matches;
+          }catch(_){ return false; }
         });
+        
+        console.log(`[buildMonthlyReportData] 🎯 Demandas filtradas para o período:`, inMonth.length);
+        
         const groups = { 'concluido':[], 'em-andamento':[], 'nao-iniciado':[] };
         inMonth.forEach(d=>{ const key = (typeof mapDemandaToStatusKey==='function') ? mapDemandaToStatusKey(d.status) : ((d.status||'').toLowerCase()==='concluido'?'concluido':((d.status||'').toLowerCase()==='em-andamento'?'em-andamento':'nao-iniciado')); groups[key].push(d); });
         const toItem = (d)=>{
@@ -34134,6 +34555,9 @@ ${contextoReunioes}`;
           const tag = Array.isArray(d.tags) ? (d.tags[0]||'') : (d.tag||'');
           return { id: d.id||'', title: (d.demanda||'').toString(), responsavel: d.responsavel||'', status: d.status||'', tag: tag||'', endDate };
         };
+        
+        console.log(`[buildMonthlyReportData] 🎯 Resumo: concluído=${groups['concluido'].length}, em-andamento=${groups['em-andamento'].length}, nao-iniciado=${groups['nao-iniciado'].length}`);
+        
         goals = {
           summary: {
             total: inMonth.length,
@@ -34148,7 +34572,14 @@ ${contextoReunioes}`;
       const notes = [];
       try{
         const map = CAL_NOTES && typeof CAL_NOTES==='object' ? CAL_NOTES : {};
-        Object.keys(map).forEach(k=>{ if(String(k).startsWith(mesISO)){ const txt = map[k]; if(txt){ notes.push({ id:k, text: String(txt) }); } }});
+        Object.keys(map).forEach(k=>{ 
+          // Verificar se a nota está no período
+          const noteDate = String(k).substring(0, 7); // Pega YYYY-MM
+          if(noteDate >= periodoInicio && noteDate <= periodoFim){ 
+            const txt = map[k]; 
+            if(txt){ notes.push({ id:k, text: String(txt) }); } 
+          }
+        });
         notes.sort((a,b)=> String(a.id).localeCompare(String(b.id)));
       }catch(_){ }
       // social links + snapshot dos ícones exibidos no header
@@ -34200,7 +34631,8 @@ ${contextoReunioes}`;
             const month = String(leadDate.getMonth() + 1).padStart(2, '0');
             const leadMonthISO = `${year}-${month}`;
             
-            return leadMonthISO === mesISO;
+            // Verificar se está no período
+            return leadMonthISO >= periodoInicio && leadMonthISO <= periodoFim;
           });
           
           leadsCount = filteredLeads.length;
@@ -34215,7 +34647,7 @@ ${contextoReunioes}`;
             source: lead.source || 'Não especificado'
           }));
           
-          console.log('[buildMonthlyReportData] ✅ Leads filtrados para', mesISO, ':', leadsCount);
+          console.log('[buildMonthlyReportData] ✅ Leads filtrados para período', periodoInicio, 'até', periodoFim, ':', leadsCount);
           console.log('[buildMonthlyReportData] ✅ Dados dos leads:', leadsData.length, 'leads com detalhes');
           if(leadsData.length > 0) {
             console.log('[buildMonthlyReportData] ✅ Exemplo do primeiro lead:', leadsData[0]);
@@ -34283,20 +34715,51 @@ ${contextoReunioes}`;
         console.error('[buildMonthlyReportData] ❌ Erro ao buscar leads do Firestore:', err);
       }
       
-      return { monthKey: mesISO, labelMonth, tenant, metas, posts, notes, socialLinks, social, goals, leadsCount, leadsData, leadsAnalysis };
+      return { 
+        monthKey: periodoInicio, // Mantém para compatibilidade, mas agora é o início do período
+        periodoInicio, 
+        periodoFim, 
+        periodoTexto,
+        labelMonth, 
+        tenant, 
+        metas, 
+        posts, 
+        notes, 
+        socialLinks, 
+        social, 
+        goals, 
+        leadsCount, 
+        leadsData, 
+        leadsAnalysis 
+      };
     }
 
     // Cria/atualiza um documento de compartilhamento público e retorna o token
-    async function createOrUpdateReportShare(mesISO){
-      console.log('[createOrUpdateReportShare] Iniciando - mesISO:', mesISO);
+    async function createOrUpdateReportShare(mesInicioISO, mesFimISO = null){
+      console.log('[createOrUpdateReportShare] 🎬 Iniciando - mesInicioISO:', mesInicioISO, 'mesFimISO:', mesFimISO);
+      
+      // Verificar autenticação ANTES de chamar requireAuthUser
+      if(!auth.currentUser){
+        console.error('[createOrUpdateReportShare] ❌ auth.currentUser é null! Usuário não está autenticado.');
+        throw new Error('Usuário não autenticado. Recarregue a página e faça login novamente.');
+      }
+      console.log('[createOrUpdateReportShare] ✅ auth.currentUser existe:', auth.currentUser.uid);
+      
       await requireAuthUser();
       const uid = getUserKey();
-      if(!uid) throw new Error('Usuário não autenticado');
-      console.log('[createOrUpdateReportShare] uid:', uid);
+      if(!uid){
+        console.error('[createOrUpdateReportShare] ❌ getUserKey() retornou null/undefined!');
+        throw new Error('Erro ao obter ID do usuário. Recarregue a página.');
+      }
+      console.log('[createOrUpdateReportShare] ✅ uid obtido:', uid);
       
-      const data = await buildMonthlyReportData(mesISO);
-      console.log('[createOrUpdateReportShare] Data gerado:', {
+      console.log('[createOrUpdateReportShare] 📊 Gerando dados do relatório...');
+      const data = await buildMonthlyReportData(mesInicioISO, mesFimISO);
+      console.log('[createOrUpdateReportShare] ✅ Data gerado:', {
         monthKey: data.monthKey,
+        periodoInicio: data.periodoInicio,
+        periodoFim: data.periodoFim,
+        periodoTexto: data.periodoTexto,
         tenant: data.tenant,
         postsCount: Array.isArray(data.posts) ? data.posts.length : 0,
         storiesCount: Array.isArray(data.posts) ? data.posts.filter(p => p.target === 'stories').length : 0,
@@ -34314,6 +34777,10 @@ ${contextoReunioes}`;
         token,
         uid,
         monthKey: data.monthKey,
+        periodoInicio: data.periodoInicio,
+        periodoFim: data.periodoFim,
+        periodoTexto: data.periodoTexto,
+        reportTitle: 'Relatório de Performance',
         tenant: data.tenant || null,
         createdAt: Date.now(),
         payload: data
@@ -34322,6 +34789,10 @@ ${contextoReunioes}`;
       console.log('[createOrUpdateReportShare] Payload a ser salvo:', {
         token,
         monthKey: payload.monthKey,
+        periodoInicio: payload.periodoInicio,
+        periodoFim: payload.periodoFim,
+        periodoTexto: payload.periodoTexto,
+        reportTitle: payload.reportTitle,
         tenant: payload.tenant,
         payloadPostsCount: Array.isArray(payload.payload?.posts) ? payload.payload.posts.length : 0,
         payloadLeadsCount: payload.payload?.leadsCount || 0,
