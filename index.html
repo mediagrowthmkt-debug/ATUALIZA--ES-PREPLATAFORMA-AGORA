@@ -13169,157 +13169,180 @@ Você pode adicionar links (https://...) e colar imagens."></textarea>
 
 <!-- Modal Template Tráfego -->
 <div class="team-notes-modal traffic-template-modal" id="trafficTemplateModal">
-  <div class="team-notes-modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+  <div class="team-notes-modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
     <div class="team-notes-modal-header">
-      <h3>📋 Relatório de Tráfego - Template</h3>
+      <h3>📋 Relatório de Tráfego Pago - Organizado por Campanha</h3>
       <button type="button" class="team-notes-modal-close" onclick="closeTrafficTemplateModal()">✕</button>
     </div>
     <div class="team-notes-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
       
-      <!-- 1. Campanhas rodando -->
-      <div class="template-question">
-        <label class="template-label">🎯 Campanhas estão rodando? Quais?</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(99,102,241,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
-            <input type="checkbox" id="trafficCampGoogle" style="width: 16px; height: 16px;">
-            <span>Google Ads</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(99,102,241,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
-            <input type="checkbox" id="trafficCampMeta" style="width: 16px; height: 16px;">
-            <span>Meta Ads</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; background: rgba(239,68,68,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer;">
-            <input type="checkbox" id="trafficCampNenhuma" style="width: 16px; height: 16px;" onchange="if(this.checked){ document.getElementById('trafficCampGoogle').checked=false; document.getElementById('trafficCampMeta').checked=false; }">
-            <span>Nenhuma</span>
-          </label>
+      <!-- Seletor de Plataforma/Campanha -->
+      <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 16px;">
+        <label class="template-label" style="margin-bottom: 12px; display: block;">🎯 Selecione a Plataforma e Campanha</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="display: block; color: #94a3b8; font-size: 0.8rem; margin-bottom: 6px;">Plataforma:</label>
+            <select id="trafficPlatform" class="template-select" onchange="updateCampaignPlaceholder()">
+              <option value="">Selecione plataforma...</option>
+              <option value="Google Ads">📊 Google Ads</option>
+              <option value="Meta Ads">📘 Meta Ads (Facebook/Instagram)</option>
+              <option value="LinkedIn Ads">💼 LinkedIn Ads</option>
+              <option value="TikTok Ads">🎵 TikTok Ads</option>
+              <option value="YouTube Ads">📹 YouTube Ads</option>
+              <option value="Twitter Ads">🐦 Twitter/X Ads</option>
+              <option value="Outra">➕ Outra plataforma</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; color: #94a3b8; font-size: 0.8rem; margin-bottom: 6px;">Nome da Campanha:</label>
+            <input type="text" id="trafficCampaignName" class="template-input" placeholder="Ex: Campanha Conversão - SP">
+          </div>
         </div>
-        <input type="text" id="trafficCampDetails" class="template-input" placeholder="Especificar campanhas (opcional)..." style="margin-top: 8px;">
+        <div style="margin-top: 12px;">
+          <label style="display: block; color: #94a3b8; font-size: 0.8rem; margin-bottom: 6px;">Conjunto de Anúncios/Grupo (opcional):</label>
+          <input type="text" id="trafficAdSetName" class="template-input" placeholder="Ex: Público Interesse Alto - 25-45">
+        </div>
       </div>
-
-      <!-- 2. Gerando leads -->
-      <div class="template-question">
-        <label class="template-label">📊 Estão gerando leads?</label>
-        <select id="trafficLeadsGerando" class="template-select">
-          <option value="">Selecione...</option>
-          <option value="Sim">✅ Sim</option>
-          <option value="Não">❌ Não</option>
-          <option value="Aguardando aprovação">⏳ Aguardando aprovação</option>
-          <option value="Em otimização">🔧 Em otimização</option>
-        </select>
+      
+      <!-- Formulário de Dados da Campanha -->
+      <div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #e2e8f0; margin: 0 0 16px 0; font-size: 0.95rem;">📊 Dados da Campanha/Anúncio</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="template-question">
+            <label class="template-label">📈 Leads ontem</label>
+            <input type="number" id="trafficLeadsOntem" class="template-input" placeholder="Ex: 5" min="0">
+          </div>
+          
+          <div class="template-question">
+            <label class="template-label">📅 Leads no mês</label>
+            <input type="number" id="trafficLeadsMes" class="template-input" placeholder="Ex: 120" min="0">
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="template-question">
+            <label class="template-label">💰 Investimento (dia/total)</label>
+            <input type="text" id="trafficInvestimento" class="template-input" placeholder="Ex: R$ 150 / R$ 2.500">
+          </div>
+          
+          <div class="template-question">
+            <label class="template-label">💵 CPL (Custo por Lead)</label>
+            <input type="text" id="trafficCPL" class="template-input" placeholder="Ex: R$ 25,50">
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="template-question">
+            <label class="template-label">🎯 CTR (Taxa de Clique)</label>
+            <input type="text" id="trafficCTR" class="template-input" placeholder="Ex: 3,5%">
+          </div>
+          
+          <div class="template-question">
+            <label class="template-label">💹 CPC (Custo por Clique)</label>
+            <input type="text" id="trafficCPC" class="template-input" placeholder="Ex: R$ 1,80">
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="template-question">
+            <label class="template-label">👥 Alcance/Impressões</label>
+            <input type="text" id="trafficAlcance" class="template-input" placeholder="Ex: 15.000">
+          </div>
+          
+          <div class="template-question">
+            <label class="template-label">📊 Taxa de Conversão</label>
+            <input type="text" id="trafficConversao" class="template-input" placeholder="Ex: 8,5%">
+          </div>
+        </div>
       </div>
-
-      <!-- 3. Leads ontem -->
-      <div class="template-question">
-        <label class="template-label">📈 Quantos leads ontem?</label>
-        <input type="number" id="trafficLeadsOntem" class="template-input" placeholder="Ex: 5" min="0">
+      
+      <!-- Status e Performance -->
+      <div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #e2e8f0; margin: 0 0 16px 0; font-size: 0.95rem;">🎯 Status e Performance</h4>
+        
+        <div class="template-question" style="margin-bottom: 12px;">
+          <label class="template-label">📊 Gerando leads?</label>
+          <select id="trafficLeadsGerando" class="template-select">
+            <option value="">Selecione...</option>
+            <option value="Sim">✅ Sim, gerando normalmente</option>
+            <option value="Não">❌ Não está gerando</option>
+            <option value="Aguardando aprovação">⏳ Aguardando aprovação</option>
+            <option value="Em otimização">� Em otimização</option>
+            <option value="Pausada">⏸️ Campanha pausada</option>
+          </select>
+        </div>
+        
+        <div class="template-question" style="margin-bottom: 12px;">
+          <label class="template-label">✅ Leads caindo no CRM?</label>
+          <select id="trafficLeadsCaindo" class="template-select">
+            <option value="">Selecione...</option>
+            <option value="Sim">✅ Sim, tudo ok</option>
+            <option value="Não">❌ Não está caindo</option>
+            <option value="Apenas na plataforma">⚠️ Apenas na plataforma</option>
+            <option value="Verificando integração">🔍 Verificando integração</option>
+          </select>
+        </div>
+        
+        <div class="template-question">
+          <label class="template-label">⭐ Melhores anúncios/criativos</label>
+          <textarea id="trafficMelhoresAnuncios" class="template-input" rows="2" placeholder="Ex: Vídeo curto 15s com depoimento / Carrossel com resultados"></textarea>
+        </div>
       </div>
-
-      <!-- 4. Leads no mês -->
-      <div class="template-question">
-        <label class="template-label">📅 Quantos leads no mês?</label>
-        <input type="number" id="trafficLeadsMes" class="template-input" placeholder="Ex: 120" min="0">
+      
+      <!-- Comentários e Interações -->
+      <div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #e2e8f0; margin: 0 0 16px 0; font-size: 0.95rem;">💬 Comentários e Interações</h4>
+        
+        <div class="template-question">
+          <label class="template-label">� Comentários relevantes nos anúncios</label>
+          <textarea id="trafficComentarios" class="template-input" rows="2" placeholder="Ex: Muitas perguntas sobre preço / Feedback positivo sobre produto"></textarea>
+        </div>
       </div>
-
-      <!-- 5. Investimento total -->
-      <div class="template-question">
-        <label class="template-label">💰 Investimento total até agora?</label>
-        <input type="text" id="trafficInvestimento" class="template-input" placeholder="Ex: R$ 2.500">
+      
+      <!-- Otimizações e Ações -->
+      <div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #e2e8f0; margin: 0 0 16px 0; font-size: 0.95rem;">🛠️ Otimizações e Ações</h4>
+        
+        <div class="template-question" style="margin-bottom: 12px;">
+          <label class="template-label">🛠️ Otimizações realizadas hoje</label>
+          <textarea id="trafficOtimizacao" class="template-input" rows="2" placeholder="Ex: Pausei anúncio com CTR baixo / Aumentei lance em 15% / Ajustei público"></textarea>
+        </div>
+        
+        <div class="template-question" style="margin-bottom: 12px;">
+          <label class="template-label">🎯 Próximas ações planejadas</label>
+          <textarea id="trafficProximasAcoes" class="template-input" rows="2" placeholder="Ex: Testar novo criativo amanhã / Escalar se CPL < R$ 20 / Criar campanha remarketing"></textarea>
+        </div>
+        
+        <div class="template-question">
+          <label class="template-label">⚠️ Problemas ou alertas</label>
+          <textarea id="trafficProblemas" class="template-input" rows="2" placeholder="Ex: Orçamento acabando / Anúncio reprovado / Queda na taxa de conversão"></textarea>
+        </div>
       </div>
-
-      <!-- 6. CPL médio -->
-      <div class="template-question">
-        <label class="template-label">💵 CPL médio por campanha</label>
-        <input type="text" id="trafficCPL" class="template-input" placeholder="Ex: R$ 25 Google | R$ 18 Meta">
+      
+      <!-- Insights e Decisões -->
+      <div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.2); border-radius: 10px; padding: 16px;">
+        <h4 style="color: #e2e8f0; margin: 0 0 16px 0; font-size: 0.95rem;">� Insights e Decisões</h4>
+        
+        <div class="template-question" style="margin-bottom: 12px;">
+          <label class="template-label">💡 Insight principal</label>
+          <textarea id="trafficInsight" class="template-input" rows="2" placeholder="Ex: Público 25-35 anos convertendo melhor / Anúncios com vídeo têm CTR 2x maior"></textarea>
+        </div>
+        
+        <div class="template-question">
+          <label class="template-label">🎯 Decisão estratégica</label>
+          <textarea id="trafficDecisao" class="template-input" rows="2" placeholder="Ex: Escalar Google Ads em 30% / Pausar Meta até melhorar criativos / Manter sem alterações"></textarea>
+        </div>
       </div>
-
-      <!-- 7. Leads caindo corretamente -->
-      <div class="template-question">
-        <label class="template-label">✅ Leads estão caindo corretamente na plataforma e no CRM?</label>
-        <select id="trafficLeadsCaindo" class="template-select">
-          <option value="">Selecione...</option>
-          <option value="Sim">✅ Sim, tudo ok</option>
-          <option value="Não">❌ Não</option>
-          <option value="Apenas na plataforma">⚠️ Apenas na plataforma</option>
-          <option value="Verificando integração">🔍 Verificando</option>
-        </select>
-      </div>
-
-      <!-- 8. CTR por campanha -->
-      <div class="template-question">
-        <label class="template-label">🎯 CTR por campanha</label>
-        <input type="text" id="trafficCTR" class="template-input" placeholder="Ex: Google 3,5% | Meta 2,1%">
-      </div>
-
-      <!-- 9. Melhores anúncios -->
-      <div class="template-question">
-        <label class="template-label">⭐ Quais são os melhores anúncios hoje?</label>
-        <select id="trafficMelhoresAnuncios" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficMelhoresAnunciosCustom').style.display='block'; } else { document.getElementById('trafficMelhoresAnunciosCustom').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Todos performando bem">✅ Todos performando bem</option>
-          <option value="Anúncios de conversão">🎯 Anúncios de conversão</option>
-          <option value="Remarketing">🔄 Remarketing</option>
-          <option value="Carrossel/Imagem">🖼️ Carrossel/Imagem</option>
-          <option value="Vídeo">🎬 Vídeo</option>
-          <option value="personalizado">✏️ Especificar...</option>
-        </select>
-        <input type="text" id="trafficMelhoresAnunciosCustom" class="template-input" placeholder="Especifique..." style="margin-top: 8px; display: none;">
-      </div>
-
-      <!-- 10. Comentários nos anúncios -->
-      <div class="template-question">
-        <label class="template-label">💬 Algum anúncio com comentários relevantes?</label>
-        <select id="trafficComentarios" class="template-select" onchange="if(this.value==='Sim'){ document.getElementById('trafficComentariosDetails').style.display='block'; } else { document.getElementById('trafficComentariosDetails').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Não">❌ Não</option>
-          <option value="Apenas Google rodando">📊 Apenas Google (sem comentários)</option>
-          <option value="Sim">✅ Sim</option>
-        </select>
-        <input type="text" id="trafficComentariosDetails" class="template-input" placeholder="Quais comentários?" style="margin-top: 8px; display: none;">
-      </div>
-
-      <!-- 11. Otimização hoje -->
-      <div class="template-question">
-        <label class="template-label">🛠️ Otimização hoje? Qual foi/será feita</label>
-        <select id="trafficOtimizacao" class="template-select" onchange="if(this.value==='Sim' || this.value==='Feita'){ document.getElementById('trafficOtimizacaoDetails').style.display='block'; } else { document.getElementById('trafficOtimizacaoDetails').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Não">❌ Não precisa hoje</option>
-          <option value="Feita">✅ Já foi feita</option>
-          <option value="Sim">🔧 Será feita</option>
-          <option value="Aguardando dados">⏳ Aguardando dados</option>
-        </select>
-        <input type="text" id="trafficOtimizacaoDetails" class="template-input" placeholder="O que foi/será feito?" style="margin-top: 8px; display: none;">
-      </div>
-
-      <!-- 12. Insight geral -->
-      <div class="template-question">
-        <label class="template-label">💡 Insight geral da conta</label>
-        <select id="trafficInsight" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficInsightCustom').style.display='block'; } else { document.getElementById('trafficInsightCustom').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Conta saudável, manter estratégia">✅ Conta saudável, manter estratégia</option>
-          <option value="Precisa mais investimento">💰 Precisa mais investimento</option>
-          <option value="Necessário ajustes urgentes">⚠️ Ajustes urgentes</option>
-          <option value="Aguardando resultados da otimização">⏳ Aguardando resultados</option>
-          <option value="Escalar campanhas que performam">🚀 Escalar campanhas boas</option>
-          <option value="personalizado">✏️ Insight personalizado...</option>
-        </select>
-        <input type="text" id="trafficInsightCustom" class="template-input" placeholder="Seu insight..." style="margin-top: 8px; display: none;">
-      </div>
-
-      <!-- 13. Decisão tomada hoje -->
-      <div class="template-question">
-        <label class="template-label">🎯 Decisão tomada hoje</label>
-        <select id="trafficDecisao" class="template-select" onchange="if(this.value==='personalizado'){ document.getElementById('trafficDecisaoCustom').style.display='block'; } else { document.getElementById('trafficDecisaoCustom').style.display='none'; }">
-          <option value="">Selecione...</option>
-          <option value="Manter como está">✅ Manter como está</option>
-          <option value="Aumentar orçamento">💰 Aumentar orçamento</option>
-          <option value="Pausar campanhas fracas">⏸️ Pausar campanhas fracas</option>
-          <option value="Testar novos criativos">🎨 Testar novos criativos</option>
-          <option value="Ajustar público-alvo">🎯 Ajustar público-alvo</option>
-          <option value="Criar novas campanhas">➕ Criar novas campanhas</option>
-          <option value="Nenhuma ação necessária">➖ Nenhuma ação necessária</option>
-          <option value="personalizado">✏️ Outra decisão...</option>
-        </select>
-        <input type="text" id="trafficDecisaoCustom" class="template-input" placeholder="Qual decisão?" style="margin-top: 8px; display: none;">
+      
+      <!-- Botão para adicionar mais campanhas -->
+      <div style="text-align: center; padding: 16px; background: rgba(99,102,241,0.05); border: 2px dashed rgba(99,102,241,0.3); border-radius: 10px;">
+        <button type="button" onclick="addAnotherCampaign()" class="btn secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+          <span>➕</span> Adicionar Outra Campanha/Plataforma
+        </button>
+        <p style="color: #94a3b8; font-size: 0.8rem; margin: 8px 0 0 0;">
+          Você pode adicionar anotações para múltiplas campanhas em uma única nota
+        </p>
       </div>
 
     </div>
@@ -28265,131 +28288,233 @@ async function sendIAQuestion(){
       }
     });
     
-    /* ========== TEMPLATE DE TRÁFEGO ========== */
+    /* ========== TEMPLATE DE TRÁFEGO (MÚLTIPLAS CAMPANHAS) ========== */
+    
+    // Array para armazenar múltiplas campanhas
+    let trafficCampaigns = [];
+    
+    function updateCampaignPlaceholder(){
+      const platform = document.getElementById('trafficPlatform').value;
+      const campaignInput = document.getElementById('trafficCampaignName');
+      
+      if(platform === 'Google Ads'){
+        campaignInput.placeholder = 'Ex: Campanha Conversão - SP';
+      } else if(platform === 'Meta Ads'){
+        campaignInput.placeholder = 'Ex: Lead Gen - Público Frio';
+      } else if(platform === 'LinkedIn Ads'){
+        campaignInput.placeholder = 'Ex: B2B - Gestores';
+      } else {
+        campaignInput.placeholder = 'Nome da campanha...';
+      }
+    }
+    window.updateCampaignPlaceholder = updateCampaignPlaceholder;
+    
     function openTrafficTemplateModal(){
       const modal = document.getElementById('trafficTemplateModal');
       if(!modal) return;
       
+      // Resetar array de campanhas
+      trafficCampaigns = [];
+      
       // Limpar todos os campos
-      document.getElementById('trafficCampGoogle').checked = false;
-      document.getElementById('trafficCampMeta').checked = false;
-      document.getElementById('trafficCampNenhuma').checked = false;
-      document.getElementById('trafficCampDetails').value = '';
-      document.getElementById('trafficLeadsGerando').value = '';
-      document.getElementById('trafficLeadsOntem').value = '';
-      document.getElementById('trafficLeadsMes').value = '';
-      document.getElementById('trafficInvestimento').value = '';
-      document.getElementById('trafficCPL').value = '';
-      document.getElementById('trafficLeadsCaindo').value = '';
-      document.getElementById('trafficCTR').value = '';
-      document.getElementById('trafficMelhoresAnuncios').value = '';
-      document.getElementById('trafficMelhoresAnunciosCustom').value = '';
-      document.getElementById('trafficMelhoresAnunciosCustom').style.display = 'none';
-      document.getElementById('trafficComentarios').value = '';
-      document.getElementById('trafficComentariosDetails').value = '';
-      document.getElementById('trafficComentariosDetails').style.display = 'none';
-      document.getElementById('trafficOtimizacao').value = '';
-      document.getElementById('trafficOtimizacaoDetails').value = '';
-      document.getElementById('trafficOtimizacaoDetails').style.display = 'none';
-      document.getElementById('trafficInsight').value = '';
-      document.getElementById('trafficInsightCustom').value = '';
-      document.getElementById('trafficInsightCustom').style.display = 'none';
-      document.getElementById('trafficDecisao').value = '';
-      document.getElementById('trafficDecisaoCustom').value = '';
-      document.getElementById('trafficDecisaoCustom').style.display = 'none';
+      clearTrafficForm();
       
       modal.classList.add('show');
       document.body.style.overflow = 'hidden';
     }
     window.openTrafficTemplateModal = openTrafficTemplateModal;
     
+    function clearTrafficForm(){
+      document.getElementById('trafficPlatform').value = '';
+      document.getElementById('trafficCampaignName').value = '';
+      document.getElementById('trafficAdSetName').value = '';
+      document.getElementById('trafficLeadsGerando').value = '';
+      document.getElementById('trafficLeadsOntem').value = '';
+      document.getElementById('trafficLeadsMes').value = '';
+      document.getElementById('trafficInvestimento').value = '';
+      document.getElementById('trafficCPL').value = '';
+      document.getElementById('trafficCPC').value = '';
+      document.getElementById('trafficLeadsCaindo').value = '';
+      document.getElementById('trafficCTR').value = '';
+      document.getElementById('trafficAlcance').value = '';
+      document.getElementById('trafficConversao').value = '';
+      document.getElementById('trafficMelhoresAnuncios').value = '';
+      document.getElementById('trafficComentarios').value = '';
+      document.getElementById('trafficOtimizacao').value = '';
+      document.getElementById('trafficProximasAcoes').value = '';
+      document.getElementById('trafficProblemas').value = '';
+      document.getElementById('trafficInsight').value = '';
+      document.getElementById('trafficDecisao').value = '';
+    }
+    
+    function addAnotherCampaign(){
+      // Coletar dados do formulário atual
+      const platform = document.getElementById('trafficPlatform').value.trim();
+      const campaignName = document.getElementById('trafficCampaignName').value.trim();
+      
+      if(!platform || !campaignName){
+        mgToast('Preencha pelo menos a Plataforma e o Nome da Campanha antes de adicionar outra');
+        return;
+      }
+      
+      // Coletar todos os dados
+      const campaignData = {
+        platform: platform,
+        campaignName: campaignName,
+        adSetName: document.getElementById('trafficAdSetName').value.trim(),
+        leadsGerando: document.getElementById('trafficLeadsGerando').value,
+        leadsOntem: document.getElementById('trafficLeadsOntem').value,
+        leadsMes: document.getElementById('trafficLeadsMes').value,
+        investimento: document.getElementById('trafficInvestimento').value.trim(),
+        cpl: document.getElementById('trafficCPL').value.trim(),
+        cpc: document.getElementById('trafficCPC').value.trim(),
+        leadsCaindo: document.getElementById('trafficLeadsCaindo').value,
+        ctr: document.getElementById('trafficCTR').value.trim(),
+        alcance: document.getElementById('trafficAlcance').value.trim(),
+        conversao: document.getElementById('trafficConversao').value.trim(),
+        melhoresAnuncios: document.getElementById('trafficMelhoresAnuncios').value.trim(),
+        comentarios: document.getElementById('trafficComentarios').value.trim(),
+        otimizacao: document.getElementById('trafficOtimizacao').value.trim(),
+        proximasAcoes: document.getElementById('trafficProximasAcoes').value.trim(),
+        problemas: document.getElementById('trafficProblemas').value.trim(),
+        insight: document.getElementById('trafficInsight').value.trim(),
+        decisao: document.getElementById('trafficDecisao').value.trim()
+      };
+      
+      // Adicionar ao array
+      trafficCampaigns.push(campaignData);
+      
+      // Limpar formulário
+      clearTrafficForm();
+      
+      // Scroll para o topo
+      document.querySelector('.traffic-template-modal .team-notes-modal-content').scrollTop = 0;
+      
+      mgToast(`Campanha "${campaignName}" adicionada! (${trafficCampaigns.length} campanha(s) no total)`);
+    }
+    window.addAnotherCampaign = addAnotherCampaign;
+    
     function closeTrafficTemplateModal(){
       const modal = document.getElementById('trafficTemplateModal');
       if(!modal) return;
       modal.classList.remove('show');
       document.body.style.overflow = '';
+      trafficCampaigns = [];
     }
     window.closeTrafficTemplateModal = closeTrafficTemplateModal;
     
     async function saveTrafficTemplate(){
       try {
-        // Coletar dados do formulário
-        const campanhasGoogle = document.getElementById('trafficCampGoogle').checked;
-        const campanhasMeta = document.getElementById('trafficCampMeta').checked;
-        const campanhasNenhuma = document.getElementById('trafficCampNenhuma').checked;
-        const campanhasDetalhes = document.getElementById('trafficCampDetails').value.trim();
+        // Verificar se há dados no formulário atual
+        const platform = document.getElementById('trafficPlatform').value.trim();
+        const campaignName = document.getElementById('trafficCampaignName').value.trim();
         
-        let campanhasTexto = '';
-        if(campanhasNenhuma){
-          campanhasTexto = 'Nenhuma rodando';
-        } else if(campanhasGoogle || campanhasMeta){
-          const plataformas = [];
-          if(campanhasGoogle) plataformas.push('Google Ads');
-          if(campanhasMeta) plataformas.push('Meta Ads');
-          campanhasTexto = plataformas.join(' + ');
-          if(campanhasDetalhes) campanhasTexto += ` (${campanhasDetalhes})`;
-        } else {
-          campanhasTexto = campanhasDetalhes || '-';
+        // Se houver dados preenchidos, adicionar ao array
+        if(platform && campaignName){
+          const campaignData = {
+            platform: platform,
+            campaignName: campaignName,
+            adSetName: document.getElementById('trafficAdSetName').value.trim(),
+            leadsGerando: document.getElementById('trafficLeadsGerando').value,
+            leadsOntem: document.getElementById('trafficLeadsOntem').value,
+            leadsMes: document.getElementById('trafficLeadsMes').value,
+            investimento: document.getElementById('trafficInvestimento').value.trim(),
+            cpl: document.getElementById('trafficCPL').value.trim(),
+            cpc: document.getElementById('trafficCPC').value.trim(),
+            leadsCaindo: document.getElementById('trafficLeadsCaindo').value,
+            ctr: document.getElementById('trafficCTR').value.trim(),
+            alcance: document.getElementById('trafficAlcance').value.trim(),
+            conversao: document.getElementById('trafficConversao').value.trim(),
+            melhoresAnuncios: document.getElementById('trafficMelhoresAnuncios').value.trim(),
+            comentarios: document.getElementById('trafficComentarios').value.trim(),
+            otimizacao: document.getElementById('trafficOtimizacao').value.trim(),
+            proximasAcoes: document.getElementById('trafficProximasAcoes').value.trim(),
+            problemas: document.getElementById('trafficProblemas').value.trim(),
+            insight: document.getElementById('trafficInsight').value.trim(),
+            decisao: document.getElementById('trafficDecisao').value.trim()
+          };
+          trafficCampaigns.push(campaignData);
         }
         
-        const leadsGerando = document.getElementById('trafficLeadsGerando').value;
-        const leadsOntem = document.getElementById('trafficLeadsOntem').value;
-        const leadsMes = document.getElementById('trafficLeadsMes').value;
-        const investimento = document.getElementById('trafficInvestimento').value.trim();
-        const cpl = document.getElementById('trafficCPL').value.trim();
-        const leadsCaindo = document.getElementById('trafficLeadsCaindo').value;
-        const ctr = document.getElementById('trafficCTR').value.trim();
-        
-        let melhoresAnuncios = document.getElementById('trafficMelhoresAnuncios').value;
-        if(melhoresAnuncios === 'personalizado'){
-          melhoresAnuncios = document.getElementById('trafficMelhoresAnunciosCustom').value.trim();
-        }
-        
-        let comentarios = document.getElementById('trafficComentarios').value;
-        if(comentarios === 'Sim'){
-          const detalhes = document.getElementById('trafficComentariosDetails').value.trim();
-          if(detalhes) comentarios += `: ${detalhes}`;
-        }
-        
-        let otimizacao = document.getElementById('trafficOtimizacao').value;
-        if(otimizacao === 'Sim' || otimizacao === 'Feita'){
-          const detalhes = document.getElementById('trafficOtimizacaoDetails').value.trim();
-          if(detalhes) otimizacao += `: ${detalhes}`;
-        }
-        
-        let insight = document.getElementById('trafficInsight').value;
-        if(insight === 'personalizado'){
-          insight = document.getElementById('trafficInsightCustom').value.trim();
-        }
-        
-        let decisao = document.getElementById('trafficDecisao').value;
-        if(decisao === 'personalizado'){
-          decisao = document.getElementById('trafficDecisaoCustom').value.trim();
-        }
-        
-        // Montar o conteúdo da nota - formato compacto
-        let conteudo = '📊 RELATÓRIO DE TRÁFEGO\n';
-        conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n\n`;
-        
-        conteudo += `🎯 Campanhas: ${campanhasTexto}\n`;
-        if(leadsGerando) conteudo += `📊 Gerando leads: ${leadsGerando}\n`;
-        if(leadsOntem) conteudo += `📈 Leads ontem: ${leadsOntem}\n`;
-        if(leadsMes) conteudo += `📅 Leads mês: ${leadsMes}\n`;
-        if(investimento) conteudo += `� Investimento: ${investimento}\n`;
-        if(cpl) conteudo += `💵 CPL: ${cpl}\n`;
-        if(leadsCaindo) conteudo += `✅ Leads no CRM: ${leadsCaindo}\n`;
-        if(ctr) conteudo += `🎯 CTR: ${ctr}\n`;
-        if(melhoresAnuncios) conteudo += `⭐ Melhores anúncios: ${melhoresAnuncios}\n`;
-        if(comentarios) conteudo += `💬 Comentários: ${comentarios}\n`;
-        if(otimizacao) conteudo += `🛠️ Otimização: ${otimizacao}\n`;
-        if(insight) conteudo += `💡 Insight: ${insight}\n`;
-        if(decisao) conteudo += `🎯 Decisão: ${decisao}\n`;
-        
-        // Verificar se há conteúdo suficiente
-        if(conteudo.split('\n').filter(line => line.trim()).length <= 3){
-          mgToast('Preencha pelo menos algumas perguntas');
+        // Verificar se há campanhas
+        if(trafficCampaigns.length === 0){
+          mgToast('Preencha pelo menos uma campanha');
           return;
         }
+        
+        // Montar o conteúdo da nota
+        let conteudo = '📊 RELATÓRIO DE TRÁFEGO PAGO\n';
+        conteudo += `📅 ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
+        conteudo += `📌 Total: ${trafficCampaigns.length} campanha(s)\n\n`;
+        conteudo += '═'.repeat(50) + '\n\n';
+        
+        // Processar cada campanha
+        trafficCampaigns.forEach((camp, index) => {
+          conteudo += `🎯 CAMPANHA ${index + 1}: ${camp.campaignName}\n`;
+          conteudo += `📱 Plataforma: ${camp.platform}\n`;
+          if(camp.adSetName) conteudo += `📊 Conjunto: ${camp.adSetName}\n`;
+          conteudo += '\n';
+          
+          // Dados de Performance
+          if(camp.leadsOntem || camp.leadsMes || camp.investimento || camp.cpl){
+            conteudo += '� PERFORMANCE:\n';
+            if(camp.leadsGerando) conteudo += `  • Status: ${camp.leadsGerando}\n`;
+            if(camp.leadsOntem) conteudo += `  • Leads ontem: ${camp.leadsOntem}\n`;
+            if(camp.leadsMes) conteudo += `  • Leads mês: ${camp.leadsMes}\n`;
+            if(camp.investimento) conteudo += `  • Investimento: ${camp.investimento}\n`;
+            if(camp.cpl) conteudo += `  • CPL: ${camp.cpl}\n`;
+            if(camp.cpc) conteudo += `  • CPC: ${camp.cpc}\n`;
+            if(camp.ctr) conteudo += `  • CTR: ${camp.ctr}\n`;
+            if(camp.alcance) conteudo += `  • Alcance: ${camp.alcance}\n`;
+            if(camp.conversao) conteudo += `  • Conversão: ${camp.conversao}\n`;
+            if(camp.leadsCaindo) conteudo += `  • CRM: ${camp.leadsCaindo}\n`;
+            conteudo += '\n';
+          }
+          
+          // Criativos e Anúncios
+          if(camp.melhoresAnuncios){
+            conteudo += '⭐ MELHORES ANÚNCIOS:\n';
+            conteudo += `  ${camp.melhoresAnuncios}\n\n`;
+          }
+          
+          // Comentários
+          if(camp.comentarios){
+            conteudo += '💬 COMENTÁRIOS:\n';
+            conteudo += `  ${camp.comentarios}\n\n`;
+          }
+          
+          // Otimizações
+          if(camp.otimizacao){
+            conteudo += '🛠️ OTIMIZAÇÕES REALIZADAS:\n';
+            conteudo += `  ${camp.otimizacao}\n\n`;
+          }
+          
+          // Próximas Ações
+          if(camp.proximasAcoes){
+            conteudo += '� PRÓXIMAS AÇÕES:\n';
+            conteudo += `  ${camp.proximasAcoes}\n\n`;
+          }
+          
+          // Problemas
+          if(camp.problemas){
+            conteudo += '⚠️ PROBLEMAS/ALERTAS:\n';
+            conteudo += `  ${camp.problemas}\n\n`;
+          }
+          
+          // Insights
+          if(camp.insight){
+            conteudo += '💡 INSIGHT:\n';
+            conteudo += `  ${camp.insight}\n\n`;
+          }
+          
+          // Decisões
+          if(camp.decisao){
+            conteudo += '🎯 DECISÃO ESTRATÉGICA:\n';
+            conteudo += `  ${camp.decisao}\n\n`;
+          }
+          
+          conteudo += '─'.repeat(50) + '\n\n';
+        });
         
         // Verificar UID
         const uid = getTeamNotesTargetUid();
@@ -28420,7 +28545,7 @@ async function sendIAQuestion(){
         await persistTeamNotes();
         closeTrafficTemplateModal();
         renderTeamNotes();
-        mgToast('Relatório de tráfego salvo!');
+        mgToast(`Relatório salvo com ${trafficCampaigns.length} campanha(s)!`);
         
       } catch(err) {
         console.error('❌ Erro ao salvar relatório de tráfego:', err);
