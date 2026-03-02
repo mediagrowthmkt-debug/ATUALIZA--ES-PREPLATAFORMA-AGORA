@@ -718,30 +718,39 @@
           const leadsSnap = await getDocs(collection(db,'usuarios', uid, 'clients', TENANT, 'leads'));
           const allLeads = leadsSnap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
           
+          // ✅ FIX: Usar a mesma lógica de filtragem da aba leads (datas completas)
+          // Calcular data de início do período (primeiro dia do mês às 00:00:00)
+          const [ano, mes] = mesISO.split('-');
+          const periodoStartDate = new Date(parseInt(ano), parseInt(mes) - 1, 1, 0, 0, 0, 0);
+          
+          // Calcular data de fim do período (último dia do mês às 23:59:59.999)
+          const periodoEndDate = new Date(parseInt(ano), parseInt(mes), 0, 23, 59, 59, 999);
+          
+          console.log('[Relatorio] Período de leads - início:', periodoStartDate.toISOString(), 'fim:', periodoEndDate.toISOString());
+          
           // Filtrar leads pelo mês de criação
           leads = allLeads.filter(lead => {
             if(!lead.createdAt) return false;
             
-            // Converter createdAt para data
+            // Converter createdAt para data (igual à aba leads)
             let leadDate;
-            if(typeof lead.createdAt.toMillis === 'function'){
-              leadDate = new Date(lead.createdAt.toMillis());
-            } else if(typeof lead.createdAt.toDate === 'function'){
+            if(typeof lead.createdAt.toDate === 'function'){
               leadDate = lead.createdAt.toDate();
-            } else if(lead.createdAt.seconds) {
+            } else if(lead.createdAt.seconds){
               leadDate = new Date(lead.createdAt.seconds * 1000);
+            } else if(typeof lead.createdAt.toMillis === 'function'){
+              leadDate = new Date(lead.createdAt.toMillis());
             } else if(typeof lead.createdAt === 'number'){
               leadDate = new Date(lead.createdAt);
+            } else if(lead.createdAt instanceof Date){
+              leadDate = lead.createdAt;
             } else {
               return false;
             }
             
-            // Formatar data no formato YYYY-MM
-            const year = leadDate.getFullYear();
-            const month = String(leadDate.getMonth() + 1).padStart(2, '0');
-            const leadMonthISO = `${year}-${month}`;
-            
-            return leadMonthISO === mesISO;
+            // ✅ Verificar se está no período usando comparação de datas completas
+            // Mesma lógica usada na função getFilteredLeads() da aba leads
+            return leadDate >= periodoStartDate && leadDate <= periodoEndDate;
           });
           
           console.log('[Relatorio] Total de leads no Firestore:', allLeads.length);
@@ -1385,12 +1394,15 @@
       
       if(!resumoSection || !resumoContent) return;
       
-      const mesLabel = payload.labelMonth || mesISO || '';
+      const mesLabel = payload.labelMonth || payload.periodoTexto || '';
+      const periodoInicio = payload.periodoInicio || '';
+      const periodoFim = payload.periodoFim || periodoInicio;
+      const isMultiMes = periodoInicio !== periodoFim;
       
       let resumo = `📊 RESUMO DO RELATÓRIO - ${mesLabel.toUpperCase()}\n`;
       resumo += `${'='.repeat(60)}\n\n`;
       
-      // Stories e Posts - USAR DADOS DO PAYLOAD ao invés do DOM
+      // Stories e Posts - USAR DADOS DO PAYLOAD
       const allPosts = Array.isArray(payload.posts) ? payload.posts : [];
       const storiesCount = allPosts.filter(p => p.target === 'stories').length;
       const postsCount = allPosts.length - storiesCount;
@@ -1401,60 +1413,157 @@
       resumo += `📱 POSTS DE FEED PUBLICADOS\n`;
       resumo += `   Quantidade: ${postsCount} ${postsCount === 1 ? 'post' : 'posts'}\n\n`;
       
-      // Objetivos (Planejamento) - usar payload
-      const goals = payload.goals || {};
-      const goalsSummary = goals.summary || {};
-      const goalsTotal = goalsSummary.total || 0;
-      const goalsDone = goalsSummary.done || 0;
-      const goalsProgress = goalsSummary.progress || 0;
-      const goalsTodo = goalsSummary.todo || 0;
-      
-      if(goalsTotal > 0) {
-        resumo += `🎯 OBJETIVOS DO MÊS (PLANEJAMENTO)\n`;
-        resumo += `   Total de objetivos: ${goalsTotal}\n`;
-        resumo += `   ✅ Concluídos: ${goalsDone}\n`;
-        resumo += `   🔄 Em andamento: ${goalsProgress}\n`;
-        resumo += `   ⏳ Não iniciados: ${goalsTodo}\n`;
-        
-        if(goalsTotal > 0) {
-          const percentConcluido = Math.round((goalsDone / goalsTotal) * 100);
-          resumo += `   Taxa de conclusão: ${percentConcluido}%\n`;
-        }
-        resumo += `\n`;
-      }
-      
-      // Metas - usar payload
+      // 📈 CRESCIMENTO POR PLATAFORMA (novo formato)
       const metas = Array.isArray(payload.metas) ? payload.metas : [];
-      const metasAchieved = metas.filter(m => m.status === 'achieved').length;
-      const metasProgress = metas.filter(m => m.status === 'progress').length;
-      const metasMissing = metas.filter(m => m.status === 'missing').length;
-      const metasTotal = metas.length;
       
-      if(metasTotal > 0) {
-        resumo += `� RELATÓRIO DE PERFORMANCE\n`;
-        resumo += `   Total de métricas: ${metasTotal}\n`;
+      if(metas.length > 0) {
+        // Helper para formatar valores
+        const formatarValor = (val, unidade) => {
+          if(!val && val !== 0) return '-';
+          const num = parseFloat(val);
+          if(isNaN(num)) return String(val);
+          
+          const unidadeLower = (unidade || '').toLowerCase();
+          if(unidadeLower.includes('r$') || unidadeLower === 'brl' || unidadeLower.includes('reais')) {
+            return `R$ ${num.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+          }
+          if(unidadeLower === 'usd' || unidadeLower.includes('dólar') || unidadeLower === '$') {
+            return `$ ${num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+          }
+          if(unidadeLower === '%' || unidadeLower.includes('percent')) {
+            return `${num.toLocaleString('pt-BR')}%`;
+          }
+          if(unidadeLower === 'minutos' || unidadeLower.includes('min')) {
+            return `${num.toLocaleString('pt-BR')} min`;
+          }
+          if(unidadeLower === 'horas' || unidadeLower.includes('hora')) {
+            return `${num.toLocaleString('pt-BR')}h`;
+          }
+          if(unidadeLower === 'dias' || unidadeLower.includes('dia')) {
+            return `${num.toLocaleString('pt-BR')} dias`;
+          }
+          if(num >= 1000000) return `${(num/1000000).toFixed(1)}M`;
+          if(num >= 1000) return `${(num/1000).toFixed(1)}K`;
+          return num.toLocaleString('pt-BR');
+        };
+        
+        // Detectar plataforma pelo título
+        const detectarPlataforma = (descricao) => {
+          const desc = (descricao || '').toLowerCase();
+          if(desc.includes('instagram') || desc.includes('insta')) return 'Instagram';
+          if(desc.includes('facebook') || desc.includes('fb ')) return 'Facebook';
+          if(desc.includes('google') && !desc.includes('business')) return 'Google Ads';
+          if(desc.includes('google business') || desc.includes('gbp')) return 'Google Business';
+          if(desc.includes('meta') && !desc.includes('metrica')) return 'Meta Ads';
+          if(desc.includes('youtube') || desc.includes('yt ')) return 'YouTube';
+          if(desc.includes('tiktok')) return 'TikTok';
+          if(desc.includes('linkedin')) return 'LinkedIn';
+          if(desc.includes('pinterest')) return 'Pinterest';
+          if(desc.includes('whatsapp') || desc.includes('wpp')) return 'WhatsApp';
+          if(desc.includes('crm') || desc.includes('pipeline') || desc.includes('oportunidade')) return 'CRM/Vendas';
+          if(desc.includes('email') || desc.includes('newsletter')) return 'E-mail';
+          if(desc.includes('lead')) return 'Leads';
+          if(desc.includes('investimento') || desc.includes('gasto') || desc.includes('budget')) return 'Investimento';
+          if(desc.includes('roas') || desc.includes('roi')) return 'Retorno';
+          if(desc.includes('cpl') || desc.includes('cpa') || desc.includes('custo')) return 'Custos';
+          if(desc.includes('venda') || desc.includes('faturamento')) return 'Vendas';
+          if(desc.includes('automação') || desc.includes('automacoes')) return 'Automações';
+          return 'Métricas Gerais';
+        };
+        
+        // Agrupar metas por plataforma
+        const plataformasData = {};
+        
+        metas.forEach(meta => {
+          if(meta.realized === 0 && meta.planned === 0) return;
+          
+          const plataforma = detectarPlataforma(meta.descricao);
+          if(!plataformasData[plataforma]) plataformasData[plataforma] = [];
+          
+          let performance = '-';
+          if(meta.planned > 0) {
+            performance = `${Math.round((meta.realized / meta.planned) * 100)}%`;
+          }
+          
+          plataformasData[plataforma].push({
+            titulo: meta.descricao,
+            realizado: formatarValor(meta.realized, meta.unidade),
+            meta: meta.planned > 0 ? formatarValor(meta.planned, meta.unidade) : null,
+            performance: performance
+          });
+        });
+        
+        const plataformas = Object.keys(plataformasData);
+        
+        if(plataformas.length > 0) {
+          if(isMultiMes) {
+            resumo += `📈 CRESCIMENTO POR PLATAFORMA (${periodoInicio} a ${periodoFim})\n`;
+          } else {
+            resumo += `📈 RESULTADOS POR PLATAFORMA\n`;
+          }
+          
+          plataformas.sort((a, b) => plataformasData[b].length - plataformasData[a].length);
+          
+          plataformas.forEach(plat => {
+            const metricas = plataformasData[plat];
+            const emoji = plat === 'Instagram' ? '📸' :
+                         plat === 'Facebook' ? '📘' :
+                         plat === 'Google Ads' ? '🔍' :
+                         plat === 'Google Business' ? '📍' :
+                         plat === 'Meta Ads' ? '📊' :
+                         plat === 'YouTube' ? '📺' :
+                         plat === 'TikTok' ? '🎵' :
+                         plat === 'LinkedIn' ? '💼' :
+                         plat === 'Pinterest' ? '📌' :
+                         plat === 'WhatsApp' ? '💬' :
+                         plat === 'CRM/Vendas' ? '💰' :
+                         plat === 'E-mail' ? '📧' :
+                         plat === 'Leads' ? '🎯' :
+                         plat === 'Investimento' ? '💵' :
+                         plat === 'Retorno' ? '📈' :
+                         plat === 'Custos' ? '💲' :
+                         plat === 'Vendas' ? '🛒' :
+                         plat === 'Automações' ? '🤖' : '📌';
+            
+            resumo += `\n   ${emoji} ${plat.toUpperCase()}:\n`;
+            
+            metricas.forEach(m => {
+              if(m.meta) {
+                resumo += `      • ${m.titulo}: ${m.realizado} (meta: ${m.meta}) ${m.performance}\n`;
+              } else {
+                resumo += `      • ${m.titulo}: ${m.realizado}\n`;
+              }
+            });
+          });
+          
+          resumo += `\n`;
+        }
+        
+        // Resumo geral de performance
+        const metasAchieved = metas.filter(m => m.status === 'achieved').length;
+        const metasProgress = metas.filter(m => m.status === 'progress').length;
+        const metasMissing = metas.filter(m => m.status === 'missing').length;
+        
+        resumo += `📊 RESUMO DE PERFORMANCE\n`;
+        resumo += `   Total de métricas: ${metas.length}\n`;
         resumo += `   ✅ Atingidas: ${metasAchieved}\n`;
         resumo += `   🔄 Em andamento: ${metasProgress}\n`;
         resumo += `   ⚠️ Abaixo do esperado: ${metasMissing}\n`;
-        
-        if(metasTotal > 0) {
-          const percentAtingido = Math.round((metasAchieved / metasTotal) * 100);
-          resumo += `   Taxa de atingimento: ${percentAtingido}%\n`;
+        if(metas.length > 0) {
+          resumo += `   Taxa de atingimento: ${Math.round((metasAchieved / metas.length) * 100)}%\n`;
         }
         resumo += `\n`;
       }
       
-      // Leads - usar payload.leadsAnalysis
+      // Leads
       const leadsCount = payload.leadsCount || 0;
       
       if(leadsCount > 0) {
         resumo += `🎯 LEADS GERADOS\n`;
         resumo += `   Total de leads: ${leadsCount}\n`;
         
-        // Usar análise do payload se disponível
         const analysis = payload.leadsAnalysis || {};
         
-        // Plataformas
         if(analysis.platforms && analysis.platforms.length > 0) {
           resumo += `\n   Por Plataforma:\n`;
           analysis.platforms.forEach(p => {
@@ -1462,7 +1571,6 @@
           });
         }
         
-        // Fontes
         if(analysis.sources && analysis.sources.length > 0) {
           resumo += `\n   Por Fonte:\n`;
           analysis.sources.forEach(s => {
@@ -1470,7 +1578,6 @@
           });
         }
         
-        // Top perguntas
         if(analysis.topQuestions && analysis.topQuestions.length > 0) {
           resumo += `\n   Principais Perguntas:\n`;
           analysis.topQuestions.forEach((q, idx) => {
@@ -1481,12 +1588,11 @@
         resumo += `\n`;
       }
       
-      // Redes trabalhadas - usar payload
+      // Redes trabalhadas
       const redes = Array.isArray(payload.redes) ? payload.redes : [];
-      const redesCount = redes.length;
-      if(redesCount > 0) {
+      if(redes.length > 0) {
         resumo += `🔗 REDES TRABALHADAS\n`;
-        resumo += `   Quantidade: ${redesCount} ${redesCount === 1 ? 'rede' : 'redes'} com link configurado\n\n`;
+        resumo += `   Quantidade: ${redes.length} ${redes.length === 1 ? 'rede' : 'redes'} com link configurado\n\n`;
       }
       
       // Rodapé
