@@ -68730,6 +68730,29 @@ FORMATO PADRÃO:
     let notificationUpdateTimer = null;
     let notificationInitialized = false;
 
+    // Função auxiliar global para abrir o pop-up de notificações automaticamente
+    // DEVE estar aqui no topo para ser acessível antes do onAuthStateChanged
+    function autoOpenNotificationPanel(delay = 800) {
+      console.log('🔔 [AUTO-OPEN] Função chamada com delay:', delay);
+      setTimeout(() => {
+        console.log('🔔 [AUTO-OPEN] Timeout executado - tentando abrir painel');
+        // Garantir que os elementos existem antes de tentar abrir
+        if (typeof ensureNotificationElements === 'function') {
+          console.log('🔔 [AUTO-OPEN] Chamando ensureNotificationElements...');
+          ensureNotificationElements();
+        } else {
+          console.warn('⚠️ [AUTO-OPEN] ensureNotificationElements não disponível');
+        }
+        if (typeof toggleNotificationPanel === 'function') {
+          console.log('🔔 [AUTO-OPEN] Abrindo painel de notificações agora!');
+          toggleNotificationPanel(true);
+        } else {
+          console.error('❌ [AUTO-OPEN] toggleNotificationPanel ainda não está disponível');
+        }
+      }, delay);
+    }
+    window.autoOpenNotificationPanel = autoOpenNotificationPanel;
+
     function loadNotificationSeen(){
       try{
         const raw = localStorage.getItem(getNotificationStorageKey(NOTIFICATION_SEEN_KEY));
@@ -69533,6 +69556,9 @@ FORMATO PADRÃO:
       renderNotifications();
       updateNotificationBadge();
       console.log('🚀 [WIDGET] Inicialização concluída');
+      
+      // Abrir automaticamente o pop-up de notificações após um pequeno delay
+      autoOpenNotificationPanel(500);
     }
     document.addEventListener('DOMContentLoaded', initNotificationWidget);
 
@@ -73499,6 +73525,15 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           notificationAckCounters = loadNotificationCounters();
           try{ scheduleNotificationRefresh({ immediate: true }); }
           catch(_err){ }
+          
+          // Abrir automaticamente o pop-up de notificações IMEDIATAMENTE após login
+          console.log('🔔 [AUTH-EARLY] Abrindo pop-up logo após login, antes de carregar dados');
+          if (typeof autoOpenNotificationPanel === 'function') {
+            autoOpenNotificationPanel(1000);
+          } else {
+            console.error('❌ [AUTH-EARLY] autoOpenNotificationPanel NÃO está disponível!');
+          }
+          
           $("userInfo").textContent=`Logado como: ${user.displayName||user.email} • Cliente: ${TENANT}`;
           const ref = doc(db,"usuarios",user.uid);
           const snap=await getDoc(ref); USER_DATA=snap.exists()?snap.data():{}; window.USER_DATA = USER_DATA; 
@@ -73555,6 +73590,7 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           rerenderBySection();
           triggerMacroAutoOpen();
           invalidateIAContextCache();
+          
           try{
             await fetchClientDataSnapshot(true);
           }catch(err){
@@ -73706,6 +73742,14 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             
             try{ scheduleNotificationRefresh({ immediate: true }); }
             catch(_err){ }
+            
+            // Abrir automaticamente o pop-up de notificações IMEDIATAMENTE após login admin
+            console.log('🔔 [AUTH-ADMIN-EARLY] Abrindo pop-up logo após login admin, antes de carregar dados');
+            if (typeof autoOpenNotificationPanel === 'function') {
+              autoOpenNotificationPanel(1000);
+            } else {
+              console.error('❌ [AUTH-ADMIN-EARLY] autoOpenNotificationPanel NÃO está disponível!');
+            }
             
             syncStorageLimitFromProfile();
             loadBriefFromUserData();
