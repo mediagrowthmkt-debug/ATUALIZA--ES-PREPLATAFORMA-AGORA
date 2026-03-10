@@ -67325,31 +67325,31 @@ FORMATO PADRÃO:
         inp.dataset.metaId = meta.id;
         inp.style.cssText = 'width: 100%;';
         
-        // Botão de nota (apenas emoji, compacto)
+        // Botão de nota (apenas emoji, tamanho mínimo)
         const noteBtn = document.createElement('button');
         noteBtn.textContent = '📝';
         noteBtn.title = 'Adicionar nota';
-        noteBtn.style.cssText = 'padding: 2px 6px; font-size: 14px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; text-align: center; line-height: 1;';
+        noteBtn.style.cssText = 'padding: 2px 4px; font-size: 16px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: auto; align-self: flex-start; line-height: 1;';
         noteBtn.type = 'button';
         
-        // Popup de nota (posicionamento absoluto, flutuante)
+        // Popup de nota (posicionamento absoluto, flutuante, maior que a coluna)
         const notePopup = document.createElement('div');
         notePopup.className = 'meta-note-popup';
-        notePopup.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border: 2px solid #3b82f6; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; margin-top: 4px;';
+        notePopup.style.cssText = 'display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 1000; background: #fffbea; border: 2px solid #f59e0b; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 12px; margin-top: 4px; min-width: 280px; max-width: 400px; width: max-content;';
         
         const noteArea = document.createElement('textarea');
         noteArea.className = 'meta-note-area';
         noteArea.placeholder = 'Adicione observações sobre este mês...';
-        noteArea.rows = 3;
-        noteArea.style.cssText = 'width: 100%; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; font-family: inherit; margin-bottom: 6px;';
+        noteArea.rows = 5;
+        noteArea.style.cssText = 'width: 100%; min-width: 260px; padding: 10px; font-size: 13px; border: 1px solid #f59e0b; border-radius: 4px; resize: both; font-family: inherit; margin-bottom: 8px; background: white;';
         noteArea.dataset.month = monthName;
         noteArea.dataset.metaId = meta.id;
         
         // Botão de fechar popup
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = '✕ Fechar';
+        closeBtn.textContent = '✓ Salvar e Fechar';
         closeBtn.type = 'button';
-        closeBtn.style.cssText = 'width: 100%; padding: 4px 8px; font-size: 11px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;';
+        closeBtn.style.cssText = 'width: 100%; padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;';
         
         notePopup.appendChild(noteArea);
         notePopup.appendChild(closeBtn);
@@ -67358,10 +67358,10 @@ FORMATO PADRÃO:
         const currentNote = (meta.notas && meta.notas[monthName]) || '';
         noteArea.value = currentNote;
         
-        // Se já tem nota, mudar estilo do botão
+        // Se já tem nota, mudar estilo do botão (amarelo como Google Sheets)
         if(currentNote.trim()) {
-          noteBtn.style.background = '#dbeafe';
-          noteBtn.style.borderColor = '#3b82f6';
+          noteBtn.style.background = '#fef3c7';
+          noteBtn.style.borderColor = '#f59e0b';
           noteBtn.style.fontWeight = '600';
         }
         
@@ -67434,10 +67434,10 @@ FORMATO PADRÃO:
           // Atualizar nota
           targetMeta.notas[month] = noteValue;
           
-          // Atualizar estilo do botão
+          // Atualizar estilo do botão (amarelo como Google Sheets)
           if(noteValue) {
-            noteBtn.style.background = '#dbeafe';
-            noteBtn.style.borderColor = '#3b82f6';
+            noteBtn.style.background = '#fef3c7';
+            noteBtn.style.borderColor = '#f59e0b';
             noteBtn.style.fontWeight = '600';
           } else {
             noteBtn.style.background = '#f3f4f6';
