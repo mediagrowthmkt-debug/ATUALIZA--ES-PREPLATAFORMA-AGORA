@@ -67156,6 +67156,15 @@ FORMATO PADRÃO:
           downloadMetasAsExcel();
         };
       }
+      
+      // Event listener global para fechar popups ao clicar fora
+      document.addEventListener('click', (e) => {
+        if(!e.target.closest('.meta-note-popup') && !e.target.closest('button')) {
+          document.querySelectorAll('.meta-note-popup').forEach(p => {
+            p.style.display = 'none';
+          });
+        }
+      });
     }
 
     function createMetaRows(meta, mobile=false){
@@ -67299,9 +67308,9 @@ FORMATO PADRÃO:
         const td = document.createElement('td');
         td.style.cssText = 'vertical-align: top; padding: 8px; position: relative;';
         
-        // Container para input + botão + nota (vertical)
+        // Container para input + botão
         const cellContainer = document.createElement('div');
-        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 6px;';
+        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 4px; position: relative;';
         
         const inp = document.createElement('input');
         inp.type = 'text';
@@ -67316,32 +67325,43 @@ FORMATO PADRÃO:
         inp.dataset.metaId = meta.id;
         inp.style.cssText = 'width: 100%;';
         
-        // Botão de nota (abaixo do input)
+        // Botão de nota (apenas emoji, compacto)
         const noteBtn = document.createElement('button');
-        noteBtn.textContent = '📝 Nota';
+        noteBtn.textContent = '📝';
         noteBtn.title = 'Adicionar nota';
-        noteBtn.style.cssText = 'padding: 4px 8px; font-size: 11px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; text-align: center;';
+        noteBtn.style.cssText = 'padding: 2px 6px; font-size: 14px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; text-align: center; line-height: 1;';
         noteBtn.type = 'button';
         
-        // Área de nota (inicialmente oculta)
+        // Popup de nota (posicionamento absoluto, flutuante)
+        const notePopup = document.createElement('div');
+        notePopup.className = 'meta-note-popup';
+        notePopup.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border: 2px solid #3b82f6; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; margin-top: 4px;';
+        
         const noteArea = document.createElement('textarea');
         noteArea.className = 'meta-note-area';
         noteArea.placeholder = 'Adicione observações sobre este mês...';
-        noteArea.rows = 2;
-        noteArea.style.cssText = 'display: none; width: 100%; padding: 6px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; font-family: inherit;';
+        noteArea.rows = 3;
+        noteArea.style.cssText = 'width: 100%; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; font-family: inherit; margin-bottom: 6px;';
         noteArea.dataset.month = monthName;
         noteArea.dataset.metaId = meta.id;
+        
+        // Botão de fechar popup
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕ Fechar';
+        closeBtn.type = 'button';
+        closeBtn.style.cssText = 'width: 100%; padding: 4px 8px; font-size: 11px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;';
+        
+        notePopup.appendChild(noteArea);
+        notePopup.appendChild(closeBtn);
         
         // Carregar nota existente
         const currentNote = (meta.notas && meta.notas[monthName]) || '';
         noteArea.value = currentNote;
         
-        // Se já tem nota, mostrar a área e mudar estilo do botão
+        // Se já tem nota, mudar estilo do botão
         if(currentNote.trim()) {
-          noteArea.style.display = 'block';
           noteBtn.style.background = '#dbeafe';
           noteBtn.style.borderColor = '#3b82f6';
-          noteBtn.style.color = '#1e40af';
           noteBtn.style.fontWeight = '600';
         }
         
@@ -67376,13 +67396,24 @@ FORMATO PADRÃO:
           updateTotal();
         };
         
-        const handleNoteToggle = function() {
-          if(noteArea.style.display === 'none') {
-            noteArea.style.display = 'block';
+        const handleNoteToggle = function(e) {
+          e.stopPropagation();
+          
+          // Fechar todos os outros popups abertos
+          document.querySelectorAll('.meta-note-popup').forEach(p => {
+            if(p !== notePopup) p.style.display = 'none';
+          });
+          
+          if(notePopup.style.display === 'none') {
+            notePopup.style.display = 'block';
             noteArea.focus();
           } else {
-            noteArea.style.display = 'none';
+            notePopup.style.display = 'none';
           }
+        };
+        
+        const closePopup = function() {
+          notePopup.style.display = 'none';
         };
         
         const handleNoteSave = function() {
@@ -67407,7 +67438,6 @@ FORMATO PADRÃO:
           if(noteValue) {
             noteBtn.style.background = '#dbeafe';
             noteBtn.style.borderColor = '#3b82f6';
-            noteBtn.style.color = '#1e40af';
             noteBtn.style.fontWeight = '600';
           } else {
             noteBtn.style.background = '#f3f4f6';
@@ -67423,13 +67453,14 @@ FORMATO PADRÃO:
         };
         
         noteBtn.onclick = handleNoteToggle;
+        closeBtn.onclick = closePopup;
         noteArea.addEventListener('blur', handleNoteSave);
         inp.addEventListener('change', handleSave);
         inp.addEventListener('blur', handleSave);
         
         cellContainer.appendChild(inp);
         cellContainer.appendChild(noteBtn);
-        cellContainer.appendChild(noteArea);
+        cellContainer.appendChild(notePopup);
         td.appendChild(cellContainer);
         trData.appendChild(td);
       });
