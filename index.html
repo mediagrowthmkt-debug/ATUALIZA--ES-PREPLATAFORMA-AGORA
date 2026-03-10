@@ -34507,6 +34507,26 @@ ${contextoReunioes}`;
       console.log('[buildMonthlyReportData] 🎯 Processando metas:', metasActive.length);
       console.log('[buildMonthlyReportData] 📅 Período:', periodoInicio, 'até', periodoFim);
       
+      // Debug: Verificar se as metas têm notas
+      if(metasActive.length > 0){
+        const primeiraMeta = metasActive[0];
+        console.log('[buildMonthlyReportData] 🔍 Primeira meta completa:', {
+          descricao: primeiraMeta.descricao,
+          notas: primeiraMeta.notas,
+          meses: primeiraMeta.meses
+        });
+        
+        // Contar quantas metas têm notas
+        const metasComNotas = metasActive.filter(m => m.notas && typeof m.notas === 'object' && Object.keys(m.notas).some(k => m.notas[k]));
+        console.log('[buildMonthlyReportData] 🗒️ Metas com notas preenchidas:', metasComNotas.length, '/', metasActive.length);
+        if(metasComNotas.length > 0){
+          console.log('[buildMonthlyReportData] 🗒️ Exemplo de meta com nota:', {
+            descricao: metasComNotas[0].descricao,
+            notas: metasComNotas[0].notas
+          });
+        }
+      }
+      
       // Se for um único mês, usar lógica antiga
       if(periodoInicio === periodoFim){
         const mesISO = periodoInicio;
@@ -34552,6 +34572,14 @@ ${contextoReunioes}`;
           
           // ✅ Incluir nota do mês se existir
           const nota = (m.notas && m.notas[monthKey]) || '';
+          
+          // Debug: verificar se há notas na meta
+          if(idx === 0){
+            console.log('[buildMonthlyReportData] 🗒️ Meta:', m.descricao);
+            console.log('[buildMonthlyReportData] 🗒️ m.notas:', m.notas);
+            console.log('[buildMonthlyReportData] 🗒️ monthKey:', monthKey);
+            console.log('[buildMonthlyReportData] 🗒️ nota extraída:', nota);
+          }
           
           const metaObj = {
             descricao: (m.descricao||'').toString(),
@@ -34664,6 +34692,14 @@ ${contextoReunioes}`;
                 });
               }
             });
+          }
+          
+          // Debug: verificar coleta de notas no período
+          if(metaIndex === 0){
+            console.log('[buildMonthlyReportData] 🗒️ META MULTI-MÊS:', m.descricao);
+            console.log('[buildMonthlyReportData] 🗒️ m.notas disponível:', m.notas);
+            console.log('[buildMonthlyReportData] 🗒️ valoresPorMes:', valoresPorMes.map(v => v.monthKey));
+            console.log('[buildMonthlyReportData] 🗒️ notasPeriodo coletado:', notasPeriodo);
           }
           
           const metaObj = {
