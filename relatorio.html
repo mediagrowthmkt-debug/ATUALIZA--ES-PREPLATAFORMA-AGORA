@@ -1086,6 +1086,47 @@
         }
       }
       
+      // Renderizar notas
+      let notasHTML = '';
+      
+      // Caso 1: Nota única (string) para período único
+      if(meta.nota && typeof meta.nota === 'string' && meta.nota.trim()){
+        notasHTML = `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+            <div style="background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span>📝</span>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #fbbf24;">Nota</span>
+              </div>
+              <div style="font-size: 0.85rem; color: #e5e7eb; line-height: 1.5;">${escapeHtml(meta.nota)}</div>
+            </div>
+          </div>
+        `;
+      }
+      // Caso 2: Notas múltiplas (array) para múltiplos meses
+      else if(Array.isArray(meta.notas) && meta.notas.length > 0){
+        notasHTML = '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.15);">';
+        
+        meta.notas.forEach((notaObj, index) => {
+          // Parse da data do mês
+          const [ano, mesNum] = notaObj.mesISO.split('-');
+          const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+          const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+          
+          notasHTML += `
+            <div style="background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px; ${index < meta.notas.length - 1 ? 'margin-bottom: 8px;' : ''}">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span>📝</span>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #fbbf24;">Nota • ${mesNome}</span>
+              </div>
+              <div style="font-size: 0.85rem; color: #e5e7eb; line-height: 1.5;">${escapeHtml(notaObj.texto)}</div>
+            </div>
+          `;
+        });
+        
+        notasHTML += '</div>';
+      }
+      
       return `
         <div style="background: rgba(30, 41, 59, 0.8); border: 2px solid ${statusColor}60; border-radius: 12px; padding: 16px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
           <!-- Cabeçalho com Ícone da Plataforma -->
@@ -1113,6 +1154,7 @@
           </div>
           
           ${comparacaoHTML}
+          ${notasHTML}
         </div>
       `;
     }
