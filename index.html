@@ -65918,6 +65918,12 @@ FORMATO PADRÃO:
       return o;
     }
 
+    function createEmptyNotas(){
+      const o = {};
+      META_MONTHS.forEach(m => o[m] = '');
+      return o;
+    }
+
     function createDefaultMetas(){
       const defs = [
         // 🎯 TRÁFEGO PAGO (11 metas)
@@ -65995,7 +66001,8 @@ FORMATO PADRÃO:
         categoria: d.categoria,
         descricao: d.descricao,
         unidade: d.unidade,
-        meses: createEmptyMonths()
+        meses: createEmptyMonths(),
+        notas: createEmptyNotas()
       }));
     }
 
@@ -66122,6 +66129,20 @@ FORMATO PADRÃO:
           });
         }
         
+        // ✅ CRIAR/PRESERVAR NOTAS
+        const newNotas = {};
+        if(!m.notas || typeof m.notas !== 'object'){
+          // Criar notas vazias
+          META_MONTHS.forEach(month => {
+            newNotas[month] = '';
+          });
+        } else {
+          // Copiar notas existentes
+          META_MONTHS.forEach(month => {
+            newNotas[month] = m.notas[month] || '';
+          });
+        }
+        
         // ✅ RETORNAR NOVO OBJETO (não modificar o original)
         return {
           id: m.id,
@@ -66129,7 +66150,8 @@ FORMATO PADRÃO:
           categoria: m.categoria,
           descricao: m.descricao,
           unidade: m.unidade,
-          meses: newMeses
+          meses: newMeses,
+          notas: newNotas
         };
       });
       
@@ -67275,6 +67297,16 @@ FORMATO PADRÃO:
       
       META_MONTHS.forEach((monthName) => {
         const td = document.createElement('td');
+        td.style.cssText = 'vertical-align: top; padding: 8px; position: relative;';
+        
+        // Container para input + botão + nota
+        const cellContainer = document.createElement('div');
+        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
+        
+        // Container do input + botão (horizontal)
+        const inputRow = document.createElement('div');
+        inputRow.style.cssText = 'display: flex; gap: 4px; align-items: center;';
+        
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.inputMode = 'decimal';
@@ -67286,6 +67318,35 @@ FORMATO PADRÃO:
         inp.className = 'meta-month-input';
         inp.dataset.month = monthName;
         inp.dataset.metaId = meta.id;
+        inp.style.cssText = 'flex: 1;';
+        
+        // Botão de nota
+        const noteBtn = document.createElement('button');
+        noteBtn.textContent = '📝';
+        noteBtn.title = 'Adicionar nota';
+        noteBtn.style.cssText = 'padding: 4px 8px; font-size: 14px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; flex-shrink: 0;';
+        noteBtn.type = 'button';
+        
+        // Área de nota (inicialmente oculta)
+        const noteArea = document.createElement('textarea');
+        noteArea.className = 'meta-note-area';
+        noteArea.placeholder = 'Adicione observações sobre este mês...';
+        noteArea.rows = 2;
+        noteArea.style.cssText = 'display: none; width: 100%; padding: 6px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; font-family: inherit;';
+        noteArea.dataset.month = monthName;
+        noteArea.dataset.metaId = meta.id;
+        
+        // Carregar nota existente
+        const currentNote = (meta.notas && meta.notas[monthName]) || '';
+        noteArea.value = currentNote;
+        
+        // Se já tem nota, mostrar a área e mudar estilo do botão
+        if(currentNote.trim()) {
+          noteArea.style.display = 'block';
+          noteBtn.style.background = '#dbeafe';
+          noteBtn.style.borderColor = '#3b82f6';
+          noteBtn.style.color = '#1e40af';
+        }
         
         // ✅ CRIAR CLOSURE COM VALORES FIXOS CAPTURADOS
         const metaId = meta.id;
@@ -67311,20 +67372,69 @@ FORMATO PADRÃO:
           console.log(`💾 [DEPOIS] Meta: ${targetMeta.descricao}, Mês: ${month}, Novo Valor: "${newValue}"`);
           
           // Verificar se não contaminou outros meses/metas
-          console.log(`� [VERIFICAÇÃO] Objeto meses completo:`, JSON.stringify(targetMeta.meses));
+          console.log(`🔍 [VERIFICAÇÃO] Objeto meses completo:`, JSON.stringify(targetMeta.meses));
           
           // Salvar
           debouncedPersistMetas();
           updateTotal();
         };
         
+        const handleNoteToggle = function() {
+          if(noteArea.style.display === 'none') {
+            noteArea.style.display = 'block';
+            noteArea.focus();
+          } else {
+            noteArea.style.display = 'none';
+          }
+        };
+        
+        const handleNoteSave = function() {
+          const noteValue = noteArea.value.trim();
+          
+          // Encontrar a meta específica no array global
+          const targetMeta = METAS.find(m => m.id === metaId);
+          if (!targetMeta) {
+            console.error(`❌ Meta não encontrada: ${metaId}`);
+            return;
+          }
+          
+          // Garantir que o objeto notas existe
+          if(!targetMeta.notas) {
+            targetMeta.notas = createEmptyNotas();
+          }
+          
+          // Atualizar nota
+          targetMeta.notas[month] = noteValue;
+          
+          // Atualizar estilo do botão
+          if(noteValue) {
+            noteBtn.style.background = '#dbeafe';
+            noteBtn.style.borderColor = '#3b82f6';
+            noteBtn.style.color = '#1e40af';
+          } else {
+            noteBtn.style.background = '#f3f4f6';
+            noteBtn.style.borderColor = '#d1d5db';
+            noteBtn.style.color = '';
+          }
+          
+          console.log(`📝 [NOTA] Meta: ${targetMeta.descricao}, Mês: ${month}, Nota: "${noteValue}"`);
+          
+          // Salvar
+          debouncedPersistMetas();
+        };
+        
+        noteBtn.onclick = handleNoteToggle;
+        noteArea.addEventListener('blur', handleNoteSave);
         inp.addEventListener('change', handleSave);
         inp.addEventListener('blur', handleSave);
         
-        td.appendChild(inp);
+        inputRow.appendChild(inp);
+        inputRow.appendChild(noteBtn);
+        cellContainer.appendChild(inputRow);
+        cellContainer.appendChild(noteArea);
+        td.appendChild(cellContainer);
         trData.appendChild(td);
       });
-      
       const tdTotal = document.createElement('td');
       tdTotal.className = 'meta-total';
       const updateTotal = () => {
