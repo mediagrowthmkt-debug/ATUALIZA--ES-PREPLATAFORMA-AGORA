@@ -27752,7 +27752,9 @@ async function sendIAQuestion(){
           renderEstruturacao();
         }
       } else if(currentSection==="relatorio"){
+        console.log('📋 [DEBUG-RELATORIO] setActiveTab: relatorio ativado, chamando setSectionVisibility + initRelatorio');
         setSectionVisibility({relatorio:true});
+        console.log('📋 [DEBUG-RELATORIO] relatorioWrap.display após setSectionVisibility:', document.getElementById('relatorioWrap')?.style?.display);
         initRelatorio();
       } else if(currentSection==="teamNotes"){
         setSectionVisibility({teamNotes:true});
@@ -32992,12 +32994,21 @@ ${contextoReunioes}`;
   let btnCopiarPromptIA, relatorioAnaliseIADesc;
     
     function initRelatorio(){
+      console.log('📋 [DEBUG-RELATORIO] initRelatorio() chamado');
+      console.log('📋 [DEBUG-RELATORIO] relatorioMesInicio já existe?', !!relatorioMesInicio);
       if(!relatorioMesInicio){
         relatorioMesInicio = $("relatorioMesInicio");
         relatorioMesFim = $("relatorioMesFim");
         relatorioGerarBtn = $("relatorioGerar");
         relatorioExportarBtn = $("relatorioExportar");
         relatorioPreview = $("relatorioPreview");
+        console.log('📋 [DEBUG-RELATORIO] Elementos capturados:', {
+          relatorioMesInicio: !!relatorioMesInicio,
+          relatorioMesFim: !!relatorioMesFim,
+          relatorioGerarBtn: !!relatorioGerarBtn,
+          relatorioExportarBtn: !!relatorioExportarBtn,
+          relatorioPreview: !!relatorioPreview
+        });
         relatorioStoriesSection = $("relatorioStoriesSection");
         relatorioStoriesGrid = $("relatorioStoriesGrid");
         relatorioStoriesPrev = $("relatorioStoriesPrev");
@@ -33051,6 +33062,9 @@ ${contextoReunioes}`;
         
         if(relatorioGerarBtn){
           relatorioGerarBtn.addEventListener('click', gerarRelatorio);
+          console.log('📋 [DEBUG-RELATORIO] ✅ Event listener "click" adicionado ao botão Gerar');
+        } else {
+          console.error('📋 [DEBUG-RELATORIO] ❌ relatorioGerarBtn NÃO ENCONTRADO - botão não terá listener!');
         }
         if(relatorioExportarBtn){
           relatorioExportarBtn.addEventListener('click', exportarRelatorioPDF);
@@ -33132,7 +33146,12 @@ ${contextoReunioes}`;
     }
     
   function renderRelatorioStories(mesInicioISO, mesFimISO = null){
-      if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesInicioISO) return;
+      console.log('📋 [DEBUG-STORIES] chamado com:', mesInicioISO, mesFimISO);
+      console.log('📋 [DEBUG-STORIES] relatorioStoriesGrid?', !!relatorioStoriesGrid, '| relatorioStoriesSection?', !!relatorioStoriesSection);
+      if(!relatorioStoriesGrid || !relatorioStoriesSection || !mesInicioISO) {
+        console.warn('📋 [DEBUG-STORIES] ❌ Saindo cedo - elementos faltando ou sem mesInicioISO');
+        return;
+      }
       
       // Se não houver mesFim, usar mesInicio como período único
       const inicio = mesInicioISO;
@@ -33272,7 +33291,9 @@ ${contextoReunioes}`;
     }
 
     function renderRelatorioPosts(mesInicioISO, mesFimISO = null){
-      if(!relatorioPostsGrid || !relatorioPostsSection || !mesInicioISO) return;
+      console.log('📋 [DEBUG-POSTS] chamado com:', mesInicioISO, mesFimISO);
+      console.log('📋 [DEBUG-POSTS] relatorioPostsGrid?', !!relatorioPostsGrid, '| relatorioPostsSection?', !!relatorioPostsSection);
+      if(!relatorioPostsGrid || !relatorioPostsSection || !mesInicioISO) { console.warn('📋 [DEBUG-POSTS] ❌ Saindo cedo - elementos faltando'); return; }
 
       const inicio = mesInicioISO;
       const fim = mesFimISO || mesInicioISO;
@@ -33710,7 +33731,9 @@ ${contextoReunioes}`;
     }
 
     function renderRelatorioGoals(mesInicioISO, mesFimISO = null){
-      if(!relatorioGoalsSection) return;
+      console.log('📋 [DEBUG-GOALS] chamado com:', mesInicioISO, mesFimISO);
+      console.log('📋 [DEBUG-GOALS] relatorioGoalsSection?', !!relatorioGoalsSection);
+      if(!relatorioGoalsSection) { console.warn('📋 [DEBUG-GOALS] ❌ Saindo - relatorioGoalsSection não existe'); return; }
       
       const inicio = mesInicioISO;
       const fim = mesFimISO || mesInicioISO;
@@ -33816,8 +33839,16 @@ ${contextoReunioes}`;
     }
     
     async function gerarRelatorio(){
+      console.log('📋 [DEBUG-RELATORIO] ========================================');
+      console.log('📋 [DEBUG-RELATORIO] gerarRelatorio() CHAMADO!');
+      console.log('📋 [DEBUG-RELATORIO] relatorioMesInicio:', relatorioMesInicio);
+      console.log('📋 [DEBUG-RELATORIO] relatorioMesInicio?.value:', relatorioMesInicio?.value);
+      console.log('📋 [DEBUG-RELATORIO] relatorioMesFim:', relatorioMesFim);
+      console.log('📋 [DEBUG-RELATORIO] relatorioMesFim?.value:', relatorioMesFim?.value);
+      
       // Validação: se não tem mês inicial, alertar
       if(!relatorioMesInicio || !relatorioMesInicio.value){
+        console.error('📋 [DEBUG-RELATORIO] ❌ SAINDO: relatorioMesInicio vazio ou inexistente');
         alert('Por favor, selecione o mês inicial');
         return;
       }
@@ -33825,8 +33856,11 @@ ${contextoReunioes}`;
       const mesInicialISO = relatorioMesInicio.value;
       const mesFinalISO = relatorioMesFim && relatorioMesFim.value ? relatorioMesFim.value : mesInicialISO;
       
+      console.log('📋 [DEBUG-RELATORIO] mesInicialISO:', mesInicialISO, '| mesFinalISO:', mesFinalISO);
+      
       // Se mês final for anterior ao inicial, alertar
       if(mesFinalISO < mesInicialISO){
+        console.error('📋 [DEBUG-RELATORIO] ❌ SAINDO: mês final anterior ao inicial');
         alert('O mês final não pode ser anterior ao mês inicial');
         return;
       }
@@ -33839,13 +33873,81 @@ ${contextoReunioes}`;
       
       const mesISO = mesInicialISO; // Para compatibilidade com código existente
       
-  renderRelatorioStories(periodo.inicio, periodo.fim);
-  renderRelatorioPosts(periodo.inicio, periodo.fim);
-  renderRelatorioGoals(periodo.inicio, periodo.fim);
-  renderRelatorioPerformance(periodo.inicio, periodo.fim);
-  loadRelatorioGoalsNoteLocal(mesISO);
-  await renderRelatorioLeads(periodo); // Aguarda buscar leads do Firestore
-  renderRelatorioRedes(periodo.inicio, periodo.fim);
+      console.log('📋 [DEBUG-RELATORIO] Período:', JSON.stringify(periodo));
+      console.log('📋 [DEBUG-RELATORIO] POSTS disponíveis:', Array.isArray(POSTS) ? POSTS.length : 'NÃO É ARRAY');
+      console.log('📋 [DEBUG-RELATORIO] METAS disponíveis:', Array.isArray(METAS) ? METAS.length : 'NÃO É ARRAY');
+      console.log('📋 [DEBUG-RELATORIO] DEMANDAS disponíveis:', Array.isArray(DEMANDAS) ? DEMANDAS.length : typeof DEMANDAS);
+      
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 1/7 renderRelatorioStories...');
+    renderRelatorioStories(periodo.inicio, periodo.fim);
+    console.log('📋 [DEBUG-RELATORIO] 1/7 ✅ renderRelatorioStories OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 1/7 ❌ renderRelatorioStories ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 2/7 renderRelatorioPosts...');
+    renderRelatorioPosts(periodo.inicio, periodo.fim);
+    console.log('📋 [DEBUG-RELATORIO] 2/7 ✅ renderRelatorioPosts OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 2/7 ❌ renderRelatorioPosts ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 3/7 renderRelatorioGoals...');
+    renderRelatorioGoals(periodo.inicio, periodo.fim);
+    console.log('📋 [DEBUG-RELATORIO] 3/7 ✅ renderRelatorioGoals OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 3/7 ❌ renderRelatorioGoals ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 4/7 renderRelatorioPerformance...');
+    renderRelatorioPerformance(periodo.inicio, periodo.fim);
+    console.log('📋 [DEBUG-RELATORIO] 4/7 ✅ renderRelatorioPerformance OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 4/7 ❌ renderRelatorioPerformance ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 5/7 loadRelatorioGoalsNoteLocal...');
+    loadRelatorioGoalsNoteLocal(mesISO);
+    console.log('📋 [DEBUG-RELATORIO] 5/7 ✅ loadRelatorioGoalsNoteLocal OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 5/7 ❌ loadRelatorioGoalsNoteLocal ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 6/7 renderRelatorioLeads (await)...');
+    await renderRelatorioLeads(periodo);
+    console.log('📋 [DEBUG-RELATORIO] 6/7 ✅ renderRelatorioLeads OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 6/7 ❌ renderRelatorioLeads ERRO:', e);
+  }
+  
+  try {
+    console.log('📋 [DEBUG-RELATORIO] 7/7 renderRelatorioRedes...');
+    renderRelatorioRedes(periodo.inicio, periodo.fim);
+    console.log('📋 [DEBUG-RELATORIO] 7/7 ✅ renderRelatorioRedes OK');
+  } catch(e) {
+    console.error('📋 [DEBUG-RELATORIO] 7/7 ❌ renderRelatorioRedes ERRO:', e);
+  }
+  
+  console.log('📋 [DEBUG-RELATORIO] ✅ Todas as 7 funções de render executadas');
+  
+  // Verificar visibilidade das seções após render
+  const secoes = {
+    relatorioStoriesSection: document.getElementById('relatorioStoriesSection'),
+    relatorioPostsSection: document.getElementById('relatorioPostsSection'),
+    relatorioGoalsSection: document.getElementById('relatorioGoalsSection'),
+    relatorioPerformanceSection: document.getElementById('relatorioPerformanceSection'),
+    relatorioLeadsSection: document.getElementById('relatorioLeadsSection'),
+    relatorioRedesSection: document.getElementById('relatorioRedesSection')
+  };
+  Object.entries(secoes).forEach(([nome, el]) => {
+    console.log(`📋 [DEBUG-RELATORIO] Seção ${nome}: existe=${!!el}, display=${el?.style?.display || 'N/A'}`);
+  });
   
   // Aguardar um momento para o DOM ser atualizado
   setTimeout(async () => {
@@ -33866,6 +33968,7 @@ ${contextoReunioes}`;
       console.error('[gerarRelatorio] ❌ Erro no processo de salvamento:', err);
     }
   }, 300);      
+      console.log('📋 [DEBUG-RELATORIO] relatorioPreview existe?', !!relatorioPreview);
       if(relatorioPreview){
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         
@@ -35861,8 +35964,10 @@ ${contextoReunioes}`;
     
     // Relatório: Redes trabalhadas (lista apenas redes com link configurado)
     function renderRelatorioRedes(mesInicioISO, mesFimISO = null){
+      console.log('📋 [DEBUG-REDES] chamado com:', mesInicioISO, mesFimISO);
+      console.log('📋 [DEBUG-REDES] relatorioRedesSection?', !!relatorioRedesSection, '| relatorioRedesGrid?', !!relatorioRedesGrid);
       // mesISO não altera os links, mas mantém consistência com as demais seções
-      if(!relatorioRedesSection || !relatorioRedesGrid) return;
+      if(!relatorioRedesSection || !relatorioRedesGrid) { console.warn('📋 [DEBUG-REDES] ❌ Saindo - elementos faltando'); return; }
       const items = collectHeaderSocialItems();
       const connected = items.filter(i=> i && i.hasLink && i.href);
       if(connected.length === 0){
