@@ -67299,13 +67299,9 @@ FORMATO PADRÃO:
         const td = document.createElement('td');
         td.style.cssText = 'vertical-align: top; padding: 8px; position: relative;';
         
-        // Container para input + botão + nota
+        // Container para input + botão + nota (vertical)
         const cellContainer = document.createElement('div');
-        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
-        
-        // Container do input + botão (horizontal)
-        const inputRow = document.createElement('div');
-        inputRow.style.cssText = 'display: flex; gap: 4px; align-items: center;';
+        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 6px;';
         
         const inp = document.createElement('input');
         inp.type = 'text';
@@ -67318,13 +67314,13 @@ FORMATO PADRÃO:
         inp.className = 'meta-month-input';
         inp.dataset.month = monthName;
         inp.dataset.metaId = meta.id;
-        inp.style.cssText = 'flex: 1;';
+        inp.style.cssText = 'width: 100%;';
         
-        // Botão de nota
+        // Botão de nota (abaixo do input)
         const noteBtn = document.createElement('button');
-        noteBtn.textContent = '📝';
+        noteBtn.textContent = '📝 Nota';
         noteBtn.title = 'Adicionar nota';
-        noteBtn.style.cssText = 'padding: 4px 8px; font-size: 14px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; flex-shrink: 0;';
+        noteBtn.style.cssText = 'padding: 4px 8px; font-size: 11px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; text-align: center;';
         noteBtn.type = 'button';
         
         // Área de nota (inicialmente oculta)
@@ -67346,6 +67342,7 @@ FORMATO PADRÃO:
           noteBtn.style.background = '#dbeafe';
           noteBtn.style.borderColor = '#3b82f6';
           noteBtn.style.color = '#1e40af';
+          noteBtn.style.fontWeight = '600';
         }
         
         // ✅ CRIAR CLOSURE COM VALORES FIXOS CAPTURADOS
@@ -67411,10 +67408,12 @@ FORMATO PADRÃO:
             noteBtn.style.background = '#dbeafe';
             noteBtn.style.borderColor = '#3b82f6';
             noteBtn.style.color = '#1e40af';
+            noteBtn.style.fontWeight = '600';
           } else {
             noteBtn.style.background = '#f3f4f6';
             noteBtn.style.borderColor = '#d1d5db';
             noteBtn.style.color = '';
+            noteBtn.style.fontWeight = '';
           }
           
           console.log(`📝 [NOTA] Meta: ${targetMeta.descricao}, Mês: ${month}, Nota: "${noteValue}"`);
@@ -67428,9 +67427,8 @@ FORMATO PADRÃO:
         inp.addEventListener('change', handleSave);
         inp.addEventListener('blur', handleSave);
         
-        inputRow.appendChild(inp);
-        inputRow.appendChild(noteBtn);
-        cellContainer.appendChild(inputRow);
+        cellContainer.appendChild(inp);
+        cellContainer.appendChild(noteBtn);
         cellContainer.appendChild(noteArea);
         td.appendChild(cellContainer);
         trData.appendChild(td);
