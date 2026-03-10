@@ -34550,6 +34550,9 @@ ${contextoReunioes}`;
             realized: realized
           }] : [];
           
+          // ✅ Incluir nota do mês se existir
+          const nota = (m.notas && m.notas[monthKey]) || '';
+          
           const metaObj = {
             descricao: (m.descricao||'').toString(),
             unidade: m.unidade||'',
@@ -34558,7 +34561,8 @@ ${contextoReunioes}`;
             planned, 
             realized, 
             status,
-            valoresPorMes: valoresPorMes
+            valoresPorMes: valoresPorMes,
+            nota: nota // ✅ Incluir nota no payload
           };
           
           metas.push(metaObj);
@@ -34647,6 +34651,21 @@ ${contextoReunioes}`;
           // Detectar categoria
           const categoria = m.categoria || detectarCategoriaMetaGlobal(m.descricao || '');
           
+          // ✅ Coletar todas as notas do período
+          const notasPeriodo = [];
+          if(m.notas && typeof m.notas === 'object'){
+            valoresPorMes.forEach(vpm => {
+              const nota = m.notas[vpm.monthKey];
+              if(nota && nota.trim()){
+                notasPeriodo.push({
+                  mesISO: vpm.mesISO,
+                  monthKey: vpm.monthKey,
+                  texto: nota
+                });
+              }
+            });
+          }
+          
           const metaObj = {
             descricao: (m.descricao||'').toString(),
             unidade: m.unidade||'',
@@ -34655,7 +34674,8 @@ ${contextoReunioes}`;
             planned: totalPlanned, 
             realized: totalRealized, 
             status,
-            valoresPorMes: valoresPorMes // Incluir array de valores mensais
+            valoresPorMes: valoresPorMes, // Incluir array de valores mensais
+            notas: notasPeriodo // ✅ Incluir array de notas do período
           };
           
           metas.push(metaObj);
@@ -35035,7 +35055,10 @@ ${contextoReunioes}`;
           realized: m.realized,
           status: m.status,
           // Manter só os 6 últimos meses de valoresPorMes para economizar espaço
-          valoresPorMes: Array.isArray(m.valoresPorMes) ? m.valoresPorMes.slice(-6) : []
+          valoresPorMes: Array.isArray(m.valoresPorMes) ? m.valoresPorMes.slice(-6) : [],
+          // ✅ Preservar notas (para mês único) ou array de notas (para múltiplos meses)
+          nota: m.nota || '',
+          notas: Array.isArray(m.notas) ? m.notas : []
         })) : [],
         // Simplificar goals (demandas) removendo campos extras
         goals: data.goals ? {
@@ -35588,29 +35611,66 @@ ${contextoReunioes}`;
             
             <!-- Notas do período -->
             ${(() => {
-              // Coletar todas as notas do período selecionado
               const notasHTML = [];
-              mesesReaisComDados.forEach(mesISO => {
-                const monthKey = getMetaMonthKeyFromISO(mesISO);
-                const nota = (meta.notas && meta.notas[monthKey]) || '';
-                
-                if(nota && nota.trim()) {
-                  // Parse da data ISO para nome do mês
-                  const [ano, mesNum] = mesISO.split('-');
-                  const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
-                  const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
-                  
-                  notasHTML.push(`
-                    <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 6px;">
-                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <span style="font-size: 1rem;">📝</span>
-                        <span style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">${mesNome}</span>
-                      </div>
-                      <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4; white-space: pre-wrap;">${escapeHtml(nota)}</div>
+              
+              // ✅ Suportar ambos os formatos: 
+              // 1. meta.nota (string) - mês único
+              // 2. meta.notas (array ou objeto) - múltiplos meses
+              
+              if(meta.nota && typeof meta.nota === 'string' && meta.nota.trim()) {
+                // Formato mês único: nota direta como string
+                notasHTML.push(`
+                  <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 6px;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                      <span style="font-size: 1rem;">📝</span>
+                      <span style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">NOTA</span>
                     </div>
-                  `);
-                }
-              });
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4; white-space: pre-wrap;">${escapeHtml(meta.nota)}</div>
+                  </div>
+                `);
+              } else if(Array.isArray(meta.notas) && meta.notas.length > 0) {
+                // Formato múltiplos meses: array de objetos {mesISO, monthKey, texto}
+                meta.notas.forEach(notaObj => {
+                  if(notaObj.texto && notaObj.texto.trim()) {
+                    const [ano, mesNum] = notaObj.mesISO.split('-');
+                    const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+                    const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+                    
+                    notasHTML.push(`
+                      <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                          <span style="font-size: 1rem;">📝</span>
+                          <span style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">${mesNome}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4; white-space: pre-wrap;">${escapeHtml(notaObj.texto)}</div>
+                      </div>
+                    `);
+                  }
+                });
+              } else if(meta.notas && typeof meta.notas === 'object' && !Array.isArray(meta.notas)) {
+                // Formato objeto mensal: {jan: 'texto', fev: 'texto', ...}
+                // Usado quando renderiza direto do METAS global
+                mesesReaisComDados.forEach(mesISO => {
+                  const monthKey = getMetaMonthKeyFromISO(mesISO);
+                  const nota = meta.notas[monthKey] || '';
+                  
+                  if(nota && nota.trim()) {
+                    const [ano, mesNum] = mesISO.split('-');
+                    const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+                    const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+                    
+                    notasHTML.push(`
+                      <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                          <span style="font-size: 1rem;">📝</span>
+                          <span style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">${mesNome}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4; white-space: pre-wrap;">${escapeHtml(nota)}</div>
+                      </div>
+                    `);
+                  }
+                });
+              }
               
               return notasHTML.join('');
             })()}
