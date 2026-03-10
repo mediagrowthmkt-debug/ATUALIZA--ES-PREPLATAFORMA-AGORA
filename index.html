@@ -66143,6 +66143,28 @@ FORMATO PADRÃO:
         return;
       }
 
+      // Função para formatar números no padrão brasileiro
+      function formatarNumero(val) {
+        if(val === null || val === undefined || val === '') return '';
+        
+        const num = parseFloat(val);
+        if(isNaN(num)) return val;
+        
+        // Se for número inteiro, retorna sem casas decimais
+        if(Number.isInteger(num)) {
+          return num.toLocaleString('pt-BR', { 
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0 
+          });
+        }
+        
+        // Se for decimal, retorna com até 2 casas decimais
+        return num.toLocaleString('pt-BR', { 
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2 
+        });
+      }
+
       // Preparar dados para CSV (compatível com Excel)
       const categorias = {
         'trafego_pago': 'TRÁFEGO PAGO',
@@ -66182,11 +66204,9 @@ FORMATO PADRÃO:
           const desc = (meta.descricao || '').replace(/"/g, '""'); // Escapar aspas
           const unidade = unidades[meta.unidade] || meta.unidade || '';
           
-          // Valores mensais
+          // Valores mensais formatados
           const valores = META_MONTHS.map(m => {
-            const val = meta.meses?.[m];
-            if(val === null || val === undefined || val === '') return '';
-            return String(val).replace('.', ','); // Formato brasileiro
+            return formatarNumero(meta.meses?.[m]);
           });
 
           // Calcular total anual
@@ -66195,7 +66215,7 @@ FORMATO PADRÃO:
             const val = parseFloat(meta.meses?.[m]) || 0;
             totalAnual += val;
           });
-          const totalFormatado = totalAnual > 0 ? String(totalAnual.toFixed(2)).replace('.', ',') : '';
+          const totalFormatado = totalAnual > 0 ? formatarNumero(totalAnual) : '';
 
           // Linha da meta
           csv += `"${categorias[catKey]}";${pos};"${desc}";"${unidade}";${valores.join(';')};${totalFormatado}\n`;
