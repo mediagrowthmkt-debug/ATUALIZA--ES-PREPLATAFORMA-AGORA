@@ -35585,6 +35585,35 @@ ${contextoReunioes}`;
             ` : ''}
             
             ${comparacaoHTML}
+            
+            <!-- Notas do período -->
+            ${(() => {
+              // Coletar todas as notas do período selecionado
+              const notasHTML = [];
+              mesesReaisComDados.forEach(mesISO => {
+                const monthKey = getMetaMonthKeyFromISO(mesISO);
+                const nota = (meta.notas && meta.notas[monthKey]) || '';
+                
+                if(nota && nota.trim()) {
+                  // Parse da data ISO para nome do mês
+                  const [ano, mesNum] = mesISO.split('-');
+                  const dataCorreta = new Date(parseInt(ano), parseInt(mesNum) - 1, 15);
+                  const mesNome = dataCorreta.toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'});
+                  
+                  notasHTML.push(`
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 6px;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                        <span style="font-size: 1rem;">📝</span>
+                        <span style="font-size: 0.7rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">${mesNome}</span>
+                      </div>
+                      <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4; white-space: pre-wrap;">${escapeHtml(nota)}</div>
+                    </div>
+                  `);
+                }
+              });
+              
+              return notasHTML.join('');
+            })()}
           </div>
         `;
       };
@@ -66086,12 +66115,19 @@ FORMATO PADRÃO:
               mesesCopy[month] = saved.meses && saved.meses[month] ? saved.meses[month] : '';
             });
             
+            // ✅ FAZER CÓPIA PROFUNDA DAS NOTAS
+            const notasCopy = {};
+            META_MONTHS.forEach(month => {
+              notasCopy[month] = (saved.notas && saved.notas[month]) ? saved.notas[month] : '';
+            });
+            
             // ✅ FIX: Preservar TODOS os valores personalizados pelo usuário
             return {
               ...defaultMeta,
               id: saved.id || defaultMeta.id, // Preservar ID salvo
               pos: saved.pos !== undefined ? saved.pos : defaultMeta.pos, // Preservar posição
               meses: mesesCopy,
+              notas: notasCopy, // ✅ PRESERVAR NOTAS
               unidade: saved.unidade || defaultMeta.unidade, // ✅ Preservar unidade (minutos, dias, BRL, USD, etc)
               direcao: saved.direcao || defaultMeta.direcao, // ✅ Preservar direção (up, down)
               ativo: saved.ativo !== undefined ? saved.ativo : defaultMeta.ativo // ✅ Preservar ativo
@@ -66168,6 +66204,18 @@ FORMATO PADRÃO:
         METAS.slice(0, 3).forEach((m, i) => {
           console.log(`  ${i+1}. ${m.descricao} - jan: "${m.meses.jan}", fev: "${m.meses.fev}"`);
         });
+        
+        // 📝 LOG DE NOTAS: Verificar se notas foram carregadas
+        const metasComNotas = METAS.filter(m => m.notas && Object.values(m.notas).some(n => n && n.trim()));
+        if(metasComNotas.length > 0) {
+          console.log(`📝 [LOAD] ${metasComNotas.length} metas com notas encontradas:`);
+          metasComNotas.forEach(m => {
+            const mesesComNotas = Object.entries(m.notas).filter(([k,v]) => v && v.trim()).map(([k,v]) => `${k}: "${v.substring(0, 30)}..."`);
+            console.log(`  - ${m.descricao}: ${mesesComNotas.join(', ')}`);
+          });
+        } else {
+          console.log('📝 [LOAD] Nenhuma nota encontrada nas metas carregadas');
+        }
       }
     }
 
@@ -67310,7 +67358,7 @@ FORMATO PADRÃO:
         
         // Container para input + botão
         const cellContainer = document.createElement('div');
-        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 4px; position: relative;';
+        cellContainer.style.cssText = 'display: flex; flex-direction: column; gap: 4px; position: relative; align-items: center;';
         
         const inp = document.createElement('input');
         inp.type = 'text';
@@ -67325,11 +67373,11 @@ FORMATO PADRÃO:
         inp.dataset.metaId = meta.id;
         inp.style.cssText = 'width: 100%;';
         
-        // Botão de nota (apenas emoji, tamanho mínimo)
+        // Botão de nota (apenas emoji, transparente, centralizado)
         const noteBtn = document.createElement('button');
         noteBtn.textContent = '📝';
         noteBtn.title = 'Adicionar nota';
-        noteBtn.style.cssText = 'padding: 2px 4px; font-size: 16px; cursor: pointer; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; width: auto; align-self: flex-start; line-height: 1;';
+        noteBtn.style.cssText = 'padding: 0; font-size: 18px; cursor: pointer; background: transparent; border: none; line-height: 1; opacity: 0.6; transition: opacity 0.2s;';
         noteBtn.type = 'button';
         
         // Popup de nota (posicionamento absoluto, flutuante, maior que a coluna)
@@ -67358,12 +67406,14 @@ FORMATO PADRÃO:
         const currentNote = (meta.notas && meta.notas[monthName]) || '';
         noteArea.value = currentNote;
         
-        // Se já tem nota, mudar estilo do botão (amarelo como Google Sheets)
+        // Se já tem nota, deixar emoji totalmente visível
         if(currentNote.trim()) {
-          noteBtn.style.background = '#fef3c7';
-          noteBtn.style.borderColor = '#f59e0b';
-          noteBtn.style.fontWeight = '600';
+          noteBtn.style.opacity = '1';
         }
+        
+        // Atualizar hover effect para considerar nota existente
+        noteBtn.onmouseenter = () => noteBtn.style.opacity = '1';
+        noteBtn.onmouseleave = () => noteBtn.style.opacity = currentNote.trim() ? '1' : '0.6';
         
         // ✅ CRIAR CLOSURE COM VALORES FIXOS CAPTURADOS
         const metaId = meta.id;
@@ -67434,16 +67484,11 @@ FORMATO PADRÃO:
           // Atualizar nota
           targetMeta.notas[month] = noteValue;
           
-          // Atualizar estilo do botão (amarelo como Google Sheets)
+          // Atualizar estilo do botão (opacidade)
           if(noteValue) {
-            noteBtn.style.background = '#fef3c7';
-            noteBtn.style.borderColor = '#f59e0b';
-            noteBtn.style.fontWeight = '600';
+            noteBtn.style.opacity = '1';
           } else {
-            noteBtn.style.background = '#f3f4f6';
-            noteBtn.style.borderColor = '#d1d5db';
-            noteBtn.style.color = '';
-            noteBtn.style.fontWeight = '';
+            noteBtn.style.opacity = '0.6';
           }
           
           console.log(`📝 [NOTA] Meta: ${targetMeta.descricao}, Mês: ${month}, Nota: "${noteValue}"`);
