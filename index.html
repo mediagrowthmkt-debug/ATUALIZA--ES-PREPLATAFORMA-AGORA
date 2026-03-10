@@ -65920,7 +65920,7 @@ FORMATO PADRÃO:
 
     function createDefaultMetas(){
       const defs = [
-        // TRÁFEGO PAGO (11 metas) - ✅ Formatos corretos aplicados
+        // 🎯 TRÁFEGO PAGO (11 metas)
         {categoria:'trafego_pago', descricao:'Investimento', unidade:'BRL'},
         {categoria:'trafego_pago', descricao:'Impressões', unidade:'numero'},
         {categoria:'trafego_pago', descricao:'CTR médio', unidade:'%'},
@@ -65933,7 +65933,7 @@ FORMATO PADRÃO:
         {categoria:'trafego_pago', descricao:'ROAS', unidade:'multiplicador'},
         {categoria:'trafego_pago', descricao:'Ticket médio do tráfego', unidade:'BRL'},
         
-        // CANAIS (17 metas) - ✅ Formatos corretos aplicados
+        // 📱 CANAIS (19 metas)
         {categoria:'canais', descricao:'Visualizações no YouTube', unidade:'numero'},
         {categoria:'canais', descricao:'Visualizações no Facebook', unidade:'numero'},
         {categoria:'canais', descricao:'Visualizações no TikTok', unidade:'numero'},
@@ -65946,13 +65946,18 @@ FORMATO PADRÃO:
         {categoria:'canais', descricao:'Compartilhamentos', unidade:'numero'},
         {categoria:'canais', descricao:'Salvamentos no Instagram', unidade:'numero'},
         {categoria:'canais', descricao:'Seguidores no Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Total de seguidores (todos os canais)', unidade:'numero'},
         {categoria:'canais', descricao:'Leads orgânicos canais', unidade:'numero'},
         {categoria:'canais', descricao:'Mensagens Direct Instagram', unidade:'numero'},
-        {categoria:'canais', descricao:'Cliques em "ligar agora" no Google', unidade:'numero'},
+        {categoria:'canais', descricao:'Cliques na BIO do Instagram', unidade:'numero'},
+        {categoria:'canais', descricao:'Cliques em "ligar agora" / Chamadas GBP', unidade:'numero'},
         {categoria:'canais', descricao:'Solicitações de rotas', unidade:'numero'},
         {categoria:'canais', descricao:'Views totais dos canais', unidade:'numero'},
+        {categoria:'canais', descricao:'Posição no Google Business Profile', unidade:'numero'},
+        {categoria:'canais', descricao:'Novas fotos Google Business Profile', unidade:'numero'},
+        {categoria:'canais', descricao:'Número de posts no Google Business Profile', unidade:'numero'},
         
-        // CRM E AUTOMAÇÕES (12 metas) - ✅ Formatos corretos aplicados
+        // 🤖 CRM E AUTOMAÇÕES (12 metas)
         {categoria:'crm_automacoes', descricao:'Leads recebidos no CRM', unidade:'numero'},
         {categoria:'crm_automacoes', descricao:'Número de conversas', unidade:'numero'},
         {categoria:'crm_automacoes', descricao:'Conversas geradas por automação', unidade:'numero'},
@@ -65966,15 +65971,22 @@ FORMATO PADRÃO:
         {categoria:'crm_automacoes', descricao:'Automações disparadas', unidade:'numero'},
         {categoria:'crm_automacoes', descricao:'Automações ativas', unidade:'numero'},
         
-        // OUTROS (5 metas) - ✅ Formatos corretos aplicados
+        // 👑 LIDERANÇA (12 metas)
+        {categoria:'lideranca', descricao:'Views no site', unidade:'numero'},
+        {categoria:'lideranca', descricao:'Valor total dos contratos clientes recorrentes', unidade:'BRL'},
+        {categoria:'lideranca', descricao:'Valor total dos contratos clientes novos', unidade:'BRL'},
+        {categoria:'lideranca', descricao:'Número total de novas oportunidades', unidade:'numero'},
+        {categoria:'lideranca', descricao:'Número de orçamentos (novas oportunidades)', unidade:'numero'},
+        {categoria:'lideranca', descricao:'Taxa de conversão — oportunidades x orçamentos', unidade:'%'},
+        {categoria:'lideranca', descricao:'Número de negócios fechados (novas oportunidades)', unidade:'numero'},
+        {categoria:'lideranca', descricao:'Taxa de conversão — orçamentos x negócios fechados', unidade:'%'},
+        {categoria:'lideranca', descricao:'Valor de orçamentos perdidos no mês', unidade:'BRL'},
+        {categoria:'lideranca', descricao:'Valor acumulado de orçamentos em negociação', unidade:'BRL'},
+        
+        // 📝 OUTROS (3 metas)
         {categoria:'outros', descricao:'Blogs publicados', unidade:'numero'},
         {categoria:'outros', descricao:'Cadastro em diretórios', unidade:'numero'},
-        {categoria:'outros', descricao:'Novas fotos Google Business Profile', unidade:'numero'},
-        {categoria:'outros', descricao:'Número de comentários respondidos', unidade:'numero'},
-        {categoria:'outros', descricao:'Número de posts no Google Business Profile', unidade:'numero'},
-        
-        // LIDERANÇA (1 meta) - ✅ Formato correto aplicado
-        {categoria:'lideranca', descricao:'Views no site', unidade:'numero'}
+        {categoria:'outros', descricao:'Número de comentários respondidos', unidade:'numero'}
       ];
       
       return defs.map((d,i) => ({
@@ -65990,7 +66002,7 @@ FORMATO PADRÃO:
     function loadMetasFromUserData(){
       const yearKey = `metas_${CURRENT_METAS_YEAR}`;
       
-      // ✅ SEMPRE FORÇAR CRIAÇÃO DAS 46 METAS PADRÃO
+      // ✅ SEMPRE FORÇAR CRIAÇÃO DAS 57 METAS PADRÃO
       // Isso garante que todas as contas tenham a estrutura completa
       const defaultMetas = createDefaultMetas();
       
@@ -66009,7 +66021,7 @@ FORMATO PADRÃO:
       
       // ✅ SE TIVER DADOS SALVOS, MESCLAR COM OS PADRÕES (preservar valores preenchidos)
       if(savedMetas && savedMetas.length > 0){
-        // ✅ MIGRAÇÃO: Renomear "Tempo médio por etapa" para "Tempo médio de atendimento"
+        // ✅ MIGRAÇÃO 1: Renomear "Tempo médio por etapa" para "Tempo médio de atendimento"
         savedMetas = savedMetas.map(meta => {
           if(meta.descricao === 'Tempo médio por etapa' && meta.categoria === 'crm_automacoes'){
             console.log('🔄 [MIGRAÇÃO] Renomeando "Tempo médio por etapa" → "Tempo médio de atendimento"');
@@ -66020,6 +66032,39 @@ FORMATO PADRÃO:
           }
           return meta;
         });
+        
+        // ✅ MIGRAÇÃO 2: Mover metas de "outros" para "canais"
+        const metasToMigrate = [
+          'Novas fotos Google Business Profile',
+          'Número de posts no Google Business Profile'
+        ];
+        savedMetas = savedMetas.map(meta => {
+          if(meta.categoria === 'outros' && metasToMigrate.includes(meta.descricao)){
+            console.log(`🔄 [MIGRAÇÃO] Movendo "${meta.descricao}" de OUTROS → CANAIS`);
+            return {
+              ...meta,
+              categoria: 'canais'
+            };
+          }
+          return meta;
+        });
+        
+        // ✅ MIGRAÇÃO 3: Unificar meta duplicada "Cliques em ligar agora"
+        const oldLigarAgora = savedMetas.find(s => 
+          s.descricao === 'Cliques em "ligar agora" no Google' && s.categoria === 'canais'
+        );
+        if(oldLigarAgora){
+          console.log('🔄 [MIGRAÇÃO] Unificando "Cliques em ligar agora no Google" → "Cliques em ligar agora / Chamadas GBP"');
+          savedMetas = savedMetas.map(meta => {
+            if(meta.descricao === 'Cliques em "ligar agora" no Google' && meta.categoria === 'canais'){
+              return {
+                ...meta,
+                descricao: 'Cliques em "ligar agora" / Chamadas GBP'
+              };
+            }
+            return meta;
+          });
+        }
         
         METAS = defaultMetas.map(defaultMeta => {
           // Procurar meta salva correspondente pela DESCRIÇÃO e CATEGORIA
@@ -66048,7 +66093,7 @@ FORMATO PADRÃO:
           return defaultMeta;
         });
       } else {
-        // ✅ SEM DADOS SALVOS = USAR 46 METAS PADRÃO
+        // ✅ SEM DADOS SALVOS = USAR 57 METAS PADRÃO
         METAS = defaultMetas;
       }
       
@@ -66088,7 +66133,7 @@ FORMATO PADRÃO:
         };
       });
       
-      // ✅ SALVAR AS 46 METAS COMPLETAS
+      // ✅ SALVAR AS 57 METAS COMPLETAS
       try{ 
         localStorage.setItem(`${METAS_LS_KEY}_${CURRENT_METAS_YEAR}`, JSON.stringify(METAS)); 
       }catch(_){ }
@@ -66251,9 +66296,9 @@ FORMATO PADRÃO:
     async function persistMetas(){
       const yearKey = `metas_${CURRENT_METAS_YEAR}`;
       
-      // ✅ GARANTIR QUE SEMPRE TEMOS 46 METAS ANTES DE SALVAR
-      if(!METAS || METAS.length < 46){
-        console.warn(`⚠️ Apenas ${METAS?.length || 0} metas encontradas, regenerando 46 metas padrão...`);
+      // ✅ GARANTIR QUE SEMPRE TEMOS 57 METAS ANTES DE SALVAR
+      if(!METAS || METAS.length < 57){
+        console.warn(`⚠️ Apenas ${METAS?.length || 0} metas encontradas, regenerando 57 metas padrão...`);
         const defaultMetas = createDefaultMetas();
         if(METAS && METAS.length > 0){
           // Mesclar valores existentes - PRESERVAR TODOS OS CAMPOS PERSONALIZADOS
@@ -66953,15 +66998,15 @@ FORMATO PADRÃO:
       };
     }
 
-    // ✅ FUNÇÃO PARA FORÇAR RESET COMPLETO DAS 46 METAS
+    // ✅ FUNÇÃO PARA FORÇAR RESET COMPLETO DAS 57 METAS
     async function forceResetMetas(){
-      if(!confirm(`⚠️ Isso vai RESETAR todas as metas de ${CURRENT_METAS_YEAR} para a estrutura padrão de 46 metas.\n\nVocê perderá todos os valores preenchidos!\n\nDeseja continuar?`)){
+      if(!confirm(`⚠️ Isso vai RESETAR todas as metas de ${CURRENT_METAS_YEAR} para a estrutura padrão de 57 metas.\n\nVocê perderá todos os valores preenchidos!\n\nDeseja continuar?`)){
         return;
       }
       
       console.log(`🔄 Forçando reset completo das metas para ${CURRENT_METAS_YEAR}...`);
       
-      // Criar 46 metas padrão do zero
+      // Criar 57 metas padrão do zero
       METAS = createDefaultMetas();
       
       // Salvar imediatamente
