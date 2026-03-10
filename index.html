@@ -67389,18 +67389,11 @@ FORMATO PADRÃO:
         noteArea.className = 'meta-note-area';
         noteArea.placeholder = 'Adicione observações sobre este mês...';
         noteArea.rows = 5;
-        noteArea.style.cssText = 'width: 100%; min-width: 260px; padding: 10px; font-size: 13px; border: 1px solid #f59e0b; border-radius: 4px; resize: both; font-family: inherit; margin-bottom: 8px; background: white;';
+        noteArea.style.cssText = 'width: 100%; min-width: 260px; padding: 10px; font-size: 13px; border: 1px solid #f59e0b; border-radius: 4px; resize: both; font-family: inherit; background: white;';
         noteArea.dataset.month = monthName;
         noteArea.dataset.metaId = meta.id;
         
-        // Botão de fechar popup
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = '✓ Salvar e Fechar';
-        closeBtn.type = 'button';
-        closeBtn.style.cssText = 'width: 100%; padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;';
-        
         notePopup.appendChild(noteArea);
-        notePopup.appendChild(closeBtn);
         
         // Carregar nota existente
         const currentNote = (meta.notas && meta.notas[monthName]) || '';
@@ -67462,10 +67455,6 @@ FORMATO PADRÃO:
           }
         };
         
-        const closePopup = function() {
-          notePopup.style.display = 'none';
-        };
-        
         const handleNoteSave = function() {
           const noteValue = noteArea.value.trim();
           
@@ -67497,9 +67486,32 @@ FORMATO PADRÃO:
           debouncedPersistMetas();
         };
         
+        // Debounce para auto-save enquanto digita
+        let noteTypingTimeout;
+        const handleNoteInput = function() {
+          clearTimeout(noteTypingTimeout);
+          noteTypingTimeout = setTimeout(() => {
+            handleNoteSave();
+          }, 1000); // Salva 1 segundo após parar de digitar
+        };
+        
+        // Salvar e fechar ao clicar fora
+        const handleClickOutside = function(e) {
+          if (!notePopup.contains(e.target) && e.target !== noteBtn && notePopup.style.display === 'block') {
+            handleNoteSave(); // Salvar antes de fechar
+            notePopup.style.display = 'none';
+          }
+        };
+        
         noteBtn.onclick = handleNoteToggle;
-        closeBtn.onclick = closePopup;
-        noteArea.addEventListener('blur', handleNoteSave);
+        noteArea.addEventListener('input', handleNoteInput); // Auto-save ao digitar
+        noteArea.addEventListener('blur', handleNoteSave); // Salvar ao sair do campo
+        
+        // Adicionar listener global para fechar ao clicar fora
+        setTimeout(() => {
+          document.addEventListener('click', handleClickOutside);
+        }, 0);
+        
         inp.addEventListener('change', handleSave);
         inp.addEventListener('blur', handleSave);
         
