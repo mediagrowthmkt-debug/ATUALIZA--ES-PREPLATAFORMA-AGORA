@@ -10438,7 +10438,7 @@ function renderReviewNotes(post){
                 </div>
                 <div class="ia-source-option">
                   <input type="checkbox" id="source-metas" data-source="metas" checked>
-                  <label for="source-metas">🎯 Metas</label>
+                  <label for="source-metas">🎯 Resultados/Metas</label>
                 </div>
                 <div class="ia-source-option">
                   <input type="checkbox" id="source-leads" data-source="leads" checked>
@@ -17547,7 +17547,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       estruturacaoAnalyses: 12000, // Reduzido de 25k - Análises principais
       posts: 3000,                 // Reduzido de 8k - Posts recentes/relevantes
       demandas: 3000,              // Reduzido de 6k - Demandas ativas
-      metas: 5000,                 // Reduzido de 10k - Metas principais
+      metas: 10000,                // AUMENTADO de 5k para 10k - Resultados/Metas com dados mensais por categoria
       cac: 3000,                   // Reduzido de 6k - CAC resumido
       anotacoes: 2500,             // Reduzido de 5k - Últimas anotações
       acessos: 1500,               // Reduzido de 3k - Credenciais essenciais
@@ -17557,7 +17557,8 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       calendario: 2500,            // Reduzido de 5k - Eventos próximos
       iframes: 1500,               // Reduzido de 3k - Widgets ativos
       reunioes: 20000,             // AUMENTADO de 8k para 20k - Resumos das reuniões com clientes - IMPORTANTE para contexto
-      notasTime: 6000              // Notas do Time (Marketing atual) - informações diárias de marketing
+      notasTime: 6000,             // Notas do Time (Marketing atual) - informações diárias de marketing
+      leads: 6000                  // Gestão de Leads - métricas, plataformas, fontes e últimos leads captados
     };
     
     // Cache de contexto comprimido para evitar reprocessamento
@@ -18944,7 +18945,12 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     
     async function loadIAChatsFromUserData(){
       console.log('📊 Carregando histórico completo de conversas I.A...');
+      console.log('📊 [IA LOAD] USER_DATA existe:', !!USER_DATA);
+      console.log('📊 [IA LOAD] USER_DATA.iaChats existe:', !!USER_DATA?.iaChats);
+      console.log('📊 [IA LOAD] USER_DATA.iaChats é array:', Array.isArray(USER_DATA?.iaChats));
+      console.log('📊 [IA LOAD] USER_DATA.iaChats length:', USER_DATA?.iaChats?.length || 0);
       
+      try {
       // 1️⃣ Carregar conversas do documento principal (recentes)
       let mainChats = Array.isArray(USER_DATA.iaChats) ? USER_DATA.iaChats.map(chat=>({
         ...chat,
@@ -19019,9 +19025,14 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       // Isso evita salvar no Firebase quando o documento está cheio
       if(!CURRENT_CHAT && IA_CHATS.length === 0) {
         console.log('📝 Criando primeira conversa vazia');
-        newIAChat();
+        await newIAChat();
       } else if (CURRENT_CHAT) {
         console.log(`✅ Conversa atual: "${CURRENT_CHAT.title}" (${CURRENT_CHAT.messages?.length || 0} mensagens)`);
+      }
+      
+      } catch (err) {
+        console.error('❌ [IA LOAD] Erro ao carregar conversas:', err);
+        console.error('❌ [IA LOAD] Stack:', err?.stack);
       }
     }
     
@@ -19616,7 +19627,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         setTimeout(applyPrompt, 80);
       }
     }
-    function newIAChat(){
+    async function newIAChat(){
       console.log('✨ Nova conversa iniciada na aba I.A');
       const chat = { 
         id: uuid(), 
@@ -19632,7 +19643,7 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       CURRENT_CHAT = chat;
       renderIAChatList();
       renderIAHistory();
-      saveIAChatsToUserData();
+      await saveIAChatsToUserData(); // 🔥 FIX: Aguardar salvar para garantir persistência
       // Não focar no composer para manter a visualização no topo
     }
     
@@ -20656,32 +20667,121 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
     }
     
     // Funções para extrair dados de outras abas
+    // 🎯 FUNÇÃO MELHORADA PARA EXTRAIR DADOS DA ABA RESULTADOS (METAS)
     function buildMetasDetail(metasState){
       if(!Array.isArray(metasState) || !metasState.length){
         return '';
       }
-      const metasTexto = metasState.map(meta => {
-        const desc = meta?.description || 'Meta sem nome';
-        const modo = meta?.mode || 'mensal';
-        const unidade = meta?.unit || '';
-        const meses = meta?.meses || {};
-        const monthKeys = Object.keys(meses).sort();
-        if(!monthKeys.length){
-          return `📊 ${desc} (${modo} • ${unidade || 'sem unidade'}) - Nenhum dado preenchido`;
-        }
-        const monthPieces = monthKeys.map(month => {
+      
+      // Labels dos meses em português
+      const monthLabels = { 
+        jan:'Janeiro', fev:'Fevereiro', mar:'Março', abr:'Abril', 
+        mai:'Maio', jun:'Junho', jul:'Julho', ago:'Agosto', 
+        set:'Setembro', out:'Outubro', nov:'Novembro', dez:'Dezembro' 
+      };
+      
+      // Categorias em português
+      const categoryLabels = {
+        'trafego_pago': '💰 Tráfego Pago',
+        'canais': '📢 Canais de Tração',
+        'crm_automacoes': '🤖 CRM e Automações',
+        'lideranca': '👑 Liderança/Comercial',
+        'outros': '📝 Outros'
+      };
+      
+      // Agrupar metas por categoria
+      const metasPorCategoria = {};
+      let totalPreenchidas = 0;
+      let totalComResultado = 0;
+      
+      metasState.forEach(meta => {
+        if(!meta || meta.ativo === false) return;
+        
+        const categoria = meta.categoria || 'outros';
+        if(!metasPorCategoria[categoria]) metasPorCategoria[categoria] = [];
+        
+        // Extrair descrição (pode vir como description ou descricao)
+        const desc = meta.descricao || meta.description || 'Meta sem nome';
+        const unidade = meta.unidade || meta.unit || '';
+        const meses = meta.meses || {};
+        
+        // Verificar se tem dados preenchidos
+        const monthKeys = Object.keys(meses);
+        const dadosMes = [];
+        
+        monthKeys.forEach(month => {
           const vals = meses[month];
-          const planejado = vals?.p ?? '';
-          const realizado = vals?.r ?? '';
-          const partes = [];
-          if(planejado !== '' && planejado !== null){ partes.push(`meta ${planejado}`); }
-          if(realizado !== '' && realizado !== null){ partes.push(`realizado ${realizado}`); }
-          if(!partes.length) partes.push('sem dados');
-          return `${formatMonthLabel(month)}: ${partes.join(' / ')}`;
+          // Suportar ambos os formatos: objeto {p, r} ou valor direto
+          let planejado = '', realizado = '';
+          
+          if(typeof vals === 'object' && vals !== null){
+            planejado = vals.p ?? vals.planejado ?? '';
+            realizado = vals.r ?? vals.realizado ?? '';
+          } else if(vals !== '' && vals !== null && vals !== undefined){
+            // Valor direto (formato antigo)
+            realizado = vals;
+          }
+          
+          // Só incluir meses com algum dado
+          if(planejado !== '' || realizado !== ''){
+            totalPreenchidas++;
+            if(realizado !== '') totalComResultado++;
+            
+            const monthLabel = monthLabels[month] || month;
+            const partes = [];
+            if(planejado !== '' && planejado !== null) partes.push(`Meta: ${planejado}`);
+            if(realizado !== '' && realizado !== null) partes.push(`Realizado: ${realizado}`);
+            
+            // Calcular % de atingimento se tiver ambos
+            if(planejado !== '' && realizado !== '' && !isNaN(Number(planejado)) && !isNaN(Number(realizado)) && Number(planejado) > 0){
+              const pct = ((Number(realizado) / Number(planejado)) * 100).toFixed(1);
+              partes.push(`(${pct}%)`);
+            }
+            
+            dadosMes.push({ month: monthLabel, dados: partes.join(' | ') });
+          }
         });
-        return `📊 ${desc} (${modo} • ${unidade || 'sem unidade'})\n   ${monthPieces.join('\n   ')}`;
-      }).join('\n\n');
-      return `🎯 DADOS DA ABA METAS:\n\n${metasTexto}`;
+        
+        if(dadosMes.length > 0){
+          metasPorCategoria[categoria].push({
+            descricao: desc,
+            unidade,
+            meses: dadosMes
+          });
+        }
+      });
+      
+      // Construir texto formatado
+      const parts = [];
+      parts.push('🎯 DADOS DA ABA RESULTADOS (METAS E MÉTRICAS)');
+      parts.push('=' .repeat(50));
+      parts.push(`📊 Resumo: ${totalComResultado} métricas com resultados preenchidos de ${metasState.filter(m => m && m.ativo !== false).length} metas ativas.\n`);
+      
+      // Renderizar por categoria
+      Object.keys(categoryLabels).forEach(catKey => {
+        const metas = metasPorCategoria[catKey];
+        if(!metas || metas.length === 0) return;
+        
+        parts.push(`\n${categoryLabels[catKey]}`);
+        parts.push('-'.repeat(40));
+        
+        metas.forEach(meta => {
+          parts.push(`\n📊 ${meta.descricao} ${meta.unidade ? `(${meta.unidade})` : ''}`);
+          meta.meses.forEach(m => {
+            parts.push(`   • ${m.month}: ${m.dados}`);
+          });
+        });
+      });
+      
+      // Dica para a IA
+      parts.push('\n\n💡 USE ESTES DADOS PARA:');
+      parts.push('• Comparar metas planejadas vs resultados alcançados');
+      parts.push('• Identificar métricas com baixo desempenho (< 80%)');
+      parts.push('• Cruzar com dados de LEADS para calcular taxas de conversão');
+      parts.push('• Cruzar com CAC para calcular ROI e CPL');
+      parts.push('• Sugerir ajustes nas metas baseado nos resultados');
+      
+      return parts.join('\n');
     }
     
     function buildCACDetail(){
@@ -20999,6 +21099,178 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       return result;
     }
     
+    // 👥 FUNÇÃO PARA EXTRAIR CONTEXTO DOS LEADS
+    // Contém informações sobre leads captados, fontes, plataformas e métricas
+    function buildLeadsDetail(){
+      // Usa a variável global LEADS que é carregada do Firebase
+      if(!Array.isArray(LEADS) || LEADS.length === 0){
+        console.log('👥 buildLeadsDetail: Nenhum lead encontrado');
+        return '';
+      }
+      
+      console.log(`👥 buildLeadsDetail: Processando ${LEADS.length} lead(s)`);
+      
+      // Calcular métricas por período
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDate = now.getDate();
+      
+      const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+      const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+      const thisMonthStart = new Date(currentYear, currentMonth, 1);
+      const thisMonthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+      const dayOfWeek = now.getDay();
+      const thisWeekStart = new Date(now);
+      thisWeekStart.setDate(currentDate - dayOfWeek);
+      thisWeekStart.setHours(0, 0, 0, 0);
+      const todayStart = new Date(currentYear, currentMonth, currentDate, 0, 0, 0, 0);
+      const todayEnd = new Date(currentYear, currentMonth, currentDate, 23, 59, 59, 999);
+      
+      let lastMonthCount = 0, thisMonthCount = 0, thisWeekCount = 0, todayCount = 0;
+      const plataformasMap = {};
+      const sourcesMap = {};
+      const statusMap = {};
+      
+      // Ordenar por data (mais recentes primeiro)
+      const leadsOrdenados = [...LEADS].sort((a, b) => {
+        const getDate = (lead) => {
+          if(lead.createdAt?.toDate) return lead.createdAt.toDate();
+          if(lead.createdAt?.seconds) return new Date(lead.createdAt.seconds * 1000);
+          if(lead.createdAt instanceof Date) return lead.createdAt;
+          return new Date(0);
+        };
+        return getDate(b) - getDate(a);
+      });
+      
+      // Processar todos os leads para métricas
+      LEADS.forEach(lead => {
+        let leadDate = null;
+        if(lead.createdAt){
+          if(typeof lead.createdAt.toDate === 'function') leadDate = lead.createdAt.toDate();
+          else if(lead.createdAt.seconds) leadDate = new Date(lead.createdAt.seconds * 1000);
+          else if(lead.createdAt instanceof Date) leadDate = lead.createdAt;
+        }
+        
+        if(leadDate){
+          if(leadDate >= lastMonthStart && leadDate <= lastMonthEnd) lastMonthCount++;
+          if(leadDate >= thisMonthStart && leadDate <= thisMonthEnd) thisMonthCount++;
+          if(leadDate >= thisWeekStart) thisWeekCount++;
+          if(leadDate >= todayStart && leadDate <= todayEnd) todayCount++;
+        }
+        
+        // Contabilizar plataformas
+        const plataforma = (lead.plataforma || 'Não especificada').toString().trim();
+        plataformasMap[plataforma] = (plataformasMap[plataforma] || 0) + 1;
+        
+        // Contabilizar fontes
+        const source = (lead.source || 'Não especificada').toString().trim();
+        sourcesMap[source] = (sourcesMap[source] || 0) + 1;
+        
+        // Contabilizar status
+        const status = (lead.status || 'Novo').toString().trim();
+        statusMap[status] = (statusMap[status] || 0) + 1;
+      });
+      
+      // Calcular crescimento mês a mês
+      let crescimentoMes = 0;
+      if(lastMonthCount > 0){
+        crescimentoMes = ((thisMonthCount - lastMonthCount) / lastMonthCount * 100).toFixed(1);
+      } else if(thisMonthCount > 0){
+        crescimentoMes = 100;
+      }
+      
+      const parts = [];
+      parts.push('👥 GESTÃO DE LEADS - DADOS COMPLETOS');
+      parts.push('=' .repeat(50));
+      parts.push(`📊 Total de ${LEADS.length} lead(s) cadastrados no sistema.\n`);
+      
+      // Métricas por período
+      parts.push('📈 MÉTRICAS POR PERÍODO:');
+      parts.push(`• Mês passado: ${lastMonthCount} leads`);
+      parts.push(`• Este mês: ${thisMonthCount} leads (${crescimentoMes >= 0 ? '+' : ''}${crescimentoMes}% vs mês anterior)`);
+      parts.push(`• Esta semana: ${thisWeekCount} leads`);
+      parts.push(`• Hoje: ${todayCount} leads`);
+      
+      // Distribuição por plataforma
+      parts.push('\n📊 DISTRIBUIÇÃO POR PLATAFORMA (origem dos anúncios):');
+      Object.entries(plataformasMap)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([plat, count]) => {
+          const percent = ((count / LEADS.length) * 100).toFixed(1);
+          parts.push(`• ${plat}: ${count} leads (${percent}%)`);
+        });
+      
+      // Distribuição por fonte
+      parts.push('\n📊 DISTRIBUIÇÃO POR FONTE (campanha/origem específica):');
+      Object.entries(sourcesMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10) // Top 10 fontes
+        .forEach(([src, count]) => {
+          const percent = ((count / LEADS.length) * 100).toFixed(1);
+          parts.push(`• ${src}: ${count} leads (${percent}%)`);
+        });
+      if(Object.keys(sourcesMap).length > 10){
+        parts.push(`• ... e mais ${Object.keys(sourcesMap).length - 10} fonte(s)`);
+      }
+      
+      // Distribuição por status
+      parts.push('\n📊 DISTRIBUIÇÃO POR STATUS:');
+      Object.entries(statusMap)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([st, count]) => {
+          const percent = ((count / LEADS.length) * 100).toFixed(1);
+          parts.push(`• ${st}: ${count} leads (${percent}%)`);
+        });
+      
+      // Últimos 20 leads (detalhes)
+      const leadsLimitados = leadsOrdenados.slice(0, 20);
+      parts.push(`\n📋 ÚLTIMOS ${leadsLimitados.length} LEADS CAPTADOS:`);
+      
+      leadsLimitados.forEach((lead, idx) => {
+        let dataFormatada = 'Data não informada';
+        if(lead.createdAt){
+          let dt;
+          if(typeof lead.createdAt.toDate === 'function') dt = lead.createdAt.toDate();
+          else if(lead.createdAt.seconds) dt = new Date(lead.createdAt.seconds * 1000);
+          else if(lead.createdAt instanceof Date) dt = lead.createdAt;
+          if(dt) dataFormatada = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        const nome = lead.name || lead.nome || 'Sem nome';
+        const email = lead.email || '';
+        const telefone = lead.phone || lead.telefone || '';
+        const plataforma = lead.plataforma || '';
+        const source = lead.source || '';
+        const status = lead.status || 'Novo';
+        const obs = lead.obs || lead.observacao || '';
+        
+        parts.push(`\n${idx + 1}. ${nome} [${dataFormatada}]`);
+        if(email) parts.push(`   📧 Email: ${email}`);
+        if(telefone) parts.push(`   📱 Telefone: ${telefone}`);
+        if(plataforma) parts.push(`   🎯 Plataforma: ${plataforma}`);
+        if(source) parts.push(`   🔗 Fonte: ${source}`);
+        parts.push(`   📌 Status: ${status}`);
+        if(obs) parts.push(`   📝 Obs: ${obs.length > 100 ? obs.substring(0, 100) + '...' : obs}`);
+      });
+      
+      if(LEADS.length > 20){
+        parts.push(`\n... e mais ${LEADS.length - 20} lead(s) no sistema.`);
+      }
+      
+      // Dica para a IA
+      parts.push('\n\n💡 DICA: Os dados de leads são essenciais para:');
+      parts.push('• Analisar desempenho de campanhas de tráfego pago');
+      parts.push('• Identificar quais plataformas e fontes geram mais leads');
+      parts.push('• Calcular custo por lead (CPL) quando combinado com dados de investimento');
+      parts.push('• Entender o funil de vendas e taxa de conversão');
+      parts.push('• Sugerir otimizações baseadas nos dados reais');
+      
+      const result = parts.join('\n');
+      console.log(`✅ buildLeadsDetail: Gerado ${result.length} caracteres de contexto`);
+      return result;
+    }
+    
     async function buildIAContextMessages(){
       // Verificar quais fontes estão selecionadas
       const searchAll = IA_SELECTED_SOURCES.includes('all');
@@ -21240,6 +21512,24 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         }
       }
       
+      // 👥 NOVO: Extrair contexto dos Leads
+      // IMPORTANTE: Contém dados de leads captados, plataformas, fontes e métricas
+      let leadsDetail = '';
+      if(shouldInclude('leads')){
+        try {
+          // Garantir que os leads estejam carregados
+          if(typeof subscribeLeads === 'function' && (!Array.isArray(LEADS) || LEADS.length === 0)){
+            await subscribeLeads();
+          }
+          leadsDetail = compressContextText(buildLeadsDetail(), IA_LIMITS.leads);
+          if(leadsDetail){
+            console.log('✅ Contexto de Leads carregado:', leadsDetail.length, 'chars');
+          }
+        } catch(err) {
+          console.warn('⚠️ Erro ao carregar Leads para contexto IA:', err);
+        }
+      }
+      
       const sources = [];
       
       // 🎯 OTIMIZAÇÃO: PROMPT DO SISTEMA REDUZIDO (~60% menor)
@@ -21251,22 +21541,26 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
 ✅ PODE: Criar estratégias, campanhas, ideias criativas, copies, sugestões.
 ❌ NÃO PODE: Inventar números, métricas ou dados não fornecidos.
 
-📋 PRIORIDADE DE FONTES:
-1. 🤝 REUNIÕES: Conversas diretas com o cliente - USE para entender contexto, preferências e decisões já tomadas
-2. 📋 NOTAS TIME: Status ATUAL do marketing - campanhas em andamento, problemas, resultados diários
-3. ESTRUTURAÇÃO: Informações do negócio, semanas, blocos, análises salvas
-4. METAS/CAC: Números oficiais e objetivos
-5. MACRO/CALENDÁRIO/DEMANDAS: Dados operacionais
-6. DOCUMENTOS: Base de conhecimento do usuário
+📋 PRIORIDADE DE FONTES (use TODAS para cruzar dados):
+1. 🤝 REUNIÕES: Conversas diretas com o cliente - contexto, preferências, decisões
+2. 📋 NOTAS TIME: Status ATUAL do marketing - campanhas, problemas, resultados
+3. 👥 LEADS: Dados de leads captados - plataformas, fontes, métricas de conversão
+4. 🎯 METAS/RESULTADOS: Números oficiais, objetivos e desempenho
+5. 📅 CALENDÁRIO/PLANEJAMENTO: Posts programados, demandas, timeline
+6. 📝 ESTRUTURAÇÃO: Informações do negócio, análises, entregáveis
+7. 📊 MACRO: Análises mensais consolidadas
+8. 📄 DOCUMENTOS: Base de conhecimento
 
-⚠️ PROTOCOLO:
-• Leia TODO o contexto antes de responder
-• PRIORIZE informações das REUNIÕES e NOTAS TIME - dados diretos e atuais
-• Busque em TODAS as mensagens de sistema (📊, 🤝, 📋, 🔬)
+⚠️ PROTOCOLO IMPORTANTE:
+• CRUZE informações de TODAS as fontes disponíveis para dar a melhor resposta
+• Combine dados de LEADS + METAS para calcular taxas de conversão
+• Use REUNIÕES + NOTAS TIME para contexto atual
+• Compare PLANEJAMENTO vs RESULTADOS para análise de desempenho
+• Busque em TODAS as mensagens de sistema antes de responder
 • Se não encontrar dados, diga claramente e sugira onde adicionar
-• Cite a fonte quando usar dados: "Segundo a reunião de..." ou "Nas notas do time..."
+• Cite a fonte quando usar dados: "Segundo os leads..." ou "De acordo com as metas..."
 
-💡 ESTILO: Profissional, acionável, use bullets e exemplos práticos.`
+💡 ESTILO: Profissional, acionável, use bullets e exemplos práticos com dados reais.`
       }];
       
       // Adicionar mensagem sobre fontes selecionadas se não for "all"
@@ -21296,9 +21590,9 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
           'planejamento': 'Planejamento',
           'calendario': 'Calendário',
           'posts': 'Posts',
-          'metas': 'Metas',
+          'metas': 'Resultados/Metas (Métricas e Desempenho)',
           'cac': 'CAC',
-          'leads': 'Leads',
+          'leads': 'Leads (Captação e Fontes)',
           'anotacoes': 'Anotações',
           'acessos': 'Acessos',
           'arquivos': 'Arquivos',
@@ -21366,7 +21660,8 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
       // Adicionar dados das outras abas específicas
       if(metasDetail){
         messages.push({ role: 'system', content: metasDetail });
-        sources.push('Dados da aba Metas');
+        sources.push('Dados da aba Resultados/Metas (Métricas e Desempenho)');
+        console.log('✅ Contexto de Resultados/Metas adicionado às mensagens da IA');
       }
       
       if(cacDetail){
@@ -21413,6 +21708,14 @@ function mgToast(msg){ try{ const el=document.createElement('div'); el.className
         messages.push({ role: 'system', content: notasTimeDetail });
         sources.push('Notas do Time (Marketing Atual)');
         console.log('✅ Contexto de Notas do Time adicionado às mensagens da IA');
+      }
+      
+      // 👥 NOVO: Adicionar contexto dos Leads
+      // IMPORTANTE: Contém dados de leads captados, plataformas, fontes e métricas de conversão
+      if(leadsDetail){
+        messages.push({ role: 'system', content: leadsDetail });
+        sources.push('Gestão de Leads (Métricas, Plataformas e Fontes)');
+        console.log('✅ Contexto de Leads adicionado às mensagens da IA');
       }
       
       if(IA_DOCS.length){
@@ -45215,11 +45518,11 @@ Por favor, seja específico, use números e dê recomendações acionáveis.
       // Atualizar documento principal - apenas marca que usa subcoleções
       // NÃO deleta o campo estruturacao para manter backup de segurança
       const userDocRef = doc(db, "usuarios", uid);
-      batch.update(userDocRef, { 
+      batch.set(userDocRef, { 
         estruturacaoUsesSubcollection: true,
         estruturacaoLastUpdate: new Date().toISOString()
         // REMOVIDO deleteField() para evitar perda de dados
-      });
+      }, { merge: true }); // 🔥 FIX: Usar set com merge para criar documento se não existir
       
       await batch.commit();
       estruturacaoUsesSubcollection = true;
@@ -58755,7 +59058,7 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
           
           // Atualizar variável global
           if (typeof loadIAChatsFromUserData === 'function') {
-            loadIAChatsFromUserData();
+            await loadIAChatsFromUserData(); // 🔥 FIX: Aguardar carregar chats
           }
           
           // Salvar no Firebase com proteção
@@ -58967,7 +59270,7 @@ ${modo === 'adicionar' ? 'COPIE O TEXTO ORIGINAL E ADICIONE MAIS CONTEÚDO:' : '
         
         // Recarregar interface
         if (typeof loadIAChatsFromUserData === 'function') {
-          loadIAChatsFromUserData();
+          await loadIAChatsFromUserData(); // 🔥 FIX: Aguardar carregar chats
         }
         if (typeof renderIAChatList === 'function') {
           renderIAChatList();
@@ -69592,6 +69895,67 @@ FORMATO PADRÃO:
         });
       }
 
+      // ====== RESULTADOS FALTANTES: Verificar metas sem resultados preenchidos ======
+      const missingResults = [];
+      metasList.forEach(meta=>{
+        if(!meta || !monthKey) return;
+        const meses = meta.meses || {};
+        const current = meses[monthKey] || {};
+        const planned = normalizeMetaNumber(current.p ?? current.P);
+        const realized = normalizeMetaNumber(current.r ?? current.R);
+        
+        // Considera faltante se:
+        // 1. Tem planejado mas não tem realizado (planned > 0 && realized === 0)
+        // 2. Ou ambos estão vazios (planned === 0 && realized === 0)
+        const isMissing = (planned > 0 && realized === 0) || (planned === 0 && realized === 0);
+        
+        if(isMissing){
+          missingResults.push({
+            descricao: (meta.descricao || 'Meta sem título').trim() || 'Meta sem título',
+            categoria: meta.categoria || 'outros',
+            mes: monthKey
+          });
+        }
+      });
+      
+      if(missingResults.length > 0){
+        // Agrupar por categoria para o resumo
+        const categorias = {
+          trafego_pago: { count: 0, label: 'Tráfego Pago' },
+          canais: { count: 0, label: 'Canais' },
+          crm_automacoes: { count: 0, label: 'CRM e Automações' },
+          outros: { count: 0, label: 'Outros' },
+          lideranca: { count: 0, label: 'Liderança' }
+        };
+        
+        missingResults.forEach(item => {
+          if(categorias[item.categoria]){
+            categorias[item.categoria].count++;
+          }
+        });
+        
+        // Construir mensagem do resumo
+        const categoriasSummary = Object.entries(categorias)
+          .filter(([_, data]) => data.count > 0)
+          .map(([_, data]) => `${data.label}: ${data.count}`)
+          .join(' • ');
+        
+        // Listar até 5 metas faltantes
+        const exampleMetas = missingResults.slice(0, 5).map(m => m.descricao).join(', ');
+        const extra = missingResults.length > 5 ? ` + ${missingResults.length - 5} mais` : '';
+        
+        items.push({
+          id: `missing-results-${monthKey}`,
+          category: 'meta',
+          severity: 'alert',
+          icon: '⚠️',
+          title: `${missingResults.length} resultado(s) faltando em ${META_MONTH_LABELS[monthKey] || monthKey}`,
+          message: `Metas sem resultados preenchidos: ${exampleMetas}${extra}`,
+          meta: categoriasSummary,
+          action: { label: 'Ver resultados', section: 'metas' }
+        });
+      }
+
       const postMetrics = computePostMetrics(Array.isArray(POSTS) ? POSTS : [], now);
       const monthPosts = [];
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -74136,7 +74500,17 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
           loadMetaPanelsFromUserData();
           loadSocialLinksFromUserData();
           loadImpedimentsFromUserData();
-          loadIAChatsFromUserData();
+          
+          // 🔥 Carregar conversas da I.A. com try-catch para debug
+          try {
+            console.log('🔄 [AUTH] Iniciando loadIAChatsFromUserData...');
+            await loadIAChatsFromUserData();
+            console.log('✅ [AUTH] loadIAChatsFromUserData concluído');
+            console.log('✅ [AUTH] IA_CHATS após load:', IA_CHATS?.length || 0, 'conversas');
+          } catch (iaLoadErr) {
+            console.error('❌ [AUTH] Erro em loadIAChatsFromUserData:', iaLoadErr);
+          }
+          
           await loadIADocs();
           await loadRefSocial();
           renderRefSocial();
@@ -74346,7 +74720,17 @@ Escreva em texto corrido, direto e acionável. Foque em ações concretas para e
             loadMetaPanelsFromUserData();
             loadSocialLinksFromUserData();
             loadImpedimentsFromUserData();
-            loadIAChatsFromUserData();
+            
+            // 🔥 Carregar conversas da I.A. com try-catch para debug (Admin mode)
+            try {
+              console.log('🔄 [ADMIN] Iniciando loadIAChatsFromUserData...');
+              await loadIAChatsFromUserData();
+              console.log('✅ [ADMIN] loadIAChatsFromUserData concluído');
+              console.log('✅ [ADMIN] IA_CHATS após load:', IA_CHATS?.length || 0, 'conversas');
+            } catch (iaLoadErr) {
+              console.error('❌ [ADMIN] Erro em loadIAChatsFromUserData:', iaLoadErr);
+            }
+            
             await loadIADocs();
             await loadRefSocial();
             renderRefSocial();
